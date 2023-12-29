@@ -19,10 +19,10 @@ class Posting(Base):
     date = Column(String, nullable=False)
     deadline = Column(String, nullable=True)
     notes = Column(String, nullable=False)
-    sponsor = Column(Boolean, nullable=False)
+    can_sponsor = Column(Boolean, nullable=False)
     recruiter_name = Column(String, nullable=False)
     recruiter_email = Column(String, nullable=False)
-    active = Column(Boolean, nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
     role = Column(Enum(company_schema.JobRoles), nullable=False)
     status = Column(
         Enum(application_schema.ApplicationStatuses), nullable=False
@@ -37,7 +37,7 @@ class Location(Base):
     __tablename__ = "locations"
     id = Column(Integer, primary_key=True)
     country = Column(String, nullable=False, index=True)
-    city = Column(String, nullable=False)
+    city = Column(String, nullable=False, index=True)
     companies = relationship(
         "Company",
         secondary="companies_locations_rel",
@@ -78,7 +78,7 @@ class ReferralMaterials(Base):
 class Company(Base):
     __tablename__ = "companies"
     id = Column(Integer, primary_key=True)
-    image = Column(String, nullable=True)
+    image = Column(String, nullable=True, default="url_to_default_image") # What I mean here is anytime a company is created, if no image is provided, then we use a default image
     name = Column(String, nullable=False)
     domain = Column(String, nullable=True)
     can_refer = Column(Boolean, nullable=True)
