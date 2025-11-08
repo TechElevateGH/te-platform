@@ -12,7 +12,9 @@ import Sidebar from '../_custom/Sidebar'
 import WorkspaceNavbar from '../_custom/WorkspaceNavbar'
 import FilesAndEssay from '../../pages/FilesAndEssay'
 import Referrals from '../../pages/Referrals'
+import Opportunities from '../../pages/Opportunities'
 import Learning from '../../pages/Learning'
+import Practice from '../../pages/Practice'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
@@ -168,7 +170,10 @@ const Workspace = ({ setLogin }) => {
                             content === "Profile" ? <Profile /> :
                                 content === "Applications" ? <Applications /> :
                                     content === "Resume and Essay" ? <FilesAndEssay /> :
-                                        content === "Referrals" ? <Referrals /> : <Learning />
+                                        content === "Referrals" ? <Referrals /> :
+                                            content === "Opportunities" ? <Opportunities /> :
+                                                content === "Practice" ? <Practice /> :
+                                                    <Learning />
                         }
                     </main>
                 </div>
