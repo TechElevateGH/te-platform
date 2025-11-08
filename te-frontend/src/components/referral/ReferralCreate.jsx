@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-    BuildingOfficeIcon,
     ExclamationTriangleIcon,
     UserIcon,
     EnvelopeIcon,
@@ -17,9 +16,9 @@ import { setNestedPropertyValue } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
 
 
-const ReferralCreate = ({ company, setReferralCompanyId, resumes }) => {
-    const { userId, accessToken } = useAuth();
-    const { userInfo } = useData();
+const ReferralCreate = ({ company, setReferralCompanyId }) => {
+    const { accessToken } = useAuth();
+    const { userInfo, resumes: contextResumes } = useData();
 
     // Mock user data for demo
     const mockUserInfo = {
@@ -29,11 +28,31 @@ const ReferralCreate = ({ company, setReferralCompanyId, resumes }) => {
         phone_number: '+1 (555) 123-4567'
     };
 
+    // Mock resumes if none available
+    const mockResumes = [
+        {
+            id: 1,
+            name: 'Software_Engineer_Resume.pdf',
+            role: 'Software Engineer',
+            notes: 'Tailored for FAANG companies'
+        },
+        {
+            id: 2,
+            name: 'Data_Science_Resume.pdf',
+            role: 'Data Scientist',
+            notes: 'Highlights ML projects'
+        }
+    ];
+
     const currentUser = userInfo || mockUserInfo;
+    const availableResumes = contextResumes.length > 0 ? contextResumes : mockResumes;
 
     // Check if resume requirement is met
-    const hasResume = resumes && resumes.length > 0;
-    const canRequestReferral = hasResume;
+    const hasResume = availableResumes && availableResumes.length > 0;
+
+    const [selectedResumeId, setSelectedResumeId] = useState(
+        hasResume ? availableResumes[0].id : null
+    );
 
     const [referralData, setReferralData] = useState({
         company_id: company.id,
@@ -41,7 +60,7 @@ const ReferralCreate = ({ company, setReferralCompanyId, resumes }) => {
         last_name: currentUser.last_name || '',
         email: currentUser.email || '',
         phone_number: currentUser.phone_number || '',
-        resume: resumes && resumes.length > 0 ? resumes[0].name : '',
+        resume_id: hasResume ? availableResumes[0].id : null,
         job_id: "",
         job_role: "",
         request_note: ""
@@ -223,15 +242,58 @@ const ReferralCreate = ({ company, setReferralCompanyId, resumes }) => {
 
                         {/* Resume Selection */}
                         <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Resume</h3>
-                            <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                                <DocumentTextIcon className="h-6 w-6 text-emerald-600 flex-shrink-0" />
-                                <div className="flex-1">
-                                    <p className="text-sm font-bold text-emerald-900">{referralData.resume}</p>
-                                    <p className="text-xs text-emerald-700 font-medium">Selected resume</p>
-                                </div>
-                                <CheckCircleIcon className="h-5 w-5 text-emerald-600" />
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Resume</h3>
+                            <div className="space-y-3">
+                                {availableResumes.map((resume) => {
+                                    const isSelected = selectedResumeId === resume.id;
+                                    return (
+                                        <div
+                                            key={resume.id}
+                                            onClick={() => {
+                                                setSelectedResumeId(resume.id);
+                                                handleInputChange({ field: 'resume_id', value: resume.id });
+                                            }}
+                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
+                                                    ? 'bg-emerald-50 border-emerald-500 shadow-md'
+                                                    : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                                                    <DocumentTextIcon
+                                                        className={`h-5 w-5 ${isSelected ? 'text-emerald-600' : 'text-gray-600'}`}
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className={`text-sm font-bold truncate ${isSelected ? 'text-emerald-900' : 'text-gray-900'
+                                                            }`}>
+                                                            {resume.name}
+                                                        </p>
+                                                        {isSelected && (
+                                                            <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <BriefcaseIcon className="h-3.5 w-3.5 text-gray-400" />
+                                                        <p className="text-xs font-semibold text-blue-600">
+                                                            {resume.role}
+                                                        </p>
+                                                    </div>
+                                                    {resume.notes && (
+                                                        <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">
+                                                            {resume.notes}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
+                            <p className="text-xs text-gray-500 font-medium">
+                                Select the resume that best matches this role
+                            </p>
                         </div>
 
                         {/* Additional Notes */}
