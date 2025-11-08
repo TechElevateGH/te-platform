@@ -66,111 +66,93 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                         leaveTo="opacity-0"
                     >
                         <Combobox.Options className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-xl bg-white py-1.5 text-base shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                            {filteredCompanies.length === 0 && query !== '' ? (
-                                <div className="relative cursor-default select-none px-4 py-3">
-                                    {isCustomCompany ? (
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0 mt-0.5">
-                                                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center shadow-sm">
-                                                    <BuildingOfficeIcon className="h-4 w-4 text-white" />
+                            {/* Always show custom company option if user is typing a new one */}
+                            {isCustomCompany && query !== '' && (
+                                <Combobox.Option
+                                    value={query}
+                                    className={({ active }) =>
+                                        `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
+                                        }`
+                                    }
+                                >
+                                    {({ selected, active }) => (
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex-shrink-0">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm transition-all ${active
+                                                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 shadow-blue-600/25'
+                                                    : 'bg-gray-100'
+                                                    }`}>
+                                                    <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
                                                 </div>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="text-sm font-semibold text-gray-900">
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
+                                                    }`}>
                                                     Add "{query}"
                                                 </p>
-                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                <p className="text-xs text-gray-500 truncate">
                                                     Press Enter to add this custom company
                                                 </p>
                                             </div>
+                                            {selected && (
+                                                <div className="flex-shrink-0">
+                                                    <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <p className="text-sm text-gray-500">No companies found.</p>
                                     )}
+                                </Combobox.Option>
+                            )}
+
+                            {/* Show filtered companies */}
+                            {filteredCompanies.length === 0 && !isCustomCompany && query !== '' ? (
+                                <div className="relative cursor-default select-none px-4 py-3">
+                                    <p className="text-sm text-gray-500">No companies found.</p>
                                 </div>
                             ) : (
-                                <>
-                                    {isCustomCompany && query !== '' && (
-                                        <Combobox.Option
-                                            value={query}
-                                            className={({ active }) =>
-                                                `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
-                                                }`
-                                            }
-                                        >
-                                            {({ selected, active }) => (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-shrink-0">
-                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm transition-all ${active
-                                                                ? 'bg-gradient-to-r from-blue-600 to-blue-700 shadow-blue-600/25'
-                                                                : 'bg-gray-100'
-                                                            }`}>
-                                                            <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
-                                                        </div>
+                                filteredCompanies.map((company) => (
+                                    <Combobox.Option
+                                        key={company}
+                                        value={company}
+                                        className={({ active }) =>
+                                            `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
+                                            }`
+                                        }
+                                    >
+                                        {({ selected, active }) => (
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-shrink-0">
+                                                    <img
+                                                        src={`https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`}
+                                                        alt={company}
+                                                        className="w-8 h-8 rounded-lg object-cover shadow-sm bg-white"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none'
+                                                            e.target.nextSibling.style.display = 'flex'
+                                                        }}
+                                                    />
+                                                    <div
+                                                        className={`w-8 h-8 rounded-lg hidden items-center justify-center shadow-sm ${active ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gray-100'
+                                                            }`}
+                                                    >
+                                                        <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
-                                                            }`}>
-                                                            Add "{query}"
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            Custom company
-                                                        </p>
-                                                    </div>
-                                                    {selected && (
-                                                        <div className="flex-shrink-0">
-                                                            <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            )}
-                                        </Combobox.Option>
-                                    )}
-
-                                    {filteredCompanies.map((company) => (
-                                        <Combobox.Option
-                                            key={company}
-                                            value={company}
-                                            className={({ active }) =>
-                                                `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
-                                                }`
-                                            }
-                                        >
-                                            {({ selected, active }) => (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-shrink-0">
-                                                        <img
-                                                            src={`https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`}
-                                                            alt={company}
-                                                            className="w-8 h-8 rounded-lg object-cover shadow-sm bg-white"
-                                                            onError={(e) => {
-                                                                e.target.style.display = 'none'
-                                                                e.target.nextSibling.style.display = 'flex'
-                                                            }}
-                                                        />
-                                                        <div
-                                                            className={`w-8 h-8 rounded-lg hidden items-center justify-center shadow-sm ${active ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gray-100'
-                                                                }`}
-                                                        >
-                                                            <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
-                                                            }`}>
-                                                            {company}
-                                                        </p>
-                                                    </div>
-                                                    {selected && (
-                                                        <div className="flex-shrink-0">
-                                                            <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-                                                        </div>
-                                                    )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
+                                                        }`}>
+                                                        {company}
+                                                    </p>
                                                 </div>
-                                            )}
-                                        </Combobox.Option>
-                                    ))}
-                                </>
+                                                {selected && (
+                                                    <div className="flex-shrink-0">
+                                                        <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Combobox.Option>
+                                ))
                             )}
                         </Combobox.Options>
                     </Transition>

@@ -4,12 +4,14 @@ import { jobStatuses } from './ApplicationInfo'
 
 import SlideOverForm from '../_custom/SlideOver/SlideOverCreate'
 import { setNestedPropertyValue } from '../../utils'
-import { countries, jobRoles, jobTitles } from '../../data/data'
+import { countries, jobLevels, jobTitles } from '../../data/data'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import SuccessFeedback from '../_custom/Alert/SuccessFeedback'
 import { FormSelect, FormInput, FormTextArea } from '../_custom/FormInputs'
 import CompanyCombobox from '../_custom/CompanyCombobox'
+import SelectCombobox from '../_custom/SelectCombobox'
+import { BriefcaseIcon, AcademicCapIcon, GlobeAltIcon } from '@heroicons/react/20/solid'
 
 
 export const customInputMap = {
@@ -26,7 +28,6 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
     const [appData, setAppData] = useState({
         company: "",
-        company_other: "",
         title: "",
         role: "",
         deadline: "",
@@ -42,12 +43,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
     const createUserApplicationRequest = () => {
         axiosInstance.post(`/users.${userId}.applications.create`,
-            {
-                ...appData,
-                company: appData.company_other ? appData.company_other : appData.company,
-                title: appData.title_other ? appData.title_other : appData.title,
-                role: appData.role_other ? appData.role_other : appData.role
-            },
+            appData,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -102,44 +98,25 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <FormSelect
+                            <SelectCombobox
                                 label="Title"
-                                field="title"
-                                data={jobTitles}
-                                handleInputChange={handleInputChange}
+                                options={jobTitles}
+                                value={appData.title}
+                                onChange={(title) => handleInputChange({ field: 'title', value: title })}
+                                placeholder="Type or select a title..."
+                                icon={BriefcaseIcon}
                                 required={true}
                             />
-                            <FormSelect
-                                label="Role"
-                                field="role"
-                                data={jobRoles}
-                                handleInputChange={handleInputChange}
+                            <SelectCombobox
+                                label="Level"
+                                options={jobLevels}
+                                value={appData.role}
+                                onChange={(level) => handleInputChange({ field: 'role', value: level })}
+                                placeholder="Type or select a level..."
+                                icon={AcademicCapIcon}
                                 required={true}
                             />
                         </div>
-
-                        {(appData.title === "Other....." || appData.role === "Other.....") && (
-                            <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
-                                {appData.title === "Other....." && (
-                                    <FormInput
-                                        label="Custom Title"
-                                        placeholder="Specify title"
-                                        field="title_other"
-                                        handleInputChange={handleInputChange}
-                                        required={true}
-                                    />
-                                )}
-                                {appData.role === "Other....." && (
-                                    <FormInput
-                                        label="Custom Role"
-                                        placeholder="Specify role"
-                                        field="role_other"
-                                        handleInputChange={handleInputChange}
-                                        required={true}
-                                    />
-                                )}
-                            </div>
-                        )}
                     </div>
 
                     {/* Status Section */}
@@ -158,11 +135,13 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Location</h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <FormSelect
+                            <SelectCombobox
                                 label="Country"
-                                field="location.country"
-                                data={countries}
-                                handleInputChange={handleInputChange}
+                                options={countries}
+                                value={appData.location.country}
+                                onChange={(country) => handleInputChange({ field: 'location.country', value: country })}
+                                placeholder="Type or select a country..."
+                                icon={GlobeAltIcon}
                                 required={false}
                             />
                             <FormInput

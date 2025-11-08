@@ -26,8 +26,8 @@ const WorkspaceNavbar = ({ currentPage, onMobileMenuOpen }) => {
     return (
         <header
             className={`fixed top-0 left-0 right-0 md:left-80 z-40 transition-all duration-300 ${scrolled
-                    ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5'
-                    : 'bg-transparent'
+                ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5'
+                : 'bg-transparent'
                 }`}
         >
             <nav className="mx-auto flex items-center justify-between px-6 py-4" aria-label="Workspace Navigation">

@@ -1,57 +1,51 @@
-import { useCallback, useEffect, useState } from "react";
-import { DocumentIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
+import { useState } from "react";
+import {
+    BuildingOfficeIcon,
+    ExclamationTriangleIcon,
+    UserIcon,
+    EnvelopeIcon,
+    PhoneIcon,
+    BriefcaseIcon,
+    DocumentTextIcon,
+    CheckCircleIcon
+} from '@heroicons/react/20/solid'
 import axiosInstance from "../../axiosConfig";
 import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
 import { useData } from "../../context/DataContext";
-import { FormInput, FormSelect, FormTextArea } from "../_custom/FormInputs";
+import { FormTextArea } from "../_custom/FormInputs";
 import { setNestedPropertyValue } from "../../utils";
-import MissingData from "../_custom/Alert/MissingData";
 import { useAuth } from "../../context/AuthContext";
-import { jobRoles, jobTitles } from "../../data/data";
 
 
-const referralAction = (resumes, essay, contact) => {
-    console.log(resumes, essay, contact);
-    if (!(resumes || essay || contact)) {
-        return "Please upload your resume, essay and contact before requesting."
-    }
-    else if (!(resumes || essay)) {
-        return "Please upload your resume and essay."
-    }
-    else if (!(resumes || contact)) {
-        return "Please upload your resume and contact."
-    }
-    else if (!(essay || contact)) {
-        return "Please upload your essay and contact."
-    }
-    else if (!resumes) {
-        return "Please upload your resume"
-    }
-    else if (!essay) {
-        return "Please upload your essay."
-    }
-    else if (!contact) {
-        return "Please upload your contact."
-    }
-}
-
-const ReferralCreate = ({ company, setReferralCompanyId }) => {
+const ReferralCreate = ({ company, setReferralCompanyId, resumes }) => {
     const { userId, accessToken } = useAuth();
-    const { resumes, essay } = useData();
+    const { userInfo } = useData();
+
+    // Mock user data for demo
+    const mockUserInfo = {
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@example.com',
+        phone_number: '+1 (555) 123-4567'
+    };
+
+    const currentUser = userInfo || mockUserInfo;
+
+    // Check if resume requirement is met
+    const hasResume = resumes && resumes.length > 0;
+    const canRequestReferral = hasResume;
 
     const [referralData, setReferralData] = useState({
         company_id: company.id,
-        resume: "",
-        job_title: "",
-        role: "",
+        first_name: currentUser.first_name || '',
+        last_name: currentUser.last_name || '',
+        email: currentUser.email || '',
+        phone_number: currentUser.phone_number || '',
+        resume: resumes && resumes.length > 0 ? resumes[0].name : '',
+        job_id: "",
+        job_role: "",
         request_note: ""
     });
-
-    const action = referralAction(
-        company.referral_materials.resumes ? resumes.length > 0 : true,
-        company.referral_materials.essay ? essay.length > 0 : true,
-        company.referral_materials.phone_number ? resumes.length > 0 : true,
-    )
 
     const createReferralRequest = async () => {
         await axiosInstance.post(`/referrals.create`, referralData,
@@ -69,78 +63,194 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     }
 
     const handleInputChange = ({ field, value }) => {
-        setReferralData((prevAppData) =>
-            setNestedPropertyValue({ ...prevAppData }, field, value)
+        setReferralData((prevData) =>
+            setNestedPropertyValue({ ...prevData }, field, value)
         );
     };
 
 
     return (
-        <>
-            {
-                <SlideOverForm
-                    title={"Request Referral"}
-                    setHandler={setReferralCompanyId}
-                    requestHandler={createReferralRequest}
-                    children={
-                        action ?
-                            <MissingData info={action} /> :
-                            (<div className="px-3 mt-6 space-y-6 ">
+        <SlideOverForm
+            title={"Request Referral"}
+            setHandler={setReferralCompanyId}
+            requestHandler={createReferralRequest}
+            children={
+                !hasResume ? (
+                    <div className="px-6 py-8">
+                        <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 text-center">
+                            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ExclamationTriangleIcon className="h-8 w-8 text-rose-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-rose-900 mb-2">
+                                Resume Required
+                            </h3>
+                            <p className="text-sm text-rose-700 font-medium">
+                                Please upload your resume before requesting a referral.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="px-6 py-6 space-y-6">
+                        {/* Company Section */}
+                        <div className="space-y-3">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company</h3>
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+                                <img
+                                    src={company.image}
+                                    alt={company.name}
+                                    className="h-12 w-12 rounded-lg object-cover border border-blue-200 shadow-sm"
+                                />
                                 <div>
-                                    <div className="mt-2 flex rounded-md shadow-sm">
-                                        <div className="relative flex flex-grow items-stretch focus-within:z-10">
-                                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                                <img className="h-5 w-5 rounded-full" src={company.image} alt="" />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                name="company"
-                                                id="company"
-                                                className="block w-full rounded-none rounded-l-md border-0 py-1.5 pl-10 disabled:cursor-not-allowed text-gray-700 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                                value={company.name}
-                                                disabled
-                                            />
-                                        </div>
+                                    <p className="text-lg font-bold text-blue-900">{company.name}</p>
+                                    <div className="flex items-center gap-1 mt-1">
+                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                        <span className="text-xs font-semibold text-emerald-700">Eligible for referral</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Personal Information - Auto-populated */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Your Information</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        First Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={referralData.first_name}
+                                            onChange={(e) => handleInputChange({ field: 'first_name', value: e.target.value })}
+                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                            required
+                                        />
                                     </div>
                                 </div>
 
-                                <FormSelect label="Title" field="job_title" data={jobTitles} handleInputChange={handleInputChange} required={true} />
-                                {referralData.role === "Other....." &&
-                                    <FormInput
-                                        placeholder="Specify job title: "
-                                        field="job_title_other"
-                                        handleInputChange={handleInputChange}
-                                        required={true}
+                                <div className="relative">
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Last Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={referralData.last_name}
+                                            onChange={(e) => handleInputChange({ field: 'last_name', value: e.target.value })}
+                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Email <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="email"
+                                        value={referralData.email}
+                                        onChange={(e) => handleInputChange({ field: 'email', value: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                        required
                                     />
-                                }
+                                </div>
+                            </div>
 
-                                <FormSelect label="Role" field="role" data={jobRoles} handleInputChange={handleInputChange} required={true} />
-                                {referralData.role === "Other....." &&
-                                    <FormInput
-                                        placeholder="Specify role: "
-                                        field="role_other"
-                                        handleInputChange={handleInputChange}
-                                        required={true}
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Phone Number <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="tel"
+                                        value={referralData.phone_number}
+                                        onChange={(e) => handleInputChange({ field: 'phone_number', value: e.target.value })}
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                        required
                                     />
-                                }
+                                </div>
+                            </div>
+                        </div>
 
+                        {/* Job Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
 
-                                <FormSelect
-                                    label={"Select Resume"}
-                                    field={"resume"} data={resumes.map((resume) => (resume.name))}
-                                    handleInputChange={handleInputChange}
-                                    required={true}
-                                />
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Job ID <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+                                </label>
+                                <div className="relative">
+                                    <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={referralData.job_id}
+                                        onChange={(e) => handleInputChange({ field: 'job_id', value: e.target.value })}
+                                        placeholder="e.g., R-12345, JOB-2024-001"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    />
+                                </div>
+                                <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                                    Enter the specific job posting ID if available
+                                </p>
+                            </div>
 
-                                <FormTextArea
-                                    label={"Notes"}
-                                    field={"request_note"}
-                                    handleInputChange={handleInputChange}
-                                />
-                            </div>)
-                    }
-                />}
-        </>
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Job Role/Title <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        value={referralData.job_role}
+                                        onChange={(e) => handleInputChange({ field: 'job_role', value: e.target.value })}
+                                        placeholder="e.g., Software Engineer, Data Scientist"
+                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Resume Selection */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Resume</h3>
+                            <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                                <DocumentTextIcon className="h-6 w-6 text-emerald-600 flex-shrink-0" />
+                                <div className="flex-1">
+                                    <p className="text-sm font-bold text-emerald-900">{referralData.resume}</p>
+                                    <p className="text-xs text-emerald-700 font-medium">Selected resume</p>
+                                </div>
+                                <CheckCircleIcon className="h-5 w-5 text-emerald-600" />
+                            </div>
+                        </div>
+
+                        {/* Additional Notes */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Additional Information</h3>
+                            <FormTextArea
+                                label="Notes"
+                                field="request_note"
+                                handleInputChange={handleInputChange}
+                                required={false}
+                            />
+                            <p className="text-xs text-gray-500 font-medium">
+                                Add any additional information or context for your referral request
+                            </p>
+                        </div>
+                    </div>
+                )
+            }
+        />
     )
 }
 
