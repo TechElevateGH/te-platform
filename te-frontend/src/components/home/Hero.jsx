@@ -1,48 +1,160 @@
-
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
+import { useNavigate } from 'react-router-dom';
+import { 
+  SparklesIcon, 
+  RocketLaunchIcon, 
+  AcademicCapIcon,
+  UserGroupIcon,
+  ChartBarIcon,
+  GlobeAltIcon
+} from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const floatingIcons = [
+    { Icon: SparklesIcon, delay: '0s', position: 'top-20 left-[10%]' },
+    { Icon: RocketLaunchIcon, delay: '0.5s', position: 'top-40 right-[15%]' },
+    { Icon: AcademicCapIcon, delay: '1s', position: 'top-[60%] left-[8%]' },
+    { Icon: UserGroupIcon, delay: '1.5s', position: 'top-[70%] right-[12%]' },
+    { Icon: ChartBarIcon, delay: '2s', position: 'top-[45%] right-[8%]' },
+    { Icon: GlobeAltIcon, delay: '2.5s', position: 'top-32 left-[20%]' },
+  ];
+
   return (
-    <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-screen'>
-      <h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-gray-600 sm:text-7xl">
-        Elevating {' '}
-        <span className="relative whitespace-nowrap text-amber-500">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 418 42"
-            className="absolute left-0 top-2/3 h-[0.58em] w-full fill-blue-300/70"
-            preserveAspectRatio="none"
-          >
-            <path d="M203.371.916c-26.013-2.078-76.686 1.963-124.73 9.946L67.3 12.749C35.421 18.062 18.2 21.766 6.004 25.934 1.244 27.561.828 27.778.874 28.61c.07 1.214.828 1.121 9.595-1.176 9.072-2.377 17.15-3.92 39.246-7.496C123.565 7.986 157.869 4.492 195.942 5.046c7.461.108 19.25 1.696 19.17 2.582-.107 1.183-7.874 4.31-25.75 10.366-21.992 7.45-35.43 12.534-36.701 13.884-2.173 2.308-.202 4.407 4.442 4.734 2.654.187 3.263.157 15.593-.78 35.401-2.686 57.944-3.488 88.365-3.143 46.327.526 75.721 2.23 130.788 7.584 19.787 1.924 20.814 1.98 24.557 1.332l.066-.011c1.201-.203 1.53-1.825.399-2.335-2.911-1.31-4.893-1.604-22.048-3.261-57.509-5.556-87.871-7.36-132.059-7.842-23.239-.254-33.617-.116-50.627.674-11.629.54-42.371 2.494-46.696 2.967-2.359.259 8.133-3.625 26.504-9.81 23.239-7.825 27.934-10.149 28.304-14.005.417-4.348-3.529-6-16.878-7.066Z" />
-          </svg>
-          <span className="relative">marginalized talent</span>
-        </span>{' '}
-        in computing
-      </h1>
-      <p className="mx-auto mt-6 max-w-4xl text-lg tracking-tight text-slate-700">
-        Many gems in Africa and other marginalized societies across the world are not motivated to pursue careers in computing due to lack of information, guidance and resources.
-      </p>
-      <div className="mt-10 flex justify-center gap-x-6">
-        <button href="/register">Get 6 months free</button>
-        <button
-          href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          variant="outline"
+    <div id="home" className='relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50'>
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Floating icons */}
+      {floatingIcons.map((item, idx) => (
+        <div
+          key={idx}
+          className={`hidden lg:block absolute ${item.position} animate-float opacity-30`}
+          style={{ 
+            animationDelay: item.delay,
+            transform: `translateY(${scrollY * 0.1}px)`
+          }}
         >
-          <svg
-            aria-hidden="true"
-            className="h-3 w-3 flex-none fill-blue-600 group-active:fill-current"
-          >
-            <path d="m9.997 6.91-7.583 3.447A1 1 0 0 1 1 9.447V2.553a1 1 0 0 1 1.414-.91L9.997 5.09c.782.355.782 1.465 0 1.82Z" />
-          </svg>
-          <span className="ml-3">Watch video</span>
-        </button>
+          <item.Icon className="h-12 w-12 text-blue-500" />
+        </div>
+      ))}
+
+      <div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32 lg:py-40'>
+        <div className="text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-blue-100 mb-8 animate-fade-in-down">
+            <SparklesIcon className="h-5 w-5 text-blue-600" />
+            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Empowering the Next Generation
+            </span>
+          </div>
+
+          {/* Main heading */}
+          <h1 className="mx-auto max-w-5xl font-display text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl lg:text-8xl animate-fade-in-up">
+            Unlock Your{' '}
+            <span className="relative inline-block">
+              <span className="relative z-10 bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
+                Tech Potential
+              </span>
+              <svg
+                className="absolute left-0 top-full w-full h-3 -mt-2"
+                viewBox="0 0 300 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 10C50 2 100 2 150 6C200 10 250 8 298 4"
+                  stroke="url(#gradient)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  className="animate-draw"
+                />
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#3B82F6" />
+                    <stop offset="50%" stopColor="#06B6D4" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+            {' '}Anywhere in the World
+          </h1>
+
+          {/* Subheading */}
+          <p className="mx-auto mt-8 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-600 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            Breaking barriers and building bridges to tech excellence. We connect aspiring developers from 
+            <span className="font-semibold text-gray-900"> Africa and beyond</span> with world-class
+            <span className="font-semibold text-gray-900"> mentorship</span>,
+            <span className="font-semibold text-gray-900"> cutting-edge resources</span>, and
+            <span className="font-semibold text-gray-900"> life-changing opportunities</span> at leading tech companies.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <button
+              onClick={() => navigate('/register')}
+              className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Start Your Journey
+                <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            
+            <button
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="group px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 hover:border-blue-300 transform hover:scale-105 transition-all duration-300"
+            >
+              <span className="flex items-center gap-2">
+                Learn More
+                <svg className="h-5 w-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-20 grid grid-cols-2 gap-8 sm:grid-cols-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+            {[
+              { label: 'Active Mentees', value: '500+' },
+              { label: 'Success Stories', value: '250+' },
+              { label: 'Partner Companies', value: '50+' },
+              { label: 'Countries Reached', value: '30+' },
+            ].map((stat, idx) => (
+              <div key={idx} className="group">
+                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                  {stat.value}
+                </div>
+                <div className="mt-2 text-sm text-gray-600 font-medium">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-scroll"></div>
+        </div>
       </div>
     </div>
   )
 }
-
 
 export default Hero;
