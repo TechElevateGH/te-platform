@@ -1,121 +1,172 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Essay from "../components/file/Essay";
-import { PlusIcon, PaperClipIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid'
+import { PlusIcon, PaperClipIcon, BriefcaseIcon } from '@heroicons/react/20/solid'
+import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
-import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/AuthContext"; // Commented out - will add auth checks later
 import FileCreate from "../components/file/FileCreate";
 import MissingData from "../components/_custom/Alert/MissingData";
 
 const Files = () => {
-    const { accessToken } = useAuth();
+    // const { accessToken } = useAuth(); // Commented out - will add auth checks later
 
-    const { resumes, otherFiles } = useData();
+    const { resumes } = useData();
 
     const [addFile, setAddFile] = useState(false);
-    const [reviewResume, setReviewResume] = useState(false);
 
-    useEffect(() => {
-        if (accessToken) {
-            setTimeout(() => { }, 700);
+    // Mock resume data with role and notes
+    const mockResumes = [
+        {
+            id: 1,
+            name: 'Software_Engineer_Resume.pdf',
+            role: 'Software Engineer',
+            notes: 'Tailored for FAANG companies, emphasizes distributed systems experience',
+            link: '#',
+            uploadDate: '2024-01-15',
+            size: '245 KB'
+        },
+        {
+            id: 2,
+            name: 'Data_Science_Resume.pdf',
+            role: 'Data Scientist',
+            notes: 'Highlights ML projects and Python expertise',
+            link: '#',
+            uploadDate: '2024-01-10',
+            size: '198 KB'
         }
+    ];
 
-    }, [accessToken]);
+    const displayResumes = resumes.length > 0 ? resumes : mockResumes;
+
+    // useEffect(() => {
+    //     if (accessToken) {
+    //         setTimeout(() => { }, 700);
+    //     }
+    // }, [accessToken]);
 
 
     return (
-        <>
-            {accessToken === null ?
-                <div className="flex flex-col  justify-center  h-full overflow-hidden'">
-                    <img
-                        src="loginCatFiles.png" alt=""
-                        className='transition-shadow mx-auto opacity-80  animate-pulse  h-2/3'
-                    />
-                    <button
-                        type="button"
-                        className="mt-12 mx-auto w-36 justify-center px-3 flex rounded-full py-1 text-sm font-medium ring-1 ring-inset  bg-sky-700 text-white hover:bg-white hover:text-sky-700"
-                    >
-                        Log In
-                    </button>
+        <div className="">
+            <header className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-6 py-6">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            Resumes & Essays
+                        </h1>
+                        <p className="text-sm text-gray-600">
+                            Manage your resumes, cover letters, and referral essays
+                        </p>
+                    </div>
                 </div>
-                :
-                <div className="">
-                    <header className="flex items-center justify-between border-b border-white /5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                        <h1 className="text-base ml-4  font-semibold leading-7 text-cyan-800">Resume and Other Files</h1>
-                    </header>
+            </header>
 
-                    <div className="flex mx-6">
-                        <div className="w-full lg:grid lg:grid-cols-12 lg:gap-x-8">
-                            <div className="pb-24  sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56  h-screen ">
-                                <div className="mt-3 text-lg sm:w-96  lg:w-72 xl:w-96 mx-auto  text-gray-600 ">
-                                    <Essay />
-                                </div>
-                            </div>
-
-                            <div className="w-full  lg:col-span-7 xl:relative xl:inset-0  xl:mr-6 h-screen">
-                                <header className="flex items-center justify-between border-b border-white /5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                                    <h1 className="text-base  font-semibold  text-cyan-800">Resumes</h1>
-                                    <button
-                                        type="button"
-                                        className="mt-1 mr-3 animate-bounce rounded-full bg-green-400 p-1 text-gray-900 shadow-sm hover:bg-green-600 hover:animate-none"
-                                        onClick={() => setAddFile(true)}
-                                    >
-                                        <PlusIcon className="h-5 w-5 " aria-hidden="true" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="flex rounded-full text-xs text-yellow-600 bg-yellow-400/10 ring-yellow-400/30 ring-1 ring-inset ring-yellow-500 pl-2  px-1 py-1 font-semibold  shadow-sm hover:bg-yellow-600 hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-600"
-                                        onClick={() => setReviewResume(true)}
-                                    >
-                                        Request a review <MagnifyingGlassIcon className="ml-1 h-5 w-5 " aria-hidden="true" />
-                                    </button>
-                                </header>
-                                <div className=" px-4 py-6 sm:col-span-2 sm:px-0">
-                                    <dd className="mt-2 text-sm text-gray-900">
-                                        {resumes.length === 0 ? <MissingData info="No resume(s) uploaded." />
-                                            :
-                                            <ul className="divide-y divide-gray-100 rounded-md border border-gray-200">
-                                                {
-                                                    resumes.map((resume) => (<li key={resume.id} className="flex items-center justify-between py-4 pl-4 pr-5 text-sm leading-6">
-                                                        <div className="flex w-0 flex-1 items-center">
-                                                            <PaperClipIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                                            <div className="ml-4 flex min-w-0 flex-1 gap-2">
-                                                                <span className="truncate font-medium">{resume.name}</span>
-                                                                <span className="flex-shrink-0 text-gray-400">2.4mb</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="ml-4 flex-shrink-0">
-                                                            <a href={resume.link} className="font-medium text-sky-600 hover:text-sky-500">
-                                                                View
-                                                            </a>
-                                                        </div>
-                                                    </li>))}
-                                            </ul>}
-                                    </dd>
-                                </div>
-
-
-                                <hr />
-
-                                <h3 className="text-base text-left mt-6 ml-4  font-semibold leading-7 text-cyan-800">Other Files</h3>
-                                <ul className="flex mb-6">
-                                    {otherFiles.map((otherFile) => {
-                                        return (<li key={otherFile.id} className="flex rounded-md w-40 px-3 py-3 mr-3 justify-center hover:bg-gray-100 ">
-                                            <a href={otherFile.link}>
-                                                <img className="m-auto" width="100" height="100" src="https://img.icons8.com/plasticine/100/pdf.png" alt={otherFile.name} />
-                                                <span className="text-gray-600  line-clamp-2 hover:line-clamp-none">{otherFile.name}</span>
-                                            </a>
-                                        </li>)
-                                    })
-                                    }
-                                </ul>
-                            </div>
+            <div className="flex mx-6">
+                <div className="w-full lg:grid lg:grid-cols-12 lg:gap-x-8">
+                    {/* Essay Section */}
+                    <div className="pb-24 sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56 h-screen">
+                        <div className="mt-6 text-lg sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600">
+                            <Essay />
                         </div>
                     </div>
 
-                    {addFile && <FileCreate setFileUpload={setAddFile} />}
+                    {/* Resumes Section */}
+                    <div className="w-full lg:col-span-7 xl:relative xl:inset-0 xl:mr-6 h-screen">
+                        <header className="flex items-center justify-between border-b border-gray-200 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                            <h2 className="text-xl font-bold text-gray-900">My Resumes</h2>
+                            <button
+                                type="button"
+                                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                onClick={() => setAddFile(true)}
+                            >
+                                <PlusIcon className="h-5 w-5" aria-hidden="true" />
+                                Upload Resume
+                            </button>
+                        </header>
 
-                </div>}
-        </>
+                        <div className="px-4 py-6 sm:col-span-2 sm:px-0">
+                            {displayResumes.length === 0 ? (
+                                <MissingData info="No resumes uploaded." />
+                            ) : (
+                                <div className="space-y-4">
+                                    {displayResumes.map((resume) => (
+                                        <div
+                                            key={resume.id}
+                                            className="bg-white rounded-xl border border-gray-200 p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-start gap-4 flex-1">
+                                                    {/* File Icon */}
+                                                    <div className="p-3 bg-blue-50 rounded-lg">
+                                                        <PaperClipIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                                                    </div>
+
+                                                    {/* Resume Details */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-4">
+                                                            <div className="flex-1">
+                                                                <h3 className="text-base font-bold text-gray-900 truncate">
+                                                                    {resume.name}
+                                                                </h3>
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <BriefcaseIcon className="h-4 w-4 text-gray-400" />
+                                                                    <span className="text-sm font-semibold text-blue-600">
+                                                                        {resume.role}
+                                                                    </span>
+                                                                </div>
+                                                                {resume.notes && (
+                                                                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                                                                        {resume.notes}
+                                                                    </p>
+                                                                )}
+                                                                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                                                                    <span>Size: {resume.size || '0 KB'}</span>
+                                                                    {resume.uploadDate && (
+                                                                        <span>Uploaded: {new Date(resume.uploadDate).toLocaleDateString()}</span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Actions */}
+                                                <div className="flex items-center gap-2 ml-4">
+                                                    <a
+                                                        href={resume.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-4 py-2 bg-blue-50 text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-100 transition-all"
+                                                    >
+                                                        View
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                        title="Edit"
+                                                    >
+                                                        <PencilIcon className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete"
+                                                    >
+                                                        <TrashIcon className="h-5 w-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {addFile && <FileCreate setFileUpload={setAddFile} />}
+
+        </div>
     )
 }
 
