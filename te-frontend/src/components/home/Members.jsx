@@ -54,7 +54,7 @@ const Members = () => {
                       e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=256&background=3B82F6&color=fff&bold=true`;
                     }}
                   />
-                  
+
                   {/* Social links overlay */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
                     {member.linkedin && (
@@ -88,7 +88,7 @@ const Members = () => {
                   <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
                     {member.role}
                   </p>
-                  
+
                   {/* Accent bar */}
                   <div className="mt-4 h-1 w-12 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-full group-hover:w-full transition-all duration-500"></div>
                 </div>
@@ -126,7 +126,7 @@ const Members = () => {
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-            
+
             <div className="relative text-center">
               <SparklesIcon className="h-12 w-12 text-white/80 mx-auto mb-4" />
               <h3 className="text-3xl font-bold text-white mb-4">

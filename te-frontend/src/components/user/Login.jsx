@@ -2,117 +2,264 @@ import axiosInstance from '../../axiosConfig';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, XCircleIcon } from '@heroicons/react/20/solid'
-
+import { 
+    XCircleIcon, 
+    EnvelopeIcon, 
+    LockClosedIcon,
+    ArrowRightIcon,
+    SparklesIcon
+} from '@heroicons/react/24/outline';
 
 const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const [error, setError] = useState('')
-    const [loginData, setLoginData] = useState({ username: "", password: "" })
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [loginData, setLoginData] = useState({ username: "", password: "" });
 
-    const handleLogin = () => {
-        axiosInstance.post('users.login', {
-            username: loginData.username,
-            password: loginData.password
-        })
-            .then((response) => {
-                login(response.data.token.sub, response.data.token.role, response.data.token.access_token);
-                navigate(localStorage.getItem("prevPage") || "/");
-            })
-            .catch((error) => {
-                setError(error.response.data.detail);
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await axiosInstance.post('users/login/access-token', {
+                username: loginData.username,
+                password: loginData.password
             });
-    }
+            login(response.data.sub, response.data.role, response.data.access_token);
+            navigate(localStorage.getItem("prevPage") || "/workspace");
+        } catch (error) {
+            setError(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOAuthLogin = (provider) => {
+        // TODO: Implement OAuth login flow
+        console.log(`Login with ${provider}`);
+        setError(`${provider} authentication will be implemented soon!`);
+    };
 
     const handleInputChange = ({ name, value }) => {
         setLoginData({ ...loginData, [name]: value });
     };
 
-    return (
-        <>
-            <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+    const oauthProviders = [
+        {
+            name: 'Google',
+            icon: (
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+            ),
+            color: 'hover:border-blue-500 hover:bg-blue-50'
+        },
+        {
+            name: 'Microsoft',
+            icon: (
+                <svg className="h-5 w-5" viewBox="0 0 23 23">
+                    <path fill="#f3f3f3" d="M0 0h23v23H0z"/>
+                    <path fill="#f35325" d="M1 1h10v10H1z"/>
+                    <path fill="#81bc06" d="M12 1h10v10H12z"/>
+                    <path fill="#05a6f0" d="M1 12h10v10H1z"/>
+                    <path fill="#ffba08" d="M12 12h10v10H12z"/>
+                </svg>
+            ),
+            color: 'hover:border-gray-700 hover:bg-gray-50'
+        },
+        {
+            name: 'LinkedIn',
+            icon: (
+                <svg className="h-5 w-5" fill="#0A66C2" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+            ),
+            color: 'hover:border-blue-600 hover:bg-blue-50'
+        },
+        {
+            name: 'GitHub',
+            icon: (
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"/>
+                </svg>
+            ),
+            color: 'hover:border-gray-900 hover:bg-gray-50'
+        }
+    ];
 
-                    <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                        Log In
-                    </h2>
-                </div>
-                {error &&
-                    <div className="sm:mx-auto mt-6 sm:w-full sm:max-w-sm rounded-md bg-red-50 p-4">
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
-                            </div>
-                            <div className="ml-3">
-                                <h3 className="text-sm font-medium text-red-800">{error} </h3>
-                            </div>
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            {/* Background decoration */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="relative max-w-md w-full">
+                {/* Logo and header */}
+                <div className="text-center mb-8">
+                    <div className="flex justify-center mb-4">
+                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl">
+                            <span className="text-white font-bold text-3xl">TE</span>
                         </div>
                     </div>
-                }
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                        Welcome back
+                    </h2>
+                    <p className="text-gray-600">
+                        Sign in to continue your tech journey
+                    </p>
+                </div>
 
-                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6">
+                {/* Main card */}
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8">
+                    {/* Error message */}
+                    {error && (
+                        <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-200 animate-fade-in">
+                            <div className="flex">
+                                <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0" />
+                                <p className="ml-3 text-sm text-red-800">{error}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* OAuth buttons */}
+                    <div className="space-y-3 mb-6">
+                        {oauthProviders.map((provider) => (
+                            <button
+                                key={provider.name}
+                                type="button"
+                                onClick={() => handleOAuthLogin(provider.name)}
+                                className={`w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:shadow-lg transition-all duration-300 ${provider.color}`}
+                            >
+                                {provider.icon}
+                                <span>Continue with {provider.name}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-4 bg-white text-gray-500 font-medium">Or continue with email</span>
+                        </div>
+                    </div>
+
+                    {/* Login form */}
+                    <form onSubmit={handleLogin} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="text-left block text-sm font-medium leading-6 text-gray-900">
+                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                                 Email address
                             </label>
-                            <div className="mt-2">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                                </div>
                                 <input
                                     id="email"
                                     name="email"
-                                    value={loginData.username}
                                     type="email"
+                                    value={loginData.username}
                                     autoComplete="email"
                                     required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
-                                    onChange={(e) => handleInputChange({ "name": "username", "value": e.target.value })}
+                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="you@example.com"
+                                    onChange={(e) => handleInputChange({ name: "username", value: e.target.value })}
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                            <div className="flex items-center justify-between mb-2">
+                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
                                     Password
                                 </label>
-                                <div className="text-sm">
-                                    <a href="#" className="font-semibold text-sky-600 hover:text-sky-500">
-                                        Forgot password?
-                                    </a>
-                                </div>
+                                <button
+                                    type="button"
+                                    className="text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+                                >
+                                    Forgot password?
+                                </button>
                             </div>
-                            <div className="mt-2">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                                </div>
                                 <input
                                     id="password"
                                     name="password"
-                                    value={loginData.password}
                                     type="password"
+                                    value={loginData.password}
                                     autoComplete="current-password"
                                     required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
-                                    onChange={(e) => handleInputChange({ "name": "password", "value": e.target.value })}
+                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    placeholder="••••••••"
+                                    onChange={(e) => handleInputChange({ name: "password", value: e.target.value })}
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <button
-                                type='button'
-                                className="flex w-full justify-center rounded-md bg-sky-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
-                                onClick={handleLogin}
-                            >
-                                Sign in
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="group relative w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-2">
+                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                    </svg>
+                                    <span>Signing in...</span>
+                                </div>
+                            ) : (
+                                <>
+                                    <span>Sign in</span>
+                                    <ArrowRightIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
+                        </button>
                     </form>
+
+                    {/* Sign up link */}
+                    <div className="mt-6 text-center">
+                        <p className="text-sm text-gray-600">
+                            Don't have an account?{' '}
+                            <button
+                                onClick={() => navigate('/register')}
+                                className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+                            >
+                                Create one now
+                            </button>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Back to home */}
+                <div className="mt-6 text-center">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to home
+                    </button>
                 </div>
             </div>
-        </>
-    )
+        </div>
+    );
 };
-
 
 export default Login;
 

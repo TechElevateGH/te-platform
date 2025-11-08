@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { 
-  SparklesIcon, 
-  RocketLaunchIcon, 
+import {
+  SparklesIcon,
+  RocketLaunchIcon,
   AcademicCapIcon,
   UserGroupIcon,
   ChartBarIcon,
@@ -42,7 +42,7 @@ const Hero = () => {
         <div
           key={idx}
           className={`hidden lg:block absolute ${item.position} animate-float opacity-30`}
-          style={{ 
+          style={{
             animationDelay: item.delay,
             transform: `translateY(${scrollY * 0.1}px)`
           }}
@@ -95,7 +95,7 @@ const Hero = () => {
 
           {/* Subheading */}
           <p className="mx-auto mt-8 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-600 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            Breaking barriers and building bridges to tech excellence. We connect aspiring developers from 
+            Breaking barriers and building bridges to tech excellence. We connect aspiring developers from
             <span className="font-semibold text-gray-900"> Africa and beyond</span> with world-class
             <span className="font-semibold text-gray-900"> mentorship</span>,
             <span className="font-semibold text-gray-900"> cutting-edge resources</span>, and
@@ -114,7 +114,7 @@ const Hero = () => {
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
-            
+
             <button
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               className="group px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 hover:border-blue-300 transform hover:scale-105 transition-all duration-300"
