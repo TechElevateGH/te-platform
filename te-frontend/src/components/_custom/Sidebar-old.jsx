@@ -172,75 +172,187 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
 
                 {/* Desktop sidebar */}
                 <div className="hidden md:fixed md:inset-y-0 md:z-50 md:flex md:w-80 md:flex-col">
-                    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 backdrop-blur-xl border-r border-white/60 px-6 py-6 relative">
-                        {/* Glassmorphism overlay */}
-                        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60"></div>
-
-                        <div className="relative z-10">
+                    <div className="flex grow flex-col gap-y-6 overflow-y-auto bg-white border-r border-gray-200 px-6 py-6">
+                        <div>
                             {/* Logo and Brand */}
-                            <div className="flex h-16 shrink-0 items-center">
+                            <div className="flex h-16 shrink-0 items-center border-b border-gray-100 pb-6">
                                 <button
                                     onClick={() => navigate('/')}
-                                    className="flex items-center gap-3 hover:scale-105 transition-transform duration-300"
+                                    className="flex items-center gap-3 group"
                                 >
-                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-xl shadow-blue-500/30 ring-2 ring-white/50">
-                                        <RocketLaunchIcon className="h-7 w-7 text-white" />
+                                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                                        <RocketLaunchIcon className="h-6 w-6 text-white" />
                                     </div>
                                     <div>
-                                        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">TechElevate</h1>
-                                        <p className="text-xs text-gray-600 font-medium">Your Career Hub</p>
+                                        <h1 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">TechElevate</h1>
+                                        <p className="text-xs text-gray-500 font-medium">Career Platform</p>
                                     </div>
                                 </button>
                             </div>
 
-                            <nav className="flex flex-1 flex-col mt-2">
-                                <ul className="flex flex-1 flex-col gap-y-7">
+                            <nav className="flex flex-1 flex-col mt-4">
+                                <ul className="flex flex-1 flex-col gap-y-6">
                                     <li>
-                                        <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
+                                        <div className="text-xs font-semibold text-gray-400 mb-3 tracking-wider uppercase px-1">
                                             Workspace
                                         </div>
-                                        <ul className="space-y-2">
-                                            {navigation.filter((item) => item.type === "app").map((item, index) => {
-                                                const colors = [
-                                                    { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
-                                                    { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
-                                                    { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
-                                                    { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
-                                                ];
-                                                const color = colors[index % colors.length];
-                                                return (
-                                                    <li key={item.name}>
-                                                        <button
-                                                            onClick={() => setContent(item.name)}
+                                        <ul className="space-y-1">
+                                            {navigation.filter((item) => item.type === "app").map((item) => (
+                                                <li key={item.name}>
+                                                    <button
+                                                        onClick={() => setContent(item.name)}
+                                                        className={classNames(
+                                                            item.name === content
+                                                                ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                                                            'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-200'
+                                                        )}
+                                                    >
+                                                        <item.icon
                                                             className={classNames(
-                                                                item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                'group flex w-full items-center gap-x-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm'
+                                                                item.name === content ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600',
+                                                                'h-5 w-5 shrink-0 transition-colors'
                                                             )}
-                                                        >
-                                                            <div className={classNames(
-                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                'p-2 rounded-lg transition-all duration-300'
-                                                            )}>
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.name === content ? 'text-white' : color.icon,
-                                                                        'h-5 w-5 transition-colors'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                            </div>
-                                                            <span className="flex-1 text-left">{item.name}</span>
-                                                            {item.name === content && (
-                                                                <ChevronRightIcon className="h-4 w-4 text-white/90" />
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="flex-1 text-left">{item.name}</span>
+                                                        {item.name === content && (
+                                                            <ChevronRightIcon className="h-4 w-4 text-blue-600" />
+                                                        )}
+                                                    </button>
+                                                </li>
+                                            ))}
                                         </ul>
+                                    </li>
+
+                                    <li>
+                                        <div className="text-xs font-semibold text-gray-400 mb-3 tracking-wider uppercase px-1">
+                                            Learning
+                                        </div>
+                                        <ul className="space-y-1">
+                                            {navigation.filter((item) => item.type === "learn").map((item) => (
+                                                <li key={item.name}>
+                                                    <button
+                                                        onClick={() => setContent(item.name)}
+                                                        className={classNames(
+                                                            item.name === content
+                                                                ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                                                            'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-200'
+                                                        )}
+                                                    >
+                                                        <item.icon
+                                                            className={classNames(
+                                                                item.name === content ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600',
+                                                                'h-5 w-5 shrink-0 transition-colors'
+                                                            )}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="flex-1 text-left">{item.name}</span>
+                                                        {item.name === content && (
+                                                            <ChevronRightIcon className="h-4 w-4 text-blue-600" />
+                                                        )}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <div className="text-xs font-semibold text-gray-400 mb-3 tracking-wider uppercase px-1">
+                                            Resources
+                                        </div>
+                                        <ul className="space-y-1">
+                                            {navigation.filter((item) => item.type === "other").map((item) => (
+                                                <li key={item.name}>
+                                                    <button
+                                                        onClick={() => setContent(item.name)}
+                                                        className={classNames(
+                                                            item.name === content
+                                                                ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                                                : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900',
+                                                            'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-200'
+                                                        )}
+                                                    >
+                                                        <item.icon
+                                                            className={classNames(
+                                                                item.name === content ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600',
+                                                                'h-5 w-5 shrink-0 transition-colors'
+                                                            )}
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="flex-1 text-left">{item.name}</span>
+                                                        {item.name === content && (
+                                                            <ChevronRightIcon className="h-4 w-4 text-blue-600" />
+                                                        )}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </li>
+
+                                    <li className="mt-auto pt-4 border-t border-gray-100">
+                                        <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
+                                            {/* User Profile */}
+                                            <button
+                                                onClick={() => setContent("Profile")}
+                                                className="flex w-full items-center gap-x-3 text-sm font-semibold text-gray-700 hover:bg-white rounded-lg p-2 transition-all mb-2.5"
+                                            >
+                                                <div className="relative">
+                                                    <img
+                                                        className="h-9 w-9 rounded-lg object-cover border border-gray-200"
+                                                        src={userInfo?.image || "https://via.placeholder.com/36"}
+                                                        alt="Profile"
+                                                    />
+                                                    <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                                </div>
+                                                <div className="flex-1 text-left min-w-0">
+                                                    <p className="text-sm font-bold text-gray-900 truncate">
+                                                        {(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "") || "Guest User"}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">View profile</p>
+                                                </div>
+                                                <UserCircleIcon className="h-5 w-5 text-gray-400 shrink-0" />
+                                            </button>
+
+                                            {/* Auth Button */}
+                                            {!accessToken ? (
+                                                <a
+                                                    href='/login'
+                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-sm hover:shadow-md text-sm"
+                                                >
+                                                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                                                    <span>Sign In</span>
+                                                </a>
+                                            ) : (
+                                                <button
+                                                    onClick={logout}
+                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all border border-gray-200 text-sm"
+                                                >
+                                                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                                                    <span>Sign Out</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                                        </div>
+                                        </div>
+                    </div>
+                </div>
+
+                {/* Mobile header - Now hidden since WorkspaceNavbar handles it */}
+                <div className="hidden">
+                    {/* Placeholder - mobile navigation now handled by WorkspaceNavbar */}
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default Sidebar;
                                     </li>
 
                                     <li>
@@ -260,7 +372,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                             onClick={() => setContent(item.name)}
                                                             className={classNames(
                                                                 item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    ? `${color.activeBg} text-white shadow-lg shadow-${color.icon}/30 scale-[1.02] ring-2 ${color.ring}`
                                                                     : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
                                                                 'group flex w-full items-center gap-x-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm'
                                                             )}
@@ -305,7 +417,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                             onClick={() => setContent(item.name)}
                                                             className={classNames(
                                                                 item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    ? `${color.activeBg} text-white shadow-lg shadow-${color.icon}/30 scale-[1.02] ring-2 ${color.ring}`
                                                                     : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
                                                                 'group flex w-full items-center gap-x-3 rounded-xl px-3.5 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm'
                                                             )}

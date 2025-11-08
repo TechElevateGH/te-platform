@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import companiesList from '../data/companies';
 
 const DataContext = createContext();
 
@@ -28,7 +29,7 @@ export const DataProvider = ({ children }) => {
 
 
     const [fetchCompanies, setFetchCompanies] = useState(true);
-    const [companies, setCompanies] = useState(["Microsoft", "Google", "Meta"]);
+    const [companies, setCompanies] = useState(companiesList);
 
 
 

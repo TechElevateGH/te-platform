@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import SuccessFeedback from '../_custom/Alert/SuccessFeedback'
 import { FormSelect, FormInput, FormTextArea } from '../_custom/FormInputs'
+import CompanyCombobox from '../_custom/CompanyCombobox'
 
 
 export const customInputMap = {
@@ -75,63 +76,116 @@ const ApplicationCreate = ({ setAddApplication }) => {
             title={"New Application"}
             setHandler={setAddApplication}
             requestHandler={createUserApplicationRequest}
-            children={<div className="flex flex-1 flex-col justify-between">
-                <div className="divide-y divide-gray-200 px-4 sm:px-6">
-                    <div className="space-y-6 pb-5 pt-6">
-
-                        {showSuccessFeedback &&
+            children={
+                <div className="px-6 py-6 space-y-6">
+                    {showSuccessFeedback && (
+                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                             <SuccessFeedback
                                 message={"Application successfully added."}
                                 setShowSuccessFeedback={setShowSuccessFeedback}
                             />
-                        }
+                        </div>
+                    )}
 
-                        <FormSelect label="Company" field="company" data={[...companies, "Other....."]} handleInputChange={handleInputChange} required={true} />
-                        {appData.company === "Other....." &&
-                            <FormInput
-                                placeholder="Specify company: "
-                                field="company_other"
+                    {/* Company Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company Information</h3>
+                        <CompanyCombobox
+                            companies={companies}
+                            value={appData.company}
+                            onChange={(company) => handleInputChange({ field: 'company', value: company })}
+                            required={true}
+                        />
+                    </div>
+
+                    {/* Position Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormSelect
+                                label="Title"
+                                field="title"
+                                data={jobTitles}
                                 handleInputChange={handleInputChange}
                                 required={true}
                             />
-                        }
-
-                        <div className="flex mt-3 justify-between ">
-                            <FormSelect label="Title" field="title" data={jobTitles} handleInputChange={handleInputChange} required={true} />
-                            <FormSelect label="Role" field="role" data={jobRoles} handleInputChange={handleInputChange} required={true} />
+                            <FormSelect
+                                label="Role"
+                                field="role"
+                                data={jobRoles}
+                                handleInputChange={handleInputChange}
+                                required={true}
+                            />
                         </div>
 
-                        <div className='flex justify-between'>
-                            {appData.title === "Other....." &&
-                                <FormInput
-                                    placeholder="Specify title: "
-                                    field="title_other"
-                                    handleInputChange={handleInputChange}
-                                    required={true}
-                                />
-                            }
+                        {(appData.title === "Other....." || appData.role === "Other.....") && (
+                            <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                                {appData.title === "Other....." && (
+                                    <FormInput
+                                        label="Custom Title"
+                                        placeholder="Specify title"
+                                        field="title_other"
+                                        handleInputChange={handleInputChange}
+                                        required={true}
+                                    />
+                                )}
+                                {appData.role === "Other....." && (
+                                    <FormInput
+                                        label="Custom Role"
+                                        placeholder="Specify role"
+                                        field="role_other"
+                                        handleInputChange={handleInputChange}
+                                        required={true}
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </div>
 
-                            {appData.role === "Other....." &&
-                                <FormInput
-                                    placeholder="Specify role: "
-                                    field="role_other"
-                                    handleInputChange={handleInputChange}
-                                    required={true}
-                                />
-                            }
+                    {/* Status Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Application Status</h3>
+                        <FormSelect
+                            label="Status"
+                            field="status"
+                            data={Object.keys(jobStatuses)}
+                            handleInputChange={handleInputChange}
+                            required={true}
+                        />
+                    </div>
+
+                    {/* Location Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Location</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormSelect
+                                label="Country"
+                                field="location.country"
+                                data={countries}
+                                handleInputChange={handleInputChange}
+                                required={false}
+                            />
+                            <FormInput
+                                label="City"
+                                field="location.city"
+                                handleInputChange={handleInputChange}
+                                required={false}
+                            />
                         </div>
+                    </div>
 
-                        <FormSelect label="Status" field="status" data={Object.keys(jobStatuses)} handleInputChange={handleInputChange} required={true} />
-
-                        <div className="flex justify-between">
-                            <FormSelect label="Country" field="location.country" data={countries} handleInputChange={handleInputChange} required={false} />
-                            <FormInput label="City" field="location.city" data={[]} handleInputChange={handleInputChange} required={false} />
-                        </div>
-
-                        <FormTextArea label="Notes" field="notes" handleInputChange={handleInputChange} required={true} />
+                    {/* Notes Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Additional Notes</h3>
+                        <FormTextArea
+                            label="Notes"
+                            field="notes"
+                            handleInputChange={handleInputChange}
+                            required={false}
+                        />
                     </div>
                 </div>
-            </div >}
+            }
         />
     )
 }

@@ -284,23 +284,23 @@ const Applications = () => {
     });
 
     return (
-        <div className="min-h-screen bg-[#fafafa]">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Premium Header */}
-            <div className="bg-white border-b border-gray-200/80">
+            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 mb-1">
                                 Applications
                             </h1>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-600">
                                 Manage your job search journey
                             </p>
                         </div>
                         {!fetchApplications && (
                             <button
                                 onClick={() => setAddApplication(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 <span>New Application</span>
@@ -310,62 +310,62 @@ const Applications = () => {
 
                     {/* Premium Statistics Cards */}
                     {!fetchApplications && applications.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                            <div className="bg-white rounded-xl p-4 border border-gray-200/60 hover:border-gray-300 transition-all">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-gray-100 rounded-lg">
-                                        <BriefcaseIcon className="h-4 w-4 text-gray-600" />
+                                    <div className="p-2.5 bg-gray-50 rounded-lg">
+                                        <BriefcaseIcon className="h-5 w-5 text-gray-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-gray-500">Total</p>
+                                        <p className="text-xs font-semibold text-gray-500 mb-0.5">Total</p>
                                         <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-4 border border-emerald-200/60 hover:border-emerald-300 transition-all">
+                            <div className="bg-white rounded-xl p-4 border border-emerald-100 hover:border-emerald-200 hover:shadow-md transition-all duration-200">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-emerald-100 rounded-lg">
-                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                    <div className="p-2.5 bg-emerald-50 rounded-lg">
+                                        <CheckCircleIcon className="h-5 w-5 text-emerald-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-emerald-600">Offers</p>
+                                        <p className="text-xs font-semibold text-emerald-600 mb-0.5">Offers</p>
                                         <p className="text-2xl font-bold text-emerald-900">{stats.offers}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-4 border border-blue-200/60 hover:border-blue-300 transition-all">
+                            <div className="bg-white rounded-xl p-4 border border-blue-100 hover:border-blue-200 hover:shadow-md transition-all duration-200">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                    <div className="p-2.5 bg-blue-50 rounded-lg">
                                         <ClockIcon className="h-4 w-4 text-blue-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-blue-600">Interviewing</p>
+                                        <p className="text-xs font-semibold text-blue-600 mb-0.5">Interviewing</p>
                                         <p className="text-2xl font-bold text-blue-900">{stats.interviewing}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-4 border border-amber-200/60 hover:border-amber-300 transition-all">
+                            <div className="bg-white rounded-xl p-4 border border-amber-200/60 hover:border-amber-300 hover:shadow-sm transition-all duration-200">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-amber-100 rounded-lg">
                                         <ClockIcon className="h-4 w-4 text-amber-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-amber-600">Pending</p>
+                                        <p className="text-xs font-semibold text-amber-600 mb-0.5">Pending</p>
                                         <p className="text-2xl font-bold text-amber-900">{stats.pending}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-4 border border-rose-200/60 hover:border-rose-300 transition-all">
+                            <div className="bg-white rounded-xl p-4 border border-rose-200/60 hover:border-rose-300 hover:shadow-sm transition-all duration-200">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-rose-100 rounded-lg">
                                         <XCircleIconSolid className="h-4 w-4 text-rose-600" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium text-rose-600">Rejected</p>
+                                        <p className="text-xs font-semibold text-rose-600 mb-0.5">Rejected</p>
                                         <p className="text-2xl font-bold text-rose-900">{stats.rejected}</p>
                                     </div>
                                 </div>
@@ -387,22 +387,22 @@ const Applications = () => {
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     {/* Premium Search and Filter Bar */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-4 mb-4">
-                        <div className="flex flex-col md:flex-row gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1 relative">
-                                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                                 <input
                                     type="text"
                                     placeholder="Search by company, role, or position..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-medium"
                                 />
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 sm:gap-3">
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-semibold"
+                                    className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-sm font-semibold"
                                 >
                                     <option value="All">All Status</option>
                                     <option value="Submitted">Submitted</option>
@@ -415,40 +415,40 @@ const Applications = () => {
                                 </select>
                                 <button
                                     onClick={() => setAllowSelection(!allowSelection)}
-                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm ${allowSelection
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold transition-all text-sm whitespace-nowrap ${allowSelection
+                                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                                        : 'bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100'
                                         }`}
                                 >
                                     <FunnelIcon className="h-4 w-4" />
-                                    <span>{allowSelection ? 'Cancel' : 'Select'}</span>
+                                    <span className="hidden sm:inline">{allowSelection ? 'Cancel' : 'Select'}</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Bulk Actions */}
                         {allowSelection && (
-                            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                                 <button
                                     onClick={selectAllApplications}
                                     className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-semibold hover:bg-blue-100 transition-colors text-sm"
                                 >
-                                    Select All
+                                    {Object.values(selectedApplications).filter(Boolean).length === applications.length ? 'Deselect All' : 'Select All'}
                                 </button>
                                 <button
                                     onClick={handleUserApplicationsArchive}
                                     className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm border border-gray-200"
                                 >
                                     <ArchiveBoxIcon className="h-4 w-4" />
-                                    Archive
+                                    <span className="hidden sm:inline">Archive</span>
                                 </button>
                                 <button
                                     className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg font-semibold hover:bg-red-100 transition-colors text-sm border border-red-200"
                                 >
                                     <TrashIcon className="h-4 w-4" />
-                                    Delete
+                                    <span className="hidden sm:inline">Delete</span>
                                 </button>
-                                <span className="ml-auto text-sm text-gray-500 font-medium">
+                                <span className="ml-auto text-sm text-gray-500 font-semibold">
                                     {Object.values(selectedApplications).filter(Boolean).length} selected
                                 </span>
                             </div>

@@ -11,7 +11,7 @@ const classNames = (...classes) => {
 const ApplicationItem = ({ allowSelection, addSelectedItem, application, setApplicationId }) => {
 
     return (
-        <div 
+        <div
             className="p-4 cursor-pointer group"
             onClick={() => { !allowSelection && setApplicationId(application.id) }}
         >
@@ -30,7 +30,7 @@ const ApplicationItem = ({ allowSelection, addSelectedItem, application, setAppl
                         className="h-4 w-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0"
                     />
                 )}
-                
+
                 <div className="h-10 w-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                     <img
                         alt={application.company.name}
@@ -54,7 +54,7 @@ const ApplicationItem = ({ allowSelection, addSelectedItem, application, setAppl
                             {application.status}
                         </div>
                     </div>
-                    
+
                     <p className="text-xs font-medium text-gray-600 mb-2 truncate">
                         {application.title}
                     </p>
@@ -70,8 +70,8 @@ const ApplicationItem = ({ allowSelection, addSelectedItem, application, setAppl
                         <div className="flex items-center gap-1">
                             <CalendarIcon className="h-3 w-3" />
                             <span>
-                                {new Date(application.date).toLocaleDateString('en-US', { 
-                                    month: 'short', 
+                                {new Date(application.date).toLocaleDateString('en-US', {
+                                    month: 'short',
                                     day: 'numeric'
                                 })}
                             </span>

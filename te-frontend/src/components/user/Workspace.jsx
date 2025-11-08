@@ -9,6 +9,7 @@ import axiosInstance from "../../axiosConfig"
 import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon } from '@heroicons/react/20/solid'
 import Applications from '../../pages/Applications'
 import Sidebar from '../_custom/Sidebar'
+import WorkspaceNavbar from '../_custom/WorkspaceNavbar'
 import FilesAndEssay from '../../pages/FilesAndEssay'
 import Referrals from '../../pages/Referrals'
 import Learning from '../../pages/Learning'
@@ -158,8 +159,11 @@ const Workspace = ({ setLogin }) => {
 
                 <Sidebar navigation={navigation} content={content} setContent={setContentHandler} setLogin={setLogin} />
 
+                {/* Workspace Navbar */}
+                <WorkspaceNavbar currentPage={content} onMobileMenuOpen={() => setSidebarOpen(true)} />
+
                 <div className="md:pl-80">
-                    <main className="min-h-screen bg-[#fafafa]">
+                    <main className="min-h-screen bg-[#fafafa] pt-20">
                         {
                             content === "Profile" ? <Profile /> :
                                 content === "Applications" ? <Applications /> :

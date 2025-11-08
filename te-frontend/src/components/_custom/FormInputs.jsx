@@ -4,24 +4,24 @@ import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
 export const FormSelect = ({ field, label, data, handleInputChange, value, required }) => {
 
     return (
-        <div className=''>
+        <div>
             <label
                 htmlFor={field}
-                className="block text-sm font-medium leading-6 text-sky-800"
+                className="block text-sm font-semibold text-gray-700 mb-2"
             >
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
             </label>
 
-            <div className="mt-2">
+            <div>
                 <select
                     name={field}
                     id={field}
-                    className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300  focus:ring-sky-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all bg-white"
                     defaultValue={value}
                     onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
                     required={required}
                 >
-                    <option value=""></option>
+                    <option value="">Select {label.toLowerCase()}...</option>
                     {data.map((item, index) => (
                         <option key={index} value={item}>{item}</option>
                     ))}
@@ -35,50 +35,54 @@ export const FormSelect = ({ field, label, data, handleInputChange, value, requi
 
 export const FormInput = ({ type, label, field, placeholder, handleInputChange, validation, value, required }) => {
     return (
-        <div className="relative mt-2 rounded-md shadow-sm">
+        <div>
             <label
                 htmlFor={field}
-                className="block text-sm font-medium leading-6 text-sky-800"
+                className="block text-sm font-semibold text-gray-700 mb-2"
             >
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
             </label>
-            <input
-                type={type ?? "text"}
-                name={field}
-                id={field}
-                placeholder={placeholder}
-                defaultValue={value ?? ""}
-                className="block w-full rounded-md border-0 px-1.5 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300  focus:ring-sky-600 sm:text-sm sm:leading-6"
-                aria-invalid={validation}
-                onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
-                required={required}
-            />
-            {validation &&
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                    <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-                </div>
-            }
+            <div className="relative">
+                <input
+                    type={type ?? "text"}
+                    name={field}
+                    id={field}
+                    placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
+                    defaultValue={value ?? ""}
+                    className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all"
+                    aria-invalid={validation}
+                    onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
+                    required={required}
+                />
+                {validation &&
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                    </div>
+                }
+            </div>
         </div>
     )
 }
 
-export const FormTextArea = ({ label, field, handleInputChange }) => {
+export const FormTextArea = ({ label, field, handleInputChange, required }) => {
     return (
         <div>
             <label
-                htmlFor="notes"
-                className="block text-sm font-medium leading-6 text-sky-800"
+                htmlFor={field}
+                className="block text-sm font-semibold text-gray-700 mb-2"
             >
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
             </label>
-            <div className="mt-2">
+            <div>
                 <textarea
                     id={field}
                     name={field}
                     rows={4}
-                    className="block w-full rounded-md border-0 py-1.5  shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6"
+                    className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all resize-none"
+                    placeholder={`Enter ${label.toLowerCase()}...`}
                     defaultValue={''}
                     onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
+                    required={required}
                 />
             </div>
         </div>
