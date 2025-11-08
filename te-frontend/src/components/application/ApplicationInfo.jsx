@@ -8,13 +8,13 @@ import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 
 export const jobStatuses = {
-    "Offer": 'text-green-900 bg-green-300/10 ring-green-400/30',
-    "HR": 'text-blue-400 bg-blue-400/10 ring-blue-400/30',
-    "Phone interview": 'text-blue-400 bg-blue-400/10 ring-blue-400/30',
-    "Final interview": 'text-blue-900 bg-blue-300/10 ring-blue-400/30',
-    "OA": 'text-blue-400 bg-blue-400/10 ring-blue-400/30',
-    "Submitted": 'text-yellow-900 bg-yellow-300/10 ring-yellow-400/30',
-    "Rejected": 'text-gray-900 bg-gray-300/10 ring-gray-400/30',
+    "Offer": 'text-emerald-700 bg-emerald-50 ring-emerald-600/20 border border-emerald-200',
+    "HR": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
+    "Phone interview": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
+    "Final interview": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
+    "OA": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
+    "Submitted": 'text-amber-700 bg-amber-50 ring-amber-600/20 border border-amber-200',
+    "Rejected": 'text-gray-700 bg-gray-50 ring-gray-600/20 border border-gray-200',
 }
 
 const classNames = (...classes) => {

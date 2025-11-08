@@ -1,4 +1,5 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
+import { MapPinIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import { jobStatuses } from './ApplicationInfo'
 
 
@@ -10,57 +11,84 @@ const classNames = (...classes) => {
 const ApplicationItem = ({ allowSelection, addSelectedItem, application, setApplicationId }) => {
 
     return (
-        <>
-            {allowSelection &&
-                <input
-                    id="comments"
-                    aria-describedby="comments-description"
-                    name="comments"
-                    type="checkbox"
-                    checked={application.selected}
-                    className="h-4 w-4  text-xs  md:text-sm  rounded-md border-sky-700 text-sky-600 focus:ring-sky-600"
-                />
-            }
+        <div 
+            className="p-4 cursor-pointer group"
+            onClick={() => { !allowSelection && setApplicationId(application.id) }}
+        >
+            <div className="flex gap-3">
+                {/* Checkbox + Logo */}
+                {allowSelection && (
+                    <input
+                        id={`app-${application.id}`}
+                        type="checkbox"
+                        checked={application.selected}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            addSelectedItem(application);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-4 w-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+                    />
+                )}
+                
+                <div className="h-10 w-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img
+                        alt={application.company.name}
+                        className="h-6 w-6 object-contain"
+                        src={application.company.image}
+                    />
+                </div>
 
-            <div className="min-w-0 flex-auto " onClick={() => { allowSelection ? addSelectedItem(application) : setApplicationId(application.id) }}>
-                <div className="flex items-center gap-x-3">
-                    <div className="flex-none rounded-full p-1">
-                        <img
-                            width="13"
-                            height="13"
-                            alt=""
-                            style={{ marginRight: '5px', marginLeft: '5px', marginTop: '-4px' }}
-                            className="company-logo"
-                            src={application.company.image}>
-                        </img>
-                    </div>
-                    <div className="min-w-0 font-semibold leading-6 text-black">
-                        <div className="flex gap-x-2" >
-                            <span className="truncate">{application.company.name}</span>
-                            <span className="text-gray-400">:</span>
-                            <span className="whitespace-nowrap">{application.title}, {application.role}</span>
-                            <span className="absolute inset-0" />
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3 className="text-sm font-bold text-gray-900 truncate">
+                            {application.company.name}
+                        </h3>
+                        <div
+                            className={classNames(
+                                jobStatuses[application.status],
+                                'inline-flex rounded-md px-2 py-0.5 text-xs font-semibold whitespace-nowrap flex-shrink-0'
+                            )}
+                        >
+                            {application.status}
                         </div>
                     </div>
+                    
+                    <p className="text-xs font-medium text-gray-600 mb-2 truncate">
+                        {application.title}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
+                        {application.location && (
+                            <div className="flex items-center gap-1">
+                                <MapPinIcon className="h-3 w-3" />
+                                <span>{application.location.city}</span>
+                            </div>
+                        )}
+                        <span className="text-gray-300">•</span>
+                        <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-3 w-3" />
+                            <span>
+                                {new Date(application.date).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric'
+                                })}
+                            </span>
+                        </div>
+                        {application.referred && (
+                            <>
+                                <span className="text-gray-300">•</span>
+                                <span className="text-purple-600 font-semibold">Referred</span>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="mt-3 flex items-center gap-x-2.5 text-sm leading-5 text-gray-400">
-                    <p className="truncate">{application.notes}</p>
-                    <svg viewBox="0 0 2 2" className="h-0.5 w-0.5 flex-none fill-gray-300">
-                        <circle cx={1} cy={1} r={1} />
-                    </svg>
-                    <p className="whitespace-nowrap">Added on: {application.date}</p>
-                </div>
+
+                {/* Chevron */}
+                <ChevronRightIcon className="h-4 w-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1" />
             </div>
-            <div
-                className={classNames(
-                    jobStatuses[application.status],
-                    'rounded-full flex-none py-1 px-2 text-sm font-medium ring-1 ring-inset  max-sm:hidden'
-                )}
-            >
-                {application.status}
-            </div>
-            <ChevronRightIcon className="h-5 w-5 flex-none text-gray-400" aria-hidden="true" />
-        </>
+        </div>
     )
 }
 

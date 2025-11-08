@@ -158,8 +158,8 @@ const Workspace = ({ setLogin }) => {
 
                 <Sidebar navigation={navigation} content={content} setContent={setContentHandler} setLogin={setLogin} />
 
-                <div className="md:pl-72 ">
-                    <main className="bg-white h-screen">
+                <div className="md:pl-80">
+                    <main className="min-h-screen bg-[#fafafa]">
                         {
                             content === "Profile" ? <Profile /> :
                                 content === "Applications" ? <Applications /> :
@@ -167,7 +167,6 @@ const Workspace = ({ setLogin }) => {
                                         content === "Referrals" ? <Referrals /> : <Learning />
                         }
                     </main>
-
                 </div>
             </div>
         </>
