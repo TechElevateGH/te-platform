@@ -164,7 +164,7 @@ const Workspace = ({ setLogin }) => {
                 {/* Workspace Navbar */}
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
-                <div>
+                <div className="md:pl-28">
                     <main className="min-h-screen bg-[#fafafa] pt-20">
                         {
                             content === "Profile" ? <Profile /> :

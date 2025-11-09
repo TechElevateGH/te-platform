@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
-import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -18,8 +17,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { isAuthenticated, userRole, logout } = useAuth();
-    const { userInfo } = useData();
+    const { isAuthenticated, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -57,34 +55,23 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isWorkspace
                 ? 'bg-white/90 backdrop-blur-xl shadow-sm'
                 : 'bg-transparent'
                 }`}
         >
-            <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-                <div className="flex items-center gap-4">
-                    {/* Mobile menu button - only show on mobile for workspace */}
-                    {isWorkspace && (
-                        <button
-                            type="button"
-                            className="md:hidden -m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 hover:bg-gray-100 transition-colors"
-                            onClick={handleMobileMenuToggle}
-                        >
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-                        </button>
-                    )}
-                    {!isWorkspace && (
-                        <button
-                            type="button"
-                            className="lg:hidden -m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 hover:bg-gray-100 transition-colors"
-                            onClick={handleMobileMenuToggle}
-                        >
-                            <span className="sr-only">Open main menu</span>
-                            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-                        </button>
-                    )}
+            <nav className="mx-auto flex items-center justify-between px-6 py-4 lg:px-8" aria-label="Global">
+                {/* Left section: Mobile menu + Logo */}
+                <div className="flex items-center gap-4 flex-shrink-0">
+                    {/* Mobile menu button */}
+                    <button
+                        type="button"
+                        className={`${isWorkspace ? 'md:hidden' : 'lg:hidden'} -m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 hover:bg-gray-100 transition-colors`}
+                        onClick={handleMobileMenuToggle}
+                    >
+                        <span className="sr-only">Open main menu</span>
+                        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+                    </button>
 
                     {/* Logo */}
                     <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
@@ -97,9 +84,9 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     </a>
                 </div>
 
-                {/* Desktop Navigation */}
-                <div className="hidden lg:flex lg:gap-x-8">
-                    {!isWorkspace && navigation.map((item) => (
+                {/* Center section: Navigation Links */}
+                <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:gap-x-8">
+                    {navigation.map((item) => (
                         <button
                             key={item.name}
                             onClick={() => scrollToSection(item.href)}
@@ -111,8 +98,8 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     ))}
                 </div>
 
-                {/* Desktop Auth Buttons */}
-                <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-3">
+                {/* Right section: Auth Buttons */}
+                <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
                     {!isAuthenticated ? (
                         <>
                             <button
@@ -130,44 +117,29 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         </>
                     ) : (
                         <>
-                            {!isWorkspace && (
-                                <button
-                                    onClick={() => navigate('/workspace')}
-                                    className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
-                                >
-                                    Workspace
-                                </button>
-                            )}
+                            <button
+                                onClick={() => navigate('/workspace')}
+                                className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
+                            >
+                                Workspace
+                            </button>
 
-                            {isWorkspace && userInfo && (
-                                <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100">
-                                    <img
-                                        className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-md"
-                                        src={userInfo?.image || "https://via.placeholder.com/36"}
-                                        alt="Profile"
-                                    />
-                                    <div className="pr-2">
-                                        <p className="text-sm font-bold text-gray-900">
-                                            {`${userInfo?.first_name || ''} ${userInfo?.last_name || ''}`.trim() || "Guest User"}
-                                        </p>
-                                        <p className="text-xs text-blue-600 font-medium">{userRole}</p>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Profile icon */}
+                            <button
+                                onClick={() => navigate('/workspace/profile')}
+                                className="p-2 rounded-lg hover:bg-blue-50 transition-all group"
+                                title="Profile"
+                            >
+                                <UserCircleIcon className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors" />
+                            </button>
 
-                            {!isWorkspace && (
-                                <span className="text-sm font-medium px-4 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
-                                    {userRole}
-                                </span>
-                            )}
-
+                            {/* Sign out icon */}
                             <button
                                 onClick={logout}
-                                className="flex items-center gap-2 text-sm font-semibold leading-6 text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all px-4 py-2 rounded-lg"
+                                className="p-2 rounded-lg hover:bg-red-50 transition-all group"
                                 title="Sign Out"
                             >
-                                <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-                                <span className="hidden xl:inline">Sign Out</span>
+                                <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors" />
                             </button>
                         </>
                     )}

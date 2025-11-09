@@ -223,7 +223,7 @@ const Applications = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Applications</h1>
+                                <h1 className="text-lg font-semibold text-gray-900">Applications</h1>
                                 <p className="text-xs text-gray-600">Track your job applications</p>
                             </div>
 
@@ -233,27 +233,27 @@ const Applications = () => {
                                     <div className="flex items-center gap-1.5">
                                         <BriefcaseIcon className="h-3.5 w-3.5 text-gray-500" />
                                         <span className="text-xs text-gray-600">Total:</span>
-                                        <span className="text-sm font-bold text-gray-900">{stats.total}</span>
+                                        <span className="text-xs font-semibold text-gray-900">{stats.total}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-600" />
                                         <span className="text-xs text-emerald-600">Offers:</span>
-                                        <span className="text-sm font-bold text-emerald-900">{stats.offers}</span>
+                                        <span className="text-xs font-semibold text-emerald-900">{stats.offers}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <ClockIcon className="h-3.5 w-3.5 text-blue-600" />
                                         <span className="text-xs text-blue-600">Interviewing:</span>
-                                        <span className="text-sm font-bold text-blue-900">{stats.interviewing}</span>
+                                        <span className="text-xs font-semibold text-blue-900">{stats.interviewing}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <ClockIcon className="h-3.5 w-3.5 text-amber-600" />
                                         <span className="text-xs text-amber-600">Pending:</span>
-                                        <span className="text-sm font-bold text-amber-900">{stats.pending}</span>
+                                        <span className="text-xs font-semibold text-amber-900">{stats.pending}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <XCircleIconSolid className="h-3.5 w-3.5 text-rose-600" />
                                         <span className="text-xs text-rose-600">Rejected:</span>
-                                        <span className="text-sm font-bold text-rose-900">{stats.rejected}</span>
+                                        <span className="text-xs font-semibold text-rose-900">{stats.rejected}</span>
                                     </div>
                                 </div>
                             )}
@@ -261,7 +261,7 @@ const Applications = () => {
                         {!fetchApplications && (
                             <button
                                 onClick={() => setAddApplication(true)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 <span>New Application</span>
@@ -383,10 +383,10 @@ const Applications = () => {
                             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
                                 <BriefcaseIcon className="h-10 w-10 text-gray-400" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
                                 {searchQuery || statusFilter !== 'All' ? 'No applications found' : 'No applications yet'}
                             </h3>
-                            <p className="text-gray-500 mb-8 max-w-sm mx-auto font-medium">
+                            <p className="text-xs text-gray-500 mb-8 max-w-sm mx-auto font-medium">
                                 {searchQuery || statusFilter !== 'All'
                                     ? 'Try adjusting your search or filter criteria'
                                     : 'Start tracking your job applications by adding your first one'}
@@ -394,9 +394,9 @@ const Applications = () => {
                             {!searchQuery && statusFilter === 'All' && (
                                 <button
                                     onClick={() => setAddApplication(true)}
-                                    className="inline-flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+                                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
                                 >
-                                    <PlusIcon className="h-5 w-5" />
+                                    <PlusIcon className="h-4 w-4" />
                                     Add Your First Application
                                 </button>
                             )}
@@ -472,31 +472,31 @@ const Applications = () => {
                                                             alt={app.company.name}
                                                             className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
                                                         />
-                                                        <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                        <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors text-xs">
                                                             {app.company.name}
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="text-sm font-semibold text-gray-900">{app.title}</div>
+                                                    <div className="text-xs font-medium text-gray-900">{app.title}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-semibold text-gray-700">
+                                                    <div className="text-xs font-medium text-gray-700">
                                                         {app.role}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusBadge(app.status)}`}>
+                                                    <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
                                                         {app.status}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-600 font-medium">
+                                                    <div className="text-xs text-gray-600 font-medium">
                                                         {app.location.city}, {app.location.country}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-600 font-medium">
+                                                    <div className="text-xs text-gray-600 font-medium">
                                                         {new Date(app.date).toLocaleDateString('en-US', {
                                                             month: 'short',
                                                             day: 'numeric',
@@ -513,25 +513,25 @@ const Applications = () => {
                             {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100/50 border-t border-gray-200 flex items-center justify-between">
-                                    <div className="text-sm text-gray-600 font-medium">
-                                        Showing <span className="font-bold text-gray-900">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
-                                        <span className="font-bold text-gray-900">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
-                                        <span className="font-bold text-gray-900">{sortedApplications.length}</span> applications
+                                    <div className="text-xs text-gray-600 font-medium">
+                                        Showing <span className="font-semibold text-gray-900">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
+                                        <span className="font-semibold text-gray-900">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
+                                        <span className="font-semibold text-gray-900">{sortedApplications.length}</span> applications
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                             disabled={currentPage === 1}
-                                            className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            className="p-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
-                                            <ChevronLeftIcon className="h-5 w-5" />
+                                            <ChevronLeftIcon className="h-4 w-4" />
                                         </button>
                                         <div className="flex items-center gap-1">
                                             {[...Array(totalPages)].map((_, i) => (
                                                 <button
                                                     key={i + 1}
                                                     onClick={() => setCurrentPage(i + 1)}
-                                                    className={`px-3 py-1.5 rounded-lg font-semibold text-sm transition-all ${currentPage === i + 1
+                                                    className={`px-2.5 py-1 rounded-lg font-medium text-xs transition-all ${currentPage === i + 1
                                                         ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
                                                         : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                                         }`}
@@ -543,9 +543,9 @@ const Applications = () => {
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                             disabled={currentPage === totalPages}
-                                            className="p-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            className="p-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
-                                            <ChevronRightIcon className="h-5 w-5" />
+                                            <ChevronRightIcon className="h-4 w-4" />
                                         </button>
                                     </div>
                                 </div>
