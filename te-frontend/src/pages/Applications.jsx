@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useState, Fragment } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { HttpStatusCode } from 'axios'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { Dialog, Transition } from '@headlessui/react'
 
 import { Loading } from '../components/_custom/Loading'
 import {
@@ -12,26 +11,21 @@ import {
     ClockIcon,
     CheckCircleIcon,
     XCircleIcon as XCircleIconSolid,
-    XMarkIcon,
     ChevronUpDownIcon,
     MapPinIcon,
-    EnvelopeIcon,
-    UserIcon,
     CalendarIcon,
-    DocumentTextIcon,
     BuildingOfficeIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    AdjustmentsHorizontalIcon
+    AdjustmentsHorizontalIcon,
+    TrashIcon,
+    ArchiveBoxIcon
 } from '@heroicons/react/20/solid'
-import {
-    CheckBadgeIcon
-} from '@heroicons/react/24/outline'
+
 
 import axiosInstance from '../axiosConfig'
 import ApplicationCreate from '../components/application/ApplicationCreate'
 import ApplicationInfo from '../components/application/ApplicationInfo'
-import ApplicationUpdate from '../components/application/ApplicationUpdate'
 
 // Mock data for demo purposes
 const mockApplications = [
@@ -164,13 +158,10 @@ const Applications = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const [applicationId, setApplicationId] = useState(null);
     const [application, setApplication] = useState(null);
-    const [selectedApplication, setSelectedApplication] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [applicationId, setApplicationId] = useState(null);
 
     const [addApplication, setAddApplication] = useState(false);
-    const [updateApplication, setUpdateApplication] = useState(false);
 
     // Use context applications if authenticated
     useEffect(() => {
@@ -308,16 +299,25 @@ const Applications = () => {
         }
     };
 
-    // Open modal with application details
+    // Open application info modal
     const openApplicationModal = (app) => {
-        setSelectedApplication(app);
-        setIsModalOpen(true);
+        setApplication(app);
+        setApplicationId(app.id);
     };
 
-    // Close modal
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setSelectedApplication(null);
+    // Bulk action handlers
+    const handleArchiveAll = () => {
+        if (window.confirm('Are you sure you want to archive all applications? This will move them to your archive.')) {
+            const allApplicationIds = applications.map(app => app.id);
+            archiveUserApplicationRequest(allApplicationIds);
+        }
+    };
+
+    const handleDeleteAll = () => {
+        if (window.confirm('Are you sure you want to delete ALL applications? This action cannot be undone!')) {
+            const allApplicationIds = applications.map(app => app.id);
+            deleteUserApplicationRequest(allApplicationIds);
+        }
     };
 
     // Status badge styling
@@ -338,91 +338,55 @@ const Applications = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Premium Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                                Applications
-                            </h1>
-                            <p className="text-sm text-gray-600">
-                                Manage your job search journey
-                            </p>
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                            <div>
+                                <h1 className="text-xl font-bold text-gray-900">Applications</h1>
+                                <p className="text-xs text-gray-600">Track your job applications</p>
+                            </div>
+
+                            {/* Inline Statistics */}
+                            {!fetchApplications && applications.length > 0 && (
+                                <div className="flex items-center gap-3 pl-6 border-l border-gray-200">
+                                    <div className="flex items-center gap-1.5">
+                                        <BriefcaseIcon className="h-3.5 w-3.5 text-gray-500" />
+                                        <span className="text-xs text-gray-600">Total:</span>
+                                        <span className="text-sm font-bold text-gray-900">{stats.total}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-600" />
+                                        <span className="text-xs text-emerald-600">Offers:</span>
+                                        <span className="text-sm font-bold text-emerald-900">{stats.offers}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <ClockIcon className="h-3.5 w-3.5 text-blue-600" />
+                                        <span className="text-xs text-blue-600">Interviewing:</span>
+                                        <span className="text-sm font-bold text-blue-900">{stats.interviewing}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <ClockIcon className="h-3.5 w-3.5 text-amber-600" />
+                                        <span className="text-xs text-amber-600">Pending:</span>
+                                        <span className="text-sm font-bold text-amber-900">{stats.pending}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <XCircleIconSolid className="h-3.5 w-3.5 text-rose-600" />
+                                        <span className="text-xs text-rose-600">Rejected:</span>
+                                        <span className="text-sm font-bold text-rose-900">{stats.rejected}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         {!fetchApplications && (
                             <button
                                 onClick={() => setAddApplication(true)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 <span>New Application</span>
                             </button>
                         )}
                     </div>
-
-                    {/* Premium Statistics Cards */}
-                    {!fetchApplications && applications.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            <div className="bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-gray-50 rounded-lg">
-                                        <BriefcaseIcon className="h-5 w-5 text-gray-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-gray-500 mb-0.5">Total</p>
-                                        <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-4 border border-emerald-100 hover:border-emerald-200 hover:shadow-md transition-all duration-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-emerald-50 rounded-lg">
-                                        <CheckCircleIcon className="h-5 w-5 text-emerald-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-emerald-600 mb-0.5">Offers</p>
-                                        <p className="text-2xl font-bold text-emerald-900">{stats.offers}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-4 border border-blue-100 hover:border-blue-200 hover:shadow-md transition-all duration-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-blue-50 rounded-lg">
-                                        <ClockIcon className="h-4 w-4 text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-blue-600 mb-0.5">Interviewing</p>
-                                        <p className="text-2xl font-bold text-blue-900">{stats.interviewing}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-4 border border-amber-200/60 hover:border-amber-300 hover:shadow-sm transition-all duration-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 rounded-lg">
-                                        <ClockIcon className="h-4 w-4 text-amber-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-amber-600 mb-0.5">Pending</p>
-                                        <p className="text-2xl font-bold text-amber-900">{stats.pending}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-4 border border-rose-200/60 hover:border-rose-300 hover:shadow-sm transition-all duration-200">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-rose-100 rounded-lg">
-                                        <XCircleIconSolid className="h-4 w-4 text-rose-600" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold text-rose-600 mb-0.5">Rejected</p>
-                                        <p className="text-2xl font-bold text-rose-900">{stats.rejected}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -435,74 +399,102 @@ const Applications = () => {
 
             {/* Main Content - Always Show */}
             {!fetchApplications && (
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    {/* Premium Search and Filter Bar */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5 mb-6">
-                        <div className="flex flex-col gap-4">
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    {/* Compact Search and Filter Bar */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200/80 p-3 mb-3">
+                        <div className="flex items-center gap-2">
                             {/* Search */}
-                            <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                            <div className="relative flex-1">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                                 <input
                                     type="text"
-                                    placeholder="Search by company, level, or position..."
+                                    placeholder="Search applications..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 />
                             </div>
 
-                            {/* Filters Row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-semibold"
-                                >
-                                    <option value="All">All Status</option>
-                                    <option value="Submitted">Submitted</option>
-                                    <option value="HR">HR</option>
-                                    <option value="Phone interview">Phone Interview</option>
-                                    <option value="OA">Online Assessment</option>
-                                    <option value="Final interview">Final Interview</option>
-                                    <option value="Offer">Offer</option>
-                                    <option value="Rejected">Rejected</option>
-                                </select>
+                            {/* Filters */}
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                <option value="All">All Status</option>
+                                <option value="Submitted">Submitted</option>
+                                <option value="HR">HR</option>
+                                <option value="Phone interview">Phone Interview</option>
+                                <option value="OA">Online Assessment</option>
+                                <option value="Final interview">Final Interview</option>
+                                <option value="Offer">Offer</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
 
-                                <select
-                                    value={levelFilter}
-                                    onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-semibold"
-                                >
-                                    {uniqueLevels.map(level => (
-                                        <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
-                                    ))}
-                                </select>
+                            <select
+                                value={levelFilter}
+                                onChange={(e) => setLevelFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                {uniqueLevels.map(level => (
+                                    <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
+                                ))}
+                            </select>
 
-                                <select
-                                    value={locationFilter}
-                                    onChange={(e) => setLocationFilter(e.target.value)}
-                                    className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-semibold"
-                                >
-                                    {uniqueLocations.map(location => (
-                                        <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
-                                    ))}
-                                </select>
+                            <select
+                                value={locationFilter}
+                                onChange={(e) => setLocationFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                {uniqueLocations.map(location => (
+                                    <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
+                                ))}
+                            </select>
 
-                                <button
-                                    onClick={() => {
-                                        setSearchQuery('');
-                                        setStatusFilter('All');
-                                        setLevelFilter('All');
-                                        setLocationFilter('All');
-                                    }}
-                                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-xl font-semibold hover:bg-gray-100 transition-all text-sm"
-                                >
-                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
-                                    <span>Clear Filters</span>
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setStatusFilter('All');
+                                    setLevelFilter('All');
+                                    setLocationFilter('All');
+                                }}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg font-medium hover:bg-gray-100 transition-all text-xs"
+                            >
+                                <AdjustmentsHorizontalIcon className="h-3.5 w-3.5" />
+                                <span>Clear</span>
+                            </button>
                         </div>
                     </div>
+
+                    {/* Bulk Actions Bar */}
+                    {applications.length > 0 && (
+                        <div className="bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 p-3 mb-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <BriefcaseIcon className="h-4 w-4 text-gray-500" />
+                                    <span className="text-xs font-semibold text-gray-700">
+                                        Bulk Actions ({applications.length} total)
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleArchiveAll}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg font-medium hover:bg-blue-100 transition-all text-xs"
+                                    >
+                                        <ArchiveBoxIcon className="h-3.5 w-3.5" />
+                                        <span>Archive All</span>
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteAll}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg font-medium hover:bg-rose-100 transition-all text-xs"
+                                    >
+                                        <TrashIcon className="h-3.5 w-3.5" />
+                                        <span>Delete All</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Premium Table */}
                     {sortedApplications.length === 0 ? (
@@ -687,229 +679,18 @@ const Applications = () => {
                 <ApplicationCreate setAddApplication={setAddApplication} />
             )}
 
-            {applicationId && !updateApplication && (
+            {applicationId && (
                 <ApplicationInfo
                     applicationId={applicationId}
                     setApplicationId={setApplicationId}
                     application={application}
                     setApplication={setApplication}
-                    setUpdateApplication={setUpdateApplication}
                     archiveUserApplicationRequest={archiveUserApplicationRequest}
                     deleteUserApplicationRequest={deleteUserApplicationRequest}
                 />
             )}
-
-            {updateApplication && (
-                <ApplicationUpdate
-                    application={application}
-                    setApplication={setApplication}
-                    setUpdateApplication={setUpdateApplication}
-                />
-            )}
-
-            {/* Application Detail Modal */}
-            <Transition appear show={isModalOpen} as={Fragment}>
-                <Dialog as="div" className="relative z-50" onClose={closeModal}>
-                    <Transition.Child
-                        as={Fragment}
-                        enter="ease-out duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="ease-in duration-200"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                    >
-                        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
-                    </Transition.Child>
-
-                    <div className="fixed inset-0 overflow-y-auto">
-                        <div className="flex min-h-full items-center justify-center p-4">
-                            <Transition.Child
-                                as={Fragment}
-                                enter="ease-out duration-300"
-                                enterFrom="opacity-0 scale-95"
-                                enterTo="opacity-100 scale-100"
-                                leave="ease-in duration-200"
-                                leaveFrom="opacity-100 scale-100"
-                                leaveTo="opacity-0 scale-95"
-                            >
-                                <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
-                                    {selectedApplication && (
-                                        <>
-                                            {/* Modal Header */}
-                                            <div className="relative bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 px-8 py-6">
-                                                <button
-                                                    onClick={closeModal}
-                                                    className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all"
-                                                >
-                                                    <XMarkIcon className="h-5 w-5" />
-                                                </button>
-                                                <div className="flex items-center gap-4">
-                                                    <img
-                                                        src={selectedApplication.company.image}
-                                                        alt={selectedApplication.company.name}
-                                                        className="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-lg"
-                                                    />
-                                                    <div>
-                                                        <h2 className="text-2xl font-bold text-white mb-1">
-                                                            {selectedApplication.title}
-                                                        </h2>
-                                                        <p className="text-blue-100 font-semibold text-lg">
-                                                            {selectedApplication.company.name}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Modal Content */}
-                                            <div className="px-8 py-6 max-h-[70vh] overflow-y-auto">
-                                                {/* Status and Level */}
-                                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
-                                                        <p className="text-xs font-bold text-gray-500 uppercase mb-2">Status</p>
-                                                        <span className={`inline-block px-4 py-2 text-sm font-bold rounded-full border ${getStatusBadge(selectedApplication.status)}`}>
-                                                            {selectedApplication.status}
-                                                        </span>
-                                                    </div>
-                                                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
-                                                        <p className="text-xs font-bold text-purple-600 uppercase mb-2">Level</p>
-                                                        <p className="text-lg font-bold text-purple-900">{selectedApplication.role}</p>
-                                                    </div>
-                                                </div>
-
-                                                {/* Details Grid */}
-                                                <div className="space-y-4">
-                                                    {/* Location */}
-                                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                                        <div className="p-2 bg-blue-100 rounded-lg">
-                                                            <MapPinIcon className="h-5 w-5 text-blue-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Location</p>
-                                                            <p className="text-sm font-semibold text-gray-900">
-                                                                {selectedApplication.location.city}, {selectedApplication.location.country}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Application Date */}
-                                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                                        <div className="p-2 bg-emerald-100 rounded-lg">
-                                                            <CalendarIcon className="h-5 w-5 text-emerald-600" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Application Date</p>
-                                                            <p className="text-sm font-semibold text-gray-900">
-                                                                {new Date(selectedApplication.date).toLocaleDateString('en-US', {
-                                                                    weekday: 'long',
-                                                                    year: 'numeric',
-                                                                    month: 'long',
-                                                                    day: 'numeric'
-                                                                })}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Referral */}
-                                                    {selectedApplication.referred && (
-                                                        <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
-                                                            <div className="p-2 bg-emerald-100 rounded-lg">
-                                                                <CheckBadgeIcon className="h-5 w-5 text-emerald-600" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-xs font-bold text-emerald-600 uppercase mb-1">Referred Application</p>
-                                                                <p className="text-sm font-semibold text-emerald-900">
-                                                                    This application was submitted through a referral
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Recruiter Info */}
-                                                    {selectedApplication.recruiter_name && (
-                                                        <div className="space-y-3">
-                                                            <p className="text-sm font-bold text-gray-700 uppercase">Recruiter Information</p>
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                                                    <div className="p-2 bg-cyan-100 rounded-lg">
-                                                                        <UserIcon className="h-5 w-5 text-cyan-600" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-xs font-bold text-gray-500 uppercase mb-1">Name</p>
-                                                                        <p className="text-sm font-semibold text-gray-900">
-                                                                            {selectedApplication.recruiter_name}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                {selectedApplication.recruiter_email && (
-                                                                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                                                        <div className="p-2 bg-purple-100 rounded-lg">
-                                                                            <EnvelopeIcon className="h-5 w-5 text-purple-600" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Email</p>
-                                                                            <a
-                                                                                href={`mailto:${selectedApplication.recruiter_email}`}
-                                                                                className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-                                                                            >
-                                                                                {selectedApplication.recruiter_email}
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Notes */}
-                                                    {selectedApplication.notes && (
-                                                        <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                                                            <div className="p-2 bg-amber-100 rounded-lg">
-                                                                <DocumentTextIcon className="h-5 w-5 text-amber-600" />
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <p className="text-xs font-bold text-amber-700 uppercase mb-2">Notes</p>
-                                                                <p className="text-sm text-gray-700 leading-relaxed">
-                                                                    {selectedApplication.notes}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Modal Footer */}
-                                            <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-                                                <button
-                                                    onClick={closeModal}
-                                                    className="px-6 py-2.5 bg-white text-gray-700 font-semibold rounded-xl border border-gray-300 hover:bg-gray-50 transition-all"
-                                                >
-                                                    Close
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setApplication(selectedApplication);
-                                                        setApplicationId(selectedApplication.id);
-                                                        setUpdateApplication(true);
-                                                        closeModal();
-                                                    }}
-                                                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-                                                >
-                                                    Edit Application
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </div>
-                </Dialog>
-            </Transition>
         </div>
     )
 }
-
-
 
 export default Applications

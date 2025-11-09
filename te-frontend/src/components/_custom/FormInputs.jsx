@@ -5,23 +5,25 @@ export const FormSelect = ({ field, label, data, handleInputChange, value, requi
 
     return (
         <div>
-            <label
-                htmlFor={field}
-                className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
+            {label && (
+                <label
+                    htmlFor={field}
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                    {label} {required && <span className="text-red-500">*</span>}
+                </label>
+            )}
 
             <div>
                 <select
                     name={field}
                     id={field}
                     className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all bg-white"
-                    defaultValue={value}
+                    value={value || ""}
                     onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
                     required={required}
                 >
-                    <option value="">Select {label.toLowerCase()}...</option>
+                    <option value="">Select {label ? label.toLowerCase() : 'option'}...</option>
                     {data.map((item, index) => (
                         <option key={index} value={item}>{item}</option>
                     ))}
@@ -36,19 +38,21 @@ export const FormSelect = ({ field, label, data, handleInputChange, value, requi
 export const FormInput = ({ type, label, field, placeholder, handleInputChange, validation, value, required }) => {
     return (
         <div>
-            <label
-                htmlFor={field}
-                className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
+            {label && (
+                <label
+                    htmlFor={field}
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                    {label} {required && <span className="text-red-500">*</span>}
+                </label>
+            )}
             <div className="relative">
                 <input
                     type={type ?? "text"}
                     name={field}
                     id={field}
-                    placeholder={placeholder || `Enter ${label.toLowerCase()}...`}
-                    defaultValue={value ?? ""}
+                    placeholder={placeholder || (label ? `Enter ${label.toLowerCase()}...` : '')}
+                    value={value ?? ""}
                     className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all"
                     aria-invalid={validation}
                     onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
@@ -67,19 +71,21 @@ export const FormInput = ({ type, label, field, placeholder, handleInputChange, 
 export const FormTextArea = ({ label, field, handleInputChange, required }) => {
     return (
         <div>
-            <label
-                htmlFor={field}
-                className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-                {label} {required && <span className="text-red-500">*</span>}
-            </label>
+            {label && (
+                <label
+                    htmlFor={field}
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                >
+                    {label} {required && <span className="text-red-500">*</span>}
+                </label>
+            )}
             <div>
                 <textarea
                     id={field}
                     name={field}
                     rows={4}
                     className="block w-full rounded-xl border-0 px-3.5 py-2.5 text-gray-900 font-medium shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm transition-all resize-none"
-                    placeholder={`Enter ${label.toLowerCase()}...`}
+                    placeholder={label ? `Enter ${label.toLowerCase()}...` : ''}
                     defaultValue={''}
                     onChange={(e) => handleInputChange({ field: field, value: e.target.value })}
                     required={required}

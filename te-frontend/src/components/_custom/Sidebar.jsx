@@ -120,45 +120,47 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                 </li>
 
                                                 <li className="mt-auto pt-4 border-t border-gray-100">
-                                                    <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
-                                                        <button
-                                                            onClick={() => { setContent("Profile"); setSidebarOpen(false) }}
-                                                            className="flex w-full items-center gap-x-3 text-sm font-semibold text-gray-700 hover:bg-white rounded-lg p-2 transition-all mb-2.5"
-                                                        >
-                                                            <div className="relative">
-                                                                <img
-                                                                    className="h-9 w-9 rounded-lg object-cover border border-gray-200"
-                                                                    src={userInfo?.image || "https://via.placeholder.com/36"}
-                                                                    alt="Profile"
-                                                                />
-                                                                <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
-                                                            </div>
-                                                            <div className="flex-1 text-left min-w-0">
-                                                                <p className="text-sm font-bold text-gray-900 truncate">
-                                                                    {(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "") || "Guest User"}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">View profile</p>
-                                                            </div>
-                                                            <UserCircleIcon className="h-5 w-5 text-gray-400 shrink-0" />
-                                                        </button>
-
-                                                        {!accessToken ? (
-                                                            <a
-                                                                href='/login'
-                                                                className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-sm text-sm"
-                                                            >
-                                                                <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                                                                <span>Sign In</span>
-                                                            </a>
-                                                        ) : (
+                                                    <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl p-1">
+                                                        <div className="bg-white rounded-lg p-3">
                                                             <button
-                                                                onClick={logout}
-                                                                className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all border border-gray-200 text-sm"
+                                                                onClick={() => { setContent("Profile"); setSidebarOpen(false) }}
+                                                                className="flex w-full items-center gap-x-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg p-2 transition-all mb-2.5"
                                                             >
-                                                                <ArrowLeftOnRectangleIcon className="h-4 w-4" />
-                                                                <span>Sign Out</span>
+                                                                <div className="relative flex-shrink-0">
+                                                                    <img
+                                                                        className="h-9 w-9 rounded-lg object-cover border border-gray-200"
+                                                                        src={userInfo?.image || "https://via.placeholder.com/36"}
+                                                                        alt="Profile"
+                                                                    />
+                                                                    <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
+                                                                </div>
+                                                                <div className="flex-1 text-left min-w-0">
+                                                                    <p className="text-sm font-bold text-gray-900 truncate">
+                                                                        {(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "") || "Guest User"}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">View profile</p>
+                                                                </div>
+                                                                <UserCircleIcon className="h-5 w-5 text-gray-400 shrink-0" />
                                                             </button>
-                                                        )}
+
+                                                            {!accessToken ? (
+                                                                <a
+                                                                    href='/login'
+                                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-sm text-sm"
+                                                                >
+                                                                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                                                                    <span>Sign In</span>
+                                                                </a>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={logout}
+                                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all border border-gray-200 text-sm"
+                                                                >
+                                                                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                                                                    <span>Sign Out</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </li>
                                             </ul>
@@ -288,7 +290,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                         </ul>
                                     </li>
 
-                                    <li>
+                                    {/* Resources Section - Commented out to fit sidebar without scrolling */}
+                                    {/* <li>
                                         <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
                                             Resources
                                         </div>
@@ -331,50 +334,52 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                 );
                                             })}
                                         </ul>
-                                    </li>
+                                    </li> */}
 
                                     <li className="mt-auto">
-                                        <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 border border-white/80 shadow-xl shadow-blue-500/10">
-                                            {/* User Profile */}
-                                            <button
-                                                onClick={() => setContent("Profile")}
-                                                className="flex w-full items-center gap-x-3 text-sm font-semibold leading-6 text-gray-700 hover:bg-white/80 rounded-xl p-2.5 transition-all mb-3"
-                                            >
-                                                <div className="relative">
-                                                    <img
-                                                        className="h-10 w-10 rounded-lg object-cover ring-2 ring-white shadow-md"
-                                                        src={userInfo?.image || "https://via.placeholder.com/40"}
-                                                        alt="Profile"
-                                                    />
-                                                    <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-white shadow-lg"></div>
-                                                </div>
-                                                <div className="flex-1 text-left">
-                                                    <p className="text-sm font-bold text-gray-900 truncate">
-                                                        {(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "") || "Guest User"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">View profile</p>
-                                                </div>
-                                                <UserCircleIcon className="h-5 w-5 text-gray-400" />
-                                            </button>
-
-                                            {/* Auth Button */}
-                                            {!accessToken ? (
-                                                <a
-                                                    href='/login'
-                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all shadow-md hover:scale-[1.02]"
-                                                >
-                                                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                                                    <span>Sign In</span>
-                                                </a>
-                                            ) : (
+                                        <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-1 border border-white/80 shadow-xl shadow-blue-500/10 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
+                                            <div className="bg-white rounded-xl p-3">
+                                                {/* User Profile */}
                                                 <button
-                                                    onClick={logout}
-                                                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white/80 text-gray-700 rounded-xl font-semibold hover:bg-white transition-all border border-gray-200 shadow-sm"
+                                                    onClick={() => setContent("Profile")}
+                                                    className="flex w-full items-center gap-x-3 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 rounded-lg p-2 transition-all mb-3"
                                                 >
-                                                    <ArrowLeftOnRectangleIcon className="h-4 w-4" />
-                                                    <span>Sign Out</span>
+                                                    <div className="relative flex-shrink-0">
+                                                        <img
+                                                            className="h-10 w-10 rounded-lg object-cover ring-2 ring-white shadow-md"
+                                                            src={userInfo?.image || "https://via.placeholder.com/40"}
+                                                            alt="Profile"
+                                                        />
+                                                        <div className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 border-2 border-white shadow-lg"></div>
+                                                    </div>
+                                                    <div className="flex-1 text-left min-w-0">
+                                                        <p className="text-sm font-bold text-gray-900 truncate">
+                                                            {(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "") || "Guest User"}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">View profile</p>
+                                                    </div>
+                                                    <UserCircleIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
                                                 </button>
-                                            )}
+
+                                                {/* Auth Button */}
+                                                {!accessToken ? (
+                                                    <a
+                                                        href='/login'
+                                                        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all shadow-md hover:scale-[1.02]"
+                                                    >
+                                                        <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                                                        <span>Sign In</span>
+                                                    </a>
+                                                ) : (
+                                                    <button
+                                                        onClick={logout}
+                                                        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-50 text-gray-700 rounded-xl font-semibold hover:bg-gray-100 transition-all border border-gray-200 shadow-sm"
+                                                    >
+                                                        <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+                                                        <span>Sign Out</span>
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </li>
                                 </ul>

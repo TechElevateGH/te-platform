@@ -33,6 +33,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
         deadline: "",
         notes: "",
         status: "",
+        referred: false,
         recruiter_name: "",
         recruiter_email: "",
         location: {
@@ -122,13 +123,25 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     {/* Status Section */}
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Application Status</h3>
-                        <FormSelect
-                            label="Status"
-                            field="status"
-                            data={Object.keys(jobStatuses)}
-                            handleInputChange={handleInputChange}
-                            required={true}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormSelect
+                                label="Status"
+                                field="status"
+                                data={Object.keys(jobStatuses)}
+                                handleInputChange={handleInputChange}
+                                required={true}
+                            />
+                            <FormSelect
+                                label="Referred?"
+                                field="referred"
+                                data={["No", "Yes"]}
+                                value={appData.referred ? "Yes" : "No"}
+                                handleInputChange={({ field, value }) => {
+                                    handleInputChange({ field, value: value === "Yes" });
+                                }}
+                                required={false}
+                            />
+                        </div>
                     </div>
 
                     {/* Location Section */}
@@ -147,6 +160,26 @@ const ApplicationCreate = ({ setAddApplication }) => {
                             <FormInput
                                 label="City"
                                 field="location.city"
+                                handleInputChange={handleInputChange}
+                                required={false}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Recruiter Section */}
+                    <div className="space-y-4">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recruiter Information</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormInput
+                                label="Recruiter Name"
+                                field="recruiter_name"
+                                handleInputChange={handleInputChange}
+                                required={false}
+                            />
+                            <FormInput
+                                label="Recruiter Email"
+                                type="email"
+                                field="recruiter_email"
                                 handleInputChange={handleInputChange}
                                 required={false}
                             />
