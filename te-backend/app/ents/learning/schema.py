@@ -1,5 +1,7 @@
 from enum import Enum
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -19,7 +21,7 @@ class LessonBase(BaseModel):
     topic: str
     link: str
     category: LessonCategory
-    subcategory: str | None
+    subcategory: Optional[str]
     format: LessonFormat = LessonFormat.video
     playlist: str
     year: int = 2023
@@ -27,8 +29,7 @@ class LessonBase(BaseModel):
     uploader: int = 0
 
 
-class LessonCreate(LessonBase):
-    ...
+class LessonCreate(LessonBase): ...
 
 
 class LessonRead(LessonBase):

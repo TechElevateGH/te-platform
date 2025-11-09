@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 import logging
 import app.database.session as session
 import app.ents.user.auth as user_auth
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 router = APIRouter(prefix="/users")
 
 
-@router.post(".login")
+@router.post("/login")
 def login_user(token=Depends(user_auth.login_access_token)) -> Any:
     """
     Log User in.
@@ -20,7 +20,7 @@ def login_user(token=Depends(user_auth.login_access_token)) -> Any:
     return {"token": token}
 
 
-@router.post(".login.google")
+@router.post("/login/google")
 def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
     """
     Log User in.
@@ -29,7 +29,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 
 
 # @router.get(
-#     ".mentee.list", response_model=dict[str, list[user_schema.UserRead]]
+#     ".mentee.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_mentees(
 #     db: Session = Depends(session.get_db),
@@ -49,7 +49,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 
 
 # @router.get(
-#     ".mentor.list", response_model=dict[str, list[user_schema.UserRead]]
+#     ".mentor.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_mentors(
 #     db: Session = Depends(session.get_db),
@@ -69,7 +69,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 
 
 # @router.get(
-#     ".contributor.list", response_model=dict[str, list[user_schema.UserRead]]
+#     ".contributor.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_contributors(
 #     db: Session = Depends(session.get_db),
@@ -93,7 +93,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 #     }
 
 
-# @router.get(".team.list", response_model=dict[str, list[user_schema.UserRead]])
+# @router.get(".team.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_team(
 #     db: Session = Depends(session.get_db),
 #     skip: int = 0,
@@ -109,7 +109,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 #     return {"team": [user_schema.UserRead(**vars(member)) for member in team]}
 
 
-# @router.get(".admin.list", response_model=dict[str, list[user_schema.UserRead]])
+# @router.get(".admin.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_admins(
 #     db: Session = Depends(session.get_db),
 #     skip: int = 0,
@@ -127,7 +127,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 #     }
 
 
-# @router.get(".list", response_model=dict[str, list[user_schema.UserRead]])
+# @router.get(".list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_all_users(
 #     db: Session = Depends(session.get_db),
 #     skip: int = 0,
@@ -143,7 +143,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 #     return {"users": [user_schema.UserRead(**vars(user)) for user in users]}
 
 
-# @router.get(".role.list", response_model=dict[str, list[user_schema.UserRead]])
+# @router.get(".role.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_users_by_role(
 #     db: Session = Depends(session.get_db),
 #     *,
@@ -159,7 +159,7 @@ def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
 #     return {"users": [user_schema.UserRead(**vars(user)) for user in users]}
 
 
-@router.get(".{user_id}.info", response_model=dict[str, user_schema.UserRead])
+@router.get("/{user_id}/info", response_model=Dict[str, user_schema.UserRead])
 def get_user_by_id(
     db: Session = Depends(session.get_db),
     *,
@@ -173,7 +173,7 @@ def get_user_by_id(
     return {"user": user_schema.UserRead(**vars(user))}
 
 
-@router.post(".create", response_model=dict[str, user_schema.UserRead])
+@router.post("/create", response_model=Dict[str, user_schema.UserRead])
 def create_user(
     *,
     db: Session = Depends(session.get_db),
@@ -186,7 +186,7 @@ def create_user(
     return {"user": user_schema.UserRead(**vars(new_user))}
 
 
-@router.get(".{user_id}.essay", response_model=user_schema.Essay)
+@router.get("/{user_id}/essay", response_model=user_schema.Essay)
 def get_essay(
     db: Session = Depends(session.get_db),
     *,
@@ -197,7 +197,7 @@ def get_essay(
     return user_schema.Essay(essay=essay)
 
 
-@router.post(".{user_id}.essay", response_model=user_schema.Essay)
+@router.post("/{user_id}/essay", response_model=user_schema.Essay)
 def update_essay(
     db: Session = Depends(session.get_db),
     *,

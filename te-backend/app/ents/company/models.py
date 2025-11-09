@@ -1,95 +1,88 @@
-import app.ents.application.schema as application_schema
-import app.ents.company.schema as company_schema
-from app.database.base_class import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from sqlalchemy.types import Enum
+from typing import Optional, List, Any
+from pydantic import BaseModel, Field, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
+from bson import ObjectId
 
 
-class Posting(Base):
-    __tablename__ = "postings"
-    id = Column(Integer, primary_key=True)
-    date = Column(String, nullable=False)
-    deadline = Column(String, nullable=True)
-    notes = Column(String, nullable=False)
-    sponsor = Column(Boolean, nullable=False)
-    recruiter_name = Column(String, nullable=False)
-    recruiter_email = Column(String, nullable=False)
-    active = Column(Boolean, nullable=False)
-    role = Column(Enum(company_schema.JobRoles), nullable=False)
-    status = Column(Enum(application_schema.ApplicationStatuses), nullable=False)
+# Custom type for MongoDB ObjectId compatible with Pydantic v2
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: Any
+    ) -> core_schema.CoreSchema:
+        return core_schema.union_schema(
+            [
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.chain_schema(
+                    [
+                        core_schema.str_schema(),
+                        core_schema.no_info_plain_validator_function(cls.validate),
+                    ]
+                ),
+            ]
+        )
 
-    # Relationships
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    company = relationship("Company", back_populates="postings")
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, ObjectId):
+            return v
+        if isinstance(v, str) and ObjectId.is_valid(v):
+            return ObjectId(v)
+        raise ValueError("Invalid ObjectId")
 
-
-class Location(Base):
-    __tablename__ = "locations"
-    id = Column(Integer, primary_key=True)
-    country = Column(String, nullable=False, index=True)
-    city = Column(String, nullable=True)
-    companies = relationship(
-        "Company",
-        secondary="companies_locations_rel",
-        back_populates="locations",
-    )
-    application = relationship("Application", back_populates="location")
-
-
-class Referral(Base):
-    __tablename__ = "referrals"
-    id = Column(Integer, primary_key=True)
-    date = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    job_title = Column(String, nullable=False)
-    request_note = Column(String, nullable=True)
-    review_note = Column(String, nullable=True)
-    status = Column(Enum(company_schema.ReferralStatuses))
-
-    # Relationships
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="referrals")
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    company = relationship("Company", back_populates="referrals")
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        return {"type": "string"}
 
 
-class ReferralMaterials(Base):
-    __tablename__ = "referral_materials"
-    id = Column(Integer, primary_key=True)
-    resume = Column(Boolean, nullable=False, default=True)
-    essay = Column(Boolean, nullable=False, default=True)
-    contact = Column(Boolean, nullable=False, default=True)
+class Location(BaseModel):
+    """MongoDB Location subdocument"""
 
-    # Relationships
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    company = relationship("Company", back_populates="referral_materials")
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    country: str
+    city: str = ""
 
-
-class Company(Base):
-    __tablename__ = "companies"
-    id = Column(Integer, primary_key=True)
-    image = Column(String, nullable=True)
-    name = Column(String, nullable=False)
-    domain = Column(String, nullable=True)
-    can_refer = Column(Boolean, nullable=True)
-
-    # Relationships
-    users = relationship("User", back_populates="company")
-    referral_materials = relationship(
-        "ReferralMaterials", back_populates="company", uselist=False
-    )
-    referrals = relationship("Referral", back_populates="company")
-    postings = relationship("Posting", back_populates="company")
-    applications = relationship("Application", back_populates="company")
-    locations = relationship(
-        "Location",
-        secondary="companies_locations_rel",
-        back_populates="companies",
-    )
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
 
-class CompanyLocationRel(Base):
-    __tablename__ = "companies_locations_rel"
-    company_id = Column(Integer, ForeignKey("companies.id"), primary_key=True)
-    location_id = Column(Integer, ForeignKey("locations.id"), primary_key=True)
+class Company(BaseModel):
+    """MongoDB Company document model"""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    name: str
+    domain: str
+    image: str = ""
+    can_refer: bool = True
+    locations: List[Location] = []
+    referral_materials: dict = {}
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+
+class Referral(BaseModel):
+    """MongoDB Referral document model"""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    user_id: PyObjectId
+    company_id: PyObjectId
+    job_title: str
+    role: str  # JobRoles enum value
+    request_note: str = ""
+    review_note: Optional[str] = ""
+    resume: str = ""  # Google Drive link
+    referral_date: str
+    status: str  # ReferralStatuses enum value
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

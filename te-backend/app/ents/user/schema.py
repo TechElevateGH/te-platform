@@ -42,9 +42,8 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserRead(UserBase):
-    ...
+class UserRead(UserBase): ...
 
 
 class Essay(BaseModel):
-    essay:str
+    essay: str

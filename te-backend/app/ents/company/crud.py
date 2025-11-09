@@ -1,10 +1,11 @@
 import app.ents.company.models as company_models
 import app.ents.company.schema as company_schema
 import app.ents.user.crud as user_crud
+from typing import Optional
 from sqlalchemy.orm import Session
 
 
-def read_company_by_name(db: Session, *, name: str) -> company_models.Company | None:
+def read_company_by_name(db: Session, *, name: str) -> Optional[company_models.Company]:
     return (
         db.query(company_models.Company)
         .filter(company_models.Company.name == name)

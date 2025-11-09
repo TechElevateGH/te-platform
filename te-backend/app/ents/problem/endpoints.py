@@ -4,7 +4,7 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/problems")
 
 
-# @router.get(".list", response_model=list[problem_schema.ProproblemRead])
+# @router.get(".list", response_model=List[problem_schema.ProproblemRead])
 # def get_problems(
 #     db: Session = Depends(dependencies.get_db),
 #     skip: int = 0,

@@ -1,6 +1,8 @@
 from datetime import date
 from enum import Enum
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -65,7 +67,7 @@ class ReferralReadBase(BaseModel):
     user_id: int
     job_title: str
     role: str
-    review_note: str | None = ""
+    review_note: Optional[str] = ""
     date: str
     status: ReferralStatuses
 

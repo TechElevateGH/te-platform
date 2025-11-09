@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 import app.database.session as session
 import app.ents.application.crud as application_crud
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/learning")
 
 @router.get(
     ".lessons.list",
-    response_model=dict[str, list[learning_schema.LessonRead]],
+    response_model=Dict[str, list[learning_schema.LessonRead]],
 )
 def get_lessons(
     db: Session = Depends(session.get_db),
@@ -34,7 +34,7 @@ def get_lessons(
 
 @router.post(
     ".lessons.create",
-    response_model=dict[str, learning_schema.LessonRead],
+    response_model=Dict[str, learning_schema.LessonRead],
 )
 def add_lesson(
     db: Session = Depends(session.get_db),
@@ -55,7 +55,7 @@ def add_lesson(
 
 @router.post(
     ".file.upload",
-    response_model=dict[str, application_schema.FileUpload],
+    response_model=Dict[str, application_schema.FileUpload],
 )
 def lesson_file_upload(
     *,

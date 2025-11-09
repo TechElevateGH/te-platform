@@ -1,6 +1,7 @@
 import os
 import tempfile
 from datetime import date
+from typing import Optional
 
 import app.core.service as service
 import app.ents.application.models as application_models
@@ -15,7 +16,7 @@ from sqlalchemy.orm import Session
 
 def read_application_by_id(
     db: Session, *, application_id: int
-) -> application_models.Application | None:
+) -> Optional[application_models.Application]:
     """Returns the `Application` with id `application_id`."""
 
     return (
@@ -199,7 +200,7 @@ def delete_application(
 
 def read_user_application_file_by_id(
     db: Session, *, file_id: int, file_type: application_schema.FileType
-) -> application_models.Application | None:
+) -> Optional[application_models.Application]:
     return (
         db.query(application_models.File)
         .filter(

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 import app.database.session as session
 import app.ents.company.crud as company_crud
@@ -13,7 +13,7 @@ company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
 
 
-# @router.get(".list", response_model=list[company_schema.CompanyRead])
+# @router.get(".list", response_model=List[company_schema.CompanyRead])
 # def get_companies(
 #     db: Session = Depends(dependencies.get_db),
 #     skip: int = 0,
@@ -27,7 +27,7 @@ referral_router = APIRouter(prefix="/referrals")
 #     return companies
 
 
-@company_router.post(".create", response_model=dict[str, company_schema.CompanyRead])
+@company_router.post(".create", response_model=Dict[str, company_schema.CompanyRead])
 def create_company(
     *,
     db: Session = Depends(session.get_db),
@@ -55,7 +55,7 @@ def create_company(
     return {"company": company_dependencies.parse_company(company)}
 
 
-@company_router.get(".list", response_model=dict[str, list[company_schema.CompanyRead]])
+@company_router.get(".list", response_model=Dict[str, list[company_schema.CompanyRead]])
 def get_companies(
     db: Session = Depends(session.get_db),
     skip: int = 0,
@@ -74,7 +74,7 @@ def get_companies(
 
 
 @company_router.post(
-    ".{company_id}.update", response_model=dict[str, company_schema.CompanyRead]
+    ".{company_id}.update", response_model=Dict[str, company_schema.CompanyRead]
 )
 def update_company(
     db: Session = Depends(session.get_db),
@@ -90,7 +90,7 @@ def update_company(
 
 @company_router.get(
     ".referrals.list",
-    response_model=dict[str, list[company_schema.CompanyReadForReferrals]],
+    response_model=Dict[str, list[company_schema.CompanyReadForReferrals]],
 )
 def get_referral_companies(
     db: Session = Depends(session.get_db),
@@ -112,7 +112,7 @@ def get_referral_companies(
 
 @referral_router.post(
     ".create",
-    response_model=dict[str, company_schema.ReferralRead],
+    response_model=Dict[str, company_schema.ReferralRead],
 )
 def request_referral(
     db: Session = Depends(session.get_db),
@@ -133,7 +133,7 @@ def request_referral(
 
 @referral_router.get(
     ".list",
-    response_model=dict[str, list[company_schema.ReferralRead]],
+    response_model=Dict[str, list[company_schema.ReferralRead]],
 )
 def get_user_referrals(
     db: Session = Depends(session.get_db),
@@ -154,7 +154,7 @@ def get_user_referrals(
 
 @referral_router.get(
     ".all",
-    response_model=dict[str, list[company_schema.ReferralReadWithUser]],
+    response_model=Dict[str, list[company_schema.ReferralReadWithUser]],
 )
 def get_all_referrals(
     db: Session = Depends(session.get_db),
@@ -188,7 +188,7 @@ def get_all_referrals(
 
 @referral_router.post(
     ".{referral_id}.review",
-    response_model=dict[str, list[company_schema.CompanyRead]],
+    response_model=Dict[str, list[company_schema.CompanyRead]],
 )
 def review_referral(
     *,

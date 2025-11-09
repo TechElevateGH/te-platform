@@ -1,45 +1,66 @@
-import app.ents.user.schema as user_schema
-from app.database.base_class import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from sqlalchemy.types import Enum
+from typing import Optional, Any
+from pydantic import BaseModel, EmailStr, Field, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
+from bson import ObjectId
 
 
-class User(Base):
-    __tablename__ = "users"
-    __table_args__ = {"extend_existing": True}
-    id = Column(Integer, primary_key=True, index=True)
-    image = Column(String, nullable=True)
-    first_name = Column(String, index=True, nullable=False)
-    middle_name = Column(String, index=True, nullable=True)
-    last_name = Column(String, index=True, nullable=False)
-    full_name = Column(String, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    contact = Column(String, unique=False, nullable=False)
-    address = Column(String, nullable=False)
-    password = Column(String, nullable=False)
-    date_of_birth = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True)
-    university = Column(String, nullable=False)
-    start_date = Column(String, nullable=False)
-    end_date = Column(String, nullable=False)
-    role = Column(Enum(user_schema.UserRoles), nullable=False)
-    essay = Column(String, index=True, nullable=True)
+# Custom type for MongoDB ObjectId compatible with Pydantic v2
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: Any
+    ) -> core_schema.CoreSchema:
+        return core_schema.union_schema(
+            [
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.chain_schema(
+                    [
+                        core_schema.str_schema(),
+                        core_schema.no_info_plain_validator_function(cls.validate),
+                    ]
+                ),
+            ]
+        )
 
-    # Relationships
-    mentor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    company = relationship("Company", back_populates="users")
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
-    files = relationship("File", back_populates="user")
-    applications = relationship("Application", back_populates="user")
-    referrals = relationship("Referral", back_populates="user")
-    resume_review_requests = relationship(
-        "ResumeReview",
-        back_populates="requester",
-        foreign_keys="[ResumeReview.requester_id]",
-    )
-    resume_reviews = relationship(
-        "ResumeReview",
-        back_populates="reviewers",
-        foreign_keys="[ResumeReview.reviewers_id]",
-    )
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, ObjectId):
+            return v
+        if isinstance(v, str) and ObjectId.is_valid(v):
+            return ObjectId(v)
+        raise ValueError("Invalid ObjectId")
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        return {"type": "string"}
+
+
+class User(BaseModel):
+    """MongoDB User document model"""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    email: EmailStr
+    first_name: str
+    middle_name: str = ""
+    last_name: str
+    full_name: str
+    image: str = ""
+    date_of_birth: Optional[str] = ""
+    contact: str = ""
+    address: str = ""
+    password: str  # Hashed password
+    university: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    is_active: bool = True
+    role: int  # UserRoles enum value
+    essay: str = ""
+    mentor_id: Optional[PyObjectId] = None
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

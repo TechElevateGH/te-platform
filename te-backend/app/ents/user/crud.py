@@ -1,15 +1,16 @@
 import app.core.security as security
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
+from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 
-def read_user_by_email(db: Session, *, email: str) -> user_models.User | None:
+def read_user_by_email(db: Session, *, email: str) -> Optional[user_models.User]:
     return db.query(user_models.User).filter(user_models.User.email == email).first()
 
 
-def read_user_by_id(db: Session, *, id: int) -> user_models.User | None:
+def read_user_by_id(db: Session, *, id: int) -> Optional[user_models.User]:
     return db.query(user_models.User).filter(user_models.User.id == id).first()
 
 
