@@ -9,16 +9,20 @@ export const useAuth = () => {
 const authReducer = (state, action) => {
   switch (action.type) {
     case 'login':
-      return { userId: action.payload.userId, userRole: action.payload.userRole, accessToken: action.payload.accessToken };
+      return {
+        userId: action.payload.userId,
+        userRole: action.payload.userRole,
+        accessToken: action.payload.accessToken,
+      };
     case 'logout':
       return { userId: null, userRole: null, accessToken: null };
     default:
       return state;
   }
-}
+};
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, { currentUser: null, userId: null, accessToken: null });
+  const [state, dispatch] = useReducer(authReducer, { userId: null, userRole: null, accessToken: null });
 
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
@@ -41,18 +45,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
-
     dispatch({ type: 'logout' });
-    window.location.reload();
   };
+
+  const isAuthenticated = !!state.accessToken;
 
 
   return (
-    <AuthenticationContext.Provider value={{
-      userId: state.userId,
-      userRole: state.userRole,
-      accessToken: state.accessToken, login, logout
-    }}>
+    <AuthenticationContext.Provider
+      value={{
+        userId: state.userId,
+        userRole: state.userRole,
+        accessToken: state.accessToken,
+        isAuthenticated,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthenticationContext.Provider>
   );

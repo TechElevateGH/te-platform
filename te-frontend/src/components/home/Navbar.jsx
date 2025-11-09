@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -14,6 +15,7 @@ const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const navigate = useNavigate();
+    const { isAuthenticated, userRole, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -34,8 +36,8 @@ const Navbar = () => {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-                    ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5'
-                    : 'bg-transparent'
+                ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5'
+                : 'bg-transparent'
                 }`}
         >
             <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
@@ -72,18 +74,41 @@ const Navbar = () => {
                     ))}
                 </div>
                 <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
-                    <button
-                        onClick={() => navigate('/login')}
-                        className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
-                    >
-                        Log in
-                    </button>
-                    <button
-                        onClick={() => navigate('/register')}
-                        className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
-                    >
-                        Get Started
-                    </button>
+                    {!isAuthenticated && (
+                        <>
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
+                            >
+                                Log in
+                            </button>
+                            <button
+                                onClick={() => navigate('/register')}
+                                className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
+                            >
+                                Get Started
+                            </button>
+                        </>
+                    )}
+                    {isAuthenticated && (
+                        <>
+                            <button
+                                onClick={() => navigate('/workspace')}
+                                className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
+                            >
+                                Workspace
+                            </button>
+                            <span className="text-sm font-medium px-3 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                                {userRole}
+                            </span>
+                            <button
+                                onClick={logout}
+                                className="text-sm font-semibold leading-6 text-red-600 hover:text-red-700 transition-colors px-4 py-2"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    )}
                 </div>
             </nav>
 
@@ -123,18 +148,38 @@ const Navbar = () => {
                                 ))}
                             </div>
                             <div className="py-6 space-y-2">
-                                <button
-                                    onClick={() => navigate('/login')}
-                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                >
-                                    Log in
-                                </button>
-                                <button
-                                    onClick={() => navigate('/register')}
-                                    className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
-                                >
-                                    Get Started
-                                </button>
+                                {!isAuthenticated && (
+                                    <>
+                                        <button
+                                            onClick={() => navigate('/login')}
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                        >
+                                            Log in
+                                        </button>
+                                        <button
+                                            onClick={() => navigate('/register')}
+                                            className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
+                                        >
+                                            Get Started
+                                        </button>
+                                    </>
+                                )}
+                                {isAuthenticated && (
+                                    <>
+                                        <button
+                                            onClick={() => navigate('/workspace')}
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                        >
+                                            Workspace
+                                        </button>
+                                        <button
+                                            onClick={logout}
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 hover:bg-red-50"
+                                        >
+                                            Logout
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

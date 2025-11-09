@@ -72,7 +72,7 @@ const Register = () => {
             });
 
             // Auto-login after successful registration
-            const loginResponse = await axiosInstance.post('users/login/access-token', {
+            const loginResponse = await axiosInstance.post('auth/login', {
                 username: formData.email,
                 password: formData.password
             });

@@ -9,10 +9,11 @@ from app.core.settings import settings
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.database import Database
 
-router = APIRouter(prefix="/users")
+# Professional auth router without prefix - will be mounted at /auth
+router = APIRouter()
 
 
-@router.post("/login/access-token")
+@router.post("/login")
 def login_access_token(
     data: user_schema.UserLogin,
     db: Database = Depends(session.get_db),
@@ -32,12 +33,15 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
+    # Convert ObjectId to string for JSON serialization
+    user_id_str = str(user.id)
+
     return {
-        "sub": user.id,
+        "sub": user_id_str,
         "role": user.role,
         "type": "bearer",
         "access_token": security.create_access_token(
-            user.id, expires_delta=access_token_expires
+            user_id_str, expires_delta=access_token_expires
         ),
     }
 

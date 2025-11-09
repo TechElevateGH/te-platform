@@ -1,12 +1,20 @@
 import './App.css';
 import Workspace from './components/user/Workspace'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './components/user/Login';
 import { useState, useEffect, useCallback } from 'react'
 import Home from './components/home/Home';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataProvider } from './context/DataContext'
 import Register from './components/user/Register';
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   const [login, setLogin] = useState(false)
@@ -18,7 +26,7 @@ function App() {
           <div className="App gentium-book">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/workspace" element={<Workspace setLogin={setLogin} />} />
+              <Route path="/workspace" element={<ProtectedRoute><Workspace setLogin={setLogin} /></ProtectedRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Routes>

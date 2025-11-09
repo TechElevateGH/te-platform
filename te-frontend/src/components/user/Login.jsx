@@ -24,7 +24,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('users/login/access-token', {
+            const response = await axiosInstance.post('auth/login', {
                 username: loginData.username,
                 password: loginData.password
             });

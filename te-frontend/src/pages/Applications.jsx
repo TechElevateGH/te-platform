@@ -27,128 +27,15 @@ import axiosInstance from '../axiosConfig'
 import ApplicationCreate from '../components/application/ApplicationCreate'
 import ApplicationInfo from '../components/application/ApplicationInfo'
 
-// Mock data for demo purposes
-const mockApplications = [
-    {
-        id: 1,
-        company: { name: 'Google', image: 'https://logo.clearbit.com/google.com' },
-        title: 'Software Engineer',
-        role: 'Mid-level',
-        status: 'Final interview',
-        notes: 'Third round completed, waiting for final decision',
-        date: '2025-10-15',
-        location: { city: 'Mountain View', country: 'USA' },
-        referred: true,
-        recruiter_name: 'Jane Smith',
-        recruiter_email: 'jane@google.com',
-        selected: false
-    },
-    {
-        id: 2,
-        company: { name: 'Microsoft', image: 'https://logo.clearbit.com/microsoft.com' },
-        title: 'Cloud Solutions Architect',
-        role: 'Senior',
-        status: 'Offer',
-        notes: 'Received offer, negotiating compensation',
-        date: '2025-10-20',
-        location: { city: 'Seattle', country: 'USA' },
-        referred: false,
-        recruiter_name: 'John Doe',
-        recruiter_email: 'john@microsoft.com',
-        selected: false
-    },
-    {
-        id: 3,
-        company: { name: 'Amazon', image: 'https://logo.clearbit.com/amazon.com' },
-        title: 'Frontend Developer',
-        role: 'New Grad',
-        status: 'HR',
-        notes: 'Initial HR screening scheduled for next week',
-        date: '2025-10-25',
-        location: { city: 'Austin', country: 'USA' },
-        referred: false,
-        recruiter_name: 'Sarah Johnson',
-        recruiter_email: 'sarah@amazon.com',
-        selected: false
-    },
-    {
-        id: 4,
-        company: { name: 'Meta', image: 'https://logo.clearbit.com/meta.com' },
-        title: 'Full Stack Engineer',
-        role: 'Mid-level',
-        status: 'Phone interview',
-        notes: 'Phone screen went well, moving to technical round',
-        date: '2025-11-01',
-        location: { city: 'Menlo Park', country: 'USA' },
-        referred: true,
-        recruiter_name: 'Mike Brown',
-        recruiter_email: 'mike@meta.com',
-        selected: false
-    },
-    {
-        id: 5,
-        company: { name: 'Apple', image: 'https://logo.clearbit.com/apple.com' },
-        title: 'iOS Developer',
-        role: 'Senior',
-        status: 'OA',
-        notes: 'Online assessment completed, awaiting results',
-        date: '2025-11-03',
-        location: { city: 'Cupertino', country: 'USA' },
-        referred: false,
-        recruiter_name: 'Emily Davis',
-        recruiter_email: 'emily@apple.com',
-        selected: false
-    },
-    {
-        id: 6,
-        company: { name: 'Netflix', image: 'https://logo.clearbit.com/netflix.com' },
-        title: 'Data Engineer',
-        role: 'Associate',
-        status: 'Submitted',
-        notes: 'Application submitted, no response yet',
-        date: '2025-11-05',
-        location: { city: 'Los Gatos', country: 'USA' },
-        referred: false,
-        recruiter_name: '',
-        recruiter_email: '',
-        selected: false
-    },
-    {
-        id: 7,
-        company: { name: 'Stripe', image: 'https://logo.clearbit.com/stripe.com' },
-        title: 'Backend Engineer',
-        role: 'New Grad',
-        status: 'Rejected',
-        notes: 'Did not move forward after initial screening',
-        date: '2025-10-10',
-        location: { city: 'San Francisco', country: 'USA' },
-        referred: false,
-        recruiter_name: 'Tom Wilson',
-        recruiter_email: 'tom@stripe.com',
-        selected: false
-    },
-    {
-        id: 8,
-        company: { name: 'Airbnb', image: 'https://logo.clearbit.com/airbnb.com' },
-        title: 'Product Engineer',
-        role: 'Senior',
-        status: 'Final interview',
-        notes: 'Onsite interview scheduled for next Friday',
-        date: '2025-10-28',
-        location: { city: 'San Francisco', country: 'USA' },
-        referred: true,
-        recruiter_name: 'Lisa Anderson',
-        recruiter_email: 'lisa@airbnb.com',
-        selected: false
-    }
-];
+// Start with empty list; will populate from backend
+const initialApplications = [];
 
 const Applications = () => {
     const { userId, accessToken, logout } = useAuth();
     const { fetchApplications, setFetchApplications, applications: contextApplications } = useData();
 
-    // Use mock data by default, fall back to context applications if available
-    const [applications, setApplications] = useState(mockApplications);
+    // Start empty; fetch from backend or context
+    const [applications, setApplications] = useState(initialApplications);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [levelFilter, setLevelFilter] = useState('All');
@@ -163,10 +50,10 @@ const Applications = () => {
 
     const [addApplication, setAddApplication] = useState(false);
 
-    // Use context applications if authenticated
+    // Sync context-provided applications if available
     useEffect(() => {
         if (accessToken && contextApplications && contextApplications.length > 0) {
-            setApplications(contextApplications);
+            setApplications(contextApplications.map(a => ({ ...a, selected: false })));
         }
     }, [accessToken, contextApplications]);
 
@@ -218,20 +105,14 @@ const Applications = () => {
     }, [userId, accessToken, setFetchApplications, logout]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (fetchApplications && accessToken) {
-                await getUserApplicationsRequest();
-                setTimeout(() => setFetchApplications(false), 700);
-            } else if (fetchApplications && !accessToken) {
-                // If not authenticated, just stop the loading state
-                setFetchApplications(false);
-            }
-        };
-
-        if (fetchApplications) {
-            fetchData();
+        if (!userId || !accessToken) {
+            if (fetchApplications) setFetchApplications(false);
+            return;
         }
-    }, [accessToken, getUserApplicationsRequest, fetchApplications, setFetchApplications]);
+        if (fetchApplications || applications.length === 0) {
+            getUserApplicationsRequest().finally(() => setFetchApplications(false));
+        }
+    }, [userId, accessToken, fetchApplications, applications.length, getUserApplicationsRequest, setFetchApplications]);
 
     // Calculate statistics
     const stats = applications.reduce((acc, app) => {

@@ -6,7 +6,7 @@ import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 router = APIRouter(prefix="/users")
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/users")
 #     ".mentee.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_mentees(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     _: user_models.User = Depends(user_dependencies.get_current_mentor),
@@ -35,7 +35,7 @@ router = APIRouter(prefix="/users")
 #     ".mentor.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_mentors(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     _: user_models.User = Depends(user_dependencies.get_current_mentor),
@@ -55,7 +55,7 @@ router = APIRouter(prefix="/users")
 #     ".contributor.list", response_model=Dict[str, list[user_schema.UserRead]]
 # )
 # def get_contributors(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     _: user_models.User = Depends(
@@ -78,7 +78,7 @@ router = APIRouter(prefix="/users")
 
 # @router.get(".team.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_team(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     _: user_models.User = Depends(user_dependencies.get_current_user_team),
@@ -94,7 +94,7 @@ router = APIRouter(prefix="/users")
 
 # @router.get(".admin.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_admins(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     _: user_models.User = Depends(user_dependencies.get_current_user_admin),
@@ -112,7 +112,7 @@ router = APIRouter(prefix="/users")
 
 # @router.get(".list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_all_users(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     current_user: user_models.User = Depends(user_dependencies.get_current_user_team),
@@ -128,7 +128,7 @@ router = APIRouter(prefix="/users")
 
 # @router.get(".role.list", response_model=Dict[str, list[user_schema.UserRead]])
 # def get_users_by_role(
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 #     *,
 #     skip: int = 0,
 #     limit: int = 100,
@@ -144,7 +144,7 @@ router = APIRouter(prefix="/users")
 
 @router.get("/{user_id}/info", response_model=Dict[str, user_schema.UserRead])
 def get_user_by_id(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _: user_models.User = Depends(user_dependencies.get_current_user),
@@ -159,7 +159,7 @@ def get_user_by_id(
 @router.post("/create", response_model=Dict[str, user_schema.UserRead])
 def create_user(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     data: user_schema.UserCreate,
 ) -> Any:
     """
@@ -171,7 +171,7 @@ def create_user(
 
 @router.get("/{user_id}/essay", response_model=user_schema.Essay)
 def get_essay(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _: user_models.User = Depends(user_dependencies.get_current_user),
@@ -182,7 +182,7 @@ def get_essay(
 
 @router.post("/{user_id}/essay", response_model=user_schema.Essay)
 def update_essay(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     data: user_schema.Essay,

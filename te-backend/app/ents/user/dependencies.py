@@ -9,15 +9,13 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTError
 from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_STR}/users/login/access-token"
-)
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_STR}/auth/login")
 
 
 def get_current_user(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     token=Depends(reusable_oauth2),
 ) -> user_models.User:
     try:
