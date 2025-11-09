@@ -59,7 +59,7 @@ def login_access_token(
 
 
 # @router.post("/password-recovery/{email}")
-# def recover_password(email: str, db: Session = Depends(session.get_db)) -> Any:
+# def recover_password(email: str, db: Database = Depends(session.get_db)) -> Any:
 #     user = user_crud.read_user_by_email(db=db, email=email)
 #     if not user:
 #         raise HTTPException(
@@ -78,7 +78,7 @@ def login_access_token(
 # def reset_password(
 #     token: str = Body(...),
 #     new_password: str = Body(...),
-#     db: Session = Depends(session.get_db),
+#     db: Database = Depends(session.get_db),
 # ) -> Any:
 #     """
 #     Reset password

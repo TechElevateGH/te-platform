@@ -11,11 +11,11 @@ import app.ents.company.schema as company_schema
 import app.ents.user.crud as user_crud
 from app.core.settings import settings
 from googleapiclient.http import MediaFileUpload
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
 def read_application_by_id(
-    db: Session, *, application_id: int
+    db: Database, *, application_id: int
 ) -> Optional[application_models.Application]:
     """Returns the `Application` with id `application_id`."""
 
@@ -27,14 +27,14 @@ def read_application_by_id(
 
 
 def read_application_multi(
-    db: Session, *, skip: int = 0, limit: int = 100
+    db: Database, *, skip: int = 0, limit: int = 100
 ) -> list[application_models.Application]:
     """Returns the next `limit` applications after `skip` applications."""
     return db.query(application_models.Application).offset(skip).limit(limit).all()
 
 
 def create_application(
-    db: Session, *, user_id: int, data: application_schema.ApplicationCreate
+    db: Database, *, user_id: int, data: application_schema.ApplicationCreate
 ):
     """Create an `Application` for user `user_id` with `data`."""
     location = None
@@ -86,7 +86,7 @@ def create_application(
 
 
 def read_user_applications(
-    db: Session, *, user_id
+    db: Database, *, user_id
 ) -> list[application_models.Application]:
     """Read all applications of user `user_id`."""
     user = user_crud.read_user_by_id(db, id=user_id)
@@ -96,7 +96,7 @@ def read_user_applications(
 
 
 def read_user_application(
-    db: Session, *, user_id: int, application_id: int
+    db: Database, *, user_id: int, application_id: int
 ) -> application_models.Application:
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
@@ -107,7 +107,7 @@ def read_user_application(
 
 
 def read_user_application_files(
-    db: Session, *, user_id
+    db: Database, *, user_id
 ) -> tuple[application_models.File]:
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
@@ -117,7 +117,7 @@ def read_user_application_files(
 
 
 def update_application(
-    db: Session,
+    db: Database,
     *,
     user_id: int,
     application_id: int,
@@ -164,7 +164,7 @@ def update_application(
 
 
 def archive_application(
-    db: Session, *, user_id: int, application_id: int
+    db: Database, *, user_id: int, application_id: int
 ) -> application_models.Application:
     application = read_application_by_id(db, application_id=application_id)
     if not application:
@@ -183,7 +183,7 @@ def archive_application(
 
 
 def delete_application(
-    db: Session, *, application_id: int
+    db: Database, *, application_id: int
 ) -> application_models.Application:
     application = read_application_by_id(db, application_id=application_id)
     if not application:
@@ -199,7 +199,7 @@ def delete_application(
 
 
 def read_user_application_file_by_id(
-    db: Session, *, file_id: int, file_type: application_schema.FileType
+    db: Database, *, file_id: int, file_type: application_schema.FileType
 ) -> Optional[application_models.Application]:
     return (
         db.query(application_models.File)
@@ -267,7 +267,7 @@ def create_file(db, kind, file, user_id):
 
 
 def get_user_files(
-    db: Session, user_id: int, file_type: application_schema.FileType
+    db: Database, user_id: int, file_type: application_schema.FileType
 ) -> list[application_models.File]:
     files = (
         db.query(application_models.File)
@@ -280,13 +280,13 @@ def get_user_files(
     return [file for file in files if file.active]
 
 
-def resume_review(db: Session, resume_id: int):
+def resume_review(db: Database, resume_id: int):
     resume = db.application_models.File
     ...
 
 
 # def update(
-#     db: Session,
+#     db: Database,
 #     *,
 #     db_obj: company_models.Company,
 #     data: company_schema.CompanyUpdate | dict[str, Any],

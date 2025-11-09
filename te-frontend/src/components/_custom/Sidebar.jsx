@@ -173,11 +173,11 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                 </Transition.Root>
 
                 {/* Desktop sidebar */}
-                <div className="hidden md:fixed md:inset-y-0 md:z-50 md:flex md:w-80 md:flex-col">
-                    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 backdrop-blur-xl border-r border-white/60 px-6 py-6 relative">
+                <div className="hidden md:fixed md:top-20 md:bottom-6 md:left-6 md:z-40 md:flex md:w-80 md:flex-col">
+                    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 backdrop-blur-xl border border-white/60 rounded-2xl shadow-2xl px-6 py-6 relative">
                         {/* Glassmorphism overlay */}
-                        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl"></div>
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60"></div>
+                        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl rounded-2xl"></div>
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60 rounded-2xl"></div>
 
                         <div className="relative z-10">
                             {/* Logo and Brand */}

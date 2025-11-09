@@ -2,10 +2,12 @@ import app.ents.company.models as company_models
 import app.ents.company.schema as company_schema
 import app.ents.user.crud as user_crud
 from typing import Optional
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
-def read_company_by_name(db: Session, *, name: str) -> Optional[company_models.Company]:
+def read_company_by_name(
+    db: Database, *, name: str
+) -> Optional[company_models.Company]:
     return (
         db.query(company_models.Company)
         .filter(company_models.Company.name == name)
@@ -14,13 +16,13 @@ def read_company_by_name(db: Session, *, name: str) -> Optional[company_models.C
 
 
 def read_company_multi(
-    db: Session, *, skip: int = 0, limit: int = 100
+    db: Database, *, skip: int = 0, limit: int = 100
 ) -> list[company_models.Company]:
     return db.query(company_models.Company).offset(skip).limit(limit).all()
 
 
 def create_company(
-    db: Session, *, data: company_schema.CompanyCreate
+    db: Database, *, data: company_schema.CompanyCreate
 ) -> company_models.Company:
     company = company_models.Company(
         **(data.dict(exclude={"location", "referral_materials"}))
@@ -52,7 +54,7 @@ def create_company(
 
 
 def add_location(
-    db: Session,
+    db: Database,
     *,
     company: company_models.Company,
     data: company_schema.LocationBase,
@@ -69,7 +71,7 @@ def add_location(
 
 
 def read_referral_companies(
-    db: Session, *, skip: int = 0, limit: int = 100
+    db: Database, *, skip: int = 0, limit: int = 100
 ) -> list[company_models.Company]:
     return [
         company
@@ -78,7 +80,7 @@ def read_referral_companies(
     ]
 
 
-def read_user_referrals(db: Session, *, user_id: int) -> list[company_models.Referral]:
+def read_user_referrals(db: Database, *, user_id: int) -> list[company_models.Referral]:
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
         ...
@@ -91,7 +93,7 @@ def read_user_referrals(db: Session, *, user_id: int) -> list[company_models.Ref
 
 
 def read_all_referrals(
-    db: Session, *, skip: int = 0, limit: int = 100
+    db: Database, *, skip: int = 0, limit: int = 100
 ) -> list[company_models.Referral]:
     """
     Get all referrals in the system (for Lead/Admin users).
@@ -100,7 +102,7 @@ def read_all_referrals(
 
 
 def request_referral(
-    db: Session,
+    db: Database,
     user_id: int,
     data: company_schema.ReferralRequest,
 ) -> company_models.Referral:
@@ -126,7 +128,7 @@ def request_referral(
 
 
 # def update(
-#     db: Session,
+#     db: Database,
 #     *,
 #     db_obj: company_models.Company,
 #     data: company_schema.CompanyUpdate | dict[str, Any],

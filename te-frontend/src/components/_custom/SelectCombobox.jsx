@@ -51,10 +51,26 @@ const SelectCombobox = ({
                             displayValue={(val) => val}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
-                                if (event.key === 'Enter' && query && isCustomValue) {
+                                if (event.key === 'Enter' && query) {
                                     event.preventDefault();
-                                    onChange(query);
-                                    setQuery('');
+                                    // Custom value
+                                    if (isCustomValue) {
+                                        onChange(query);
+                                        setQuery('');
+                                        return;
+                                    }
+                                    // Exact match from options
+                                    const exact = options.find(o => o.toLowerCase() === query.toLowerCase());
+                                    if (exact) {
+                                        onChange(exact);
+                                        setQuery('');
+                                        return;
+                                    }
+                                    // Fallback to first filtered option
+                                    if (filteredOptions.length > 0) {
+                                        onChange(filteredOptions[0]);
+                                        setQuery('');
+                                    }
                                 }
                             }}
                             placeholder={placeholder}

@@ -122,7 +122,7 @@ def update_essay(db: Database, user_id: str, *, data) -> str:
 
 
 # def update(
-#     db: Session,
+#     db: Database,
 #     *,
 #     db_obj: user_models.User,
 #     data: user_schema.UserUpdate | dict[str, Any],

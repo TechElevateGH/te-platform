@@ -41,10 +41,24 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                             displayValue={(company) => company}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
-                                if (event.key === 'Enter' && query && isCustomCompany) {
+                                if (event.key === 'Enter' && query) {
                                     event.preventDefault();
-                                    onChange(query);
-                                    setQuery('');
+                                    // Custom company
+                                    if (isCustomCompany) {
+                                        onChange(query);
+                                        setQuery('');
+                                        return;
+                                    }
+                                    const exact = companies.find(c => c.toLowerCase() === query.toLowerCase());
+                                    if (exact) {
+                                        onChange(exact);
+                                        setQuery('');
+                                        return;
+                                    }
+                                    if (filteredCompanies.length > 0) {
+                                        onChange(filteredCompanies[0]);
+                                        setQuery('');
+                                    }
                                 }
                             }}
                             placeholder="Type or select a company..."

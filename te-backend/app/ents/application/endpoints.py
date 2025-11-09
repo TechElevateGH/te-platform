@@ -7,7 +7,7 @@ import app.ents.application.schema as application_schema
 import app.ents.user.dependencies as user_dependencies
 from app.utilities.errors import OperationCompleted, UnauthorizedUser
 from fastapi import APIRouter, Depends, Form, UploadFile, status
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 app_router = APIRouter(prefix="/applications")
 user_app_router = APIRouter(prefix="/users/{user_id}/applications")
@@ -19,7 +19,7 @@ user_files_router = APIRouter(prefix="/users/{user_id}/files")
 )
 def create_application(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     data: application_schema.ApplicationCreate,
     user=Depends(user_dependencies.get_current_user),
 ) -> Any:
@@ -34,7 +34,7 @@ def create_application(
     "/list", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )
 def get_user_applications(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     user=Depends(user_dependencies.get_current_user),
@@ -58,7 +58,7 @@ def get_user_applications(
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def get_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     application_id: int,
     current_user=Depends(user_dependencies.get_current_user),
@@ -78,7 +78,7 @@ def get_user_application(
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def update_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     application_id: int,
     data: application_schema.ApplicationUpdate,
@@ -97,7 +97,7 @@ def update_user_application(
 
 @app_router.put("/archive", status_code=status.HTTP_202_ACCEPTED)
 def archive_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     applications: list[int],
     current_user=Depends(user_dependencies.get_current_user),
@@ -116,7 +116,7 @@ def archive_user_application(
 
 @app_router.delete("/delete", status_code=status.HTTP_202_ACCEPTED)
 def delete_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     applications: Union[int, list[int]],
     current_user=Depends(user_dependencies.get_current_user),
@@ -138,7 +138,7 @@ def delete_user_application(
 
 @user_files_router.get("/list", response_model=Dict[str, application_schema.FilesRead])
 def get_user_application_files(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _=Depends(user_dependencies.get_current_user),
@@ -167,7 +167,7 @@ def get_user_application_files(
     "/create", response_model=Dict[str, application_schema.FileRead]
 )
 def add_file(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     kind: application_schema.FileType = Form(),
@@ -185,7 +185,7 @@ def add_file(
     "/resumes/list", response_model=Dict[str, list[application_schema.FileRead]]
 )
 def get_user_resumes(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _=Depends(user_dependencies.get_current_user),
@@ -205,7 +205,7 @@ def get_user_resumes(
     ".resumes.list", response_model=Dict[str, list[application_schema.FileRead]]
 )
 def resume_review(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _=Depends(user_dependencies.get_current_user),
@@ -222,7 +222,7 @@ def resume_review(
 # @router.put(".info/{company_id}", response_model=company_schema.CompanyRead)
 # def update_company(
 #     *,
-#     db: Session = Depends(application_dependencies.get_current_user_db),
+#     db: Database = Depends(application_dependencies.get_current_user_db),
 #     data: company_schema.CompanyUpdate,
 #     user: models.Company = Depends(application_dependencies.get_current_user),
 # ) -> Any:

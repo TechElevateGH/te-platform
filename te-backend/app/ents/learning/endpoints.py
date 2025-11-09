@@ -9,7 +9,7 @@ import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from app.core.settings import settings
 from fastapi import APIRouter, Depends, UploadFile
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 router = APIRouter(prefix="/learning")
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/learning")
     response_model=Dict[str, list[learning_schema.LessonRead]],
 )
 def get_lessons(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     skip: int = 0,
     limit: int = 100,
 ) -> Any:
@@ -37,7 +37,7 @@ def get_lessons(
     response_model=Dict[str, learning_schema.LessonRead],
 )
 def add_lesson(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonCreate,
     current_user: user_models.User = Depends(
@@ -59,7 +59,7 @@ def add_lesson(
 )
 def lesson_file_upload(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     file: UploadFile,
     current_user: user_models.User = Depends(user_dependencies.get_current_user),
 ) -> Any:

@@ -6,7 +6,7 @@ router = APIRouter(prefix="/problems")
 
 # @router.get(".list", response_model=List[problem_schema.ProproblemRead])
 # def get_problems(
-#     db: Session = Depends(dependencies.get_db),
+#     db: Database = Depends(dependencies.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     # _: str = Depends(dependencies.get_current_user),
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/problems")
 # @router.post(".create", response_model=problem_schema.ProproblemRead)
 # def create_problem(
 #     *,
-#     db: Session = Depends(dependencies.get_db),
+#     db: Database = Depends(dependencies.get_db),
 #     data: problem_schema.ProproblemCreate,
 #     # _=Depends(get_current_user),
 # ) -> Any:
@@ -47,7 +47,7 @@ router = APIRouter(prefix="/problems")
 # @router.put(".info/{problem_id}", response_model=problem_schema.ProproblemRead)
 # def update_problem(
 #     *,
-#     db: Session = Depends(dependencies.get_db),
+#     db: Database = Depends(dependencies.get_db),
 #     data: problem_schema.ProproblemUpdate,
 #     user: models.Proproblem = Depends(dependencies.get_current_user),
 # ) -> Any:

@@ -7,7 +7,7 @@ import app.ents.company.schema as company_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
@@ -15,7 +15,7 @@ referral_router = APIRouter(prefix="/referrals")
 
 # @router.get(".list", response_model=List[company_schema.CompanyRead])
 # def get_companies(
-#     db: Session = Depends(dependencies.get_db),
+#     db: Database = Depends(dependencies.get_db),
 #     skip: int = 0,
 #     limit: int = 100,
 #     # _: str = Depends(dependencies.get_current_user),
@@ -30,7 +30,7 @@ referral_router = APIRouter(prefix="/referrals")
 @company_router.post("/create", response_model=Dict[str, company_schema.CompanyRead])
 def create_company(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     data: company_schema.CompanyCreate,
     # _=Depends(get_current_user),
 ) -> Any:
@@ -57,7 +57,7 @@ def create_company(
 
 @company_router.get("/list", response_model=Dict[str, list[company_schema.CompanyRead]])
 def get_companies(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     skip: int = 0,
     limit: int = 100,
     # _: str = Depends(dependencies.get_current_user),
@@ -77,7 +77,7 @@ def get_companies(
     "/{company_id}/update", response_model=Dict[str, company_schema.CompanyRead]
 )
 def update_company(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     company_id: int,
     _: str = Depends(user_dependencies.get_current_user),
@@ -93,7 +93,7 @@ def update_company(
     response_model=Dict[str, list[company_schema.CompanyReadForReferrals]],
 )
 def get_referral_companies(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     skip: int = 0,
     limit: int = 100,
     user: user_models.User = Depends(user_dependencies.get_current_user),
@@ -115,7 +115,7 @@ def get_referral_companies(
     response_model=Dict[str, company_schema.ReferralRead],
 )
 def request_referral(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     data: company_schema.ReferralRequest,
     user: user_models.User = Depends(user_dependencies.get_current_user),
@@ -136,7 +136,7 @@ def request_referral(
     response_model=Dict[str, list[company_schema.ReferralRead]],
 )
 def get_user_referrals(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     user_id: int,
     _: user_models.User = Depends(user_dependencies.get_current_user),
@@ -157,7 +157,7 @@ def get_user_referrals(
     response_model=Dict[str, list[company_schema.ReferralReadWithUser]],
 )
 def get_all_referrals(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
     skip: int = 0,
     limit: int = 100,
@@ -192,7 +192,7 @@ def get_all_referrals(
 )
 def review_referral(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     referral_id: int,
     data: str,
     user: user_models.User = Depends(user_dependencies.get_current_user),
@@ -206,7 +206,7 @@ def review_referral(
 # @router.put(".info/{company_id}", response_model=company_schema.CompanyRead)
 # def update_company(
 #     *,
-#     db: Session = Depends(dependencies.get_db),
+#     db: Database = Depends(dependencies.get_db),
 #     data: company_schema.CompanyUpdate,
 #     user: models.Company = Depends(dependencies.get_current_user),
 # ) -> Any:
