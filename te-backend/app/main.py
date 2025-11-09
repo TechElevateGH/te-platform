@@ -26,3 +26,27 @@ def enable_cors(app):
 app = create_app()
 enable_cors(app)
 app.include_router(api_router, prefix=settings.API_STR)
+
+
+@app.on_event("startup")
+def on_startup():
+    """Initialize database tables on startup for in-memory database"""
+    from app.database.base import Base
+    from app.database.session import engine
+
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    print("✓ Database tables created successfully")
+
+    # Optionally seed initial data
+    from app.database.init_db import init_db
+    from app.database.session import SessionLocal
+
+    db = SessionLocal()
+    try:
+        init_db(db)
+        print("✓ Initial data seeded successfully")
+    except Exception as e:
+        print(f"Warning: Could not seed initial data: {e}")
+    finally:
+        db.close()

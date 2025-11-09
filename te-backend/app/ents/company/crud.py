@@ -89,6 +89,15 @@ def read_user_referrals(db: Session, *, user_id: int) -> list[company_models.Ref
     )
 
 
+def read_all_referrals(
+    db: Session, *, skip: int = 0, limit: int = 100
+) -> list[company_models.Referral]:
+    """
+    Get all referrals in the system (for Lead/Admin users).
+    """
+    return db.query(company_models.Referral).offset(skip).limit(limit).all()
+
+
 def request_referral(
     db: Session,
     user_id: int,

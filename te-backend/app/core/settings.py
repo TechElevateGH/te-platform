@@ -1,13 +1,10 @@
-from typing import Any, Optional, Union
+from typing import Union
 
 from pydantic import (
     AnyHttpUrl,
     EmailStr,
-    HttpUrl,
-    PostgresDsn,
     field_validator,
     ValidationError,
-    ValidationInfo,
 )
 from pydantic_settings import BaseSettings
 
@@ -49,38 +46,8 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: str
     EMAILS_FROM_EMAIL: str
 
-    POSTGRES_PORT: int
-    POSTGRES_HOST: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
-
-    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
-    @classmethod
-    def assemble_db_connection(cls, v: Optional[str], values: ValidationInfo) -> Any:
-        if isinstance(v, str):
-            return v
-
-        return PostgresDsn.build(
-            scheme="postgresql",
-            username=values.data.get("POSTGRES_USER"),
-            password=values.data.get("POSTGRES_PASSWORD"),
-            host=values.data.get("POSTGRES_HOST"),
-            path=values.data.get("POSTGRES_DB") or "",
-        )
-
-    # @field_validator("SQLALCHEMY_DATABASE_URI")
-    # def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
-    #     if isinstance(v, str):
-    #         return v
-    #     return PostgresDsn.build(
-    #         scheme="postgresql",
-    #         user=values.get("POSTGRES_USER"),
-    #         password=values.get("POSTGRES_PASSWORD"),
-    #         host=values.get("POSTGRES_HOST"),  # type: ignore
-    #         path=f"/{values.get('POSTGRES_DB') or ''}",
-    #     )
+    # Using SQLite in-memory database for quick testing
+    SQLALCHEMY_DATABASE_URI: str = "sqlite:///:memory:"
 
     # Superuser
     FIRST_SUPERUSER_EMAIL: EmailStr

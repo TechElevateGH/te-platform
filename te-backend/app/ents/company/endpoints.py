@@ -152,6 +152,40 @@ def get_user_referrals(
     }
 
 
+@referral_router.get(
+    ".all",
+    response_model=dict[str, list[company_schema.ReferralReadWithUser]],
+)
+def get_all_referrals(
+    db: Session = Depends(session.get_db),
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    user: user_models.User = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Get all referrals in the system (for Lead/Admin users only).
+    Requires user role to be mentor, team, or admin (role >= 3).
+    """
+    # Check if user has elevated privileges (Lead = mentor/team, Admin = admin)
+    # UserRoles: guest=0, mentee=1, contributor=2, mentor=3, team=4, admin=5
+    if user.role.value < 3:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=403,
+            detail="Only Lead and Admin users can view all referral requests",
+        )
+
+    referrals = company_crud.read_all_referrals(db, skip=skip, limit=limit)
+    return {
+        "referrals": [
+            company_dependencies.parse_referral_with_user(referral)
+            for referral in referrals
+        ]
+    }
+
+
 @referral_router.post(
     ".{referral_id}.review",
     response_model=dict[str, list[company_schema.CompanyRead]],

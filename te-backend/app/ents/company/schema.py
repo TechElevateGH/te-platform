@@ -74,5 +74,13 @@ class ReferralRead(ReferralReadBase):
     company: CompanyBase
 
 
+class ReferralReadWithUser(ReferralReadBase):
+    """Referral with user information for Lead/Admin view"""
+
+    company: CompanyBase
+    user_name: str
+    user_email: str
+
+
 class CompanyReadForReferrals(CompanyReadBase):
     referral_materials: ReferralMaterials
