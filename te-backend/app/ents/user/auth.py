@@ -7,18 +7,24 @@ import app.ents.user.crud as user_crud
 import app.ents.user.schema as user_schema
 from app.core.settings import settings
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 router = APIRouter(prefix="/users")
 
 
 @router.post("/login/access-token")
 def login_access_token(
-    db: Session = Depends(session.get_db), data: user_schema.UserLogin = None
+    data: user_schema.UserLogin,
+    db: Database = Depends(session.get_db),
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
+    print(f"🔍 Login attempt - Username: {data.username}")
+    print(f"🔍 Data received: {data}")
+    print(f"🔍 DB session type: {type(db)}")
+    print(f"🔍 DB connection: {db}")
+
     user = security.authenticate(db, email=data.username, password=data.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")

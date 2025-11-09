@@ -30,7 +30,7 @@ const Essay = () => {
     };
 
     const updateCoverLetterRequest = async () => {
-        await axiosInstance.post(`/users.${userId}.cover-letter`,
+        await axiosInstance.post(`/users/${userId}/cover-letter`,
             { "cover_letter": coverLetterBody },
             {
                 headers: { Authorization: `Bearer ${accessToken}` },
@@ -44,7 +44,7 @@ const Essay = () => {
     };
 
     const updateReferralEssayRequest = async () => {
-        await axiosInstance.post(`/users.${userId}.essay`,
+        await axiosInstance.post(`/users/${userId}/essay`,
             { "essay": referralEssayBody },
             {
                 headers: { Authorization: `Bearer ${accessToken}` },

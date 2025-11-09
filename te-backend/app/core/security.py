@@ -7,7 +7,7 @@ from app.core.settings import settings
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
 class Token(BaseModel):
@@ -72,7 +72,7 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return None
 
 
-def authenticate(db: Session, *, email: str, password: str) -> user_models.User:
+def authenticate(db: Database, *, email: str, password: str) -> user_models.User:
     user = user_crud.read_user_by_email(db, email=email)
     if not user:
         return None

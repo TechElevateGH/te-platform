@@ -40,7 +40,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
             referred: updateData.referred === "Yes" || updateData.referred === true
         };
 
-        axiosInstance.put(`/applications.${application.id}.update`,
+        axiosInstance.put(`/applications/${application.id}/update`,
             dataToSend,
             {
                 headers: {

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/learning")
 
 
 @router.get(
-    ".lessons.list",
+    "/lessons/list",
     response_model=Dict[str, list[learning_schema.LessonRead]],
 )
 def get_lessons(
@@ -33,7 +33,7 @@ def get_lessons(
 
 
 @router.post(
-    ".lessons.create",
+    "/lessons/create",
     response_model=Dict[str, learning_schema.LessonRead],
 )
 def add_lesson(
@@ -54,7 +54,7 @@ def add_lesson(
 
 
 @router.post(
-    ".file.upload",
+    "/file/upload",
     response_model=Dict[str, application_schema.FileUpload],
 )
 def lesson_file_upload(

@@ -32,7 +32,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
     const getUserApplicationRequest = useCallback(async () => {
         console.log(userId);
-        axiosInstance.get(`/applications.${applicationId}.info`,
+        axiosInstance.get(`/applications/${applicationId}/info`,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -102,7 +102,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
             referred: updateData.referred === "Yes" || updateData.referred === true
         };
 
-        axiosInstance.put(`/applications.${application.id}.update`,
+        axiosInstance.put(`/applications/${application.id}/update`,
             dataToSend,
             {
                 headers: {

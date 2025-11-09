@@ -10,12 +10,12 @@ from fastapi import APIRouter, Depends, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 app_router = APIRouter(prefix="/applications")
-user_app_router = APIRouter(prefix="/users.{user_id}.applications")
-user_files_router = APIRouter(prefix="/users.{user_id}.files")
+user_app_router = APIRouter(prefix="/users/{user_id}/applications")
+user_files_router = APIRouter(prefix="/users/{user_id}/files")
 
 
 @user_app_router.post(
-    ".create", response_model=Dict[str, application_schema.ApplicationRead]
+    "/create", response_model=Dict[str, application_schema.ApplicationRead]
 )
 def create_application(
     *,
@@ -31,7 +31,7 @@ def create_application(
 
 
 @user_app_router.get(
-    ".list", response_model=Dict[str, list[application_schema.ApplicationRead]]
+    "/list", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )
 def get_user_applications(
     db: Session = Depends(session.get_db),
@@ -54,7 +54,7 @@ def get_user_applications(
 
 
 @app_router.get(
-    ".{application_id}.info",
+    "/{application_id}/info",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def get_user_application(
@@ -74,7 +74,7 @@ def get_user_application(
 
 
 @app_router.put(
-    ".{application_id}.update",
+    "/{application_id}/update",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def update_user_application(
@@ -95,7 +95,7 @@ def update_user_application(
     return {"application": application_dependencies.parse_application(application)}
 
 
-@app_router.put(".archive", status_code=status.HTTP_202_ACCEPTED)
+@app_router.put("/archive", status_code=status.HTTP_202_ACCEPTED)
 def archive_user_application(
     db: Session = Depends(session.get_db),
     *,
@@ -114,7 +114,7 @@ def archive_user_application(
     return {"data": OperationCompleted()}
 
 
-@app_router.delete(".delete", status_code=status.HTTP_202_ACCEPTED)
+@app_router.delete("/delete", status_code=status.HTTP_202_ACCEPTED)
 def delete_user_application(
     db: Session = Depends(session.get_db),
     *,
@@ -136,7 +136,7 @@ def delete_user_application(
     return {"data": OperationCompleted()}
 
 
-@user_files_router.get(".list", response_model=Dict[str, application_schema.FilesRead])
+@user_files_router.get("/list", response_model=Dict[str, application_schema.FilesRead])
 def get_user_application_files(
     db: Session = Depends(session.get_db),
     *,
@@ -164,7 +164,7 @@ def get_user_application_files(
 
 
 @user_files_router.post(
-    ".create", response_model=Dict[str, application_schema.FileRead]
+    "/create", response_model=Dict[str, application_schema.FileRead]
 )
 def add_file(
     db: Session = Depends(session.get_db),
@@ -182,7 +182,7 @@ def add_file(
 
 
 @user_files_router.get(
-    ".resumes.list", response_model=Dict[str, list[application_schema.FileRead]]
+    "/resumes/list", response_model=Dict[str, list[application_schema.FileRead]]
 )
 def get_user_resumes(
     db: Session = Depends(session.get_db),

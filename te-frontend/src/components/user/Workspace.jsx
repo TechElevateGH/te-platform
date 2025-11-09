@@ -39,7 +39,7 @@ const Workspace = ({ setLogin }) => {
     const [content, setContent] = useState("Applications")
 
     const getUserInfoRequest = useCallback(async () => {
-        axiosInstance.get(`/users.${userId}.info`, {
+        axiosInstance.get(`/users/${userId}/info`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -56,7 +56,7 @@ const Workspace = ({ setLogin }) => {
     }, [accessToken, logout, setUserInfo, userId]);
 
     const getUserFilesRequest = useCallback(async () => {
-        axiosInstance.get(`/users.${userId}.files.list`, {
+        axiosInstance.get(`/users/${userId}/files/list`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },

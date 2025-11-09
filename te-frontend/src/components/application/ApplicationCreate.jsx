@@ -43,7 +43,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
     })
 
     const createUserApplicationRequest = () => {
-        axiosInstance.post(`/users.${userId}.applications.create`,
+        axiosInstance.post(`/users/${userId}/applications/create`,
             appData,
             {
                 headers: {

@@ -22,7 +22,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 
     const createLearningLessonRequest = () => {
-        axiosInstance.post("/learning.lessons.create", { ...lessonData, format: lessonFormats[lessonData.format] },
+        axiosInstance.post("/learning/lessons/create", { ...lessonData, format: lessonFormats[lessonData.format] },
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -44,7 +44,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
             const formData = new FormData();
             formData.append('file', file);
 
-            axiosInstance.post("/learning.file.upload", formData, {
+            axiosInstance.post("/learning/file/upload", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${accessToken}`,

@@ -117,7 +117,7 @@ const Referrals = () => {
 
         setLoadingAllReferrals(true);
         try {
-            const response = await axiosInstance.get('/referrals.all');
+            const response = await axiosInstance.get('/referrals/all');
             setAllReferrals(response.data.referrals || []);
         } catch (error) {
             console.error('Error fetching all referrals:', error);

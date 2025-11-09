@@ -29,7 +29,7 @@ const CompanyCreate = ({ setCreateCompany }) => {
 
 
     const companyCreateRequest = ({ setCreateCompany }) => {
-        axiosInstance.post("/companies.create", companyData)
+        axiosInstance.post("/companies/create", companyData)
             .then((response) => {
                 let data = response.data;
                 console.log(data)

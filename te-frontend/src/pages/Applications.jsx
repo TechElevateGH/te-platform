@@ -171,7 +171,7 @@ const Applications = () => {
     }, [accessToken, contextApplications]);
 
     const getUserApplicationsRequest = useCallback(async () => {
-        await axiosInstance.get(`/users.${userId}.applications.list`, {
+        await axiosInstance.get(`/users/${userId}/applications/list`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -186,7 +186,7 @@ const Applications = () => {
     }, [userId, accessToken, setApplications, logout]);
 
     const archiveUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/users.${userId}.applications.archive`, applicationIds, {
+        axiosInstance.put(`/applications/archive`, applicationIds, {
             headers: { Authorization: `Bearer ${accessToken}` },
         })
             .then(() => {
@@ -199,10 +199,10 @@ const Applications = () => {
                 }
                 console.error('Error archiving applications:', error);
             });
-    }, [userId, accessToken, setFetchApplications, logout]);
+    }, [userId, accessToken, setApplicationId, setFetchApplications, logout]);
 
     const deleteUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/users.${userId}.applications.delete`, applicationIds, {
+        axiosInstance.put(`/applications/delete`, applicationIds, {
             headers: { Authorization: `Bearer ${accessToken}` },
         })
             .then(() => {

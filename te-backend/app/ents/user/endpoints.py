@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
 import logging
 import app.database.session as session
-import app.ents.user.auth as user_auth
 import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
@@ -10,22 +9,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/users")
-
-
-@router.post("/login")
-def login_user(token=Depends(user_auth.login_access_token)) -> Any:
-    """
-    Log User in.
-    """
-    return {"token": token}
-
-
-@router.post("/login/google")
-def login_user_via_google(token=Depends(user_auth.login_access_token)) -> Any:
-    """
-    Log User in.
-    """
-    return {"token": token}
 
 
 # @router.get(

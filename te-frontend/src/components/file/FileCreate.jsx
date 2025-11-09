@@ -11,7 +11,7 @@ import { Loading } from "../_custom/Loading";
 
 
 const FileCreate = ({ setFileUpload }) => {
-    const { accessToken } = useAuth();
+    const { accessToken, userId } = useAuth();
     const { setFetchFiles } = useData();
 
     const [status, setStatus] = useState(null);
@@ -30,7 +30,7 @@ const FileCreate = ({ setFileUpload }) => {
 
         setStatus("Loading...")
 
-        axiosInstance.post(`/files.create`, data, {
+        axiosInstance.post(`/users/${userId}/files/create`, data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 Authorization: `Bearer ${accessToken}`,

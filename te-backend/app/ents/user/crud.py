@@ -3,31 +3,39 @@ import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from typing import Optional
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
-def read_user_by_email(db: Session, *, email: str) -> Optional[user_models.User]:
-    return db.query(user_models.User).filter(user_models.User.email == email).first()
+def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.User]:
+    """Read user by email from MongoDB"""
+    user_data = db.users.find_one({"email": email})
+    if user_data:
+        return user_models.User(**user_data)
+    return None
 
 
-def read_user_by_id(db: Session, *, id: int) -> Optional[user_models.User]:
-    return db.query(user_models.User).filter(user_models.User.id == id).first()
+def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.User]:
+    """Read user by ID from MongoDB"""
+    from bson import ObjectId
+    try:
+        user_data = db.users.find_one({"_id": ObjectId(id)})
+        if user_data:
+            return user_models.User(**user_data)
+        return None
+    except Exception:
+        return None
 
 
-def is_user_active(db: Session, *, user: user_models.User) -> bool:
+def is_user_active(db: Database, *, user: user_models.User) -> bool:
     return user.is_active
 
 
 def read_users_by_role(
-    db: Session, *, role=0, skip: int = 0, limit: int = 100
+    db: Database, *, role=0, skip: int = 0, limit: int = 100
 ) -> list[user_models.User]:
-    return (
-        db.query(user_models.User)
-        .filter(user_models.User.role == role)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    """Read users by role from MongoDB"""
+    users_data = db.users.find({"role": role}).skip(skip).limit(limit)
+    return [user_models.User(**user) for user in users_data]
 
 
 def read_users_by_base_role(
