@@ -30,23 +30,32 @@ app.include_router(api_router, prefix=settings.API_STR)
 
 @app.on_event("startup")
 def on_startup():
-    """Initialize database tables on startup for in-memory database"""
-    from app.database.base import Base
-    from app.database.session import engine
+    """Initialize MongoDB connection and seed initial data"""
+    from app.database.session import mongodb
 
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-    print("✓ Database tables created successfully")
-
-    # Optionally seed initial data
-    from app.database.init_db import init_db
-    from app.database.session import SessionLocal
-
-    db = SessionLocal()
+    # Test MongoDB connection
     try:
-        init_db(db)
+        mongodb.command("ping")
+        print("✓ MongoDB connection successful")
+        print(f"✓ Connected to database: {mongodb.name}")
+    except Exception as e:
+        print(f"✗ MongoDB connection failed: {e}")
+        return
+
+    # Seed initial data
+    from app.database.init_db import init_db
+
+    try:
+        init_db(mongodb)
         print("✓ Initial data seeded successfully")
     except Exception as e:
         print(f"Warning: Could not seed initial data: {e}")
-    finally:
-        db.close()
+
+
+@app.on_event("shutdown")
+def on_shutdown():
+    """Close MongoDB connection"""
+    from app.database.session import client
+
+    client.close()
+    print("✓ MongoDB connection closed")

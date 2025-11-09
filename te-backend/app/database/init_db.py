@@ -1,28 +1,41 @@
-import app.ents.user.crud as user_crud
-import app.ents.user.schema as user_schema
 from app.core.settings import settings
-from sqlalchemy.orm import Session
+from app.core.security import get_password_hash
+import app.ents.user.schema as user_schema
+from pymongo.database import Database
+from datetime import date
 
 
-from app.database import base  # noqa
-
-
-def init_db(db: Session) -> None:
+def init_db(db: Database) -> None:
     """Initialize database with superuser"""
-    superuser = user_crud.read_user_by_email(
-        db=db, email=settings.FIRST_SUPERUSER_EMAIL
-    )
+    users_collection = db["users"]
+
+    # Check if superuser already exists
+    superuser = users_collection.find_one({"email": settings.FIRST_SUPERUSER_EMAIL})
+
     if not superuser:
-        user_in = user_schema.UserCreate(
-            email=settings.FIRST_SUPERUSER_EMAIL,
-            first_name=settings.FIRST_SUPERUSER_FIRST_NAME,
-            last_name=settings.FIRST_SUPERUSER_LAST_NAME,
-            full_name=f"{settings.FIRST_SUPERUSER_FIRST_NAME} {settings.FIRST_SUPERUSER_LAST_NAME}",
-            password=settings.FIRST_SUPERUSER_PASSWORD,
-            role=user_schema.UserRoles.admin,
-            contact="",
-            address="",
-            university="",
+        user_data = {
+            "email": settings.FIRST_SUPERUSER_EMAIL,
+            "first_name": settings.FIRST_SUPERUSER_FIRST_NAME,
+            "last_name": settings.FIRST_SUPERUSER_LAST_NAME,
+            "middle_name": "",
+            "full_name": f"{settings.FIRST_SUPERUSER_FIRST_NAME} {settings.FIRST_SUPERUSER_LAST_NAME}",
+            "password": get_password_hash(settings.FIRST_SUPERUSER_PASSWORD),
+            "role": user_schema.UserRoles.admin.value,
+            "contact": "",
+            "address": "",
+            "university": "",
+            "image": "",
+            "date_of_birth": "",
+            "essay": "",
+            "mentor_id": None,
+            "is_active": True,
+            "start_date": date.today().strftime("%d-%m-%Y"),
+            "end_date": "",
+        }
+
+        result = users_collection.insert_one(user_data)
+        print(
+            f"✓ Superuser created: {settings.FIRST_SUPERUSER_EMAIL} (ID: {result.inserted_id})"
         )
-        superuser = user_crud.create_user(db, data=user_in)
-        print(f"✓ Superuser created: {superuser.email}")
+    else:
+        print(f"✓ Superuser already exists: {settings.FIRST_SUPERUSER_EMAIL}")

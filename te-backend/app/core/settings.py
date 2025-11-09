@@ -46,8 +46,9 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: str
     EMAILS_FROM_EMAIL: str
 
-    # Using SQLite in-memory database for quick testing
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///:memory:"
+    # MongoDB Configuration
+    MONGODB_URI: str
+    MONGODB_DB_NAME: str = "te_platform"
 
     # Superuser
     FIRST_SUPERUSER_EMAIL: EmailStr

@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -25,12 +26,12 @@ class UserBase(BaseModel):
     last_name: str
     full_name: str = ""
     image: str = ""
-    date_of_birth: str | None = ""
+    date_of_birth: Optional[str] = ""
     contact: str = ""
     address: str = ""
     university: str = ""
     essay: str = ""
-    mentor_id: int | None = None
+    mentor_id: Optional[int] = None
     is_active: bool = True
     role: UserRoles = UserRoles.mentee
     start_date: str = date.today().strftime("%d-%m-%Y")
