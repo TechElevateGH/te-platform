@@ -15,7 +15,7 @@ router = APIRouter(prefix="/learning")
 
 
 @router.get(
-    "/lessons/list",
+    "/lessons",
     response_model=Dict[str, list[learning_schema.LessonRead]],
 )
 def get_lessons(
@@ -33,7 +33,7 @@ def get_lessons(
 
 
 @router.post(
-    "/lessons/create",
+    "/lessons",
     response_model=Dict[str, learning_schema.LessonRead],
 )
 def add_lesson(
@@ -45,7 +45,7 @@ def add_lesson(
     ),
 ) -> Any:
     """
-    Create a  lesson.
+    Create a lesson.
     """
     data.uploader = current_user.id
     lesson = learning_crud.create_lesson(db, data=data)

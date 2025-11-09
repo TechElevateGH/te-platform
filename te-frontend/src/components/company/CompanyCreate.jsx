@@ -1,25 +1,12 @@
-import { Fragment, useState, useEffect } from 'react'
-import {
-    XMarkIcon
-} from '@heroicons/react/24/outline'
-import { Dialog, Transition } from '@headlessui/react'
-import axios from 'axios';
+import { useState } from 'react'
 import axiosInstance from '../../axiosConfig';
 
-import Typeahead from "../_custom/Typehead";
 import { countries } from '../../data/data';
-import { FormCheckBox, FormInput, FormSelect, FormTextArea } from '../_custom/FormInputs';
+import { FormCheckBox, FormInput, FormSelect } from '../_custom/FormInputs';
 import SlideOverForm from '../_custom/SlideOver/SlideOverCreate';
 import SuccessFeedback from '../_custom/Alert/SuccessFeedback';
 import { setNestedPropertyValue } from '../../utils';
 
-const data = [
-    'Microsoft',
-    'Meta',
-    'Google',
-    'ServiceNow',
-    'Deutsche',
-];
 
 const CompanyCreate = ({ setCreateCompany }) => {
 
@@ -27,17 +14,6 @@ const CompanyCreate = ({ setCreateCompany }) => {
 
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 
-
-    const companyCreateRequest = ({ setCreateCompany }) => {
-        axiosInstance.post("/companies/create", companyData)
-            .then((response) => {
-                let data = response.data;
-                console.log(data)
-            })
-            .catch((error) => {
-                console.log("Error!");
-            });
-    }
 
     const handleInputChange = ({ field, value }) => {
         setCompanyData((prevAppData) =>

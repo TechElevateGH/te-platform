@@ -3,25 +3,18 @@ import { Dialog, Transition } from '@headlessui/react'
 import { useNavigate } from 'react-router-dom'
 import {
     XMarkIcon,
-    UserCircleIcon,
-    ArrowRightOnRectangleIcon,
-    ArrowLeftOnRectangleIcon,
     ChevronRightIcon,
     ChevronDownIcon
 } from '@heroicons/react/24/outline'
 import {
     RocketLaunchIcon
 } from '@heroicons/react/24/solid'
-import { useAuth } from '../../context/AuthContext'
-import { useData } from '../../context/DataContext'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
 const Sidebar = ({ navigation, content, setContent, setLogin }) => {
-    const { accessToken, logout } = useAuth();
-    const { userInfo } = useData();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)

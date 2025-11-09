@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import axiosInstance from '../../axiosConfig';
-import { ChevronDownIcon, DocumentIcon } from '@heroicons/react/20/solid'
 
 import SlideOverForm from '../_custom/SlideOver/SlideOverCreate'
 import { setNestedPropertyValue } from '../../utils'
@@ -22,7 +21,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 
     const createLearningLessonRequest = () => {
-        axiosInstance.post("/learning/lessons/create", { ...lessonData, format: lessonFormats[lessonData.format] },
+        axiosInstance.post("/learning/lessons", { ...lessonData, format: lessonFormats[lessonData.format] },
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

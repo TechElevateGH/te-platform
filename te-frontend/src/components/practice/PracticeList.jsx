@@ -1,9 +1,9 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useState, Fragment } from 'react';
 
 
 const LearningGroup = ({ subcategory, rawLessons }) => {
 
-    let [lessons, setLessons] = useState(rawLessons);
+    let [lessons] = useState(rawLessons);
 
     const mapPlaylistsToLessons = (lessons) => {
         return lessons.reduce((acc, lesson) => {

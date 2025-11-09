@@ -15,7 +15,7 @@ user_files_router = APIRouter(prefix="/users/{user_id}/files")
 
 
 @user_app_router.post(
-    "/create", response_model=Dict[str, application_schema.ApplicationRead]
+    "", response_model=Dict[str, application_schema.ApplicationRead]
 )
 def create_application(
     *,
@@ -24,14 +24,14 @@ def create_application(
     user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Create an application for  `user`.
+    Create an application for `user`.
     """
     application = application_crud.create_application(db, data=data, user_id=user.id)
     return {"application": application_dependencies.parse_application(application)}
 
 
 @user_app_router.get(
-    "/list", response_model=Dict[str, list[application_schema.ApplicationRead]]
+    "", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )
 def get_user_applications(
     db: Database = Depends(session.get_db),
@@ -54,7 +54,7 @@ def get_user_applications(
 
 
 @app_router.get(
-    "/{application_id}/info",
+    "/{application_id}",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def get_user_application(
@@ -64,7 +64,7 @@ def get_user_application(
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve application `application_id` of user `user_id`.
+    Retrieve application `application_id` of user.
     """
     application = application_crud.read_user_application(
         db, user_id=current_user.id, application_id=application_id
@@ -74,7 +74,7 @@ def get_user_application(
 
 
 @app_router.put(
-    "/{application_id}/update",
+    "/{application_id}",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
 def update_user_application(
@@ -136,7 +136,7 @@ def delete_user_application(
     return {"data": OperationCompleted()}
 
 
-@user_files_router.get("/list", response_model=Dict[str, application_schema.FilesRead])
+@user_files_router.get("", response_model=Dict[str, application_schema.FilesRead])
 def get_user_application_files(
     db: Database = Depends(session.get_db),
     *,
@@ -164,7 +164,7 @@ def get_user_application_files(
 
 
 @user_files_router.post(
-    "/create", response_model=Dict[str, application_schema.FileRead]
+    "", response_model=Dict[str, application_schema.FileRead]
 )
 def add_file(
     db: Database = Depends(session.get_db),
@@ -182,7 +182,7 @@ def add_file(
 
 
 @user_files_router.get(
-    "/resumes/list", response_model=Dict[str, list[application_schema.FileRead]]
+    "/resumes", response_model=Dict[str, list[application_schema.FileRead]]
 )
 def get_user_resumes(
     db: Database = Depends(session.get_db),
@@ -202,7 +202,7 @@ def get_user_resumes(
 
 
 @user_files_router.get(
-    ".resumes.list", response_model=Dict[str, list[application_schema.FileRead]]
+    ".resumes", response_model=Dict[str, list[application_schema.FileRead]]
 )
 def resume_review(
     db: Database = Depends(session.get_db),
@@ -217,28 +217,3 @@ def resume_review(
     return {
         "resumes": [application_schema.FileRead(**vars(resume)) for resume in resumes]
     }
-
-
-# @router.put(".info/{company_id}", response_model=company_schema.CompanyRead)
-# def update_company(
-#     *,
-#     db: Database = Depends(application_dependencies.get_current_user_db),
-#     data: company_schema.CompanyUpdate,
-#     user: models.Company = Depends(application_dependencies.get_current_user),
-# ) -> Any:
-#     """
-#     Update Company.
-#     """
-#     company = company.crud.read_user_by_id(db, id=company.id)
-#     if not company:
-#         raise HTTPException(
-#             status_code=404,
-#             detail={
-#                 "error": {
-#                     "email": company.email,
-#                     "message": "The company with this name does not exist in the system",
-#                 }
-#             },
-#         )
-#     company = crud.company.update(db, db_obj=company, data=data)
-#     return user

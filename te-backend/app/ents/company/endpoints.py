@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import app.database.session as session
 import app.ents.company.crud as company_crud
@@ -6,28 +6,14 @@ import app.ents.company.dependencies as company_dependencies
 import app.ents.company.schema as company_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pymongo.database import Database
 
 company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
 
 
-# @router.get(".list", response_model=List[company_schema.CompanyRead])
-# def get_companies(
-#     db: Database = Depends(dependencies.get_db),
-#     skip: int = 0,
-#     limit: int = 100,
-#     # _: str = Depends(dependencies.get_current_user),
-# ) -> Any:
-#     """
-#     Retrieve Companies.
-#     """
-#     companies = crud.company.read_multi(db, skip=skip, limit=limit)
-#     return companies
-
-
-@company_router.post("/create", response_model=Dict[str, company_schema.CompanyRead])
+@company_router.post("", response_model=Dict[str, company_schema.CompanyRead])
 def create_company(
     *,
     db: Database = Depends(session.get_db),
@@ -35,7 +21,7 @@ def create_company(
     # _=Depends(get_current_user),
 ) -> Any:
     """
-    Create an Company.
+    Create a Company.
     """
     if company := company_crud.read_company_by_name(db, name=data.name):
         if not (
@@ -55,7 +41,7 @@ def create_company(
     return {"company": company_dependencies.parse_company(company)}
 
 
-@company_router.get("/list", response_model=Dict[str, list[company_schema.CompanyRead]])
+@company_router.get("", response_model=Dict[str, list[company_schema.CompanyRead]])
 def get_companies(
     db: Database = Depends(session.get_db),
     skip: int = 0,
@@ -74,7 +60,7 @@ def get_companies(
 
 
 @company_router.post(
-    "/{company_id}/update", response_model=Dict[str, company_schema.CompanyRead]
+    "/{company_id}", response_model=Dict[str, company_schema.CompanyRead]
 )
 def update_company(
     db: Database = Depends(session.get_db),
@@ -83,13 +69,13 @@ def update_company(
     _: str = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve Companies.
+    Update Company.
     """
     ...
 
 
 @company_router.get(
-    "/referrals/list",
+    "/referrals",
     response_model=Dict[str, list[company_schema.CompanyReadForReferrals]],
 )
 def get_referral_companies(
@@ -111,7 +97,7 @@ def get_referral_companies(
 
 
 @referral_router.post(
-    "/create",
+    "",
     response_model=Dict[str, company_schema.ReferralRead],
 )
 def request_referral(
@@ -132,7 +118,7 @@ def request_referral(
 
 
 @referral_router.get(
-    "/list",
+    "",
     response_model=Dict[str, list[company_schema.ReferralRead]],
 )
 def get_user_referrals(
@@ -170,8 +156,6 @@ def get_all_referrals(
     # Check if user has elevated privileges (Lead = mentor/team, Admin = admin)
     # UserRoles: guest=0, mentee=1, contributor=2, mentor=3, team=4, admin=5
     if user.role.value < 3:
-        from fastapi import HTTPException
-
         raise HTTPException(
             status_code=403,
             detail="Only Lead and Admin users can view all referral requests",
@@ -198,31 +182,6 @@ def review_referral(
     user: user_models.User = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve Companies.
+    Review referral.
     """
     ...
-
-
-# @router.put(".info/{company_id}", response_model=company_schema.CompanyRead)
-# def update_company(
-#     *,
-#     db: Database = Depends(dependencies.get_db),
-#     data: company_schema.CompanyUpdate,
-#     user: models.Company = Depends(dependencies.get_current_user),
-# ) -> Any:
-#     """
-#     Update Company.
-#     """
-#     company = company.crud.read_user_by_id(db, id=company.id)
-#     if not company:
-#         raise HTTPException(
-#             status_code=404,
-#             detail={
-#                 "error": {
-#                     "email": company.email,
-#                     "message": "The company with this name does not exist in the system",
-#                 }
-#             },
-#         )
-#     company = crud.company.update(db, db_obj=company, data=data)
-#     return user

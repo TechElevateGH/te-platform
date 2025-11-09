@@ -5,8 +5,8 @@ import {
     EnvelopeIcon,
     PhoneIcon,
     BriefcaseIcon,
-    DocumentTextIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    DocumentTextIcon
 } from '@heroicons/react/20/solid'
 import axiosInstance from "../../axiosConfig";
 import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
@@ -67,7 +67,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     });
 
     const createReferralRequest = async () => {
-        await axiosInstance.post(`/referrals/create`, referralData,
+        await axiosInstance.post(`/referrals`, referralData,
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

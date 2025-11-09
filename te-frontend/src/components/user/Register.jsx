@@ -60,7 +60,7 @@ const Register = () => {
 
         try {
             // Register the user
-            await axiosInstance.post('users/create', {
+            await axiosInstance.post('users', {
                 email: formData.email,
                 first_name: formData.firstName,
                 middle_name: formData.middleName,

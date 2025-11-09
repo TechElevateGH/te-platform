@@ -58,7 +58,7 @@ const Applications = () => {
     }, [accessToken, contextApplications]);
 
     const getUserApplicationsRequest = useCallback(async () => {
-        await axiosInstance.get(`/users/${userId}/applications/list`, {
+        await axiosInstance.get(`/users/${userId}/applications`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },

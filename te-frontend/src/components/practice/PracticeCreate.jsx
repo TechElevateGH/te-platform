@@ -21,7 +21,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 
     const createLearningLessonRequest = () => {
-        axiosInstance.post("/learning/lessons/create", { ...lessonData, format: lessonFormats[lessonData.format] },
+        axiosInstance.post("/learning/lessons", { ...lessonData, format: lessonFormats[lessonData.format] },
             {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
