@@ -153,7 +153,7 @@ const LeadLogin = () => {
                         {/* Info Box */}
                         <div className="mt-6 bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
                             <p className="text-xs text-blue-100">
-                                <strong>Note:</strong> Lead accounts can only be created by Admin users. If you need access, please contact your administrator.
+                                <strong>Note:</strong> Management accounts can only be created by Admins. If you need access, please contact your administrator.
                             </p>
                         </div>
                     </form>
