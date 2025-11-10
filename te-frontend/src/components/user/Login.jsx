@@ -28,7 +28,15 @@ const Login = () => {
                 password: loginData.password
             });
             login(response.data.access_token, response.data.sub, response.data.role);
-            navigate(localStorage.getItem("prevPage") || "/workspace");
+
+            // Check if there's a redirect URL from session expiry
+            const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+            if (redirectPath && redirectPath !== '/login') {
+                sessionStorage.removeItem('redirectAfterLogin');
+                navigate(redirectPath);
+            } else {
+                navigate(sessionStorage.getItem("prevPage") || "/workspace");
+            }
         } catch (error) {
             setError(error.response?.data?.detail || 'Login failed. Please check your credentials.');
         } finally {

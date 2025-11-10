@@ -274,6 +274,55 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                         </ul>
                                     </li>
 
+                                    <li>
+                                        {isExpanded && (
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
+                                                Accounts
+                                            </div>
+                                        )}
+                                        <ul className="space-y-2">
+                                            {navigation.filter((item) => item.type === "accounts").map((item) => {
+                                                const color = { bg: 'bg-indigo-500/10', hoverBg: 'hover:bg-indigo-500/20', text: 'text-indigo-700', icon: 'text-indigo-600', activeBg: 'bg-gradient-to-r from-indigo-500 to-purple-500', ring: 'ring-indigo-500/20' };
+                                                return (
+                                                    <li key={item.name}>
+                                                        <button
+                                                            onClick={() => setContent(item.name)}
+                                                            className={classNames(
+                                                                item.name === content
+                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                isExpanded ? 'gap-x-3' : 'justify-center'
+                                                            )}
+                                                            title={!isExpanded ? item.name : ''}
+                                                        >
+                                                            <div className={classNames(
+                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                            )}>
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.name === content ? 'text-white' : color.icon,
+                                                                        'h-5 w-5 transition-colors'
+                                                                    )}
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <>
+                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                    {item.name === content && (
+                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </li>
+
 
                                 </ul>
                             </nav>

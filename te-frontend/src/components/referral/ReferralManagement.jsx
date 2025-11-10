@@ -20,10 +20,15 @@ import { useAuth } from '../../context/AuthContext';
 
 const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
     const { accessToken } = useAuth();
-    const [status, setStatus] = useState(referral.status);
-    const [reviewNote, setReviewNote] = useState(referral.review_note || '');
+    const [status, setStatus] = useState(referral?.status || 'Pending');
+    const [reviewNote, setReviewNote] = useState(referral?.review_note || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [copiedField, setCopiedField] = useState(null);
+
+    // Early return if no referral data
+    if (!referral) {
+        return null;
+    }
 
     const statusOptions = ['Pending', 'Completed', 'Declined', 'Cancelled'];
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer } from 'react';
+import { createContext, useContext, useEffect, useReducer, useState } from 'react';
 
 const AuthenticationContext = createContext();
 
@@ -23,28 +23,38 @@ const authReducer = (state, action) => {
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, { userId: null, userRole: null, accessToken: null });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    const userId = localStorage.getItem('userId');
-    const userRole = localStorage.getItem('userRole');
+    // Use sessionStorage for tab-independent auth (allows multiple accounts in different tabs)
+    const accessToken = sessionStorage.getItem('accessToken');
+    const userId = sessionStorage.getItem('userId');
+    const userRole = sessionStorage.getItem('userRole');
 
     if (accessToken) {
       dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
     }
+    setIsLoading(false);
   }, []);
 
   const login = (accessToken, userId, userRole) => {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('userId', userId);
-    localStorage.setItem('userRole', userRole);
+    // Use sessionStorage for tab-independent auth
+    sessionStorage.setItem('accessToken', accessToken);
+    sessionStorage.setItem('userId', userId);
+    sessionStorage.setItem('userRole', userRole);
+
+    // Track if this is a privileged user (role >= 2) for redirect after session expiry
+    const isPrivileged = parseInt(userRole) >= 2;
+    sessionStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
+
     dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userRole');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('userId');
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('wasPrivilegedUser');
     dispatch({ type: 'logout' });
   };
 
@@ -58,6 +68,7 @@ export const AuthProvider = ({ children }) => {
         userRole: state.userRole,
         accessToken: state.accessToken,
         isAuthenticated,
+        isLoading,
         login,
         logout,
       }}

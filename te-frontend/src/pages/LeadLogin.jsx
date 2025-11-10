@@ -31,8 +31,15 @@ const LeadLogin = () => {
                     response.data.user.role
                 );
 
-                // Navigate to workspace
-                navigate('/workspace');
+                // Check if there's a redirect URL from session expiry
+                const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+                if (redirectPath && redirectPath !== '/lead-login') {
+                    sessionStorage.removeItem('redirectAfterLogin');
+                    navigate(redirectPath);
+                } else {
+                    // Navigate to workspace
+                    navigate('/workspace');
+                }
             }
         } catch (err) {
             console.error('Lead login error:', err);

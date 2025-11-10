@@ -1,8 +1,9 @@
-import { Fragment, useState, useEffect, useCallback } from 'react'
+import { Fragment, useState, useEffect, useCallback, useMemo } from 'react'
 import {
     FolderIcon,
     XMarkIcon,
     UserCircleIcon,
+    UserGroupIcon,
 
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
@@ -19,22 +20,11 @@ import Practice from '../../pages/Practice'
 import AdminApplications from '../../pages/AdminApplications'
 import AdminReferrals from '../../pages/AdminReferrals'
 import AdminFiles from '../../pages/AdminFiles'
+import UserAccountManagement from '../../pages/UserAccountManagement'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
 import { useLocation } from 'react-router-dom'
-
-
-const navigation = [
-    { name: 'Profile', type: "app", icon: UserCircleIcon },
-    { name: 'Applications', type: "app", icon: BriefcaseIcon },
-    { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
-    { name: 'Referrals', type: "app", icon: FolderIcon },
-    { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
-    { name: 'Learning', type: "learn", icon: BookOpenIcon },
-    { name: 'Practice', type: "learn", icon: CodeBracketIcon },
-    { name: 'Other files', type: "other", icon: FolderIcon },
-]
 
 
 const Workspace = ({ setLogin }) => {
@@ -45,11 +35,34 @@ const Workspace = ({ setLogin }) => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [content, setContent] = useState("Applications")
 
-    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
-    // Lead/Admin see same navigation but different page implementations
+    // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const isLeadOrAdmin = userRole && parseInt(userRole) >= 4;
+    const isAdmin = userRole && parseInt(userRole) === 5;
     const isReferrer = userRole && parseInt(userRole) === 2;
-    const isVolunteer = userRole && parseInt(userRole) === 3;
+
+    // Dynamic navigation based on role
+    const navigation = useMemo(() => {
+        const baseNavigation = [
+            { name: 'Profile', type: "app", icon: UserCircleIcon },
+            { name: 'Applications', type: "app", icon: BriefcaseIcon },
+            { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
+            { name: 'Referrals', type: "app", icon: FolderIcon },
+            { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
+            { name: 'Learning', type: "learn", icon: BookOpenIcon },
+            { name: 'Practice', type: "learn", icon: CodeBracketIcon },
+            { name: 'Other files', type: "other", icon: FolderIcon },
+        ];
+
+        // Admin gets additional Account Management section
+        if (isAdmin) {
+            return [
+                ...baseNavigation,
+                { name: 'Account Management', type: "accounts", icon: UserGroupIcon },
+            ];
+        }
+
+        return baseNavigation;
+    }, [isAdmin]);
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {
@@ -93,11 +106,14 @@ const Workspace = ({ setLogin }) => {
         }
     }, [content]);
 
-    // Handle URL-based navigation (e.g., /workspace/profile)
+    // Handle URL-based navigation (e.g., /workspace/profile, /workspace/account-management)
     useEffect(() => {
         if (location.pathname === '/workspace/profile') {
             setContent('Profile');
             sessionStorage.setItem('content', 'Profile');
+        } else if (location.pathname === '/workspace/account-management') {
+            setContent('Account Management');
+            sessionStorage.setItem('content', 'Account Management');
         }
     }, [location]);
 
@@ -188,19 +204,20 @@ const Workspace = ({ setLogin }) => {
                 <div className="md:pl-28">
                     <main className="min-h-screen bg-[#fafafa] pt-20">
                         {
-                            content === "Profile" ? <Profile /> :
-                                content === "Applications" ? (
-                                    isLeadOrAdmin ? <AdminApplications /> : <Applications />
-                                ) :
-                                    content === "Resume and Essays" ? (
-                                        isLeadOrAdmin ? <AdminFiles /> : <FilesAndEssay />
+                            content === "Account Management" ? <UserAccountManagement /> :
+                                content === "Profile" ? <Profile /> :
+                                    content === "Applications" ? (
+                                        isLeadOrAdmin ? <AdminApplications /> : <Applications />
                                     ) :
-                                        content === "Referrals" ? (
-                                            (isLeadOrAdmin || isReferrer) ? <AdminReferrals /> : <Referrals />
+                                        content === "Resume and Essays" ? (
+                                            isLeadOrAdmin ? <AdminFiles /> : <FilesAndEssay />
                                         ) :
-                                            content === "Opportunities" ? <Opportunities /> :
-                                                content === "Practice" ? <Practice /> :
-                                                    <Learning />
+                                            content === "Referrals" ? (
+                                                (isLeadOrAdmin || isReferrer) ? <AdminReferrals /> : <Referrals />
+                                            ) :
+                                                content === "Opportunities" ? <Opportunities /> :
+                                                    content === "Practice" ? <Practice /> :
+                                                        <Learning />
                         }
                     </main>
                 </div>

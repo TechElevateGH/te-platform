@@ -10,6 +10,41 @@ from pymongo.database import Database
 router = APIRouter(prefix="/users")
 
 
+@router.get("/privileged", response_model=list[Dict[str, Any]])
+def get_all_privileged_users(
+    db: Database = Depends(session.get_db),
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Get all privileged users (Admin only).
+    Returns list of all privileged users (role >= 2).
+    """
+    users = user_crud.read_all_privileged_users(db)
+    return users
+
+
+@router.get("", response_model=list[Dict[str, Any]])
+def get_all_member_users(
+    db: Database = Depends(session.get_db),
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Get all member users (Admin only).
+    Returns list of all member users (role = 1).
+    """
+    users = user_crud.read_all_users(db)
+    # Convert to dict format for JSON serialization
+    result = []
+    for user in users:
+        user_dict = vars(user).copy()
+        # Convert ObjectId to string
+        if "_id" in user_dict:
+            user_dict["id"] = str(user_dict["_id"])
+            user_dict["_id"] = str(user_dict["_id"])
+        result.append(user_dict)
+    return result
+
+
 @router.get("/{user_id}", response_model=Dict[str, user_schema.UserRead])
 def get_user_by_id(
     db: Database = Depends(session.get_db),
@@ -21,6 +56,12 @@ def get_user_by_id(
     Get user with id `user_id`
     """
     user = user_crud.read_user_by_id(db, id=user_id)
+    if not user:
+        from fastapi import HTTPException, status
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return {"user": user_schema.UserRead(**vars(user))}
 
 
@@ -68,6 +109,25 @@ def create_lead_account(
     return {
         "lead": result,
         "message": "Lead account created successfully. Please share the token securely with the user.",
+    }
+
+
+@router.patch("/privileged/{user_id}", response_model=Dict[str, Any])
+def update_privileged_account(
+    *,
+    db: Database = Depends(session.get_db),
+    user_id: str,
+    data: user_schema.PrivilegedUserUpdate,
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Update a privileged user account (Admin only).
+    Can update username, token, and active status.
+    """
+    result = user_crud.update_privileged_user(db, user_id=user_id, data=data)
+    return {
+        "user": result,
+        "message": "Privileged account updated successfully.",
     }
 
 

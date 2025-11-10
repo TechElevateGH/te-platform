@@ -53,6 +53,26 @@ def read_all_users(db: Database) -> list[user_models.User]:
     return [user_models.User(**user) for user in users_data]
 
 
+def read_all_privileged_users(db: Database) -> list[dict]:
+    """Read all privileged users from MongoDB (Admin only)"""
+    users_data = db.privileged_users.find({})
+    result = []
+    for user in users_data:
+        result.append(
+            {
+                "id": str(user["_id"]),
+                "_id": str(user["_id"]),
+                "username": user.get("username"),
+                "role": user.get("role"),
+                "is_active": user.get("is_active", True),
+                "company_id": str(user["company_id"])
+                if user.get("company_id")
+                else None,
+            }
+        )
+    return result
+
+
 def read_users_by_base_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
 ) -> list[user_models.User]:
@@ -296,6 +316,73 @@ def update_user_profile(
     # Fetch and return the updated user
     user_data = db.member_users.find_one({"_id": ObjectId(user_id)})
     return user_models.User(**user_data)
+
+
+def update_privileged_user(
+    db: Database, *, user_id: str, data: user_schema.PrivilegedUserUpdate
+) -> dict:
+    """Update privileged user account (Admin only)"""
+    from bson import ObjectId
+
+    # Validate user_id
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user ID"
+        )
+
+    # Check if user exists
+    existing_user = db.privileged_users.find_one({"_id": ObjectId(user_id)})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="Privileged user not found")
+
+    # Build update dictionary
+    update_data = {}
+
+    # Check username uniqueness if updating username
+    if data.username is not None:
+        username_exists = db.privileged_users.find_one(
+            {"username": data.username, "_id": {"$ne": ObjectId(user_id)}}
+        )
+        if username_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already exists",
+            )
+        update_data["username"] = data.username
+
+    # Hash and update token if provided
+    if data.token is not None:
+        update_data["password"] = security.get_password_hash(data.token)
+        update_data["lead_token"] = data.token
+
+    # Update is_active if provided
+    if data.is_active is not None:
+        update_data["is_active"] = data.is_active
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
+        )
+
+    # Update the privileged user
+    result = db.privileged_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$set": update_data}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Privileged user not found")
+
+    # Fetch and return the updated user
+    user_data = db.privileged_users.find_one({"_id": ObjectId(user_id)})
+    user = user_models.PrivilegedUser(**user_data)
+
+    return {
+        "user_id": str(user.id),
+        "username": user.username,
+        "role": user.role,
+        "is_active": user.is_active,
+        "company_id": str(user.company_id) if user.company_id else None,
+    }
 
 
 # def update(

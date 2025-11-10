@@ -52,6 +52,14 @@ class ReferrerCreate(BaseModel):
     company_id: str  # MongoDB ObjectId as string
 
 
+class PrivilegedUserUpdate(BaseModel):
+    """Schema for updating a privileged user account (Admin only)"""
+
+    username: Optional[str] = None
+    token: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
 class UserBase(BaseModel):
     email: EmailStr
     first_name: str
