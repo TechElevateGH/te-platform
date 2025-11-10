@@ -71,6 +71,8 @@ class File(BaseModel):
     date: str
     link: str  # Google Drive link
     name: str
+    role: str = ""  # Target role for this file
+    notes: str = ""  # Additional notes about this file
     reviewed: bool = False
     active: bool = True
     type: str  # FileType enum value

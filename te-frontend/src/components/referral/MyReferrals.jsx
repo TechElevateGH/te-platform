@@ -119,7 +119,7 @@ const MyReferrals = () => {
             </div>
 
             <div className="grid gap-4">
-                {referrals.map((referral) => (
+                {referrals.filter(r => r && r.status).map((referral) => (
                     <div
                         key={referral.id}
                         className="bg-white rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all overflow-hidden"

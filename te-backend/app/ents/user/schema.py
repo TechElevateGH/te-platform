@@ -17,12 +17,14 @@ class UserRoles(int, Enum):
     - Member (1): Regular signed-in users (mentees)
     - Lead (2): Elevated privileges (mentors, team members)
     - Admin (3): Full system access
+    - SuperAdmin (5): Legacy super admin role
     """
 
     guest = 0
     member = 1
     lead = 2
     admin = 3
+    super_admin = 5
 
 
 class UserBase(BaseModel):
@@ -37,6 +39,7 @@ class UserBase(BaseModel):
     address: str = ""
     university: str = ""
     essay: str = ""
+    cover_letter: str = ""
     mentor_id: Optional[int] = None
     is_active: bool = True
     role: UserRoles = UserRoles.member
@@ -53,3 +56,7 @@ class UserRead(UserBase): ...
 
 class Essay(BaseModel):
     essay: str
+
+
+class CoverLetter(BaseModel):
+    cover_letter: str

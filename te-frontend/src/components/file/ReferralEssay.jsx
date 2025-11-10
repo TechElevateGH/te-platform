@@ -7,7 +7,7 @@ import axiosInstance from '../../axiosConfig'
 import { useAuth } from '../../context/AuthContext'
 
 
-const ReferralEssay = () => {
+const Essay = () => {
     const { userId, accessToken } = useAuth();
     const { userInfo, setUserInfo } = useData();
     const [updateCoverLetter, setUpdateCoverLetter] = useState(false);
@@ -310,4 +310,4 @@ const ReferralEssay = () => {
         </div>
     )
 }
-export default ReferralEssay;
+export default Essay;

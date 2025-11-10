@@ -240,7 +240,7 @@ def upload_file(file, parent) -> application_schema.FileUpload:
     )
 
 
-def create_file(db, kind, file, user_id):
+def create_file(db, kind, file, user_id, role="", notes=""):
     uploaded_file = upload_file(
         file=file,
         parent=settings.GDRIVE_RESUMES
@@ -254,6 +254,8 @@ def create_file(db, kind, file, user_id):
         link=uploaded_file.link[: uploaded_file.link.find("&export=download")],
         date=date.today().strftime("%Y-%m-%d"),
         user_id=user_id,
+        role=role,
+        notes=notes,
         type=application_schema.FileType.resume
         if kind == "Resume"
         else application_schema.FileType.otherFile,

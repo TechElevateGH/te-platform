@@ -22,7 +22,7 @@ import Profile from './Profile'
 
 const navigation = [
     { name: 'Applications', type: "app", icon: BriefcaseIcon },
-    { name: 'Resume and Essay', type: "app", icon: DocumentIcon },
+    { name: 'Resume and Referral Essay', type: "app", icon: DocumentIcon },
     { name: 'Referrals', type: "app", icon: FolderIcon },
     { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
     { name: 'Learning', type: "learn", icon: BookOpenIcon },
@@ -169,7 +169,7 @@ const Workspace = ({ setLogin }) => {
                         {
                             content === "Profile" ? <Profile /> :
                                 content === "Applications" ? <Applications /> :
-                                    content === "Resume and Essay" ? <FilesAndEssay /> :
+                                    content === "Resume and Referral Essay" ? <FilesAndEssay /> :
                                         content === "Referrals" ? <Referrals /> :
                                             content === "Opportunities" ? <Opportunities /> :
                                                 content === "Practice" ? <Practice /> :

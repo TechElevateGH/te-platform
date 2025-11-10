@@ -34,7 +34,7 @@ def create_application(
 def get_user_applications(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -138,7 +138,7 @@ def delete_user_application(
 def get_user_application_files(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -165,16 +165,20 @@ def get_user_application_files(
 def add_file(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
-    kind: application_schema.FileType = Form(),
+    user_id: str,
+    kind: application_schema.FileType = Form(
+        default=application_schema.FileType.resume
+    ),
     file: UploadFile = Form(),
+    role: str = Form(default=""),
+    notes: str = Form(default=""),
     _=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Upload resume for user `user_id`.
+    Upload resume for user `user_id` with role and notes.
     """
-    file = application_crud.create_file(db, kind, file, user_id)
-    return {"file": application_schema.FileRead(**vars(file))}
+    uploaded_file = application_crud.create_file(db, kind, file, user_id, role, notes)
+    return {"file": application_schema.FileRead(**vars(uploaded_file))}
 
 
 @user_files_router.get(
@@ -183,7 +187,7 @@ def add_file(
 def get_user_resumes(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -203,7 +207,7 @@ def get_user_resumes(
 def resume_review(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """

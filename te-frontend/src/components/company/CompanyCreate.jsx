@@ -60,7 +60,7 @@ const CompanyCreate = ({ setCreateCompany }) => {
                         <div className="flex space-x-6 mt-3">
                             <span className='italic text-sky-700 font-semibold'>Need: </span>
                             <FormCheckBox label={"Resume"} field={"resume"} handleInputChange={handleInputChange} />
-                            <FormCheckBox label={"Essay"} field={"essay"} handleInputChange={handleInputChange} />
+                            <FormCheckBox label={"Referral Essay"} field={"essay"} handleInputChange={handleInputChange} />
                             <FormCheckBox label={"Contact"} field={"contact"} handleInputChange={handleInputChange} />
                         </div>
                     </div>

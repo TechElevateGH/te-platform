@@ -25,7 +25,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const availableResumes = hasResume ? contextResumes : [];
 
     // Check user's available materials
-    const hasEssay = userInfo?.essay && userInfo.essay.trim() !== '';
+    const hasReferralEssay = userInfo?.essay && userInfo.essay.trim() !== '';
     const hasContact = userInfo?.contact && userInfo.contact.trim() !== '';
 
     // Company requirements
@@ -126,7 +126,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         </div>
 
                         {/* Requirements Section */}
-                        {(requirements.resume || requirements.essay || requirements.contact) && (
+                        {(requirements.resume || requirements.referralEssay || requirements.contact) && (
                             <div className="space-y-3">
                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                                     <DocumentTextIcon className="h-4 w-4" />
@@ -146,15 +146,15 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 </span>
                                             </div>
                                         )}
-                                        {requirements.essay && (
+                                        {requirements.referralEssay && (
                                             <div className="flex items-center gap-3">
-                                                {hasEssay ? (
+                                                {hasReferralEssay ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
                                                 ) : (
                                                     <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasEssay ? 'text-emerald-900' : 'text-red-900'}`}>
-                                                    Essay
+                                                <span className={`text-sm font-semibold ${hasReferralEssay ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                    Referral Essay
                                                 </span>
                                             </div>
                                         )}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Essay from "../components/file/Essay";
+import ReferralEssay from "../components/file/ReferralEssay";
 import { PlusIcon, PaperClipIcon, BriefcaseIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
@@ -51,7 +51,7 @@ const Files = () => {
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900 mb-1.5">
-                            Resumes & Essays
+                            Resumes & Referral Essays
                         </h1>
                         <p className="text-xs text-gray-600">
                             Manage your resumes, cover letters, and referral essays
@@ -62,10 +62,10 @@ const Files = () => {
 
             <div className="flex mx-6">
                 <div className="w-full lg:grid lg:grid-cols-12 lg:gap-x-8">
-                    {/* Essay Section */}
+                    {/* Referral Essay Section */}
                     <div className="pb-24 sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56 h-screen">
                         <div className="mt-6 text-sm sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600">
-                            <Essay />
+                            <ReferralEssay />
                         </div>
                     </div>
 

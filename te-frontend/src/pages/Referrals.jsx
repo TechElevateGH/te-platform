@@ -31,7 +31,7 @@ const mockReferralCompanies = [
         image: 'https://logo.clearbit.com/microsoft.com',
         referral_materials: {
             resume: true,
-            essay: true,
+            referralEssay: true,
             contact: true
         }
     },
@@ -41,7 +41,7 @@ const mockReferralCompanies = [
         image: 'https://logo.clearbit.com/amazon.com',
         referral_materials: {
             resume: true,
-            essay: false,
+            referralEssay: false,
             contact: true
         }
     },
@@ -51,7 +51,7 @@ const mockReferralCompanies = [
         image: 'https://logo.clearbit.com/google.com',
         referral_materials: {
             resume: true,
-            essay: true,
+            referralEssay: true,
             contact: false
         }
     },
@@ -61,7 +61,7 @@ const mockReferralCompanies = [
         image: 'https://logo.clearbit.com/apple.com',
         referral_materials: {
             resume: true,
-            essay: false,
+            referralEssay: false,
             contact: false
         }
     },
@@ -71,7 +71,7 @@ const mockReferralCompanies = [
         image: 'https://logo.clearbit.com/netflix.com',
         referral_materials: {
             resume: false,
-            essay: false,
+            referralEssay: false,
             contact: false
         }
     }
@@ -125,7 +125,7 @@ const Referrals = () => {
     }, [isLeadOrAdmin, accessToken]);
 
     // Count pending referrals (Pending status)
-    const pendingReferralsCount = allReferrals.filter(r => r.status === 'Pending').length;
+    const pendingReferralsCount = allReferrals.filter(r => r && r.status === 'Pending').length;
 
     // Handle export to Google Sheets
     const handleExportToSheets = async () => {
@@ -186,7 +186,7 @@ const Referrals = () => {
         const requirements = [];
         // Check actual resumes from context, not displayResumes which includes mock data
         if (company.referral_materials.resume) requirements.push(resumes.length !== 0);
-        if (company.referral_materials.essay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
+        if (company.referral_materials.referralEssay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
         if (company.referral_materials.contact) requirements.push(userInfo?.contact && userInfo.contact.trim() !== '');
 
         if (requirements.length === 0) return 'No Requirements';
@@ -448,14 +448,14 @@ const Referrals = () => {
                                                                         <span className="text-sm font-medium text-gray-700">Resume</span>
                                                                     </div>
                                                                 )}
-                                                                {company.referral_materials.essay && (
+                                                                {company.referral_materials.referralEssay && (
                                                                     <div className="flex items-center gap-2">
                                                                         {userInfo?.essay && userInfo.essay.trim() !== '' ? (
                                                                             <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                                                                         ) : (
                                                                             <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
                                                                         )}
-                                                                        <span className="text-sm font-medium text-gray-700">Essay</span>
+                                                                        <span className="text-sm font-medium text-gray-700">Referral Essay</span>
                                                                     </div>
                                                                 )}
                                                                 {company.referral_materials.contact && (
@@ -597,7 +597,7 @@ const Referrals = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
-                                                {allReferrals.map((referral) => (
+                                                {allReferrals.filter(r => r && r.status).map((referral) => (
                                                     <tr
                                                         key={referral.id}
                                                         className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150"

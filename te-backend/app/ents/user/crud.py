@@ -121,6 +121,31 @@ def update_essay(db: Database, user_id: str, *, data) -> str:
     return essay_text
 
 
+def read_user_cover_letter(db: Database, *, user_id: str) -> str:
+    """Read user cover letter from MongoDB"""
+    user = read_user_by_id(db, id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return user.cover_letter
+
+
+def add_user_cover_letter(
+    db: Database, *, user_id: str, data: user_schema.CoverLetter
+) -> str:
+    """Add/update user cover letter in MongoDB"""
+    from bson import ObjectId
+
+    result = db.users.update_one(
+        {"_id": ObjectId(user_id)}, {"$set": {"cover_letter": data.cover_letter}}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return data.cover_letter
+
+
 # def update(
 #     db: Database,
 #     *,

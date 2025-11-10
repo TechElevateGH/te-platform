@@ -58,6 +58,7 @@ class User(BaseModel):
     is_active: bool = True
     role: int  # UserRoles enum value
     essay: str = ""
+    cover_letter: str = ""
     mentor_id: Optional[PyObjectId] = None
 
     class Config:

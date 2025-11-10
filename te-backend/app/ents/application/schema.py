@@ -16,6 +16,8 @@ class Essay(BaseModel):
 class FileBase(BaseModel):
     name: str
     date: str
+    role: str = ""
+    notes: str = ""
 
 
 class File(FileBase):

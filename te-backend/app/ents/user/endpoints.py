@@ -15,7 +15,7 @@ router = APIRouter(prefix="/users")
 def get_user_by_id(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _: user_models.User = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -42,7 +42,7 @@ def create_user(
 def get_essay(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _: user_models.User = Depends(user_dependencies.get_current_user),
 ):
     essay = user_crud.read_user_essay(db, user_id=user_id)
@@ -53,9 +53,32 @@ def get_essay(
 def update_essay(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     data: user_schema.Essay,
     _: user_models.User = Depends(user_dependencies.get_current_user),
 ):
     essay = user_crud.add_user_essay(db, user_id=user_id, data=data)
     return user_schema.Essay(essay=essay)
+
+
+@router.get("/{user_id}/cover-letter", response_model=user_schema.CoverLetter)
+def get_cover_letter(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    _: user_models.User = Depends(user_dependencies.get_current_user),
+):
+    cover_letter = user_crud.read_user_cover_letter(db, user_id=user_id)
+    return user_schema.CoverLetter(cover_letter=cover_letter)
+
+
+@router.post("/{user_id}/cover-letter", response_model=user_schema.CoverLetter)
+def update_cover_letter(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    data: user_schema.CoverLetter,
+    _: user_models.User = Depends(user_dependencies.get_current_user),
+):
+    cover_letter = user_crud.add_user_cover_letter(db, user_id=user_id, data=data)
+    return user_schema.CoverLetter(cover_letter=cover_letter)
