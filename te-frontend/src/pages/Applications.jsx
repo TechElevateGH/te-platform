@@ -137,17 +137,23 @@ const Applications = () => {
     }, { total: 0, offers: 0, interviewing: 0, rejected: 0, pending: 0 });
 
     // Get unique levels and locations for filters
-    const uniqueLevels = ['All', ...new Set(applications.map(app => app.role))];
-    const uniqueLocations = ['All', ...new Set(applications.map(app => `${app.location.city}, ${app.location.country}`))];
+    const uniqueLevels = ['All', ...new Set(applications.map(app => app.role).filter(Boolean))];
+    const uniqueLocations = ['All', ...new Set(applications.map(app => {
+        if (app.location?.city && app.location?.country) {
+            return `${app.location.city}, ${app.location.country}`;
+        }
+        return null;
+    }).filter(Boolean))];
 
     // Filter applications
     const filteredApplications = applications.filter(app => {
-        const matchesSearch = app.company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            app.role.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = (app.company || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (app.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (app.role || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'All' || app.status === statusFilter;
         const matchesLevel = levelFilter === 'All' || app.role === levelFilter;
-        const matchesLocation = locationFilter === 'All' || `${app.location.city}, ${app.location.country}` === locationFilter;
+        const matchesLocation = locationFilter === 'All' ||
+            (app.location?.city ? `${app.location.city}, ${app.location.country}` : app.location?.country) === locationFilter;
         return matchesSearch && matchesStatus && matchesLevel && matchesLocation;
     });
 
@@ -157,7 +163,7 @@ const Applications = () => {
 
         switch (sortBy) {
             case 'company':
-                comparison = a.company.name.localeCompare(b.company.name);
+                comparison = (a.company || '').localeCompare(b.company || '');
                 break;
             case 'title':
                 comparison = a.title.localeCompare(b.title);
@@ -480,13 +486,22 @@ const Applications = () => {
                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-3">
-                                                        <img
-                                                            src={app.company.image}
-                                                            alt={app.company.name}
-                                                            className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow"
-                                                        />
+                                                        <div className="relative h-10 w-10 flex-shrink-0">
+                                                            <img
+                                                                src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                alt={app.company}
+                                                                className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow bg-white"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.nextSibling.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                            <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                                                <BuildingOfficeIcon className="h-5 w-5 text-white" />
+                                                            </div>
+                                                        </div>
                                                         <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xs">
-                                                            {app.company.name}
+                                                            {app.company}
                                                         </div>
                                                     </div>
                                                 </td>
@@ -504,8 +519,13 @@ const Applications = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                                        {app.location.city}, {app.location.country}
+                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                        <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                                                        <span>
+                                                            {app.location?.city
+                                                                ? `${app.location.city}, ${app.location.country}`
+                                                                : app.location?.country || 'Unknown'}
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">

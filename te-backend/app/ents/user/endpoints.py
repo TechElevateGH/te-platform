@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users")
 @router.get("/privileged", response_model=list[Dict[str, Any]])
 def get_all_privileged_users(
     db: Database = Depends(session.get_db),
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Get all privileged users (Admin only).
@@ -26,7 +26,7 @@ def get_all_privileged_users(
 @router.get("", response_model=list[Dict[str, Any]])
 def get_all_member_users(
     db: Database = Depends(session.get_db),
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Get all member users (Admin only).
@@ -45,12 +45,12 @@ def get_all_member_users(
     return result
 
 
-@router.get("/{user_id}", response_model=Dict[str, user_schema.UserRead])
+@router.get("/{user_id}", response_model=Dict[str, user_schema.MemberUserRead])
 def get_user_by_id(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get user with id `user_id`
@@ -62,35 +62,35 @@ def get_user_by_id(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
-    return {"user": user_schema.UserRead(**vars(user))}
+    return {"user": user_schema.MemberUserRead(**vars(user))}
 
 
-@router.patch("/{user_id}", response_model=Dict[str, user_schema.UserRead])
+@router.patch("/{user_id}", response_model=Dict[str, user_schema.MemberUserRead])
 def update_user_profile(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    data: user_schema.UserUpdate,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    data: user_schema.MemberUserUpdate,
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Update user profile information
     """
     updated_user = user_crud.update_user_profile(db, user_id=user_id, data=data)
-    return {"user": user_schema.UserRead(**vars(updated_user))}
+    return {"user": user_schema.MemberUserRead(**vars(updated_user))}
 
 
-@router.post("", response_model=Dict[str, user_schema.UserRead])
+@router.post("", response_model=Dict[str, user_schema.MemberUserRead])
 def create_user(
     *,
     db: Database = Depends(session.get_db),
-    data: user_schema.UserCreate,
+    data: user_schema.MemberUserCreate,
 ) -> Any:
     """
     Create a User.
     """
     new_user = user_crud.create_user(db, data=data)
-    return {"user": user_schema.UserRead(**vars(new_user))}
+    return {"user": user_schema.MemberUserRead(**vars(new_user))}
 
 
 @router.post("/leads", response_model=Dict[str, Any])
@@ -98,7 +98,7 @@ def create_lead_account(
     *,
     db: Database = Depends(session.get_db),
     data: user_schema.LeadCreate,
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Create a Lead account (Admin only).
@@ -118,7 +118,7 @@ def update_privileged_account(
     db: Database = Depends(session.get_db),
     user_id: str,
     data: user_schema.PrivilegedUserUpdate,
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Update a privileged user account (Admin only).
@@ -136,7 +136,7 @@ def create_referrer_account(
     *,
     db: Database = Depends(session.get_db),
     data: user_schema.ReferrerCreate,
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Create a Referrer account (Admin only).
@@ -156,7 +156,7 @@ def get_essay(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
     essay = user_crud.read_user_essay(db, user_id=user_id)
     return user_schema.Essay(essay=essay)
@@ -168,7 +168,7 @@ def update_essay(
     *,
     user_id: str,
     data: user_schema.Essay,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
     essay = user_crud.add_user_essay(db, user_id=user_id, data=data)
     return user_schema.Essay(essay=essay)
@@ -179,7 +179,7 @@ def get_cover_letter(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
     cover_letter = user_crud.read_user_cover_letter(db, user_id=user_id)
     return user_schema.CoverLetter(cover_letter=cover_letter)
@@ -191,7 +191,7 @@ def update_cover_letter(
     *,
     user_id: str,
     data: user_schema.CoverLetter,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
     cover_letter = user_crud.add_user_cover_letter(db, user_id=user_id, data=data)
     return user_schema.CoverLetter(cover_letter=cover_letter)
@@ -201,7 +201,7 @@ def update_cover_letter(
 def get_all_users_files(
     db: Database = Depends(session.get_db),
     *,
-    _: user_models.User = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
     Get all users with their files (Admin only).

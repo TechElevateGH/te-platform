@@ -38,8 +38,8 @@ class PyObjectId(ObjectId):
         return {"type": "string"}
 
 
-class User(BaseModel):
-    """MongoDB User document model for Members (role=1)"""
+class MemberUser(BaseModel):
+    """MongoDB MemberUser document model for Members (role=1)"""
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     email: EmailStr

@@ -60,8 +60,6 @@ class ApplicationBase(BaseModel):
     active: bool = True
     archived: bool = False
     date: str = None
-    role: referralcompany_schema.JobRoles
-    status: ApplicationStatuses
     role: str
     status: str
     referred: bool = False
@@ -73,17 +71,23 @@ class ApplicationCreate(ApplicationBase):
 
 
 class ApplicationReadBase(ApplicationBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
+    company: str
+    location: dict  # {"country": "...", "city": "..."}
 
 
-class ApplicationRead(ApplicationBase):
-    id: int
-    company: referralcompany_schema.CompanyReadBase
-    location: referralcompany_schema.LocationRead
+class ApplicationRead(ApplicationReadBase):
+    pass
+
+
+class ApplicationAdminRead(ApplicationReadBase):
+    """Application with user info for admin dashboard"""
+
+    user_name: str = ""
+    user_email: str = ""
 
 
 class ApplicationUpdateBase(BaseModel):
-    id: int
     status: str
     referred: bool
     notes: str
@@ -92,10 +96,4 @@ class ApplicationUpdateBase(BaseModel):
 
 
 class ApplicationUpdate(ApplicationUpdateBase):
-    id: int
-    status: str
-    referred: bool
-    notes: str
-    recruiter_name: str
-    recruiter_email: str
     location: referralcompany_schema.LocationBase

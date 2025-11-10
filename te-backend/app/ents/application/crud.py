@@ -6,8 +6,6 @@ from typing import Optional
 import app.core.service as service
 import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
-import app.ents.referralcompany.crud as referralcompany_crud
-import app.ents.referralcompany.schema as referralcompany_schema
 from fastapi import HTTPException
 import app.ents.user.crud as user_crud
 from app.core.settings import settings
@@ -16,7 +14,7 @@ from pymongo.database import Database
 
 
 def read_application_by_id(
-    db: Database, *, application_id: int
+    db: Database, *, application_id: str
 ) -> Optional[application_models.Application]:
     """Returns the `Application` with id `application_id`."""
 
@@ -35,55 +33,40 @@ def read_application_multi(
 
 
 def create_application(
-    db: Database, *, user_id: int, data: application_schema.ApplicationCreate
+    db: Database, *, user_id: str, data: application_schema.ApplicationCreate
 ):
     """Create an `Application` for user `user_id` with `data`."""
-    location = None
-    company = referralcompany_crud.read_company_by_name(db, name=data.company)
-    if not company:
-        company = referralcompany_crud.create_company(
-            db,
-            data=referralcompany_schema.CompanyCreate(
-                **{
-                    "name": data.company,
-                    "location": {
-                        "country": data.location.country,
-                        "city": data.location.city,
-                    },
-                    "domain": "",
-                }
-            ),
-        )
-        location = company.locations[0]
+    from bson import ObjectId
+    from datetime import date
 
-    if not location:
-        for loc in company.locations:
-            if loc.country == data.location.country and loc.city == data.location.city:
-                location = loc
-                break
-            if loc.country == data.location.country:
-                location = loc
+    # Create application document for MongoDB - just store company and location as simple data
+    application_data = {
+        "user_id": ObjectId(user_id),
+        "company": data.company,  # Store company name as string
+        "location": {
+            "country": data.location.country,
+            "city": data.location.city,
+        },
+        "date": date.today().strftime("%Y-%m-%d"),
+        "title": data.title,
+        "notes": data.notes,
+        "recruiter_name": data.recruiter_name,
+        "recruiter_email": data.recruiter_email,
+        "role": data.role,
+        "status": data.status,
+        "referred": data.referred,
+        "active": True,
+        "archived": False,
+    }
 
-        if not location:
-            location = referralcompany_crud.add_location(
-                db, company=company, data=data.location
-            ).locations[-1]
+    # Insert into MongoDB
+    result = db.applications.insert_one(application_data)
 
-    application = application_models.Application(
-        **(data.dict(exclude={"company", "location"}))
-    )
+    # Fetch the created document to return
+    created_application = db.applications.find_one({"_id": result.inserted_id})
 
-    application.company = company
-    application.location = location
-    application.date = date.today().strftime("%Y-%m-%d")
-
-    application.user_id = user_id
-
-    db.add(application)
-    db.commit()
-    db.refresh(application)
-
-    return application
+    # Convert to Application model and return
+    return application_models.Application(**created_application)
 
 
 def read_user_applications(
@@ -109,7 +92,7 @@ def read_all_applications(db: Database) -> list[application_models.Application]:
 
 
 def read_user_application(
-    db: Database, *, user_id: int, application_id: int
+    db: Database, *, user_id: str, application_id: str
 ) -> application_models.Application:
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
@@ -132,52 +115,46 @@ def read_user_application_files(
 def update_application(
     db: Database,
     *,
-    user_id: int,
-    application_id: int,
+    user_id: str,
+    application_id: str,
     data: application_schema.ApplicationUpdate,
 ) -> application_models.Application:
+    """Update an application with new data"""
+    from bson import ObjectId
+
+    # Verify user exists
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
-        ...
+        raise HTTPException(status_code=404, detail="User not found")
 
+    # Get the application
     application = read_application_by_id(db, application_id=application_id)
     if not application:
-        ...
+        raise HTTPException(status_code=404, detail="Application not found")
 
-    base_app = application_schema.ApplicationUpdateBase(**data.dict())
+    # Prepare update data
+    update_data = {
+        "status": data.status,
+        "referred": data.referred,
+        "notes": data.notes,
+        "recruiter_name": data.recruiter_name,
+        "recruiter_email": data.recruiter_email,
+        "location": {
+            "country": data.location.country,
+            "city": data.location.city,
+        },
+    }
 
-    location = None
-    for loc in application.company.locations:
-        if loc.country == data.location.country and loc.city == data.location.city:
-            location = loc
-            break
-        if loc.country == data.location.country:
-            location = loc
+    # Update in MongoDB
+    db.applications.update_one({"_id": ObjectId(application_id)}, {"$set": update_data})
 
-    if location and not location.city:
-        location.city = data.location.city
-        db.add(location)
-
-    elif not location:
-        location = referralcompany_crud.add_location(
-            db, company=application.company, data=data.location
-        ).locations[-1]
-
-    for key, value in base_app.dict().items():
-        setattr(application, key, value)
-
-    application.location = location
-
-    db.add(application)
-    db.commit()
-    db.refresh(application)
-    db.refresh(location)
-
-    return application
+    # Fetch and return updated application
+    updated_app = db.applications.find_one({"_id": ObjectId(application_id)})
+    return application_models.Application(**updated_app)
 
 
 def archive_application(
-    db: Database, *, user_id: int, application_id: int
+    db: Database, *, user_id: str, application_id: str
 ) -> application_models.Application:
     application = read_application_by_id(db, application_id=application_id)
     if not application:
@@ -196,7 +173,7 @@ def archive_application(
 
 
 def delete_application(
-    db: Database, *, application_id: int
+    db: Database, *, application_id: str
 ) -> application_models.Application:
     application = read_application_by_id(db, application_id=application_id)
     if not application:
@@ -212,7 +189,7 @@ def delete_application(
 
 
 def read_user_application_file_by_id(
-    db: Database, *, file_id: int, file_type: application_schema.FileType
+    db: Database, *, file_id: str, file_type: application_schema.FileType
 ) -> Optional[application_models.Application]:
     return (
         db.query(application_models.File)
@@ -323,7 +300,7 @@ def get_user_resumes_by_ids(
     return [application_models.File(**file) for file in files_data]
 
 
-def resume_review(db: Database, resume_id: int):
+def resume_review(db: Database, resume_id: str):
     # TODO: Implement resume review functionality
     ...
 

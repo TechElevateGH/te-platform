@@ -77,7 +77,7 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         return None
 
 
-def authenticate(db: Database, *, email: str, password: str) -> user_models.User:
+def authenticate(db: Database, *, email: str, password: str) -> user_models.MemberUser:
     user = user_crud.read_user_by_email(db, email=email)
     if not user:
         return None

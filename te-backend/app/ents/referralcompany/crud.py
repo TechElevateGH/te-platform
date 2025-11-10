@@ -59,7 +59,9 @@ def read_company_by_id(
     return referralcompany_models.Company(**company_data)
 
 
-def read_user_referrals(db: Database, *, user_id: str) -> list[referralcompany_models.Referral]:
+def read_user_referrals(
+    db: Database, *, user_id: str
+) -> list[referralcompany_models.Referral]:
     """
     Get all referrals for a specific user from MongoDB.
     """

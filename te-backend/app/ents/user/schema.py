@@ -60,7 +60,7 @@ class PrivilegedUserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-class UserBase(BaseModel):
+class MemberUserBase(BaseModel):
     email: EmailStr
     first_name: str
     middle_name: str = ""
@@ -80,12 +80,12 @@ class UserBase(BaseModel):
     end_date: str = ""
 
 
-class UserCreate(UserBase):
+class MemberUserCreate(MemberUserBase):
     password: str
 
 
-class UserUpdate(BaseModel):
-    """Schema for updating user profile information"""
+class MemberUserUpdate(BaseModel):
+    """Schema for updating member user profile information"""
 
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -95,7 +95,7 @@ class UserUpdate(BaseModel):
     image: Optional[str] = None
 
 
-class UserRead(UserBase): ...
+class MemberUserRead(MemberUserBase): ...
 
 
 class Essay(BaseModel):

@@ -23,7 +23,7 @@ def add_company(
     db: Database = Depends(session.get_db),
     *,
     data: referralcompany_schema.AdminCompanyCreate,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Add a new referral company to the system.
@@ -46,7 +46,7 @@ def get_referral_companies(
     db: Database = Depends(session.get_db),
     skip: int = 0,
     limit: int = 100,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Retrieve Companies.
@@ -68,7 +68,7 @@ def request_referral(
     db: Database = Depends(session.get_db),
     *,
     data: referralcompany_schema.ReferralRequest,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Request a referral for `user`
@@ -89,7 +89,7 @@ def get_user_referrals(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.User = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get all referrals of `user`.
@@ -112,7 +112,7 @@ def get_all_referrals(
     *,
     skip: int = 0,
     limit: int = 100,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get all referrals in the system.
@@ -168,7 +168,7 @@ def get_company_referrals(
     company_id: str,
     skip: int = 0,
     limit: int = 100,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get all referrals for a specific company (for Lead/Admin users only).
@@ -203,7 +203,7 @@ def get_referrals_by_status(
     status: str,
     skip: int = 0,
     limit: int = 100,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get all referrals with a specific status (for Lead/Admin users only).
@@ -238,7 +238,7 @@ def get_user_company_referrals(
     *,
     user_id: str,
     company_id: str,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get all referrals for a specific user at a specific company.
@@ -272,7 +272,7 @@ def review_referral(
     db: Database = Depends(session.get_db),
     referral_id: int,
     data: referralcompany_schema.ReferralUpdateStatus,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Update referral status and review note (Lead/Admin only).
@@ -298,7 +298,7 @@ def export_referrals_to_sheets(
     db: Database = Depends(session.get_db),
     *,
     referral_ids: list[int] = None,
-    user: user_models.User = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Export referrals to Google Sheets (Lead/Admin only).

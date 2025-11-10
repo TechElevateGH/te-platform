@@ -1,4 +1,4 @@
-from typing import Any, Union, Dict, List
+from typing import Any, Union, Dict
 
 import app.database.session as session
 import app.ents.application.crud as application_crud
@@ -6,7 +6,7 @@ import app.ents.application.dependencies as application_dependencies
 import app.ents.application.schema as application_schema
 import app.ents.user.dependencies as user_dependencies
 from app.utilities.errors import OperationCompleted, UnauthorizedUser
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status, HTTPException
 from pymongo.database import Database
 
 app_router = APIRouter(prefix="/applications")
@@ -58,6 +58,44 @@ def get_user_applications(
     }
 
 
+@app_router.get("/all")
+def get_all_applications(
+    db: Database = Depends(session.get_db),
+    current_user=Depends(user_dependencies.get_current_user),
+) -> Any:
+    """Retrieve all applications across members for admin dashboards."""
+    import app.ents.user.crud as user_crud
+
+    # Only allow admins/leads (role >= 5)
+    if user_dependencies.get_user_role(current_user) < 5:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    try:
+        applications = application_crud.read_all_applications(db)
+
+        enriched_apps: list[Dict[str, Any]] = []
+        for app in applications:
+            try:
+                parsed = application_dependencies.parse_application(app).model_dump()
+                user = user_crud.read_user_by_id(db, id=str(app.user_id))
+                parsed["user_name"] = user.full_name if user else "Unknown User"
+                parsed["user_email"] = user.email if user else ""
+                enriched_apps.append(parsed)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                print(f"Error processing application {app.id}: {exc}")
+                import traceback
+
+                traceback.print_exc()
+
+        return {"applications": enriched_apps}
+    except Exception as exc:
+        print(f"Error in get_all_applications: {exc}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Failed to load applications")
+
+
 @app_router.get(
     "/{application_id}",
     response_model=Dict[str, application_schema.ApplicationRead],
@@ -65,7 +103,7 @@ def get_user_applications(
 def get_user_application(
     db: Database = Depends(session.get_db),
     *,
-    application_id: int,
+    application_id: str,
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -85,7 +123,7 @@ def get_user_application(
 def update_user_application(
     db: Database = Depends(session.get_db),
     *,
-    application_id: int,
+    application_id: str,
     data: application_schema.ApplicationUpdate,
     current_user=Depends(user_dependencies.get_current_user),
 ):
@@ -238,26 +276,6 @@ def resume_review(
     """
     resumes = application_crud.resume_review(db, user_id)
     return {"resumes": [file_to_read(resume) for resume in resumes]}
-
-
-@app_router.get(
-    "/all", response_model=Dict[str, List[application_schema.ApplicationRead]]
-)
-def get_all_applications(
-    db: Database = Depends(session.get_db),
-    *,
-    admin_user=Depends(user_dependencies.get_current_admin),
-) -> Any:
-    """
-    Retrieve all applications from all users (Admin only).
-    Returns applications with user info for admin dashboard.
-    """
-    applications = application_crud.read_all_applications(db)
-    return {
-        "applications": [
-            application_dependencies.parse_application(app) for app in applications
-        ]
-    }
 
 
 @user_files_router.delete("/{file_id}", status_code=status.HTTP_200_OK)

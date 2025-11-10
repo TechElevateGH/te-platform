@@ -6,51 +6,53 @@ from fastapi import HTTPException, status
 from pymongo.database import Database
 
 
-def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.User]:
+def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.MemberUser]:
     """Read user by email from MongoDB"""
     user_data = db.member_users.find_one({"email": email})
     if user_data:
-        return user_models.User(**user_data)
+        return user_models.MemberUser(**user_data)
     return None
 
 
-def get_user_by_username(db: Database, *, username: str) -> Optional[user_models.User]:
+def get_user_by_username(
+    db: Database, *, username: str
+) -> Optional[user_models.MemberUser]:
     """Read user by username from MongoDB (for Lead/Admin login)"""
     user_data = db.member_users.find_one({"username": username})
     if user_data:
-        return user_models.User(**user_data)
+        return user_models.MemberUser(**user_data)
     return None
 
 
-def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.User]:
+def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.MemberUser]:
     """Read user by ID from MongoDB"""
     from bson import ObjectId
 
     try:
         user_data = db.member_users.find_one({"_id": ObjectId(id)})
         if user_data:
-            return user_models.User(**user_data)
+            return user_models.MemberUser(**user_data)
         return None
     except Exception:
         return None
 
 
-def is_user_active(db: Database, *, user: user_models.User) -> bool:
+def is_user_active(db: Database, *, user: user_models.MemberUser) -> bool:
     return user.is_active
 
 
 def read_users_by_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
-) -> list[user_models.User]:
+) -> list[user_models.MemberUser]:
     """Read users by role from MongoDB"""
     users_data = db.member_users.find({"role": role}).skip(skip).limit(limit)
-    return [user_models.User(**user) for user in users_data]
+    return [user_models.MemberUser(**user) for user in users_data]
 
 
-def read_all_users(db: Database) -> list[user_models.User]:
+def read_all_users(db: Database) -> list[user_models.MemberUser]:
     """Read all users from MongoDB (Admin only)"""
     users_data = db.member_users.find({})
-    return [user_models.User(**user) for user in users_data]
+    return [user_models.MemberUser(**user) for user in users_data]
 
 
 def read_all_privileged_users(db: Database) -> list[dict]:
@@ -75,17 +77,19 @@ def read_all_privileged_users(db: Database) -> list[dict]:
 
 def read_users_by_base_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
-) -> list[user_models.User]:
+) -> list[user_models.MemberUser]:
     """Read users by base role from MongoDB (role >= specified role)"""
     users_data = db.member_users.find({"role": {"$gte": role}}).skip(skip).limit(limit)
-    return [user_models.User(**user) for user in users_data]
+    return [user_models.MemberUser(**user) for user in users_data]
 
 
 def get_user_full_name(first_name, middle_name, last_name) -> str:
     return f"{first_name} {middle_name} {last_name}"
 
 
-def create_user(db: Database, *, data: user_schema.UserCreate) -> user_models.User:
+def create_user(
+    db: Database, *, data: user_schema.MemberUserCreate
+) -> user_models.MemberUser:
     """Create a new user in MongoDB"""
     user = read_user_by_email(db, email=data.email)
     if user:
@@ -114,7 +118,7 @@ def create_user(db: Database, *, data: user_schema.UserCreate) -> user_models.Us
 
     # Fetch and return the created user
     user_data = db.member_users.find_one({"_id": result.inserted_id})
-    return user_models.User(**user_data)
+    return user_models.MemberUser(**user_data)
 
 
 def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
@@ -292,8 +296,8 @@ def remove_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
 
 
 def update_user_profile(
-    db: Database, *, user_id: str, data: user_schema.UserUpdate
-) -> user_models.User:
+    db: Database, *, user_id: str, data: user_schema.MemberUserUpdate
+) -> user_models.MemberUser:
     """Update user profile in MongoDB"""
     from bson import ObjectId
 
@@ -315,7 +319,7 @@ def update_user_profile(
 
     # Fetch and return the updated user
     user_data = db.member_users.find_one({"_id": ObjectId(user_id)})
-    return user_models.User(**user_data)
+    return user_models.MemberUser(**user_data)
 
 
 def update_privileged_user(
@@ -388,9 +392,9 @@ def update_privileged_user(
 # def update(
 #     db: Database,
 #     *,
-#     db_obj: user_models.User,
-#     data: user_schema.UserUpdate | dict[str, Any],
-# ) -> user_models.User:
+#     db_obj: user_models.MemberUser,
+#     data: user_schema.MemberUserUpdate | dict[str, Any],
+# ) -> user_models.MemberUser:
 #     if isinstance(data, dict):
 #         update_data = data
 #     else:

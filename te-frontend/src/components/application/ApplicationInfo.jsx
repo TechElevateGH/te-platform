@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useState } from 'react'
-import { PencilIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/20/solid'
+import { PencilIcon, TrashIcon, ArchiveBoxIcon, BuildingOfficeIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import axiosInstance from '../../axiosConfig';
@@ -172,27 +172,34 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                 {application && (
                                     <>
                                         {/* Header */}
-                                        <div className="flex items-center justify-between border-b pb-3">
-                                            <div className="flex items-center">
-                                                <img
-                                                    width="32"
-                                                    height="32"
-                                                    alt=""
-                                                    className="rounded-lg"
-                                                    src={application.company.image}
-                                                />
-                                                <div className="ml-2.5">
-                                                    <h3 className="text-base font-semibold text-gray-900">
-                                                        {application.company.name}
+                                        <div className="flex items-center justify-between border-b dark:border-gray-700 pb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative h-10 w-10 flex-shrink-0">
+                                                    <img
+                                                        src={`https://logo.clearbit.com/${(application.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                        alt={application.company}
+                                                        className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white"
+                                                        onError={(e) => {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextSibling.style.display = 'flex';
+                                                        }}
+                                                    />
+                                                    <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center">
+                                                        <BuildingOfficeIcon className="h-5 w-5 text-white" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                                                        {application.company}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {application.title}, {application.role}
                                                     </p>
                                                 </div>
                                             </div>
                                             <button
                                                 type="button"
-                                                className="rounded-full bg-white p-1.5 text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                className="rounded-full bg-white dark:bg-gray-700 p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 onClick={isEditing ? handleCancel : handleEdit}
                                             >
                                                 <PencilIcon className="h-4 w-4" aria-hidden="true" />

@@ -156,7 +156,7 @@ def create_lesson(
     db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonCreate,
-    current_user: user_models.User = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
     Create a new lesson. Requires lead permissions (user type >= 2).
@@ -194,7 +194,7 @@ def update_lesson(
     db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonUpdate,
-    current_user: user_models.User = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
     Update an existing lesson. Requires lead permissions (user type >= 2).
@@ -233,7 +233,7 @@ def update_lesson(
 def delete_lesson(
     lesson_id: str,
     db: Database = Depends(session.get_db),
-    current_user: user_models.User = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
     Delete a lesson. Requires lead permissions (user type >= 2).
@@ -254,7 +254,7 @@ def lesson_file_upload(
     *,
     db: Database = Depends(session.get_db),
     file: UploadFile,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Create other lesson.
@@ -272,7 +272,7 @@ def lesson_file_upload(
 )
 def get_user_progress(
     db: Database = Depends(session.get_db),
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Get current user's learning progress.
@@ -296,7 +296,7 @@ def update_progress(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.ProgressUpdate,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Update user's learning progress.
@@ -326,7 +326,7 @@ def toggle_complete_topic(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicToggle,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Toggle completion status for a topic.
@@ -343,7 +343,7 @@ def toggle_bookmark_topic(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicToggle,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Toggle bookmark status for a topic.
@@ -362,7 +362,7 @@ def update_note(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicNote,
-    current_user: user_models.User = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Update or create a note for a topic.

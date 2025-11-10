@@ -7,9 +7,10 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
 
     const filteredCompanies =
         query === ''
-            ? companies.slice(0, 8) // Show top 8 companies by default
-            : companies
+            ? (companies || []).slice(0, 8) // Show top 8 companies by default
+            : (companies || [])
                 .filter((company) =>
+                    company &&
                     company
                         .toLowerCase()
                         .replace(/\s+/g, '')
@@ -18,8 +19,8 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                 .slice(0, 8)
 
     // Check if user is typing a custom company
-    const isCustomCompany = query !== '' && !companies.some(
-        company => company.toLowerCase() === query.toLowerCase()
+    const isCustomCompany = query !== '' && !(companies || []).some(
+        company => company && company.toLowerCase() === query.toLowerCase()
     )
 
     return (
@@ -38,7 +39,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
 
                         <Combobox.Input
                             className="w-full border-none py-2.5 pl-11 pr-10 text-sm leading-5 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-0 bg-transparent font-medium"
-                            displayValue={(company) => company}
+                            displayValue={(company) => company || ''}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
                                 if (event.key === 'Enter' && query) {
@@ -49,7 +50,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                         setQuery('');
                                         return;
                                     }
-                                    const exact = companies.find(c => c.toLowerCase() === query.toLowerCase());
+                                    const exact = (companies || []).find(c => c && c.toLowerCase() === query.toLowerCase());
                                     if (exact) {
                                         onChange(exact);
                                         setQuery('');
@@ -124,7 +125,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                     <p className="text-sm text-gray-500 dark:text-gray-400">No companies found.</p>
                                 </div>
                             ) : (
-                                filteredCompanies.map((company) => (
+                                filteredCompanies.map((company) => company && (
                                     <Combobox.Option
                                         key={company}
                                         value={company}
@@ -137,8 +138,8 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-shrink-0">
                                                     <img
-                                                        src={`https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`}
-                                                        alt={company}
+                                                        src={`https://logo.clearbit.com/${(company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                        alt={company || ''}
                                                         className="w-8 h-8 rounded-lg object-cover shadow-sm bg-white"
                                                         onError={(e) => {
                                                             e.target.style.display = 'none'

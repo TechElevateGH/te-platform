@@ -19,7 +19,7 @@ reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_STR}/auth/login"
 def get_current_user(
     db: Database = Depends(session.get_db),
     token=Depends(reusable_oauth2),
-) -> Union[user_models.User, user_models.PrivilegedUser]:
+) -> Union[user_models.MemberUser, user_models.PrivilegedUser]:
     try:
         payload = jwt.decode(
             token=token,
@@ -52,16 +52,16 @@ def get_current_user(
 
 
 def get_current_active_user(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
+    current_user: user_models.MemberUser = Depends(get_current_user),
+) -> user_models.MemberUser:
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
 def get_current_user_by_role(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
+    current_user: user_models.MemberUser = Depends(get_current_user),
+) -> user_models.MemberUser:
     """Get current user if they are at least a Member (role >= 1)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -73,8 +73,8 @@ def get_current_user_by_role(
 
 
 def get_current_lead(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
+    current_user: user_models.MemberUser = Depends(get_current_user),
+) -> user_models.MemberUser:
     """Get current user if they are at least a Lead (role >= 4)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -86,8 +86,8 @@ def get_current_lead(
 
 
 def get_current_admin(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
+    current_user: user_models.MemberUser = Depends(get_current_user),
+) -> user_models.MemberUser:
     """Get current user if they are an Admin (role >= 5)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")

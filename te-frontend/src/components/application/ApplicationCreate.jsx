@@ -51,8 +51,12 @@ const ApplicationCreate = ({ setAddApplication }) => {
                 },
             })
             .then((_) => {
-                setFetchApplications(true);
                 setShowSuccessFeedback(true);
+                // Close modal and trigger refetch after showing success message
+                setTimeout(() => {
+                    setFetchApplications(true);
+                    setAddApplication(null);
+                }, 1500);
             })
             .catch((error) => {
                 console.log(error);

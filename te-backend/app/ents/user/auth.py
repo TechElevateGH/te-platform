@@ -89,9 +89,9 @@ def lead_login_access_token(
     }
 
 
-# @router.post("/login/test-token", response_model=user_schema.UserRead)
+# @router.post("/login/test-token", response_model=user_schema.MemberUserRead)
 # def test_token(
-#     current_user: user_models.User = Depends(
+#     current_user: user_models.MemberUser = Depends(
 #         base_dependencies.get_current_user
 #     ),
 # ) -> Any:
