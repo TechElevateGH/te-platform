@@ -181,16 +181,26 @@ def update_referral_status(
     *,
     referral_id: str,
     data: referralcompany_schema.ReferralUpdateStatus,
+    user_role: int = None,
 ) -> referralcompany_models.Referral:
     """
-    Update referral status and review note (for Lead/Admin users) in MongoDB.
+    Update referral status and review note in MongoDB.
+    Sets feedback_date when a Referrer (role=2) provides feedback.
     """
     from bson import ObjectId
+    from datetime import datetime
 
     # Build update data
     update_data = {"status": data.status.value}
     if data.review_note:
         update_data["review_note"] = data.review_note
+
+    # Set feedback_date when Referrer provides feedback (only if not already set)
+    if user_role == 2:  # Referrer role
+        # Check if feedback_date is already set
+        existing = db.referrals.find_one({"_id": ObjectId(referral_id)})
+        if existing and not existing.get("feedback_date"):
+            update_data["feedback_date"] = datetime.now().strftime("%d-%m-%Y")
 
     # Update in MongoDB
     result = db.referrals.update_one(

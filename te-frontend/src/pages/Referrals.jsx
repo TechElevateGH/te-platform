@@ -15,7 +15,8 @@ import {
     FunnelIcon,
     SparklesIcon,
     BellAlertIcon,
-    ArrowDownTrayIcon
+    ArrowDownTrayIcon,
+    ClipboardDocumentIcon
 } from '@heroicons/react/20/solid'
 import {
     CheckBadgeIcon,
@@ -90,10 +91,11 @@ const Referrals = () => {
         userInfo
     } = useData();
 
-    // Determine if user has elevated privileges (Lead or Admin)
-    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    // Determine if user has elevated privileges (Referrer and above)
+    // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
     const isMember = userRole && parseInt(userRole) === 1; // Only Members can request referrals
+    const isReferrer = userRole && parseInt(userRole) === 2; // Referrer role
 
     // State for view toggle
     const [viewMode, setViewMode] = useState('companies'); // 'companies', 'my-requests', or 'all-requests'
@@ -104,6 +106,7 @@ const Referrals = () => {
     const [isExporting, setIsExporting] = useState(false);
     const [selectedReferralIds, setSelectedReferralIds] = useState([]);
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+    const [copiedField, setCopiedField] = useState(null); // Track which field was copied
 
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -193,6 +196,42 @@ const Referrals = () => {
         setAllReferrals(prev =>
             prev.map(ref => ref.id === updatedReferral.id ? updatedReferral : ref)
         );
+    };
+
+    // Handle inline status update
+    const handleInlineStatusUpdate = async (referralId, newStatus) => {
+        try {
+            const response = await axiosInstance.patch(
+                `/referrals/${referralId}`,
+                {
+                    status: newStatus,
+                    review_note: '' // Empty note for inline updates
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            if (response.data.referral) {
+                handleReferralUpdate(response.data.referral);
+            }
+        } catch (error) {
+            console.error('Error updating referral status:', error);
+            alert('Failed to update status. Please try again.');
+        }
+    };
+
+    // Copy to clipboard function
+    const copyToClipboard = async (text, fieldId) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedField(fieldId);
+            setTimeout(() => setCopiedField(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
     };
 
     // Toggle referral selection for export
@@ -546,23 +585,25 @@ const Referrals = () => {
                             {/* Filters */}
                             <div className="mb-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-colors">
                                 <div className="flex items-center gap-4 flex-wrap">
-                                    {/* Status Filter */}
-                                    <div className="flex-1 min-w-[180px]">
-                                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
-                                            Status
-                                        </label>
-                                        <select
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        >
-                                            <option value="">All Statuses</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="Declined">Declined</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                        </select>
-                                    </div>
+                                    {/* Status Filter - Hidden for Referrers */}
+                                    {!isReferrer && (
+                                        <div className="flex-1 min-w-[180px]">
+                                            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
+                                                Status
+                                            </label>
+                                            <select
+                                                value={statusFilter}
+                                                onChange={(e) => setStatusFilter(e.target.value)}
+                                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            >
+                                                <option value="">All Statuses</option>
+                                                <option value="Pending">Pending</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Declined">Declined</option>
+                                                <option value="Cancelled">Cancelled</option>
+                                            </select>
+                                        </div>
+                                    )}
 
                                     {/* Company Filter */}
                                     <div className="flex-1 min-w-[200px]">
@@ -593,7 +634,7 @@ const Referrals = () => {
                                     </div>
 
                                     {/* Clear Filters */}
-                                    {(statusFilter !== 'Pending' || companyFilter || memberFilter) && (
+                                    {((!isReferrer && statusFilter !== 'Pending') || companyFilter || memberFilter) && (
                                         <div className="flex items-end">
                                             <button
                                                 onClick={() => {
@@ -601,7 +642,7 @@ const Referrals = () => {
                                                     setCompanyFilter('');
                                                     setMemberFilter('');
                                                 }}
-                                                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+                                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
                                             >
                                                 Clear Filters
                                             </button>
@@ -612,38 +653,57 @@ const Referrals = () => {
 
                             {/* Export Controls */}
                             {filteredAllReferrals.length > 0 && (
-                                <div className="mb-4 flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-colors">
-                                    <div className="flex items-center gap-2">
-                                        <BellAlertIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                                            {pendingReferralsCount} pending request{pendingReferralsCount !== 1 ? 's' : ''}
-                                        </span>
+                                <>
+                                    {/* Tip Banner */}
+                                    <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl p-4 transition-colors">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-shrink-0">
+                                                <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-1">Quick Tip</h4>
+                                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                    You can update the status directly in the table. To leave feedback notes, click <span className="font-semibold">"View Details"</span> and add your note before updating.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        {selectedReferralIds.length > 0 && (
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                {selectedReferralIds.length} selected
+
+                                    <div className="mb-4 flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-colors">
+                                        <div className="flex items-center gap-2">
+                                            <BellAlertIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                                {pendingReferralsCount} pending request{pendingReferralsCount !== 1 ? 's' : ''}
                                             </span>
-                                        )}
-                                        <button
-                                            onClick={handleExportToSheets}
-                                            disabled={isExporting}
-                                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                                        >
-                                            {isExporting ? (
-                                                <>
-                                                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                                                    Exporting...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <ArrowDownTrayIcon className="h-4 w-4" />
-                                                    Export to Sheets
-                                                </>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {selectedReferralIds.length > 0 && (
+                                                <span className="text-sm text-gray-600 dark:text-gray-300">
+                                                    {selectedReferralIds.length} selected
+                                                </span>
                                             )}
-                                        </button>
+                                            <button
+                                                onClick={handleExportToSheets}
+                                                disabled={isExporting}
+                                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                            >
+                                                {isExporting ? (
+                                                    <>
+                                                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                        Exporting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ArrowDownTrayIcon className="h-4 w-4" />
+                                                        Export to Sheets
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                </>
                             )}
 
                             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
@@ -685,22 +745,19 @@ const Referrals = () => {
                                                         />
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Member
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Company
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Role
+                                                        Position
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Job Title
+                                                        Member
+                                                    </th>
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                        Contact
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Status
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                        Date
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Actions
@@ -711,7 +768,7 @@ const Referrals = () => {
                                                 {filteredAllReferrals.map((referral) => (
                                                     <tr
                                                         key={referral.id}
-                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150"
+                                                        className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150"
                                                     >
                                                         <td className="px-3 py-4">
                                                             <input
@@ -720,12 +777,6 @@ const Referrals = () => {
                                                                 onChange={() => toggleReferralSelection(referral.id)}
                                                                 className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                                                             />
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <div>
-                                                                <div className="font-semibold text-gray-900 dark:text-white">{referral.user_name}</div>
-                                                                <div className="text-xs text-gray-500 dark:text-gray-400">{referral.user_email}</div>
-                                                            </div>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
@@ -740,33 +791,83 @@ const Referrals = () => {
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{referral.role}</span>
+                                                            <div>
+                                                                <div className="font-semibold text-gray-900 dark:text-white">{referral.job_title}</div>
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400">{referral.role}</div>
+                                                            </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{referral.job_title}</span>
+                                                            <div className="space-y-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referral.user_name}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(referral.user_name, `name-${referral.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy name"
+                                                                    >
+                                                                        {copiedField === `name-${referral.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">{referral.user_email}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(referral.user_email, `email-${referral.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy email"
+                                                                    >
+                                                                        {copiedField === `email-${referral.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-full ${referral.status === 'Completed'
-                                                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                                : referral.status === 'Pending'
-                                                                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                                                                    : referral.status === 'Declined'
-                                                                        ? 'bg-red-100 text-red-700 border border-red-200'
-                                                                        : referral.status === 'Canceled'
-                                                                            ? 'bg-gray-100 text-gray-700 border border-gray-200'
-                                                                            : 'bg-blue-100 text-blue-700 border border-blue-200'
-                                                                }`}>
-                                                                {referral.status === 'Pending' && (
-                                                                    <span className="relative flex h-2 w-2">
-                                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                                                                    </span>
-                                                                )}
-                                                                {referral.status}
-                                                            </span>
+                                                            {referral.contact ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-sm text-gray-700 dark:text-gray-200">{referral.contact}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(referral.contact, `contact-${referral.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy contact"
+                                                                    >
+                                                                        {copiedField === `contact-${referral.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
+                                                            )}
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-600 dark:text-gray-300">{referral.date}</span>
+                                                            <select
+                                                                value={referral.status}
+                                                                onChange={(e) => handleInlineStatusUpdate(referral.id, e.target.value)}
+                                                                className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${referral.status === 'Completed'
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
+                                                                    : referral.status === 'Pending'
+                                                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
+                                                                        : referral.status === 'Declined'
+                                                                            ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
+                                                                            : referral.status === 'Cancelled'
+                                                                                ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
+                                                                                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
+                                                                    }`}
+                                                            >
+                                                                <option value="Pending">Pending</option>
+                                                                <option value="Completed">Completed</option>
+                                                                <option value="Declined">Declined</option>
+                                                                <option value="Cancelled">Cancelled</option>
+                                                            </select>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <button
@@ -774,7 +875,7 @@ const Referrals = () => {
                                                                     setSelectedReferral(referral);
                                                                     setIsManagementModalOpen(true);
                                                                 }}
-                                                                className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-all"
+                                                                className="px-3 py-1.5 bg-blue-600 dark:bg-blue-700 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all"
                                                             >
                                                                 View Details
                                                             </button>

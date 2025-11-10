@@ -27,12 +27,12 @@ def add_company(
 ) -> Any:
     """
     Add a new referral company to the system.
-    Requires role: Volunteer (3), Lead (4), or Admin (5).
+    Requires role: Referrer (2), Volunteer (3), Lead (4), or Admin (5).
     """
-    from app.core.permissions import require_volunteer
+    from app.core.permissions import require_referrer
 
-    # Require at least Volunteer level to add companies
-    require_volunteer(user)
+    # Require at least Referrer level to add companies
+    require_referrer(user)
 
     company = referralcompany_crud.create_admin_company(db, data=data)
     return {"company": referralcompany_dependencies.parse_company_basic(company)}
@@ -263,6 +263,69 @@ def get_user_company_referrals(
     }
 
 
+@referral_router.patch(
+    "/{referral_id}",
+    response_model=Dict[str, referralcompany_schema.ReferralReadWithUser],
+)
+def update_referral(
+    *,
+    db: Database = Depends(session.get_db),
+    referral_id: str,
+    data: referralcompany_schema.ReferralUpdateStatus,
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Update referral status and review note.
+    - Referrers (role=2): Can only update referrals for their assigned company
+    - Lead/Admin (role>=4): Can update any referral
+    """
+    from app.core.permissions import is_referrer, require_referrer
+    from bson import ObjectId
+
+    # Require at least Referrer level access
+    require_referrer(user)
+
+    # Get the referral first to check access
+    referral_data = db.referrals.find_one({"_id": ObjectId(referral_id)})
+    if not referral_data:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    # If user is a Referrer, verify they have access to this referral
+    if is_referrer(user):
+        if not user.company_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Referrer account has no assigned company",
+            )
+        # Get company name from company_id
+        company = db.companies.find_one({"_id": ObjectId(user.company_id)})
+        if not company:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Assigned company not found",
+            )
+        company_name = company.get("name", "")
+
+        # Verify referral belongs to this referrer's company
+        if referral_data.get("company_name") != company_name:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to update this referral",
+            )
+
+    # Update the referral, passing user role for feedback_date tracking
+    from app.core.permissions import get_user_role
+
+    referral = referralcompany_crud.update_referral_status(
+        db, referral_id=referral_id, data=data, user_role=get_user_role(user)
+    )
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    return {"referral": referralcompany_dependencies.parse_referral_with_user(referral)}
+
+
 @referral_router.post(
     "/{referral_id}/review",
     response_model=Dict[str, referralcompany_schema.ReferralReadWithUser],
@@ -270,18 +333,21 @@ def get_user_company_referrals(
 def review_referral(
     *,
     db: Database = Depends(session.get_db),
-    referral_id: int,
+    referral_id: str,
     data: referralcompany_schema.ReferralUpdateStatus,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
     Update referral status and review note (Lead/Admin only).
+    DEPRECATED: Use PATCH /{referral_id} instead.
     """
+    from app.core.permissions import get_user_role
+
     # Check if user has elevated privileges
     require_lead(user)
 
     referral = referralcompany_crud.update_referral_status(
-        db, referral_id=referral_id, data=data
+        db, referral_id=referral_id, data=data, user_role=get_user_role(user)
     )
 
     if not referral:

@@ -16,6 +16,7 @@ import {
     ChartBarIcon,
     ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
+import { ClipboardDocumentIcon } from '@heroicons/react/20/solid';
 
 const AdminReferrals = () => {
     const { accessToken } = useAuth();
@@ -23,11 +24,12 @@ const AdminReferrals = () => {
     const [loading, setLoading] = useState(true);
     const [showAddCompany, setShowAddCompany] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('Pending');
     const [memberFilter, setMemberFilter] = useState('');
     const [companyFilter, setCompanyFilter] = useState('');
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+    const [copiedField, setCopiedField] = useState(null);
 
     // Advanced Features State
     const [sortBy, setSortBy] = useState('date_desc');
@@ -35,15 +37,15 @@ const AdminReferrals = () => {
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [showDateFilter, setShowDateFilter] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState({
-        member: true,
-        email: true,
         company: true,
         jobTitle: true,
+        member: true,
+        contact: true,
         status: true,
-        date: true,
+        actions: true,
+        email: false,
         resume: false,
-        essay: false,
-        actions: true
+        essay: false
     });
 
     // Column Management
@@ -53,26 +55,26 @@ const AdminReferrals = () => {
 
     const resetColumns = () => {
         setVisibleColumns({
-            member: true,
-            email: true,
             company: true,
             jobTitle: true,
+            member: true,
+            contact: true,
             status: true,
-            date: true,
+            actions: true,
+            email: false,
             resume: false,
-            essay: false,
-            actions: true
+            essay: false
         });
     };
 
     const showAllColumns = () => {
         setVisibleColumns({
-            member: true,
-            email: true,
             company: true,
             jobTitle: true,
+            member: true,
+            email: true,
+            contact: true,
             status: true,
-            date: true,
             resume: true,
             essay: true,
             actions: true
@@ -152,6 +154,39 @@ const AdminReferrals = () => {
         );
     };
 
+    // Handle inline status update
+    const handleInlineStatusUpdate = async (referralId, newStatus) => {
+        try {
+            const response = await axiosInstance.patch(
+                `/referrals/${referralId}`,
+                { status: newStatus },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            if (response.data.referral) {
+                handleReferralUpdate(response.data.referral);
+            }
+        } catch (error) {
+            console.error('Error updating referral status:', error);
+            alert('Failed to update status. Please try again.');
+        }
+    };
+
+    // Copy to clipboard function
+    const copyToClipboard = async (text, fieldName) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedField(fieldName);
+            setTimeout(() => setCopiedField(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
     // Filter referrals
     const filteredReferrals = referrals.filter(ref => {
         const matchesSearch = !searchQuery ||
@@ -209,14 +244,14 @@ const AdminReferrals = () => {
 
     // CSV Export
     const exportToCSV = () => {
-        const headers = ['Member', 'Email', 'Company', 'Job Title', 'Status', 'Date', 'Resume', 'Essay'];
+        const headers = ['Company', 'Job Title', 'Member', 'Email', 'Contact', 'Status', 'Resume', 'Essay'];
         const rows = sortedReferrals.map(ref => [
-            ref.user_name || '',
-            ref.user_email || '',
             ref.company?.name || '',
             ref.job_title || '',
+            ref.user_name || '',
+            ref.user_email || '',
+            ref.contact || '',
             ref.status || '',
-            ref.submitted_date || '',
             ref.has_resume ? 'Yes' : 'No',
             ref.has_essay ? 'Yes' : 'No'
         ]);
@@ -242,16 +277,6 @@ const AdminReferrals = () => {
         approved: referrals.filter(r => r?.status === 'Approved').length,
         declined: referrals.filter(r => r?.status === 'Declined').length,
         completed: referrals.filter(r => r?.status === 'Completed').length,
-    };
-
-    const getStatusColor = (status) => {
-        const colors = {
-            Pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-            Approved: 'bg-green-100 text-green-700 border-green-200',
-            Declined: 'bg-red-100 text-red-700 border-red-200',
-            Completed: 'bg-blue-100 text-blue-700 border-blue-200',
-        };
-        return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200';
     };
 
     if (loading) {
@@ -532,6 +557,16 @@ const AdminReferrals = () => {
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                    {visibleColumns.company && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Company
+                                        </th>
+                                    )}
+                                    {visibleColumns.jobTitle && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Position
+                                        </th>
+                                    )}
                                     {visibleColumns.member && (
                                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Member
@@ -542,24 +577,14 @@ const AdminReferrals = () => {
                                             Email
                                         </th>
                                     )}
-                                    {visibleColumns.company && (
+                                    {visibleColumns.contact && (
                                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Company
-                                        </th>
-                                    )}
-                                    {visibleColumns.jobTitle && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Job Title
+                                            Contact
                                         </th>
                                     )}
                                     {visibleColumns.status && (
                                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Status
-                                        </th>
-                                    )}
-                                    {visibleColumns.date && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Submitted
                                         </th>
                                     )}
                                     {visibleColumns.resume && (
@@ -590,27 +615,13 @@ const AdminReferrals = () => {
                                     sortedReferrals.map((ref) => (
                                         <tr
                                             key={ref.id}
-                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
+                                            className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
                                         >
-                                            {visibleColumns.member && (
-                                                <td className="px-4 py-3">
-                                                    <div className="font-medium text-gray-900 dark:text-white text-sm">
-                                                        {ref.user_name}
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.email && (
-                                                <td className="px-4 py-3">
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
-                                                        {ref.user_email}
-                                                    </div>
-                                                </td>
-                                            )}
                                             {visibleColumns.company && (
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2">
                                                         {ref.company?.image && (
-                                                            <div className="h-6 w-6 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                            <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
                                                                 <img
                                                                     src={ref.company.image}
                                                                     alt={ref.company.name}
@@ -618,7 +629,7 @@ const AdminReferrals = () => {
                                                                 />
                                                             </div>
                                                         )}
-                                                        <span className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                                                        <span className="font-medium text-gray-900 dark:text-white text-sm">
                                                             {ref.company?.name}
                                                         </span>
                                                     </div>
@@ -626,23 +637,107 @@ const AdminReferrals = () => {
                                             )}
                                             {visibleColumns.jobTitle && (
                                                 <td className="px-4 py-3">
-                                                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                                                        {ref.job_title}
-                                                    </span>
+                                                    <div>
+                                                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.member && (
+                                                <td className="px-4 py-3">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
+                                                            <button
+                                                                onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
+                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                title="Copy name"
+                                                            >
+                                                                {copiedField === `name-${ref.id}` ? (
+                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                            <button
+                                                                onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                title="Copy email"
+                                                            >
+                                                                {copiedField === `email-${ref.id}` ? (
+                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.email && (
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                        <button
+                                                            onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
+                                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Copy email"
+                                                        >
+                                                            {copiedField === `email-standalone-${ref.id}` ? (
+                                                                <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                            ) : (
+                                                                <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.contact && (
+                                                <td className="px-4 py-3">
+                                                    {ref.contact ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{ref.contact}</span>
+                                                            <button
+                                                                onClick={() => copyToClipboard(ref.contact, `contact-${ref.id}`)}
+                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                title="Copy contact"
+                                                            >
+                                                                {copiedField === `contact-${ref.id}` ? (
+                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                ) : (
+                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
+                                                    )}
                                                 </td>
                                             )}
                                             {visibleColumns.status && (
                                                 <td className="px-4 py-3">
-                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(ref.status)}`}>
-                                                        {ref.status}
-                                                    </span>
-                                                </td>
-                                            )}
-                                            {visibleColumns.date && (
-                                                <td className="px-4 py-3">
-                                                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                        {ref.submitted_date || ref.date || 'N/A'}
-                                                    </span>
+                                                    <select
+                                                        value={ref.status}
+                                                        onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                        className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
+                                                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
+                                                            : ref.status === 'Pending'
+                                                                ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
+                                                                : ref.status === 'Declined'
+                                                                    ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
+                                                                    : ref.status === 'Cancelled'
+                                                                        ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
+                                                                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
+                                                            }`}
+                                                    >
+                                                        <option value="Pending">Pending</option>
+                                                        <option value="Completed">Completed</option>
+                                                        <option value="Declined">Declined</option>
+                                                        <option value="Cancelled">Cancelled</option>
+                                                    </select>
                                                 </td>
                                             )}
                                             {visibleColumns.resume && (

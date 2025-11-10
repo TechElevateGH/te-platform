@@ -84,6 +84,7 @@ class Referral(BaseModel):
     contact: str = ""  # User's contact info
     essay: str = ""  # Referral essay/cover letter URL
     referral_date: str
+    feedback_date: Optional[str] = None  # Date when referrer provided feedback
     status: str  # ReferralStatuses enum value
 
     class Config:

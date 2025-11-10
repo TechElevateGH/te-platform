@@ -2,7 +2,6 @@ import { Fragment, useState, useEffect, useCallback, useMemo } from 'react'
 import {
     FolderIcon,
     XMarkIcon,
-    UserCircleIcon,
     UserGroupIcon,
 
 } from '@heroicons/react/24/outline'
@@ -33,7 +32,11 @@ const Workspace = ({ setLogin }) => {
     const location = useLocation();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const [content, setContent] = useState("Applications")
+
+    // Set default content based on role - Referrers go to Referrals by default
+    const userRoleInt = userRole ? parseInt(userRole) : 0;
+    const defaultContent = userRoleInt === 2 ? "Referrals" : "Applications";
+    const [content, setContent] = useState(defaultContent)
 
     // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const isLeadOrAdmin = userRole && parseInt(userRole) >= 4;
@@ -42,15 +45,21 @@ const Workspace = ({ setLogin }) => {
 
     // Dynamic navigation based on role
     const navigation = useMemo(() => {
+        // Referrers only see Referrals
+        if (isReferrer) {
+            return [
+                { name: 'Referrals', type: "app", icon: FolderIcon },
+            ];
+        }
+
         const baseNavigation = [
-            { name: 'Profile', type: "app", icon: UserCircleIcon },
+            // { name: 'Profile', type: "app", icon: UserCircleIcon },
             { name: 'Applications', type: "app", icon: BriefcaseIcon },
             { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
             { name: 'Referrals', type: "app", icon: FolderIcon },
             { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
             { name: 'Learning', type: "learn", icon: BookOpenIcon },
             { name: 'Practice', type: "learn", icon: CodeBracketIcon },
-            { name: 'Other files', type: "other", icon: FolderIcon },
         ];
 
         // Admin gets additional Account Management section
@@ -62,7 +71,7 @@ const Workspace = ({ setLogin }) => {
         }
 
         return baseNavigation;
-    }, [isAdmin]);
+    }, [isAdmin, isReferrer]);
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {

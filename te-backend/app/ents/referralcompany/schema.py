@@ -93,6 +93,7 @@ class ReferralReadBase(BaseModel):
     request_note: str = ""
     review_note: Optional[str] = ""
     date: str
+    feedback_date: Optional[str] = None
     status: ReferralStatuses
     resume: str = ""
     contact: str = ""  # User's contact info
