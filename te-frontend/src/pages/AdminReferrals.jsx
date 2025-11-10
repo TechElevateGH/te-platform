@@ -25,7 +25,6 @@ const AdminReferrals = () => {
     const [statusFilter, setStatusFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
     const [companyFilter, setCompanyFilter] = useState('');
-    const [processingId, setProcessingId] = useState(null);
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
 

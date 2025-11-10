@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import axiosInstance from '../../axiosConfig';
 
 import { countries } from '../../data/data';
 import { FormCheckBox, FormInput, FormSelect } from '../_custom/FormInputs';
@@ -10,7 +9,7 @@ import { setNestedPropertyValue } from '../../utils';
 
 const CompanyCreate = ({ setCreateCompany }) => {
 
-    const [companyData, setCompanyData] = useState({});
+    const [, setCompanyData] = useState({});
 
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 

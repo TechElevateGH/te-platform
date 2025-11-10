@@ -67,12 +67,12 @@ const Practice = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                             Practice
                         </h1>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                             Master coding interviews with these recommended platforms
                         </p>
                     </div>
@@ -80,7 +80,7 @@ const Practice = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                 {/* Hero Section */}
                 <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-1 mb-12">
                     <div className="bg-white rounded-3xl p-8 md:p-12">

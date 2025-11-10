@@ -1,9 +1,7 @@
 from enum import Enum
-from typing import Optional
 
 import app.ents.referralcompany.schema as referralcompany_schema
-from pydantic import BaseModel, Field
-from app.ents.application.models import PyObjectId
+from pydantic import BaseModel
 
 
 class FileType(str, Enum):

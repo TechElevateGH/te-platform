@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import app.database.session as session
 import app.ents.application.crud as application_crud

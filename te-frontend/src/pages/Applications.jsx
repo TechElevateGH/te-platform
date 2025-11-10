@@ -231,7 +231,7 @@ const Applications = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Premium Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 py-3">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             <div>
@@ -292,7 +292,7 @@ const Applications = () => {
 
             {/* Main Content - Always Show */}
             {!fetchApplications && (
-                <div className="max-w-7xl mx-auto px-4 py-3">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     {/* Compact Search and Filter Bar */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200/80 p-3 mb-3">
                         <div className="flex items-center gap-2">

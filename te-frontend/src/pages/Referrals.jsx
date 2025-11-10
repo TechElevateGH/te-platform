@@ -244,7 +244,7 @@ const Referrals = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Ultra Compact Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-3">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between mb-2.5">
                         <div>
                             <h1 className="text-lg font-semibold text-gray-900 mb-0.5">
@@ -387,7 +387,7 @@ const Referrals = () => {
 
             {/* Main Content */}
             {(!fetchReferralCompanies) && (
-                <div className="max-w-7xl mx-auto px-6 py-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                     {/* Companies View (for all users) */}
                     {viewMode === 'companies' && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -516,8 +516,8 @@ const Referrals = () => {
                                                                 disabled={!isMember}
                                                                 title={!isMember ? "Only Members can request referrals" : ""}
                                                                 className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
-                                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
-                                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
+                                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                                                     }`}
                                                             >
                                                                 Request Referral

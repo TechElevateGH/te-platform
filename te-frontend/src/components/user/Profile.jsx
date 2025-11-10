@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
 import {
     UserCircleIcon,
     EnvelopeIcon,
@@ -11,24 +10,20 @@ import {
     XMarkIcon,
     ExclamationCircleIcon,
     CheckCircleIcon,
-    ShieldCheckIcon,
-    UserGroupIcon
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
-import CreateLeadAdmin from './CreateLeadAdmin';
 import EditPrivilegedAccount from './EditPrivilegedAccount';
 
 const Profile = () => {
-    const navigate = useNavigate();
     const { userInfo, setUserInfo } = useData();
     const { userId, accessToken, userRole } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
     const [errors, setErrors] = useState({});
-    const [showCreateLeadAdmin, setShowCreateLeadAdmin] = useState(false);
     const [showEditPrivileged, setShowEditPrivileged] = useState(false);
 
     // Check user role (Admin=5, Lead=4, Volunteer=3, Referrer=2, Member=1)
@@ -166,22 +161,34 @@ const Profile = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div className="flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                                 Profile
                             </h1>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-xs sm:text-sm text-gray-600">
                                 {isPrivilegedUser ? 'Administrative account management' : 'Manage your personal information and preferences'}
                             </p>
                         </div>
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-2 sm:gap-3">
+                            {/* Admin: Edit My Account button (when viewing own privileged account) */}
+                            {isAdmin && isPrivilegedUser && (
+                                <button
+                                    onClick={() => setShowEditPrivileged(true)}
+                                    className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm"
+                                >
+                                    <PencilIcon className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Edit My Account</span>
+                                    <span className="sm:hidden">Edit</span>
+                                </button>
+                            )}
+
                             {/* Only show edit for Member users */}
                             {!isPrivilegedUser && !isEditing && (
                                 <button
                                     onClick={handleEdit}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
+                                    className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm"
                                 >
                                     <PencilIcon className="h-4 w-4" />
                                     <span>Edit Profile</span>
@@ -189,19 +196,19 @@ const Profile = () => {
                             )}
 
                             {!isPrivilegedUser && isEditing && (
-                                <div className="flex gap-3">
+                                <div className="flex gap-2 sm:gap-3">
                                     <button
                                         onClick={handleCancel}
                                         disabled={isSaving}
-                                        className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <XMarkIcon className="h-4 w-4" />
-                                        <span>Cancel</span>
+                                        <span className="hidden sm:inline">Cancel</span>
                                     </button>
                                     <button
                                         onClick={handleSave}
                                         disabled={isSaving}
-                                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isSaving ? (
                                             <>
@@ -243,25 +250,25 @@ const Profile = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                 {/* Privileged User Profile */}
                 {isPrivilegedUser ? (
-                    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-                        <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 h-32"></div>
-                        <div className="px-8 py-8">
-                            <div className="flex items-start gap-6 -mt-16">
-                                <div className="w-32 h-32 bg-white rounded-2xl border-4 border-white shadow-xl flex items-center justify-center">
-                                    <ShieldCheckIcon className="h-20 w-20 text-purple-600" />
+                    <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 h-24 sm:h-32"></div>
+                        <div className="px-4 sm:px-8 py-6 sm:py-8">
+                            <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 -mt-12 sm:-mt-16">
+                                <div className="w-20 h-20 sm:w-32 sm:h-32 bg-white rounded-xl sm:rounded-2xl border-4 border-white shadow-xl flex items-center justify-center">
+                                    <ShieldCheckIcon className="h-12 w-12 sm:h-20 sm:w-20 text-purple-600" />
                                 </div>
-                                <div className="flex-1 mt-16">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h2 className="text-3xl font-bold text-gray-900">
+                                <div className="flex-1 sm:mt-16">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                                        <h2 className="text-xl sm:text-3xl font-bold text-gray-900">
                                             {userRoleInt === 5 && 'System Administrator'}
                                             {userRoleInt === 4 && 'Lead Account'}
                                             {userRoleInt === 3 && 'Volunteer Account'}
                                             {userRoleInt === 2 && 'Referrer Account'}
                                         </h2>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${userRoleInt === 5 ? 'bg-purple-100 text-purple-700' :
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold w-fit ${userRoleInt === 5 ? 'bg-purple-100 text-purple-700' :
                                             userRoleInt === 4 ? 'bg-blue-100 text-blue-700' :
                                                 userRoleInt === 3 ? 'bg-green-100 text-green-700' :
                                                     'bg-cyan-100 text-cyan-700'
@@ -272,13 +279,13 @@ const Profile = () => {
                                             {userRoleInt === 2 && 'REFERRER'}
                                         </span>
                                     </div>
-                                    <p className="text-gray-600 mb-4">
-                                        User ID: <code className="bg-gray-100 px-2 py-1 rounded text-sm">{userId}</code>
+                                    <p className="text-sm sm:text-base text-gray-600 mb-4 break-all">
+                                        User ID: <code className="bg-gray-100 px-2 py-1 rounded text-xs sm:text-sm">{userId}</code>
                                     </p>
-                                    <div className="flex flex-wrap gap-3 mt-4">
+                                    <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
                                         {userRoleInt === 5 && (
                                             <>
-                                                <div className="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2">
+                                                <div className="bg-purple-50 border border-purple-200 rounded-lg px-3 sm:px-4 py-2">
                                                     <p className="text-xs text-purple-600 font-semibold mb-1">Permissions</p>
                                                     <p className="text-sm text-purple-900 font-medium">Full System Access</p>
                                                 </div>
@@ -357,23 +364,23 @@ const Profile = () => {
                     /* Member Profile */
                     <>
                         {/* Profile Header Card */}
-                        <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mb-8">
-                            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 h-32"></div>
-                            <div className="px-8 pb-8">
-                                <div className="flex items-start gap-6 -mt-16">
-                                    <div className="w-32 h-32 bg-white rounded-2xl border-4 border-white shadow-xl flex items-center justify-center">
-                                        <UserCircleIcon className="h-28 w-28 text-gray-400" />
+                        <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 shadow-sm overflow-hidden mb-6 sm:mb-8">
+                            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 h-24 sm:h-32"></div>
+                            <div className="px-4 sm:px-6 md:px-8 pb-6 sm:pb-8">
+                                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 -mt-12 sm:-mt-16">
+                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-xl sm:rounded-2xl border-4 border-white shadow-xl flex items-center justify-center flex-shrink-0">
+                                        <UserCircleIcon className="h-20 w-20 sm:h-28 sm:w-28 text-gray-400" />
                                     </div>
-                                    <div className="flex-1 mt-16">
+                                    <div className="flex-1 mt-12 sm:mt-16 w-full">
                                         <div>
-                                            <label className="text-sm font-semibold text-gray-700 mb-1 block">Full Name {isEditing && <span className="text-red-500">*</span>}</label>
+                                            <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 block">Full Name {isEditing && <span className="text-red-500">*</span>}</label>
                                             {isEditing ? (
                                                 <div>
                                                     <input
                                                         type="text"
                                                         value={editedInfo.full_name}
                                                         onChange={(e) => handleChange('full_name', e.target.value)}
-                                                        className={`text-2xl font-bold text-gray-900 border-b-2 ${errors.full_name ? 'border-red-500' : 'border-blue-500'} focus:outline-none bg-transparent w-full`}
+                                                        className={`text-xl sm:text-2xl font-bold text-gray-900 border-b-2 ${errors.full_name ? 'border-red-500' : 'border-blue-500'} focus:outline-none bg-transparent w-full`}
                                                         placeholder="Enter your full name"
                                                     />
                                                     {errors.full_name && (
@@ -381,14 +388,14 @@ const Profile = () => {
                                                     )}
                                                 </div>
                                             ) : (
-                                                <h2 className="text-2xl font-bold text-gray-900">
+                                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                                                     {editedInfo.full_name || 'Not provided'}
                                                 </h2>
                                             )}
                                         </div>
                                         <div className="mt-2 flex items-center gap-2 text-gray-600">
-                                            <EnvelopeIcon className="h-5 w-5" />
-                                            <span className="text-sm">{editedInfo.email || 'No email provided'}</span>
+                                            <EnvelopeIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                                            <span className="text-xs sm:text-sm truncate">{editedInfo.email || 'No email provided'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -396,16 +403,16 @@ const Profile = () => {
                         </div>
 
                         {/* Main Content Grid */}
-                        <div className="grid md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                             {/* Contact Information */}
-                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                    <EnvelopeIcon className="h-6 w-6 text-blue-600" />
+                            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2">
+                                    <EnvelopeIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                                     Contact Information
                                 </h3>
-                                <div className="space-y-4">
+                                <div className="space-y-3 sm:space-y-4">
                                     <div>
-                                        <label className="text-sm font-semibold text-gray-700 mb-1 block">
+                                        <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 block">
                                             Email {isEditing && <span className="text-red-500">*</span>}
                                         </label>
                                         {isEditing ? (
@@ -414,7 +421,7 @@ const Profile = () => {
                                                     type="email"
                                                     value={editedInfo.email}
                                                     onChange={(e) => handleChange('email', e.target.value)}
-                                                    className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none`}
+                                                    className={`w-full px-3 sm:px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none text-sm sm:text-base`}
                                                     placeholder="your.email@example.com"
                                                 />
                                                 {errors.email && (
@@ -422,25 +429,25 @@ const Profile = () => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <p className="text-gray-900 flex items-center gap-2">
-                                                <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                                                {editedInfo.email || 'Not provided'}
+                                            <p className="text-sm sm:text-base text-gray-900 flex items-center gap-2">
+                                                <EnvelopeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
+                                                <span className="truncate">{editedInfo.email || 'Not provided'}</span>
                                             </p>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-gray-700 mb-1 block">Phone</label>
+                                        <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-1 block">Phone</label>
                                         {isEditing ? (
                                             <input
                                                 type="tel"
                                                 value={editedInfo.contact}
                                                 onChange={(e) => handleChange('contact', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm sm:text-base"
                                                 placeholder="+233 XX XXX XXXX"
                                             />
                                         ) : (
-                                            <p className="text-gray-900 flex items-center gap-2">
-                                                <PhoneIcon className="h-5 w-5 text-gray-400" />
+                                            <p className="text-sm sm:text-base text-gray-900 flex items-center gap-2">
+                                                <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
                                                 {editedInfo.contact || 'Not provided'}
                                             </p>
                                         )}

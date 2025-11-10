@@ -107,13 +107,13 @@ const Learning = () => {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div className="flex items-start justify-between mb-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                                 Learning
                             </h1>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-xs sm:text-sm text-gray-600">
                                 Master technical concepts with our curated video content
                             </p>
                         </div>
@@ -121,19 +121,19 @@ const Learning = () => {
                             href="https://www.youtube.com/@techelevategh/videos"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg text-sm"
+                            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm w-full sm:w-auto justify-center"
                         >
-                            <PlayCircleIcon className="h-5 w-5" />
+                            <PlayCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                             <span>Visit YouTube</span>
-                            <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                            <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         </a>
                     </div>
 
                     {/* Category Filter Pills */}
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 overflow-x-auto pb-2">
                         <button
                             onClick={() => setActiveCategory('all')}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === 'all'
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeCategory === 'all'
                                 ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md'
                                 : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                 }`}
@@ -144,7 +144,7 @@ const Learning = () => {
                             <button
                                 key={category.id}
                                 onClick={() => setActiveCategory(category.id)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === category.id
+                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeCategory === category.id
                                     ? `bg-gradient-to-r ${category.color} text-white shadow-md`
                                     : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-sm'
                                     }`}
@@ -157,7 +157,7 @@ const Learning = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
                 <div className="space-y-12">
                     {filteredCategories.map((category) => (
                         <div key={category.id} className="space-y-6">

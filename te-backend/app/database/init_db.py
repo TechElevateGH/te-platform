@@ -1,9 +1,7 @@
-from app.core.settings import settings
 from app.core.security import get_password_hash
 import app.ents.user.schema as user_schema
 from pymongo.database import Database
 from datetime import date
-from bson import ObjectId
 
 
 def init_db(db: Database) -> None:

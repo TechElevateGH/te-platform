@@ -324,7 +324,7 @@ def get_user_resumes_by_ids(
 
 
 def resume_review(db: Database, resume_id: int):
-    resume = db.application_models.File
+    # TODO: Implement resume review functionality
     ...
 
 
