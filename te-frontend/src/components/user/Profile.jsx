@@ -164,12 +164,6 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
-            {/* Create Lead/Admin Modal */}
-            <CreateLeadAdmin
-                show={showCreateLeadAdmin}
-                onClose={() => setShowCreateLeadAdmin(false)}
-            />
-
             {/* Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-6">
@@ -183,28 +177,6 @@ const Profile = () => {
                             </p>
                         </div>
                         <div className="flex gap-3">
-                            {/* Admin-only: Account Management button */}
-                            {isAdmin && (
-                                <button
-                                    onClick={() => navigate('/workspace/account-management')}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm"
-                                >
-                                    <UserGroupIcon className="h-4 w-4" />
-                                    <span>Account Management</span>
-                                </button>
-                            )}
-
-                            {/* Admin-only: Create Privileged Account button */}
-                            {isAdmin && (
-                                <button
-                                    onClick={() => setShowCreateLeadAdmin(true)}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
-                                >
-                                    <ShieldCheckIcon className="h-4 w-4" />
-                                    <span>Create Privileged Account</span>
-                                </button>
-                            )}
-
                             {/* Only show edit for Member users */}
                             {!isPrivilegedUser && !isEditing && (
                                 <button

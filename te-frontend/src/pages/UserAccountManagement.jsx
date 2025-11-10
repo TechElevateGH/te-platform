@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import axiosInstance from '../axiosConfig';
 import EditPrivilegedAccount from '../components/user/EditPrivilegedAccount';
+import CreateLeadAdmin from '../components/user/CreateLeadAdmin';
 
 const UserAccountManagement = () => {
     const [activeTab, setActiveTab] = useState('privileged'); // 'privileged' or 'members'
@@ -19,6 +20,7 @@ const UserAccountManagement = () => {
     const [loading, setLoading] = useState(true);
     const [selectedAccount, setSelectedAccount] = useState(null);
     const [showEditPrivileged, setShowEditPrivileged] = useState(false);
+    const [showCreateLeadAdmin, setShowCreateLeadAdmin] = useState(false);
 
     // Role mapping
     const getRoleName = (role) => {
@@ -122,67 +124,77 @@ const UserAccountManagement = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+        <div className="p-6">
+            {/* Create Lead/Admin Modal */}
+            <CreateLeadAdmin
+                show={showCreateLeadAdmin}
+                onClose={() => setShowCreateLeadAdmin(false)}
+            />
+
             {/* Header */}
-            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                User Account Management
-                            </h1>
-                            <p className="text-sm text-gray-600">
-                                Manage all user accounts - privileged and member accounts
-                            </p>
-                        </div>
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            User Account Management
+                        </h1>
+                        <p className="text-sm text-gray-600">
+                            Manage all user accounts - privileged and member accounts
+                        </p>
                     </div>
+                    {/* Create Privileged Account Button */}
+                    <button
+                        onClick={() => setShowCreateLeadAdmin(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
+                    >
+                        <ShieldCheckIcon className="h-5 w-5" />
+                        <span>Create Privileged Account</span>
+                    </button>
+                </div>
 
-                    {/* Tabs */}
-                    <div className="flex gap-4 mt-6">
-                        <button
-                            onClick={() => setActiveTab('privileged')}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'privileged'
-                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                                }`}
-                        >
-                            <ShieldCheckIcon className="h-5 w-5" />
-                            <span>Privileged Accounts</span>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('members')}
-                            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'members'
-                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                                }`}
-                        >
-                            <UserGroupIcon className="h-5 w-5" />
-                            <span>Member Accounts</span>
-                        </button>
-                    </div>
+                {/* Tabs */}
+                <div className="flex gap-4 mb-6">
+                    <button
+                        onClick={() => setActiveTab('privileged')}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'privileged'
+                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                            }`}
+                    >
+                        <ShieldCheckIcon className="h-5 w-5" />
+                        <span>Privileged Accounts</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('members')}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === 'members'
+                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                            }`}
+                    >
+                        <UserGroupIcon className="h-5 w-5" />
+                        <span>Member Accounts</span>
+                    </button>
+                </div>
 
-                    {/* Search */}
-                    <div className="mt-6">
-                        <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder={
-                                    activeTab === 'privileged'
-                                        ? 'Search by username...'
-                                        : 'Search by name or email...'
-                                }
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
+                {/* Search */}
+                <div className="relative">
+                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder={
+                            activeTab === 'privileged'
+                                ? 'Search by username...'
+                                : 'Search by name or email...'
+                        }
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
                 </div>
             </div>
 
             {/* Content */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="mt-6">
                 {loading ? (
                     <div className="flex items-center justify-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent"></div>
@@ -268,8 +280,8 @@ const UserAccountManagement = () => {
                                                                 )
                                                             }
                                                             className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${user.is_active
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
                                                                 }`}
                                                         >
                                                             {user.is_active ? 'Deactivate' : 'Activate'}
@@ -357,8 +369,8 @@ const UserAccountManagement = () => {
                                                                 )
                                                             }
                                                             className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${user.is_active
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
                                                                 }`}
                                                         >
                                                             {user.is_active ? 'Deactivate' : 'Activate'}
