@@ -1,303 +1,1158 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import axios from '../axiosConfig'
 import {
+    PlayCircleIcon,
+    BookOpenIcon,
+    CheckCircleIcon,
+    ClockIcon,
+    ArrowTopRightOnSquareIcon,
     AcademicCapIcon,
     ChartBarIcon,
-    CubeIcon,
+    BookmarkIcon,
+    LightBulbIcon,
+    TrophyIcon,
     SparklesIcon,
-    ArrowTopRightOnSquareIcon,
-    BookOpenIcon,
-    StarIcon,
-    PlayCircleIcon
+    XMarkIcon,
+    SunIcon,
+    MoonIcon,
+    PlusIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    PencilSquareIcon,
+    Bars3Icon,
+    VideoCameraIcon
 } from '@heroicons/react/24/outline'
+import {
+    CheckCircleIcon as CheckCircleSolidIcon,
+    BookmarkIcon as BookmarkSolidIcon,
+    FireIcon as FireSolidIcon
+} from '@heroicons/react/24/solid'
 
-// Mock data - Replace with actual YouTube video data
-// Note: Replace 'dQw4w9WgXcQ' with actual YouTube video IDs from your channel
-const videoCategories = [
-    {
-        id: 'workshops',
-        title: 'General Workshops',
-        description: 'Comprehensive workshops covering career development, interview prep, and professional growth',
-        icon: AcademicCapIcon,
-        color: 'from-blue-600 to-cyan-600',
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        videos: [
-            {
-                id: 1,
-                title: 'Career Development Workshop 2024',
-                description: 'Learn essential skills for advancing your tech career',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '1:45:30',
-                views: '12K'
-            },
-            {
-                id: 2,
-                title: 'Interview Preparation Masterclass',
-                description: 'Master technical interviews with proven strategies',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '2:15:20',
-                views: '8.5K'
-            }
-        ]
-    },
-    {
-        id: 'dsa',
-        title: 'Data Structures & Algorithms',
-        description: 'Master DSA concepts with clear explanations and practical examples',
-        icon: ChartBarIcon,
-        color: 'from-purple-600 to-pink-600',
-        bgColor: 'bg-purple-50',
-        borderColor: 'border-purple-200',
-        videos: [
-            {
-                id: 3,
-                title: 'Arrays & Linked Lists Deep Dive',
-                description: 'Understanding fundamental data structures',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '1:30:15',
-                views: '15K'
-            },
-            {
-                id: 4,
-                title: 'Trees & Graphs Explained',
-                description: 'Complete guide to tree and graph algorithms',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '2:00:45',
-                views: '10K'
-            }
-        ]
-    },
-    {
-        id: 'system-design',
-        title: 'System Design',
-        description: 'Learn to design scalable systems and ace system design interviews',
-        icon: CubeIcon,
-        color: 'from-emerald-600 to-teal-600',
-        bgColor: 'bg-emerald-50',
-        borderColor: 'border-emerald-200',
-        videos: [
-            {
-                id: 5,
-                title: 'System Design Fundamentals',
-                description: 'Core concepts for building scalable systems',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '1:50:30',
-                views: '20K'
-            },
-            {
-                id: 6,
-                title: 'Distributed Systems Architecture',
-                description: 'Design patterns for distributed applications',
-                youtubeId: 'dQw4w9WgXcQ', // Replace with actual video ID
-                duration: '2:30:00',
-                views: '18K'
-            }
-        ]
-    }
+import { dsaTopics } from '../data/dsaTopics'
+import { useAuth } from '../context/AuthContext'
+import LessonCreate from '../components/learning/LessonCreate'
+import LessonCreateDSA from '../components/learning/LessonCreateDSA'
+
+// Optimal learning order for DSA topics
+const learningPath = [
+    'Essentials',
+    'Time & Space Complexity',
+    'Arrays & Strings',
+    'Pointers',
+    'Hash Tables & Sets',
+    'Linked Lists',
+    'Stacks & Queues',
+    'Searching & Sorting',
+    'Recursion',
+    'Trees & Binary Search Trees',
+    'Tries',
+    'Heaps & Priority Queues',
+    'Backtracking',
+    'Greedy Algorithms',
+    'Graphs',
+    'Dynamic Programming',
+    'Bit Manipulation',
+    'Advanced Topics'
 ];
 
 const Learning = () => {
-    const [activeCategory, setActiveCategory] = useState('all');
+    const { state: authState } = useAuth();
+    const isAdmin = authState?.userRole && parseInt(authState.userRole) >= 2;
+    const isLoggedIn = !!authState?.userId;
 
-    const filteredCategories = activeCategory === 'all'
-        ? videoCategories
-        : videoCategories.filter(cat => cat.id === activeCategory);
+    const [darkMode, setDarkMode] = useState(() => {
+        const saved = localStorage.getItem('dsaDarkMode');
+        return saved === 'true';
+    });
+    const [showStats, setShowStats] = useState(false);
+    const [showAddLesson, setShowAddLesson] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(true);
+    const [expandedTopics, setExpandedTopics] = useState(new Set());
+    const [collapsedCategories, setCollapsedCategories] = useState(() => {
+        // Collapse all categories by default
+        return new Set(learningPath);
+    });
+    const [topicNotes, setTopicNotes] = useState({});
+    const [completedTopics, setCompletedTopics] = useState(new Set());
+    const [bookmarkedTopics, setBookmarkedTopics] = useState(new Set());
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Lesson management state
+    const [allLessons, setAllLessons] = useState([]);
+    const [showLessonModal, setShowLessonModal] = useState(false);
+    const [selectedLesson, setSelectedLesson] = useState(null);
+    const [currentTopicForLesson, setCurrentTopicForLesson] = useState(null);
+
+    const categoryRefs = useRef({});
+    const [activeCategory, setActiveCategory] = useState('');
+    const saveTimeoutRef = useRef(null);
+
+    // Fetch progress from backend on mount
+    useEffect(() => {
+        const fetchProgress = async () => {
+            if (!isLoggedIn) {
+                // Load from localStorage for non-logged-in users
+                const savedCompleted = localStorage.getItem('dsaCompletedTopics');
+                const savedBookmarked = localStorage.getItem('dsaBookmarkedTopics');
+                const savedNotes = localStorage.getItem('dsaTopicNotes');
+
+                setCompletedTopics(savedCompleted ? new Set(JSON.parse(savedCompleted)) : new Set());
+                setBookmarkedTopics(savedBookmarked ? new Set(JSON.parse(savedBookmarked)) : new Set());
+                setTopicNotes(savedNotes ? JSON.parse(savedNotes) : {});
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await axios.get('/learning/progress');
+                const progress = response.data;
+
+                setCompletedTopics(new Set(progress.completed_topics || []));
+                setBookmarkedTopics(new Set(progress.bookmarked_topics || []));
+                setTopicNotes(progress.topic_notes || {});
+            } catch (error) {
+                console.error('Error fetching progress:', error);
+                // Fallback to localStorage
+                const savedCompleted = localStorage.getItem('dsaCompletedTopics');
+                const savedBookmarked = localStorage.getItem('dsaBookmarkedTopics');
+                const savedNotes = localStorage.getItem('dsaTopicNotes');
+
+                setCompletedTopics(savedCompleted ? new Set(JSON.parse(savedCompleted)) : new Set());
+                setBookmarkedTopics(savedBookmarked ? new Set(JSON.parse(savedBookmarked)) : new Set());
+                setTopicNotes(savedNotes ? JSON.parse(savedNotes) : {});
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProgress();
+    }, [isLoggedIn]);
+
+    // Fetch all lessons
+    useEffect(() => {
+        const fetchLessons = async () => {
+            try {
+                const response = await axios.get('/learning/lessons?is_published=true');
+                setAllLessons(response.data || []);
+            } catch (error) {
+                console.error('Error fetching lessons:', error);
+                setAllLessons([]);
+            }
+        };
+
+        fetchLessons();
+    }, []);
+
+    // Helper to get lessons for a specific topic
+    const getLessonsForTopic = useCallback((category, topic) => {
+        return allLessons.filter(
+            lesson => lesson.category === category && lesson.topic === topic
+        );
+    }, [allLessons]);
+
+    // Handle lesson creation/update success
+    const handleLessonSuccess = () => {
+        // Refresh lessons
+        axios.get('/learning/lessons?is_published=true')
+            .then(response => setAllLessons(response.data || []))
+            .catch(error => console.error('Error refreshing lessons:', error));
+    };
+
+    // Open lesson modal for creating new lesson
+    const openCreateLessonModal = (category, topic) => {
+        setCurrentTopicForLesson({ category, topic });
+        setSelectedLesson(null);
+        setShowLessonModal(true);
+    };
+
+    // Debounced save to backend
+    const saveProgressToBackend = useCallback(async (updates) => {
+        if (!isLoggedIn) return;
+
+        try {
+            await axios.post('/learning/progress', updates);
+        } catch (error) {
+            console.error('Error saving progress:', error);
+        }
+    }, [isLoggedIn]);
+
+    // Save to localStorage for non-logged-in users or as backup
+    useEffect(() => {
+        if (!isLoading) {
+            localStorage.setItem('dsaCompletedTopics', JSON.stringify([...completedTopics]));
+
+            // Debounce backend save
+            if (isLoggedIn) {
+                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                saveTimeoutRef.current = setTimeout(() => {
+                    saveProgressToBackend({ completed_topics: [...completedTopics] });
+                }, 1000);
+            }
+        }
+    }, [completedTopics, isLoading, isLoggedIn, saveProgressToBackend]);
+
+    useEffect(() => {
+        if (!isLoading) {
+            localStorage.setItem('dsaBookmarkedTopics', JSON.stringify([...bookmarkedTopics]));
+
+            // Debounce backend save
+            if (isLoggedIn) {
+                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                saveTimeoutRef.current = setTimeout(() => {
+                    saveProgressToBackend({ bookmarked_topics: [...bookmarkedTopics] });
+                }, 1000);
+            }
+        }
+    }, [bookmarkedTopics, isLoading, isLoggedIn, saveProgressToBackend]);
+
+    useEffect(() => {
+        if (!isLoading) {
+            localStorage.setItem('dsaTopicNotes', JSON.stringify(topicNotes));
+
+            // Debounce backend save
+            if (isLoggedIn) {
+                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                saveTimeoutRef.current = setTimeout(() => {
+                    saveProgressToBackend({ topic_notes: topicNotes });
+                }, 2000); // Longer delay for notes
+            }
+        }
+    }, [topicNotes, isLoading, isLoggedIn, saveProgressToBackend]);
+
+    useEffect(() => {
+        localStorage.setItem('dsaDarkMode', darkMode);
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [darkMode]);
+
+    const toggleTopicCompletion = (categoryName, topicName) => {
+        const key = `${categoryName}::${topicName}`;
+        const newCompleted = new Set(completedTopics);
+        if (newCompleted.has(key)) {
+            newCompleted.delete(key);
+        } else {
+            newCompleted.add(key);
+        }
+        setCompletedTopics(newCompleted);
+    };
+
+    const toggleBookmark = (categoryName, topicName) => {
+        const key = `${categoryName}::${topicName}`;
+        const newBookmarked = new Set(bookmarkedTopics);
+        if (newBookmarked.has(key)) {
+            newBookmarked.delete(key);
+        } else {
+            newBookmarked.add(key);
+        }
+        setBookmarkedTopics(newBookmarked);
+    };
+
+    const isTopicCompleted = useCallback((categoryName, topicName) => {
+        return completedTopics.has(`${categoryName}::${topicName}`);
+    }, [completedTopics]);
+
+    const isTopicBookmarked = useCallback((categoryName, topicName) => {
+        return bookmarkedTopics.has(`${categoryName}::${topicName}`);
+    }, [bookmarkedTopics]);
+
+    const toggleTopicExpanded = (categoryName, topicName) => {
+        const key = `${categoryName}::${topicName}`;
+        const newExpanded = new Set(expandedTopics);
+        if (newExpanded.has(key)) {
+            newExpanded.delete(key);
+        } else {
+            newExpanded.add(key);
+        }
+        setExpandedTopics(newExpanded);
+    };
+
+    const isTopicExpanded = (categoryName, topicName) => {
+        return expandedTopics.has(`${categoryName}::${topicName}`);
+    };
+
+    const updateTopicNote = (categoryName, topicName, note) => {
+        const key = `${categoryName}::${topicName}`;
+        setTopicNotes(prev => ({
+            ...prev,
+            [key]: note
+        }));
+    };
+
+    const getTopicNote = (categoryName, topicName) => {
+        const key = `${categoryName}::${topicName}`;
+        return topicNotes[key] || '';
+    };
+
+    const toggleCategoryCollapse = (categoryName) => {
+        const newCollapsed = new Set(collapsedCategories);
+        if (newCollapsed.has(categoryName)) {
+            newCollapsed.delete(categoryName);
+        } else {
+            newCollapsed.add(categoryName);
+        }
+        setCollapsedCategories(newCollapsed);
+    };
+
+    const isCategoryCollapsed = (categoryName) => {
+        return collapsedCategories.has(categoryName);
+    };
+
+    // Smooth scroll to category
+    const scrollToCategory = useCallback((categoryName) => {
+        const element = categoryRefs.current[categoryName];
+        
+        if (element) {
+            // Immediately set this category as active
+            setActiveCategory(categoryName);
+            
+            // Expand the category if it's collapsed
+            setCollapsedCategories(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(categoryName);
+                return newSet;
+            });
+            
+            const headerOffset = 100; // Account for sticky header
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+
+            // Close mobile sidebar after navigation
+            if (window.innerWidth < 1024) {
+                setShowSidebar(false);
+            }
+        }
+    }, []);    // Get difficulty badge based on category
+    const getDifficultyInfo = useCallback((categoryName) => {
+        const difficultyMap = {
+            'Essentials': { level: 'Beginner', color: 'bg-blue-100 text-blue-700', icon: '🔵' },
+            'Time & Space Complexity': { level: 'Beginner', color: 'bg-blue-100 text-blue-700', icon: '🔵' },
+            'Arrays & Strings': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
+            'Pointers': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
+            'Linked Lists': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
+            'Stacks & Queues': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
+            'Hash Tables & Sets': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
+            'Searching & Sorting': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Recursion': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Trees & Binary Search Trees': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Tries': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Heaps & Priority Queues': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Backtracking': { level: 'Hard', color: 'bg-red-100 text-red-700', icon: '🔴' },
+            'Graphs': { level: 'Hard', color: 'bg-red-100 text-red-700', icon: '🔴' },
+            'Dynamic Programming': { level: 'Hard', color: 'bg-red-100 text-red-700', icon: '�' },
+            'Greedy Algorithms': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Bit Manipulation': { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' },
+            'Advanced Topics': { level: 'Hard', color: 'bg-red-100 text-red-700', icon: '🔴' }
+        };
+        return difficultyMap[categoryName] || { level: 'Medium', color: 'bg-yellow-100 text-yellow-700', icon: '🟡' };
+    }, []);
+
+    // Get all topics in optimal learning order
+    const orderedTopics = useMemo(() => {
+        const ordered = learningPath.map(categoryName => {
+            return dsaTopics.find(cat => cat.category === categoryName);
+        }).filter(Boolean);
+        return ordered;
+    }, []);
+
+    // Create a flat list of all topics with metadata
+    const allTopicsFlat = useMemo(() => {
+        const topics = [];
+        orderedTopics.forEach((category, catIndex) => {
+            category.topics.forEach((topic, topicIndex) => {
+                topics.push({
+                    ...topic,
+                    category: category.category,
+                    categoryColor: category.color,
+                    categoryIndex: catIndex,
+                    topicIndex: topicIndex,
+                    globalIndex: topics.length + 1,
+                    difficulty: getDifficultyInfo(category.category)
+                });
+            });
+        });
+        return topics;
+    }, [orderedTopics, getDifficultyInfo]);
+
+    // Calculate statistics
+    const stats = useMemo(() => {
+        const totalTopics = allTopicsFlat.length;
+        const completed = completedTopics.size;
+        const percentage = totalTopics > 0 ? Math.round((completed / totalTopics) * 100) : 0;
+
+        return {
+            totalTopics,
+            completed,
+            remaining: totalTopics - completed,
+            percentage,
+            bookmarked: bookmarkedTopics.size
+        };
+    }, [completedTopics, bookmarkedTopics, allTopicsFlat]);
+
+    // Filter topics based on status - keep category structure
+    const filteredCategories = useMemo(() => {
+        return orderedTopics.map(category => {
+            const filteredTopics = category.topics;
+
+            if (filteredTopics.length === 0) return null;
+
+            return {
+                ...category,
+                topics: filteredTopics,
+                difficulty: getDifficultyInfo(category.category),
+                completed: filteredTopics.filter(t => isTopicCompleted(category.category, t.name)).length,
+                total: filteredTopics.length
+            };
+        }).filter(Boolean);
+    }, [orderedTopics, isTopicCompleted, getDifficultyInfo]);
+
+    // Scrollspy for sidebar navigation - improved to track topmost visible category
+    useEffect(() => {
+        const observers = [];
+        const visibleCategories = new Map();
+
+        const updateActiveCategory = () => {
+            // Get all visible categories and sort by their position on the page
+            const visibleEntries = Array.from(visibleCategories.entries())
+                .filter(([_, isVisible]) => isVisible)
+                .map(([category]) => {
+                    const ref = categoryRefs.current[category];
+                    const rect = ref?.getBoundingClientRect();
+                    return { category, top: rect?.top || Infinity };
+                })
+                .sort((a, b) => a.top - b.top);
+
+            // Set the topmost visible category as active
+            if (visibleEntries.length > 0) {
+                setActiveCategory(visibleEntries[0].category);
+            }
+        };
+
+        Object.entries(categoryRefs.current).forEach(([category, ref]) => {
+            if (ref) {
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        visibleCategories.set(category, entry.isIntersecting);
+                        updateActiveCategory();
+                    },
+                    { threshold: 0.1, rootMargin: '-120px 0px -60% 0px' }
+                );
+                observer.observe(ref);
+                observers.push(observer);
+            }
+        });
+
+        return () => {
+            observers.forEach(obs => obs.disconnect());
+            visibleCategories.clear();
+        };
+    }, [filteredCategories]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+        <div className={`min-h-screen transition-colors duration-500 ${darkMode 
+            ? 'dark bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950' 
+            : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100'
+        } relative overflow-hidden`}>
+            {/* Animated background elements for dark mode */}
+            {darkMode && (
+                <>
+                    {/* Glowing orbs */}
+                    <div className="absolute top-1/4 -left-48 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+                </>
+            )}
+            
+            {/* Animated background pattern */}
+            <div className={`absolute inset-0 ${darkMode ? 'opacity-[0.03]' : 'opacity-[0.05]'}`} style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${darkMode ? 'FFFFFF' : '9C92AC'}' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}></div>
+
             {/* Header */}
-            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                                Learning
-                            </h1>
-                            <p className="text-xs sm:text-sm text-gray-600">
-                                Master technical concepts with our curated video content
-                            </p>
+            <div className={`sticky top-0 z-40 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${
+                darkMode 
+                    ? 'bg-slate-900/80 border-slate-700/50' 
+                    : 'bg-white/80 border-purple-200/30'
+            }`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-4 w-full sm:w-auto">
+                            <button
+                                onClick={() => setShowSidebar(!showSidebar)}
+                                className="lg:hidden p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all"
+                                aria-label="Toggle sidebar"
+                            >
+                                <Bars3Icon className="w-5 h-5" />
+                            </button>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-1 tracking-tight">
+                                    DSA Learning Path
+                                </h1>
+                                <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                                    <span className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        {stats.totalTopics} Topics
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                        {stats.completed} Completed
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                                        {stats.bookmarked} Saved
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <a
-                            href="https://www.youtube.com/@techelevategh/videos"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm w-full sm:w-auto justify-center"
-                        >
-                            <PlayCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                            <span>Visit YouTube</span>
-                            <ArrowTopRightOnSquareIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </a>
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="flex items-center gap-2 px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all text-sm"
+                                aria-label="Toggle dark mode"
+                            >
+                                {darkMode ? (
+                                    <SunIcon className="w-4 h-4" />
+                                ) : (
+                                    <MoonIcon className="w-4 h-4" />
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setShowStats(!showStats)}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all text-sm"
+                            >
+                                <ChartBarIcon className="h-4 w-4" />
+                                <span className="hidden sm:inline">Stats</span>
+                            </button>
+                            <a
+                                href="https://www.youtube.com/@techelevategh/videos"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-rose-500/30 transition-all text-sm flex-1 sm:flex-initial justify-center"
+                            >
+                                <PlayCircleIcon className="h-4 w-4" />
+                                <span className="hidden sm:inline">YouTube</span>
+                            </a>
+                        </div>
                     </div>
 
-                    {/* Category Filter Pills */}
-                    <div className="flex flex-wrap gap-2 sm:gap-3 overflow-x-auto pb-2">
-                        <button
-                            onClick={() => setActiveCategory('all')}
-                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeCategory === 'all'
-                                ? 'bg-gradient-to-r from-gray-900 to-gray-700 text-white shadow-md'
-                                : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                                }`}
-                        >
-                            All Topics
-                        </button>
-                        {videoCategories.map(category => (
-                            <button
-                                key={category.id}
-                                onClick={() => setActiveCategory(category.id)}
-                                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${activeCategory === category.id
-                                    ? `bg-gradient-to-r ${category.color} text-white shadow-md`
-                                    : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                                    }`}
-                            >
-                                {category.title}
-                            </button>
-                        ))}
+                    {/* Progress Bar */}
+                    <div className="mt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Progress</span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-white">{stats.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gradient-to-r from-gray-200/50 via-indigo-200/50 to-purple-200/50 dark:from-gray-700/50 dark:via-indigo-700/50 dark:to-purple-700/50 backdrop-blur-sm rounded-full h-1.5 overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out shadow-lg"
+                                style={{ width: `${stats.percentage}%` }}
+                            ></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                <div className="space-y-12">
-                    {filteredCategories.map((category) => (
-                        <div key={category.id} className="space-y-6">
-                            {/* Category Header */}
-                            <div className={`flex items-start gap-4 p-6 rounded-2xl border ${category.borderColor} ${category.bgColor}`}>
-                                <div className={`p-3 bg-white rounded-xl shadow-sm`}>
-                                    <category.icon className={`h-8 w-8 bg-gradient-to-r ${category.color} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent' }} />
+            {/* Statistics Modal */}
+            {showStats && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
+                    <div className={`rounded-3xl shadow-2xl max-w-md w-full border backdrop-blur-xl ${
+                        darkMode 
+                            ? 'bg-slate-900/90 border-slate-700/50' 
+                            : 'bg-white/90 border-white/20'
+                    }`} onClick={(e) => e.stopPropagation()}>
+                        <div className={`px-8 py-6 border-b ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+                                        <TrophyIcon className="h-7 w-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Your Progress</h2>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Keep up the great work!</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                        {category.title}
-                                    </h2>
-                                    <p className="text-gray-600">
-                                        {category.description}
-                                    </p>
+                                <button
+                                    onClick={() => setShowStats(false)}
+                                    className="p-2 hover:bg-white/50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                                >
+                                    <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-8">
+                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
+                                        <CheckCircleIcon className="h-8 w-8 text-white" />
+                                    </div>
+                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.completed}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Done</p>
                                 </div>
-                                <div className={`px-4 py-2 bg-gradient-to-r ${category.color} text-white rounded-full text-sm font-semibold`}>
-                                    {category.videos.length} Videos
+                                <div className="text-center">
+                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg">
+                                        <ClockIcon className="h-8 w-8 text-white" />
+                                    </div>
+                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.remaining}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">To Go</p>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg">
+                                        <BookmarkIcon className="h-8 w-8 text-white" />
+                                    </div>
+                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.bookmarked}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Saved</p>
                                 </div>
                             </div>
 
-                            {/* Video Grid */}
-                            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-                                {category.videos.map((video) => (
-                                    <div
-                                        key={video.id}
-                                        className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:border-gray-300 transition-all duration-300"
-                                    >
-                                        {/* Embedded YouTube Video */}
-                                        <div className="relative aspect-video bg-gray-900">
-                                            <iframe
-                                                src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                                                title={video.title}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                className="absolute inset-0 w-full h-full"
-                                            ></iframe>
-                                        </div>
+                            <div className={`pt-6 border-t ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
+                                <div className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border ${
+                                    darkMode 
+                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-700/50' 
+                                        : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200/50'
+                                }`}>
+                                    <FireSolidIcon className="h-7 w-7 text-orange-500" />
+                                    <div className="text-center">
+                                        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{stats.percentage}%</p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Complete</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                                        {/* Video Info */}
-                                        <div className="p-5">
-                                            <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
-                                                {video.title}
-                                            </h3>
-                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                                {video.description}
-                                            </p>
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xs text-gray-500">
-                                                        {video.views} views
-                                                    </span>
-                                                    <span className="text-xs text-gray-400">•</span>
-                                                    <span className="text-xs text-gray-500">
-                                                        {video.duration}
-                                                    </span>
-                                                </div>
-                                                <a
-                                                    href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            {/* Book Recommendation & Learning Tip */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Book Card */}
+                    <div className="glass dark:bg-gradient-to-br dark:from-amber-900/20 dark:to-orange-900/20 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-700/30 border-amber-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <BookOpenIcon className="h-6 w-6 text-white" />
+                                </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-xs font-semibold">
+                                        📚 Recommended
+                                    </span>
+                                </div>
+                                <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
+                                    A Common-Sense Guide to DSA
+                                </p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    by Jay Wengrow
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Learning Tip Card */}
+                    <div className="glass dark:bg-gradient-to-br dark:from-indigo-900/20 dark:to-purple-900/20 bg-gradient-to-br from-indigo-50 to-purple-50 dark:border-indigo-700/30 border-indigo-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <LightBulbIcon className="h-6 w-6 text-white" />
+                                </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                    <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-semibold">
+                                        💡 Pro Tip
+                                    </span>
+                                </div>
+                                <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
+                                    Practice Daily
+                                </p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Solve at least one problem every day
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content with Sidebar */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+                <div className="flex gap-6">
+                    {/* Sidebar Navigation */}
+                    {showSidebar && (
+                        <>
+                            {/* Mobile Overlay */}
+                            <div
+                                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+                                onClick={() => setShowSidebar(false)}
+                            ></div>
+
+                            {/* Sidebar Container - Fixed on mobile, Sticky on desktop */}
+                            <aside className="fixed lg:relative top-0 left-0 h-full lg:h-auto w-64 z-[60] lg:z-auto flex-shrink-0">
+                                <div className="lg:sticky lg:top-24 glass dark:bg-gray-800/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-5 shadow-2xl h-full lg:h-auto lg:max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                                    <div className="flex items-center justify-between mb-4 lg:block">
+                                        <h3 className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Categories</h3>
+                                        <button
+                                            onClick={() => setShowSidebar(false)}
+                                            className="lg:hidden p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700/50"
+                                            aria-label="Close sidebar"
+                                        >
+                                            <XMarkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                        </button>
+                                    </div>
+                                    <nav className="space-y-1">
+                                        {filteredCategories.map((category, idx) => {
+                                            const progressPercentage = Math.round((category.completed / category.total) * 100);
+                                            const isActive = activeCategory === category.category;
+
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        scrollToCategory(category.category);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${isActive
+                                                        ? 'bg-indigo-500 text-white shadow-md'
+                                                        : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
+                                                        }`}
                                                 >
-                                                    YouTube
-                                                    <ArrowTopRightOnSquareIcon className="h-3 w-3" />
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Book Recommendation for DSA */}
-                            {category.id === 'dsa' && (
-                                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200 p-6 shadow-sm">
-                                    <div className="flex items-start gap-6">
-                                        <div className="flex-shrink-0">
-                                            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                                                <BookOpenIcon className="h-8 w-8 text-white" />
-                                            </div>
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <StarIcon className="h-5 w-5 text-amber-500 fill-amber-500" />
-                                                <h3 className="text-lg font-bold text-gray-900">Recommended Book</h3>
-                                            </div>
-                                            <p className="text-xl font-bold text-gray-900 mb-2">
-                                                A Common-Sense Guide to Data Structures and Algorithms
-                                            </p>
-                                            <p className="text-gray-700 mb-1">
-                                                <span className="font-semibold">by Jay Wengrow</span>
-                                            </p>
-                                            <p className="text-sm text-gray-600 mt-3">
-                                                This book breaks down complex DSA concepts into easy-to-understand explanations with practical examples. Perfect for mastering the fundamentals!
-                                            </p>
-                                        </div>
-                                    </div>
+                                                    <div className="flex items-center justify-between mb-1.5">
+                                                        <span className="text-sm font-medium truncate">{category.category}</span>
+                                                        <span className="text-xs opacity-75">{category.completed}/{category.total}</span>
+                                                    </div>
+                                                    <div className="w-full bg-white/30 dark:bg-gray-600/30 rounded-full h-1.5 overflow-hidden">
+                                                        <div
+                                                            className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-indigo-500'
+                                                                }`}
+                                                            style={{ width: `${progressPercentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </nav>
                                 </div>
-                            )}
+                            </aside>
+                        </>
+                    )}
 
-                            {/* View All Link */}
-                            <div className="text-center pt-4">
+                    {/* Topics by Category */}
+                    <div className="flex-1 min-w-0">
+                        {filteredCategories.length === 0 ? (
+                            <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-3xl border border-white/20 shadow-xl p-16 text-center">
+                                <SparklesIcon className="h-20 w-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No topics found</h3>
+                                <p className="text-gray-600 dark:text-gray-400">Adjust your search or filter to see results</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {filteredCategories.map((category, catIdx) => {
+                                    const progressPercentage = Math.round((category.completed / category.total) * 100);
+
+                                    return (
+                                        <div
+                                            key={catIdx}
+                                            id={category.category.replace(/\s+/g, '-')}
+                                            ref={(el) => (categoryRefs.current[category.category] = el)}
+                                            className={`rounded-2xl border shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 ${
+                                                darkMode 
+                                                    ? 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-900/70' 
+                                                    : 'bg-white/60 border-white/20 hover:bg-white/80'
+                                            }`}
+                                        >
+                                            {/* Category Header */}
+                                            <div className={`px-5 py-2.5 border-b cursor-pointer transition-all ${
+                                                darkMode 
+                                                    ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70' 
+                                                    : 'bg-white/50 border-gray-200/50 hover:bg-white/70'
+                                            }`} onClick={() => toggleCategoryCollapse(category.category)}>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        <button
+                                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                            aria-label="Toggle category"
+                                                        >
+                                                            {isCategoryCollapsed(category.category) ? (
+                                                                <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                                            ) : (
+                                                                <ChevronUpIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                                            )}
+                                                        </button>
+                                                        <div className="flex items-center gap-3 flex-wrap">
+                                                            <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                                                                {category.category}
+                                                            </h2>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`px-2 py-0.5 ${category.difficulty.color} dark:opacity-90 rounded-md text-xs font-semibold`}>
+                                                                    {category.difficulty.level}
+                                                                </span>
+                                                                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
+                                                                    {category.total} topics
+                                                                </span>
+                                                                {category.completed > 0 && (
+                                                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold">
+                                                                        {category.completed}/{category.total} ✓
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {category.completed > 0 && (
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="text-right">
+                                                                <p className="text-base font-bold text-gray-800 dark:text-white">{progressPercentage}%</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Topics Table */}
+                                            {!isCategoryCollapsed(category.category) && (
+                                                <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                                    {category.topics.map((topic, topicIdx) => {
+                                                        const isCompleted = isTopicCompleted(category.category, topic.name);
+                                                        const isBookmarked = isTopicBookmarked(category.category, topic.name);
+                                                        const isExpanded = isTopicExpanded(category.category, topic.name);
+                                                        const globalIndex = allTopicsFlat.findIndex(
+                                                            t => t.category === category.category && t.name === topic.name
+                                                        ) + 1;
+
+                                                        return (
+                                                            <div
+                                                                key={topicIdx}
+                                                                className={`transition-all border-l-4 ${isCompleted
+                                                                    ? 'bg-emerald-50/40 dark:bg-emerald-900/10 border-emerald-500'
+                                                                    : isBookmarked
+                                                                        ? 'bg-amber-50/30 dark:bg-amber-900/10 border-amber-500'
+                                                                        : 'bg-white/30 dark:bg-gray-800/30 border-transparent'
+                                                                    }`}
+                                                            >
+                                                                <div className="px-6 py-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-all">
+                                                                    <div className="flex items-start gap-4">
+                                                                        {/* Number & Status */}
+                                                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                                                            <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-600 dark:to-gray-800 flex items-center justify-center shadow-md ring-2 ring-white/20">
+                                                                                <span className="text-white font-bold text-xs">
+                                                                                    {globalIndex}
+                                                                                </span>
+                                                                            </div>
+                                                                            <button
+                                                                                onClick={() => toggleTopicCompletion(category.category, topic.name)}
+                                                                                className="group/check flex-shrink-0"
+                                                                                aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+                                                                            >
+                                                                                {isCompleted ? (
+                                                                                    <CheckCircleSolidIcon className="h-6 w-6 text-emerald-500 group-hover/check:scale-110 transition-transform" />
+                                                                                ) : (
+                                                                                    <div className="h-6 w-6 border-2 border-gray-300 dark:border-gray-600 rounded-full group-hover/check:border-emerald-500 group-hover/check:scale-110 transition-all"></div>
+                                                                                )}
+                                                                            </button>
+                                                                        </div>
+
+                                                                        {/* Topic Info */}
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-start justify-between gap-4 mb-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-400 dark:text-gray-600 line-through' : 'text-gray-800 dark:text-white'
+                                                                                        }`}>
+                                                                                        {topic.name}
+                                                                                    </h3>
+                                                                                    <button
+                                                                                        onClick={() => toggleTopicExpanded(category.category, topic.name)}
+                                                                                        className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                                                        aria-label="Toggle details"
+                                                                                    >
+                                                                                        {isExpanded ? (
+                                                                                            <ChevronUpIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                                                                        ) : (
+                                                                                            <ChevronDownIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                                                                        )}
+                                                                                    </button>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={() => toggleBookmark(category.category, topic.name)}
+                                                                                    className="group/bookmark flex-shrink-0 p-1"
+                                                                                    aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                                                                                >
+                                                                                    {isBookmarked ? (
+                                                                                        <BookmarkSolidIcon className="h-5 w-5 text-amber-500 group-hover/bookmark:scale-110 transition-transform" />
+                                                                                    ) : (
+                                                                                        <BookmarkIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 group-hover/bookmark:scale-110 transition-all" />
+                                                                                    )}
+                                                                                </button>
+                                                                            </div>
+
+                                                                            {/* Resources Grid */}
+                                                                            <div className="grid sm:grid-cols-2 gap-2.5">
+                                                                                {/* Video Resource */}
+                                                                                {topic.youtubeId ? (
+                                                                                    <a
+                                                                                        href={`https://www.youtube.com/watch?v=${topic.youtubeId}`}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="flex items-center gap-2.5 px-3 py-2 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200/50 dark:border-red-700/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:shadow-md hover:scale-[1.02] transition-all group/link"
+                                                                                    >
+                                                                                        <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
+                                                                                        <span className="flex-1 truncate">Video Lecture</span>
+                                                                                        <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5 opacity-60 group-hover/link:opacity-100 transition-opacity" />
+                                                                                    </a>
+                                                                                ) : (
+                                                                                    <div className="flex items-center gap-2.5 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/30 dark:border-gray-700/30 text-gray-400 dark:text-gray-600 rounded-lg text-sm">
+                                                                                        <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
+                                                                                        <span className="flex-1 italic text-xs">Coming soon</span>
+                                                                                    </div>
+                                                                                )}
+
+                                                                                {/* Practice Resources */}
+                                                                                {topic.resources && topic.resources.length > 0 && (
+                                                                                    <div className="flex flex-wrap gap-1.5">
+                                                                                        {topic.resources.slice(0, 2).map((resource, resIdx) => (
+                                                                                            <a
+                                                                                                key={resIdx}
+                                                                                                href={resource.url}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-indigo-200/50 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all group/resource"
+                                                                                            >
+                                                                                                <span className="truncate max-w-[100px]">{resource.name}</span>
+                                                                                                <ArrowTopRightOnSquareIcon className="h-3 w-3 opacity-60 group-hover/resource:opacity-100 transition-opacity flex-shrink-0" />
+                                                                                            </a>
+                                                                                        ))}
+                                                                                        {topic.resources.length > 2 && (
+                                                                                            <span className="inline-flex items-center px-2.5 py-1.5 bg-gray-100/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium">
+                                                                                                +{topic.resources.length - 2}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Expandable Notes Section */}
+                                                                {isExpanded && (
+                                                                    <div className="px-6 pb-5 pt-2 bg-white/20 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700/50">
+                                                                        <div className="space-y-3">
+                                                                            {/* Lessons Section */}
+                                                                            {(() => {
+                                                                                const topicLessons = getLessonsForTopic(category.category, topic.name);
+                                                                                return (
+                                                                                    <div>
+                                                                                        <div className="flex items-center justify-between mb-2">
+                                                                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                                                                <VideoCameraIcon className="w-4 h-4" />
+                                                                                                Lessons {topicLessons.length > 0 && `(${topicLessons.length})`}
+                                                                                            </h4>
+                                                                                            {isAdmin && (
+                                                                                                <button
+                                                                                                    onClick={() => openCreateLessonModal(category.category, topic.name)}
+                                                                                                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                                                                                                >
+                                                                                                    <PlusIcon className="w-3.5 h-3.5" />
+                                                                                                    Add Lesson
+                                                                                                </button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                        {topicLessons.length > 0 ? (
+                                                                                            <div className="space-y-2">
+                                                                                                {topicLessons.map((lesson) => (
+                                                                                                    <div
+                                                                                                        key={lesson.id}
+                                                                                                        className="p-3 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg hover:shadow-md transition-all"
+                                                                                                    >
+                                                                                                        <div className="flex items-start justify-between gap-3">
+                                                                                                            <div className="flex-1">
+                                                                                                                <h5 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
+                                                                                                                    {lesson.title}
+                                                                                                                </h5>
+                                                                                                                {lesson.description && (
+                                                                                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                                                                                                        {lesson.description}
+                                                                                                                    </p>
+                                                                                                                )}
+                                                                                                                <div className="flex flex-wrap gap-2 items-center">
+                                                                                                                    {lesson.video_id && (
+                                                                                                                        <a
+                                                                                                                            href={`https://www.youtube.com/watch?v=${lesson.video_id}`}
+                                                                                                                            target="_blank"
+                                                                                                                            rel="noopener noreferrer"
+                                                                                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-xs font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                                                                                                        >
+                                                                                                                            <PlayCircleIcon className="w-3.5 h-3.5" />
+                                                                                                                            Watch Video
+                                                                                                                        </a>
+                                                                                                                    )}
+                                                                                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${lesson.difficulty === 'Beginner' || lesson.difficulty === 'Easy'
+                                                                                                                        ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                                                                                                                        : lesson.difficulty === 'Medium'
+                                                                                                                            ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                                                                                                                            : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+                                                                                                                        }`}>
+                                                                                                                        {lesson.difficulty}
+                                                                                                                    </span>
+                                                                                                                    {lesson.duration_minutes && (
+                                                                                                                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                                                                                            <ClockIcon className="w-3 h-3" />
+                                                                                                                            {lesson.duration_minutes} min
+                                                                                                                        </span>
+                                                                                                                    )}
+                                                                                                                    {lesson.instructor && (
+                                                                                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                                                            by {lesson.instructor}
+                                                                                                                        </span>
+                                                                                                                    )}
+                                                                                                                </div>
+                                                                                                                {lesson.resources && lesson.resources.length > 0 && (
+                                                                                                                    <div className="mt-2 flex flex-wrap gap-1">
+                                                                                                                        {lesson.resources.map((resource, idx) => (
+                                                                                                                            <a
+                                                                                                                                key={idx}
+                                                                                                                                href={resource.url}
+                                                                                                                                target="_blank"
+                                                                                                                                rel="noopener noreferrer"
+                                                                                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                                                                                                            >
+                                                                                                                                {resource.title}
+                                                                                                                                <ArrowTopRightOnSquareIcon className="w-2.5 h-2.5" />
+                                                                                                                            </a>
+                                                                                                                        ))}
+                                                                                                                    </div>
+                                                                                                                )}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                ))}
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
+                                                                                                No lessons available yet. {isAdmin && 'Click "Add Lesson" to create one!'}
+                                                                                            </p>
+                                                                                        )}
+                                                                                    </div>
+                                                                                );
+                                                                            })()}
+
+                                                                            {/* All Resources */}
+                                                                            {topic.resources && topic.resources.length > 0 && (
+                                                                                <div>
+                                                                                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                                                                        <BookOpenIcon className="w-4 h-4" />
+                                                                                        All Practice Resources
+                                                                                    </h4>
+                                                                                    <div className="flex flex-wrap gap-2">
+                                                                                        {topic.resources.map((resource, resIdx) => (
+                                                                                            <a
+                                                                                                key={resIdx}
+                                                                                                href={resource.url}
+                                                                                                target="_blank"
+                                                                                                rel="noopener noreferrer"
+                                                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium hover:shadow-md transition-all"
+                                                                                            >
+                                                                                                <span>{resource.name}</span>
+                                                                                                <ArrowTopRightOnSquareIcon className="h-3 w-3" />
+                                                                                            </a>
+                                                                                        ))}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Notes Editor */}
+                                                                            <div>
+                                                                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                                                                    <PencilSquareIcon className="w-4 h-4" />
+                                                                                    Personal Notes
+                                                                                </label>
+                                                                                <textarea
+                                                                                    value={getTopicNote(category.category, topic.name)}
+                                                                                    onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)}
+                                                                                    placeholder="Add your notes, key points, or reminders here..."
+                                                                                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                                                                                    rows="4"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Footer CTA */}
+                        <div className="mt-6">
+                            <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-xl p-6 border border-white/20 shadow-xl text-center">
+                                <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                    <AcademicCapIcon className="h-6 w-6 text-white" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+                                    Ready to Master DSA?
+                                </h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
+                                    Subscribe for in-depth tutorials and live workshops
+                                </p>
                                 <a
                                     href="https://www.youtube.com/@techelevategh/videos"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${category.color} text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-200 group`}
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm"
                                 >
-                                    <SparklesIcon className="h-5 w-5" />
-                                    <span>View All {category.title} Videos</span>
-                                    <ArrowTopRightOnSquareIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                                    <PlayCircleIcon className="h-4 w-4" />
+                                    <span>Subscribe on YouTube</span>
+                                    <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
                                 </a>
                             </div>
                         </div>
-                    ))}
-                </div>
-
-                {/* Footer CTA */}
-                <div className="mt-16 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-1">
-                    <div className="bg-white rounded-3xl p-8 text-center">
-                        <SparklesIcon className="h-12 w-12 mx-auto mb-4 text-purple-600" />
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                            Subscribe for More Content
-                        </h3>
-                        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                            Don't miss out on new tutorials, workshops, and tech insights. Subscribe to our YouTube channel for regular updates!
-                        </p>
-                        <a
-                            href="https://www.youtube.com/@techelevategh/videos"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-bold hover:from-red-700 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl text-base"
-                        >
-                            <PlayCircleIcon className="h-6 w-6" />
-                            <span>Subscribe on YouTube</span>
-                            <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-                        </a>
                     </div>
                 </div>
             </div>
+
+            {/* Admin FAB */}
+            {isAdmin && (
+                <button
+                    onClick={() => setShowAddLesson(true)}
+                    className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/50 hover:scale-110 transition-all flex items-center justify-center group z-50"
+                    aria-label="Add new lesson"
+                >
+                    <PlusIcon className="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+            )}
+
+            {/* Add Lesson Modal */}
+            {showAddLesson && isAdmin && (
+                <LessonCreate setAddLesson={setShowAddLesson} lessonCategories={{}} />
+            )}
+
+            {/* DSA Lesson Create/Edit Modal */}
+            {showLessonModal && isAdmin && (
+                <LessonCreateDSA
+                    isOpen={showLessonModal}
+                    onClose={() => {
+                        setShowLessonModal(false);
+                        setSelectedLesson(null);
+                        setCurrentTopicForLesson(null);
+                    }}
+                    onSuccess={handleLessonSuccess}
+                    editLesson={selectedLesson}
+                    defaultCategory={currentTopicForLesson?.category}
+                    defaultTopic={currentTopicForLesson?.topic}
+                />
+            )}
         </div>
     )
 }

@@ -3,13 +3,122 @@ import app.ents.learning.schema as learning_schema
 from pymongo.database import Database
 from app.core import service
 from app.core.settings import settings
-from app.utilities.constants import Constants
+from datetime import datetime
+from typing import Optional, List
+from bson import ObjectId
 
 
+# ============================================
+# LESSON CRUD OPERATIONS
+# ============================================
+
+
+def get_all_lessons(
+    db: Database,
+    *,
+    skip: int = 0,
+    limit: int = 100,
+    category: Optional[str] = None,
+    topic: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    is_published: Optional[bool] = None,
+) -> List[learning_models.Lesson]:
+    """Get all lessons with optional filtering"""
+    query = {}
+
+    if category:
+        query["category"] = category
+    if topic:
+        query["topic"] = topic
+    if difficulty:
+        query["difficulty"] = difficulty
+    if is_published is not None:
+        query["is_published"] = is_published
+
+    lessons = db["lessons"].find(query).skip(skip).limit(limit).sort("created_at", -1)
+    return [learning_models.Lesson(**lesson) for lesson in lessons]
+
+
+def get_lesson_by_id(db: Database, lesson_id: str) -> Optional[learning_models.Lesson]:
+    """Get a single lesson by ID"""
+    if not ObjectId.is_valid(lesson_id):
+        return None
+
+    lesson = db["lessons"].find_one({"_id": ObjectId(lesson_id)})
+    if lesson:
+        # Increment view count
+        db["lessons"].update_one(
+            {"_id": ObjectId(lesson_id)}, {"$inc": {"view_count": 1}}
+        )
+        lesson["view_count"] = lesson.get("view_count", 0) + 1
+        return learning_models.Lesson(**lesson)
+    return None
+
+
+def get_lessons_by_category_and_topic(
+    db: Database, category: str, topic: str
+) -> List[learning_models.Lesson]:
+    """Get all lessons for a specific category and topic"""
+    lessons = (
+        db["lessons"]
+        .find({"category": category, "topic": topic, "is_published": True})
+        .sort("created_at", -1)
+    )
+
+    return [learning_models.Lesson(**lesson) for lesson in lessons]
+
+
+def create_lesson(
+    db: Database, *, data: learning_schema.LessonCreate, user_id: int
+) -> learning_models.Lesson:
+    """Create a new lesson"""
+    lesson_data = data.dict()
+    lesson_data["created_by"] = user_id
+    lesson_data["created_at"] = datetime.utcnow()
+    lesson_data["updated_at"] = datetime.utcnow()
+    lesson_data["view_count"] = 0
+
+    result = db["lessons"].insert_one(lesson_data)
+    lesson_data["_id"] = result.inserted_id
+
+    return learning_models.Lesson(**lesson_data)
+
+
+def update_lesson(
+    db: Database, lesson_id: str, data: learning_schema.LessonUpdate
+) -> Optional[learning_models.Lesson]:
+    """Update an existing lesson"""
+    if not ObjectId.is_valid(lesson_id):
+        return None
+
+    update_data = {
+        k: v for k, v in data.dict(exclude_unset=True).items() if v is not None
+    }
+    update_data["updated_at"] = datetime.utcnow()
+
+    result = db["lessons"].find_one_and_update(
+        {"_id": ObjectId(lesson_id)}, {"$set": update_data}, return_document=True
+    )
+
+    if result:
+        return learning_models.Lesson(**result)
+    return None
+
+
+def delete_lesson(db: Database, lesson_id: str) -> bool:
+    """Delete a lesson"""
+    if not ObjectId.is_valid(lesson_id):
+        return False
+
+    result = db["lessons"].delete_one({"_id": ObjectId(lesson_id)})
+    return result.deleted_count > 0
+
+
+# Legacy function for backwards compatibility
 def read_lessons(
     db: Database, *, skip: int = 0, limit: int = 100
-) -> list[learning_models.Lesson]:
-    return db.query(learning_models.Lesson).offset(skip).limit(limit).all()
+) -> List[learning_models.Lesson]:
+    return get_all_lessons(db, skip=skip, limit=limit)
 
 
 def read_lessons_v1():
@@ -24,12 +133,142 @@ def read_lessons_v1():
         print(f)
 
 
-def create_lesson(
-    db: Database, *, data: learning_schema.LessonCreate
-) -> learning_models.Lesson:
-    lesson = learning_models.Lesson(**data.dict())
+# User Progress CRUD Operations
+def get_user_progress(
+    db: Database, user_id: int
+) -> Optional[learning_models.UserProgress]:
+    """Get user's learning progress by user_id"""
+    progress = db["user_progress"].find_one({"user_id": user_id})
+    if progress:
+        return learning_models.UserProgress(**progress)
+    return None
 
-    db.add(lesson)
-    db.commit()
-    db.refresh(lesson)
-    return lesson
+
+def create_user_progress(
+    db: Database, user_id: int, data: learning_schema.ProgressCreate
+) -> learning_models.UserProgress:
+    """Create new user progress record"""
+    progress_data = data.dict()
+    progress_data["user_id"] = user_id
+    progress_data["last_updated"] = datetime.utcnow()
+    progress_data["created_at"] = datetime.utcnow()
+
+    result = db["user_progress"].insert_one(progress_data)
+    progress_data["_id"] = result.inserted_id
+
+    return learning_models.UserProgress(**progress_data)
+
+
+def update_user_progress(
+    db: Database, user_id: int, data: learning_schema.ProgressUpdate
+) -> Optional[learning_models.UserProgress]:
+    """Update existing user progress"""
+    update_data = {
+        k: v for k, v in data.dict(exclude_unset=True).items() if v is not None
+    }
+    update_data["last_updated"] = datetime.utcnow()
+
+    result = db["user_progress"].find_one_and_update(
+        {"user_id": user_id}, {"$set": update_data}, return_document=True
+    )
+
+    if result:
+        return learning_models.UserProgress(**result)
+    return None
+
+
+def toggle_completed_topic(
+    db: Database, user_id: int, topic_key: str
+) -> Optional[learning_models.UserProgress]:
+    """Toggle a topic's completion status"""
+    progress = get_user_progress(db, user_id)
+
+    if not progress:
+        # Create new progress if doesn't exist
+        progress = create_user_progress(
+            db, user_id, learning_schema.ProgressCreate(completed_topics=[topic_key])
+        )
+    else:
+        # Toggle the topic
+        completed = progress.completed_topics
+        if topic_key in completed:
+            completed.remove(topic_key)
+        else:
+            completed.append(topic_key)
+
+        db["user_progress"].update_one(
+            {"user_id": user_id},
+            {
+                "$set": {
+                    "completed_topics": completed,
+                    "last_updated": datetime.utcnow(),
+                }
+            },
+        )
+        progress.completed_topics = completed
+        progress.last_updated = datetime.utcnow()
+
+    return progress
+
+
+def toggle_bookmarked_topic(
+    db: Database, user_id: int, topic_key: str
+) -> Optional[learning_models.UserProgress]:
+    """Toggle a topic's bookmark status"""
+    progress = get_user_progress(db, user_id)
+
+    if not progress:
+        # Create new progress if doesn't exist
+        progress = create_user_progress(
+            db, user_id, learning_schema.ProgressCreate(bookmarked_topics=[topic_key])
+        )
+    else:
+        # Toggle the bookmark
+        bookmarked = progress.bookmarked_topics
+        if topic_key in bookmarked:
+            bookmarked.remove(topic_key)
+        else:
+            bookmarked.append(topic_key)
+
+        db["user_progress"].update_one(
+            {"user_id": user_id},
+            {
+                "$set": {
+                    "bookmarked_topics": bookmarked,
+                    "last_updated": datetime.utcnow(),
+                }
+            },
+        )
+        progress.bookmarked_topics = bookmarked
+        progress.last_updated = datetime.utcnow()
+
+    return progress
+
+
+def update_topic_note(
+    db: Database, user_id: int, topic_key: str, note: str
+) -> Optional[learning_models.UserProgress]:
+    """Update or create a note for a specific topic"""
+    progress = get_user_progress(db, user_id)
+
+    if not progress:
+        # Create new progress if doesn't exist
+        progress = create_user_progress(
+            db, user_id, learning_schema.ProgressCreate(topic_notes={topic_key: note})
+        )
+    else:
+        # Update the note
+        notes = progress.topic_notes
+        if note.strip():  # Only add/update if note has content
+            notes[topic_key] = note
+        else:  # Remove note if empty
+            notes.pop(topic_key, None)
+
+        db["user_progress"].update_one(
+            {"user_id": user_id},
+            {"$set": {"topic_notes": notes, "last_updated": datetime.utcnow()}},
+        )
+        progress.topic_notes = notes
+        progress.last_updated = datetime.utcnow()
+
+    return progress
