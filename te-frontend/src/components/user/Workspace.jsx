@@ -16,6 +16,9 @@ import Referrals from '../../pages/Referrals'
 import Opportunities from '../../pages/Opportunities'
 import Learning from '../../pages/Learning'
 import Practice from '../../pages/Practice'
+import AdminApplications from '../../pages/AdminApplications'
+import AdminReferrals from '../../pages/AdminReferrals'
+import AdminFiles from '../../pages/AdminFiles'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
@@ -184,9 +187,15 @@ const Workspace = ({ setLogin }) => {
                     <main className="min-h-screen bg-[#fafafa] pt-20">
                         {
                             content === "Profile" ? <Profile /> :
-                                content === "Applications" ? <Applications /> :
-                                    content === "Resume and Referral Essay" ? <FilesAndEssay /> :
-                                        content === "Referrals" ? <Referrals /> :
+                                content === "Applications" ? (
+                                    isLeadOrAdmin ? <AdminApplications /> : <Applications />
+                                ) :
+                                    content === "Resume and Referral Essay" ? (
+                                        isLeadOrAdmin ? <AdminFiles /> : <FilesAndEssay />
+                                    ) :
+                                        content === "Referrals" ? (
+                                            isLeadOrAdmin ? <AdminReferrals /> : <Referrals />
+                                        ) :
                                             content === "Opportunities" ? <Opportunities /> :
                                                 content === "Practice" ? <Practice /> :
                                                     <Learning />

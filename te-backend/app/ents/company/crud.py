@@ -6,6 +6,49 @@ from pymongo.database import Database
 from fastapi import HTTPException
 
 
+def create_admin_company(
+    db: Database, *, data: company_schema.AdminCompanyCreate
+) -> company_models.Company:
+    """
+    Create a new company for referrals (Admin/Lead only).
+    Simplified creation with basic company information.
+    """
+    # Check if company with this name already exists
+    existing = db.companies.find_one({"name": data.name})
+    if existing:
+        raise HTTPException(
+            status_code=400, detail=f"Company '{data.name}' already exists"
+        )
+
+    # Create company document
+    company_dict = {
+        "name": data.name,
+        "domain": data.website if data.website else "",
+        "image": data.image if data.image else "",
+        "can_refer": True,
+        "locations": [],  # Can be added later if needed
+        "referral_materials": {
+            "resume": True,
+            "essay": True,
+            "contact": True,
+        },
+        # Store additional info in a metadata field
+        "metadata": {
+            "description": data.description if data.description else "",
+            "industry": data.industry if data.industry else "",
+            "size": data.size if data.size else "",
+            "headquarters": data.headquarters if data.headquarters else "",
+        },
+    }
+
+    # Insert into MongoDB
+    result = db.companies.insert_one(company_dict)
+
+    # Fetch and return the created company
+    company_data = db.companies.find_one({"_id": result.inserted_id})
+    return company_models.Company(**company_data)
+
+
 def read_company_by_id(
     db: Database, *, company_id: int
 ) -> Optional[company_models.Company]:

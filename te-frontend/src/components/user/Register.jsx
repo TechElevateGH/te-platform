@@ -77,7 +77,7 @@ const Register = () => {
                 password: formData.password
             });
 
-            login(loginResponse.data.sub, loginResponse.data.role, loginResponse.data.access_token);
+            login(loginResponse.data.access_token, loginResponse.data.sub, loginResponse.data.role);
             navigate('/workspace');
         } catch (error) {
             setError(error.response?.data?.detail || 'Registration failed. Please try again.');

@@ -34,6 +34,18 @@ class CompanyCreate(CompanyBase):
     referral_materials: ReferralMaterials = None
 
 
+class AdminCompanyCreate(BaseModel):
+    """Simplified schema for admin to add referral companies"""
+
+    name: str
+    image: str = ""
+    description: str = ""
+    website: str = ""
+    industry: str = ""
+    size: str = ""
+    headquarters: str = ""
+
+
 class CompanyReadBase(CompanyBase):
     id: str  # MongoDB ObjectId as string
     domain: str

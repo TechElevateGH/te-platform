@@ -12,6 +12,7 @@ class UserLogin(BaseModel):
 
 class LeadLogin(BaseModel):
     """Schema for Lead/Admin login with username and token"""
+
     username: str
     token: str
 
@@ -34,12 +35,10 @@ class UserRoles(int, Enum):
 
 
 class LeadCreate(BaseModel):
-    """Schema for creating a Lead account (Admin only)"""
+    """Schema for creating a Lead/Admin account (Admin only)"""
+
     username: str
-    email: EmailStr
-    first_name: str
-    last_name: str
-    full_name: str = ""
+    token: str
     role: UserRoles = UserRoles.lead
 
 

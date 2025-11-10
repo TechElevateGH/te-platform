@@ -240,6 +240,26 @@ def resume_review(
     return {"resumes": [file_to_read(resume) for resume in resumes]}
 
 
+@app_router.get(
+    "/all", response_model=Dict[str, List[application_schema.ApplicationRead]]
+)
+def get_all_applications(
+    db: Database = Depends(session.get_db),
+    *,
+    admin_user=Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Retrieve all applications from all users (Admin only).
+    Returns applications with user info for admin dashboard.
+    """
+    applications = application_crud.read_all_applications(db)
+    return {
+        "applications": [
+            application_dependencies.parse_application(app) for app in applications
+        ]
+    }
+
+
 @user_files_router.delete("/{file_id}", status_code=status.HTTP_200_OK)
 def delete_file(
     db: Database = Depends(session.get_db),

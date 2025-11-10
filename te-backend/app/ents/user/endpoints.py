@@ -67,7 +67,7 @@ def create_lead_account(
     result = user_crud.create_lead_user(db, data=data)
     return {
         "lead": result,
-        "message": "Lead account created successfully. Please share the token securely with the user."
+        "message": "Lead account created successfully. Please share the token securely with the user.",
     }
 
 
@@ -115,3 +115,58 @@ def update_cover_letter(
 ):
     cover_letter = user_crud.add_user_cover_letter(db, user_id=user_id, data=data)
     return user_schema.CoverLetter(cover_letter=cover_letter)
+
+
+@router.get("/all-files", response_model=Dict[str, Any])
+def get_all_users_files(
+    db: Database = Depends(session.get_db),
+    *,
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Get all users with their files (Admin only).
+    Returns list of users with their resumes and essays.
+    """
+    import app.ents.application.crud as application_crud
+
+    users = user_crud.read_all_users(db)
+    users_with_files = []
+
+    for user in users:
+        # Only include members (role = 1)
+        if user.role != user_schema.UserRoles.member.value:
+            continue
+
+        # Get user's files
+        files = application_crud.read_user_application_files(db, user_id=str(user.id))
+
+        # Separate resumes and essays
+        resumes = [f for f in files if f.file_type == "resume"]
+        essays = [f for f in files if f.file_type == "essay"]
+
+        user_data = {
+            "id": str(user.id),
+            "full_name": user.full_name,
+            "email": user.email,
+            "resumes": [
+                {
+                    "id": str(f.id),
+                    "name": f.name,
+                    "url": f.url,
+                    "uploaded_at": f.uploaded_at,
+                }
+                for f in resumes
+            ],
+            "essays": [
+                {
+                    "id": str(f.id),
+                    "name": f.name,
+                    "url": f.url,
+                    "uploaded_at": f.uploaded_at,
+                }
+                for f in essays
+            ],
+        }
+        users_with_files.append(user_data)
+
+    return {"users": users_with_files}

@@ -55,24 +55,26 @@ def lead_login_access_token(
     Lead/Admin token login with username and access token
     """
     print(f"🔐 Lead login attempt - Username: {data.username}")
-    
+
     # Find user by username
     user = user_crud.get_user_by_username(db, username=data.username)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid username or token")
-    
+
     # Verify user has Lead or Admin role
     if user.role < user_schema.UserRoles.lead:
-        raise HTTPException(status_code=403, detail="Unauthorized: Lead or Admin access required")
-    
+        raise HTTPException(
+            status_code=403, detail="Unauthorized: Lead or Admin access required"
+        )
+
     # Verify token matches
     if not user.lead_token or user.lead_token != data.token:
         raise HTTPException(status_code=400, detail="Invalid username or token")
-    
+
     # Check if user is active
     if not user_crud.is_user_active(db, user=user):
         raise HTTPException(status_code=400, detail="Inactive user")
-    
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     user_id_str = str(user.id)
 
@@ -86,8 +88,8 @@ def lead_login_access_token(
             "username": user.username,
             "email": user.email,
             "role": user.role,
-            "full_name": user.full_name
-        }
+            "full_name": user.full_name,
+        },
     }
 
 

@@ -47,18 +47,18 @@ const AdminApplications = () => {
 
     // Filter applications
     const filteredApplications = applications.filter(app => {
-        const matchesSearch = !searchQuery || 
+        const matchesSearch = !searchQuery ||
             app.company?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             app.position?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             app.user_name?.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        const matchesMember = !memberFilter || 
+
+        const matchesMember = !memberFilter ||
             app.user_name?.toLowerCase().includes(memberFilter.toLowerCase()) ||
             app.user_email?.toLowerCase().includes(memberFilter.toLowerCase());
-        
-        const matchesCompany = !companyFilter || 
+
+        const matchesCompany = !companyFilter ||
             app.company?.name?.toLowerCase().includes(companyFilter.toLowerCase());
-        
+
         const matchesStatus = !statusFilter || app.status === statusFilter;
 
         return matchesSearch && matchesMember && matchesCompany && matchesStatus;
@@ -278,7 +278,7 @@ const AdminApplications = () => {
                                             <BuildingOfficeIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                                             <p className="text-sm font-medium text-gray-900">No applications found</p>
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {applications.length === 0 
+                                                {applications.length === 0
                                                     ? 'No member applications yet'
                                                     : 'Try adjusting your filters'}
                                             </p>

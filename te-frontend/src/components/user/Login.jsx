@@ -27,7 +27,7 @@ const Login = () => {
                 username: loginData.username,
                 password: loginData.password
             });
-            login(response.data.sub, response.data.role, response.data.access_token);
+            login(response.data.access_token, response.data.sub, response.data.role);
             navigate(localStorage.getItem("prevPage") || "/workspace");
         } catch (error) {
             setError(error.response?.data?.detail || 'Login failed. Please check your credentials.');

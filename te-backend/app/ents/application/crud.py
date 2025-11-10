@@ -101,6 +101,13 @@ def read_user_applications(
     return [application_models.Application(**app) for app in applications_data]
 
 
+def read_all_applications(db: Database) -> list[application_models.Application]:
+    """Read all applications from all users (Admin only)."""
+    # Fetch all applications from MongoDB
+    applications_data = db.applications.find({})
+    return [application_models.Application(**app) for app in applications_data]
+
+
 def read_user_application(
     db: Database, *, user_id: int, application_id: int
 ) -> application_models.Application:

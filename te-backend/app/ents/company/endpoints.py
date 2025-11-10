@@ -14,6 +14,25 @@ company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
 
 
+@company_router.post(
+    "",
+    response_model=Dict[str, company_schema.CompanyReadBase],
+    status_code=status.HTTP_201_CREATED,
+)
+def add_company(
+    db: Database = Depends(session.get_db),
+    *,
+    data: company_schema.AdminCompanyCreate,
+    user: user_models.User = Depends(user_dependencies.get_current_lead),
+) -> Any:
+    """
+    Add a new company to the referral system (Lead/Admin only).
+    Requires user role to be Lead or Admin (role >= 2).
+    """
+    company = company_crud.create_admin_company(db, data=data)
+    return {"company": company_dependencies.parse_company_basic(company)}
+
+
 @company_router.get(
     "/referrals",
     response_model=Dict[str, list[company_schema.CompanyReadForReferrals]],

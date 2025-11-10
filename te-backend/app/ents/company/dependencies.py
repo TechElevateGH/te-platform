@@ -1,6 +1,17 @@
 import app.ents.company.schema as company_schema
 
 
+def parse_company_basic(company):
+    """Parse company to basic read format"""
+    return company_schema.CompanyReadBase(
+        id=str(company.id),
+        name=company.name,
+        domain=company.domain,
+        image=company.image,
+        can_refer=company.can_refer,
+    )
+
+
 def parse_company(company):
     company_base = company_schema.CompanyReadBase(**vars(company))
     new_company = company_schema.CompanyRead(

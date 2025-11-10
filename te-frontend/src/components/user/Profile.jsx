@@ -9,19 +9,25 @@ import {
     CheckIcon,
     XMarkIcon,
     ExclamationCircleIcon,
-    CheckCircleIcon
+    CheckCircleIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline'
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
+import CreateLeadAdmin from './CreateLeadAdmin';
 
 const Profile = () => {
     const { userInfo, setUserInfo } = useData();
-    const { userId, accessToken } = useAuth();
+    const { userId, accessToken, userRole } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
     const [errors, setErrors] = useState({});
+    const [showCreateLeadAdmin, setShowCreateLeadAdmin] = useState(false);
+
+    // Check if user is Admin (role === 3)
+    const isAdmin = userRole && parseInt(userRole) === 3;
 
     const [editedInfo, setEditedInfo] = useState({
         full_name: '',
@@ -151,6 +157,12 @@ const Profile = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+            {/* Create Lead/Admin Modal */}
+            <CreateLeadAdmin
+                show={showCreateLeadAdmin}
+                onClose={() => setShowCreateLeadAdmin(false)}
+            />
+
             {/* Header */}
             <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-6">
@@ -163,50 +175,63 @@ const Profile = () => {
                                 Manage your personal information and preferences
                             </p>
                         </div>
-                        {!isEditing ? (
-                            <button
-                                onClick={handleEdit}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                                <PencilIcon className="h-4 w-4" />
-                                <span>Edit Profile</span>
-                            </button>
-                        ) : (
-                            <div className="flex gap-3">
+                        <div className="flex gap-3">
+                            {/* Admin-only: Create Lead/Admin button */}
+                            {isAdmin && (
                                 <button
-                                    onClick={handleCancel}
-                                    disabled={isSaving}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => setShowCreateLeadAdmin(true)}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
                                 >
-                                    <XMarkIcon className="h-4 w-4" />
-                                    <span>Cancel</span>
+                                    <ShieldCheckIcon className="h-4 w-4" />
+                                    <span>Create Lead/Admin</span>
                                 </button>
+                            )}
+
+                            {!isEditing ? (
                                 <button
-                                    onClick={handleSave}
-                                    disabled={isSaving}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={handleEdit}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-sm"
                                 >
-                                    {isSaving ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                            <span>Saving...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CheckIcon className="h-4 w-4" />
-                                            <span>Save Changes</span>
-                                        </>
-                                    )}
+                                    <PencilIcon className="h-4 w-4" />
+                                    <span>Edit Profile</span>
                                 </button>
-                            </div>
-                        )}
+                            ) : (
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={isSaving}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                        <span>Cancel</span>
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isSaving ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                                <span>Saving...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckIcon className="h-4 w-4" />
+                                                <span>Save Changes</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Notification Banner */}
                     {notification && (
                         <div className={`mt-4 p-4 rounded-lg border ${notification.type === 'success'
-                                ? 'bg-emerald-50 border-emerald-200'
-                                : 'bg-red-50 border-red-200'
+                            ? 'bg-emerald-50 border-emerald-200'
+                            : 'bg-red-50 border-red-200'
                             } animate-fade-in`}>
                             <div className="flex items-center gap-3">
                                 {notification.type === 'success' ? (

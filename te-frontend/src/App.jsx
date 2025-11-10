@@ -9,10 +9,10 @@ import Register from './components/user/Register';
 import LeadLogin from './pages/LeadLogin';
 
 const ProtectedRoute = ({ children }) => {
-  // const { isAuthenticated } = useAuth();
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
   return children;
 };
 

@@ -30,7 +30,7 @@ const LeadLogin = () => {
                     response.data.user.id,
                     response.data.user.role
                 );
-                
+
                 // Navigate to workspace
                 navigate('/workspace');
             }

@@ -47,6 +47,12 @@ def read_users_by_role(
     return [user_models.User(**user) for user in users_data]
 
 
+def read_all_users(db: Database) -> list[user_models.User]:
+    """Read all users from MongoDB (Admin only)"""
+    users_data = db.users.find({})
+    return [user_models.User(**user) for user in users_data]
+
+
 def read_users_by_base_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
 ) -> list[user_models.User]:
@@ -92,40 +98,28 @@ def create_user(db: Database, *, data: user_schema.UserCreate) -> user_models.Us
 
 
 def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
-    """Create a new Lead account (Admin only) - generates a secure token"""
-    import secrets
-    
+    """Create a new Lead/Admin account (Admin only) - uses provided token"""
+
     # Check if username already exists
     existing_user = get_user_by_username(db, username=data.username)
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already exists"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
         )
-    
-    # Check if email already exists
-    existing_email = read_user_by_email(db, email=data.email)
-    if existing_email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already exists"
-        )
-    
-    # Generate secure token (32 characters alphanumeric)
-    lead_token = secrets.token_urlsafe(32)
-    
-    # Create user data
+
+    # Create minimal user data for Lead/Admin
     user_dict = {
         "username": data.username,
-        "email": data.email,
-        "first_name": data.first_name,
-        "middle_name": "",
-        "last_name": data.last_name,
-        "full_name": data.full_name or f"{data.first_name} {data.last_name}",
-        "password": security.get_password_hash(lead_token),  # Store hashed token as password
-        "lead_token": lead_token,  # Store plain token for Lead login
+        "password": security.get_password_hash(data.token),  # Hash token as password
+        "lead_token": data.token,  # Store plain token for Lead login
         "role": data.role,
         "is_active": True,
+        # Minimal/empty fields not needed for Lead/Admin
+        "email": "",
+        "first_name": "",
+        "middle_name": "",
+        "last_name": "",
+        "full_name": "",
         "image": "",
         "date_of_birth": "",
         "contact": "",
@@ -136,24 +130,22 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
         "essay": "",
         "cover_letter": "",
         "resume_file_ids": [],
-        "mentor_id": None
+        "mentor_id": None,
     }
-    
+
     # Insert into MongoDB
     result = db.users.insert_one(user_dict)
-    
+
     # Fetch the created user
     user_data = db.users.find_one({"_id": result.inserted_id})
     user = user_models.User(**user_data)
-    
-    # Return user info with the plain token (only shown once)
+
+    # Return user info with credentials
     return {
         "user_id": str(user.id),
         "username": user.username,
-        "email": user.email,
         "role": user.role,
-        "full_name": user.full_name,
-        "token": lead_token  # Return token only once at creation
+        "token": data.token,  # Return provided token for reference
     }
 
 
