@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ReferralEssay from "../components/file/ReferralEssay";
 import { PlusIcon, PaperClipIcon, BriefcaseIcon } from '@heroicons/react/20/solid'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { TrashIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
 import FileCreate from "../components/file/FileCreate";
@@ -18,9 +18,18 @@ const Files = () => {
     const isMember = userRole && parseInt(userRole) === 1; // Only Members can upload resumes/essays
 
     const [addFile, setAddFile] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
     const [deletingFileId, setDeletingFileId] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, fileId: null, fileName: '' });
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+
+    // Resume Review Form Data
+    const [reviewFormData, setReviewFormData] = useState({
+        resume_link: '',
+        job_title: '',
+        level: 'Intern',
+        notes: ''
+    });
 
     // Check if user is authenticated
     useEffect(() => {
@@ -51,6 +60,26 @@ const Files = () => {
             alert(`Failed to delete resume: ${error.response?.data?.detail || error.message}`);
         } finally {
             setDeletingFileId(null);
+        }
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axiosInstance.post('/resume-reviews', reviewFormData, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            alert('Resume review request submitted successfully!');
+            setReviewFormData({
+                resume_link: '',
+                job_title: '',
+                level: 'Intern',
+                notes: ''
+            });
+            setShowReviewModal(false);
+        } catch (error) {
+            console.error('Error submitting request:', error);
+            alert('Failed to submit request. Please try again.');
         }
     };
 
@@ -85,14 +114,24 @@ const Files = () => {
                         <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Resumes</h2>
                             {isMember && (
-                                <button
-                                    type="button"
-                                    className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
-                                    onClick={() => setAddFile(true)}
-                                >
-                                    <PlusIcon className="h-4 w-4" aria-hidden="true" />
-                                    Upload Resume
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-purple-700 hover:to-pink-700 active:scale-95 transition-all duration-200"
+                                        onClick={() => setShowReviewModal(true)}
+                                    >
+                                        <DocumentTextIcon className="h-4 w-4" aria-hidden="true" />
+                                        Request Review
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                        onClick={() => setAddFile(true)}
+                                    >
+                                        <PlusIcon className="h-4 w-4" aria-hidden="true" />
+                                        Upload Resume
+                                    </button>
+                                </div>
                             )}
                         </header>
 
@@ -198,6 +237,124 @@ const Files = () => {
                 isOpen={showSignInPrompt}
                 onClose={() => setShowSignInPrompt(false)}
             />
+
+            {/* Resume Review Request Modal */}
+            {showReviewModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                    <DocumentTextIcon className="h-6 w-6" />
+                                    Request Resume Review
+                                </h2>
+                                <button
+                                    onClick={() => setShowReviewModal(false)}
+                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleReviewSubmit} className="p-6 space-y-4">
+                            {/* Important Info Banner */}
+                            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                                <div className="flex items-start gap-3">
+                                    <svg className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-200 mb-1">
+                                            Important: Grant Edit Access
+                                        </h3>
+                                        <p className="text-xs text-purple-800 dark:text-purple-300">
+                                            Please ensure <span className="font-semibold">info@techelevate.org</span> has <span className="font-semibold">Edit access</span> to your Google Doc so our reviewers can add comments and suggestions directly to your resume.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Google Docs Resume Link *
+                                </label>
+                                <input
+                                    type="url"
+                                    required
+                                    value={reviewFormData.resume_link}
+                                    onChange={(e) => setReviewFormData({ ...reviewFormData, resume_link: e.target.value })}
+                                    placeholder="https://docs.google.com/document/d/..."
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Target Job Title *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={reviewFormData.job_title}
+                                    onChange={(e) => setReviewFormData({ ...reviewFormData, job_title: e.target.value })}
+                                    placeholder="e.g., Software Engineer, Data Analyst"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Experience Level *
+                                </label>
+                                <select
+                                    required
+                                    value={reviewFormData.level}
+                                    onChange={(e) => setReviewFormData({ ...reviewFormData, level: e.target.value })}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                >
+                                    <option value="Intern">Intern</option>
+                                    <option value="Entry Level">Entry Level (0-2 years)</option>
+                                    <option value="Mid Level">Mid Level (3-5 years)</option>
+                                    <option value="Senior Level">Senior Level (6-10 years)</option>
+                                    <option value="Lead/Principal">Lead/Principal (10+ years)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Additional Notes (Optional)
+                                </label>
+                                <textarea
+                                    value={reviewFormData.notes}
+                                    onChange={(e) => setReviewFormData({ ...reviewFormData, notes: e.target.value })}
+                                    placeholder="Any specific areas you'd like feedback on?"
+                                    rows="3"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                ></textarea>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowReviewModal(false)}
+                                    className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+                                >
+                                    Submit Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
         </div>
     )

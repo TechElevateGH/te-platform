@@ -9,7 +9,6 @@ import {
     ClockIcon,
     CheckCircleIcon,
     XCircleIcon,
-    MagnifyingGlassIcon,
     PaperAirplaneIcon,
     EyeIcon,
     XMarkIcon,
@@ -29,11 +28,12 @@ const AdminReferrals = () => {
     const [companyFilter, setCompanyFilter] = useState('');
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
-    
+
     // Advanced Features State
     const [sortBy, setSortBy] = useState('date_desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    const [showDateFilter, setShowDateFilter] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
         email: true,
@@ -167,7 +167,7 @@ const AdminReferrals = () => {
 
         const matchesCompany = !companyFilter ||
             ref.company?.name?.toLowerCase().includes(companyFilter.toLowerCase());
-        
+
         const matchesDateRange = (!dateRange.start || new Date(ref.submitted_date) >= new Date(dateRange.start)) &&
             (!dateRange.end || new Date(ref.submitted_date) <= new Date(dateRange.end));
 
@@ -373,27 +373,10 @@ const AdminReferrals = () => {
             </header>
 
             <div className="max-w-7xl mx-auto px-4 py-3">
-                
+
                 {/* Filters Bar */}
                 <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                        {/* Global Search */}
-                        <div className="md:col-span-4">
-                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                Search
-                            </label>
-                            <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search referrals (member, company, job title)..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-                        </div>
-
                         {/* Status Filter */}
                         <div className="md:col-span-2">
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
@@ -413,9 +396,9 @@ const AdminReferrals = () => {
                         </div>
 
                         {/* Member Filter */}
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-3">
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                Member
+                                Member Name or Email
                             </label>
                             <input
                                 type="text"
@@ -427,9 +410,9 @@ const AdminReferrals = () => {
                         </div>
 
                         {/* Company Filter */}
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-3">
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                Company
+                                Company Name
                             </label>
                             <input
                                 type="text"
@@ -460,30 +443,47 @@ const AdminReferrals = () => {
                                 <option value="status_desc">Status (Z-A)</option>
                             </select>
                         </div>
-                    </div>
 
-                    {/* Date Range - Second Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-3">
-                        <div className="md:col-span-4">
+                        {/* Date Range Toggle */}
+                        <div className="md:col-span-2">
                             <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                Date Range
+                                Date Filter
                             </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="date"
-                                    value={dateRange.start}
-                                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                                    className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                                <input
-                                    type="date"
-                                    value={dateRange.end}
-                                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                                    className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                            </div>
+                            <button
+                                onClick={() => setShowDateFilter(!showDateFilter)}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-left"
+                            >
+                                {dateRange.start || dateRange.end ? '📅 Filtered' : '📅 Date Range'}
+                            </button>
                         </div>
                     </div>
+
+                    {/* Date Range - Collapsible Section */}
+                    {showDateFilter && (
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div className="md:col-span-6">
+                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    Date Range
+                                </label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="date"
+                                        value={dateRange.start}
+                                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                                        placeholder="Start date"
+                                        className="flex-1 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    />
+                                    <input
+                                        type="date"
+                                        value={dateRange.end}
+                                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                                        placeholder="End date"
+                                        className="flex-1 px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Active Filters & Clear */}
                     {(searchQuery || statusFilter || memberFilter || companyFilter || dateRange.start || dateRange.end) && (

@@ -9,6 +9,7 @@ import { DataProvider } from './context/DataContext'
 import Register from './components/user/Register';
 import LeadLogin from './pages/LeadLogin';
 import UserAccountManagement from './pages/UserAccountManagement';
+import ResumeReviews from './pages/ResumeReviews';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
                 <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
                 <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
+                <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/lead-login" element={<LeadLogin />} />
                 <Route path="/register" element={<Register />} />

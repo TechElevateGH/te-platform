@@ -31,7 +31,7 @@ const AdminApplications = () => {
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [sortBy, setSortBy] = useState('date_desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
-    
+
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
@@ -259,11 +259,11 @@ const AdminApplications = () => {
                                 {showColumnSelector && (
                                     <>
                                         {/* Backdrop */}
-                                        <div 
-                                            className="fixed inset-0 z-10" 
+                                        <div
+                                            className="fixed inset-0 z-10"
                                             onClick={() => setShowColumnSelector(false)}
                                         />
-                                        
+
                                         {/* Dropdown */}
                                         <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
                                             <div className="p-3 border-b border-gray-200 dark:border-gray-700">
@@ -293,7 +293,7 @@ const AdminApplications = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="p-2 max-h-80 overflow-y-auto">
                                                 {columnConfig.map(column => (
                                                     <label
@@ -333,8 +333,8 @@ const AdminApplications = () => {
                             <button
                                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                     }`}
                             >
                                 <AdjustmentsHorizontalIcon className="h-4 w-4" />

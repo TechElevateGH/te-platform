@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 class ResumeReviewCreate(BaseModel):
     """Schema for creating a resume review request"""
+
     resume_link: str
     job_title: str
     level: str  # Entry Level, Mid Level, Senior Level, etc.
@@ -12,6 +13,7 @@ class ResumeReviewCreate(BaseModel):
 
 class ResumeReviewUpdate(BaseModel):
     """Schema for updating a resume review request"""
+
     status: Optional[str] = None
     feedback: Optional[str] = None
     notes: Optional[str] = None
@@ -19,6 +21,7 @@ class ResumeReviewUpdate(BaseModel):
 
 class ResumeReviewRead(BaseModel):
     """Schema for reading resume review data"""
+
     id: str
     user_id: str
     user_name: str
@@ -30,6 +33,7 @@ class ResumeReviewRead(BaseModel):
     submitted_date: str
     reviewed_by: Optional[str] = None
     reviewer_name: Optional[str] = None
+    assigned_date: Optional[str] = None
     review_date: Optional[str] = None
     feedback: str = ""
     notes: str = ""

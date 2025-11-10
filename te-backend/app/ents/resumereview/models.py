@@ -18,6 +18,7 @@ class ResumeReview(BaseModel):
     submitted_date: str  # Date when request was submitted
     reviewed_by: Optional[PyObjectId] = None  # Volunteer/Lead/Admin who reviews
     reviewer_name: Optional[str] = None  # Reviewer's name
+    assigned_date: Optional[str] = None  # Date when assigned to reviewer
     review_date: Optional[str] = None  # Date when reviewed
     feedback: str = ""  # Reviewer's feedback/comments
     notes: str = ""  # Additional notes
