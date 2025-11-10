@@ -1,48 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReferralEssay from "../components/file/ReferralEssay";
 import { PlusIcon, PaperClipIcon, BriefcaseIcon } from '@heroicons/react/20/solid'
-import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { TrashIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
-// import { useAuth } from "../context/AuthContext"; // Commented out - will add auth checks later
+import { useAuth } from "../context/AuthContext";
 import FileCreate from "../components/file/FileCreate";
-import MissingData from "../components/_custom/Alert/MissingData";
+import EmptyResumes from "../components/_custom/Alert/EmptyResumes";
+import SignInPrompt from "../components/_custom/Alert/SignInPrompt";
+import ConfirmDialog from "../components/_custom/Alert/ConfirmDialog";
+import axiosInstance from "../axiosConfig";
 
 const Files = () => {
-    // const { accessToken } = useAuth(); // Commented out - will add auth checks later
-
-    const { resumes } = useData();
+    const { userId, accessToken } = useAuth();
+    const { resumes, setFetchFiles } = useData();
 
     const [addFile, setAddFile] = useState(false);
+    const [deletingFileId, setDeletingFileId] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, fileId: null, fileName: '' });
+    const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
-    // Mock resume data with role and notes
-    const mockResumes = [
-        {
-            id: 1,
-            name: 'Software_Engineer_Resume.pdf',
-            role: 'Software Engineer',
-            notes: 'Tailored for FAANG companies, emphasizes distributed systems experience',
-            link: '#',
-            uploadDate: '2024-01-15',
-            size: '245 KB'
-        },
-        {
-            id: 2,
-            name: 'Data_Science_Resume.pdf',
-            role: 'Data Scientist',
-            notes: 'Highlights ML projects and Python expertise',
-            link: '#',
-            uploadDate: '2024-01-10',
-            size: '198 KB'
+    // Check if user is authenticated
+    useEffect(() => {
+        if (!accessToken) {
+            setShowSignInPrompt(true);
         }
-    ];
+    }, [accessToken]);
 
-    const displayResumes = resumes.length > 0 ? resumes : mockResumes;
+    const handleDeleteClick = (fileId, fileName) => {
+        setConfirmDelete({ isOpen: true, fileId, fileName });
+    };
 
-    // useEffect(() => {
-    //     if (accessToken) {
-    //         setTimeout(() => { }, 700);
-    //     }
-    // }, [accessToken]);
+    const handleDeleteConfirm = async () => {
+        const { fileId } = confirmDelete;
+        setDeletingFileId(fileId);
+        
+        try {
+            await axiosInstance.delete(`/users/${userId}/files/${fileId}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            
+            // Refresh the files list
+            setFetchFiles(true);
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert(`Failed to delete resume: ${error.response?.data?.detail || error.message}`);
+        } finally {
+            setDeletingFileId(null);
+        }
+    };
+
 
 
     return (
@@ -84,11 +92,11 @@ const Files = () => {
                         </header>
 
                         <div className="px-4 py-6 sm:col-span-2 sm:px-0">
-                            {displayResumes.length === 0 ? (
-                                <MissingData info="No resumes uploaded." />
+                            {resumes.length === 0 ? (
+                                <EmptyResumes onUploadClick={() => setAddFile(true)} />
                             ) : (
                                 <div className="space-y-3">
-                                    {displayResumes.map((resume) => (
+                                    {resumes.map((resume) => (
                                         <div
                                             key={resume.id}
                                             className="group bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-400 hover:shadow-lg transition-all duration-200"
@@ -115,8 +123,6 @@ const Files = () => {
                                                                     {resume.role}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-gray-400">•</span>
-                                                            <span className="text-gray-500">{resume.size || '0 KB'}</span>
                                                             {resume.uploadDate && (
                                                                 <>
                                                                     <span className="text-gray-400">•</span>
@@ -144,14 +150,9 @@ const Files = () => {
                                                     </a>
                                                     <button
                                                         type="button"
-                                                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
-                                                        title="Edit"
-                                                    >
-                                                        <PencilIcon className="h-3.5 w-3.5" />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"
+                                                        onClick={() => handleDeleteClick(resume.id, resume.name)}
+                                                        disabled={deletingFileId === resume.id}
+                                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                         title="Delete"
                                                     >
                                                         <TrashIcon className="h-3.5 w-3.5" />
@@ -168,6 +169,28 @@ const Files = () => {
             </div>
 
             {addFile && <FileCreate setFileUpload={setAddFile} />}
+
+                        <ConfirmDialog
+                isOpen={confirmDelete.isOpen}
+                onClose={() => setConfirmDelete({ isOpen: false, fileId: null, fileName: '' })}
+                onConfirm={handleDeleteConfirm}
+                type="danger"
+                title="Delete Resume"
+                message={
+                    <div>
+                        <p className="mb-2">Are you sure you want to delete</p>
+                        <p className="font-semibold text-gray-900">"{confirmDelete.fileName}"?</p>
+                        <p className="mt-2 text-xs text-gray-500">This action cannot be undone.</p>
+                    </div>
+                }
+                confirmText="Delete Resume"
+                cancelText="Cancel"
+            />
+
+            <SignInPrompt
+                isOpen={showSignInPrompt}
+                onClose={() => setShowSignInPrompt(false)}
+            />
 
         </div>
     )

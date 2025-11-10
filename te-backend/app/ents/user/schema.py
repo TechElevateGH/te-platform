@@ -40,6 +40,7 @@ class UserBase(BaseModel):
     university: str = ""
     essay: str = ""
     cover_letter: str = ""
+    resume_file_ids: list[str] = []  # List of MongoDB ObjectId strings for resume files
     mentor_id: Optional[int] = None
     is_active: bool = True
     role: UserRoles = UserRoles.member

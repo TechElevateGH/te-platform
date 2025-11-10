@@ -8,6 +8,8 @@ import { FileUpload } from "../_custom/FormInputs";
 import { setNestedPropertyValue } from "../../utils";
 import SuccessFeedback from "../_custom/Alert/SuccessFeedback";
 import { Loading } from "../_custom/Loading";
+import SelectCombobox from "../_custom/SelectCombobox";
+import { jobTitles } from "../../data/data";
 
 
 const FileCreate = ({ setFileUpload }) => {
@@ -23,6 +25,22 @@ const FileCreate = ({ setFileUpload }) => {
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
 
     const uploadFileRequest = async () => {
+        if (!fileData.file) {
+            alert("Please select a file to upload");
+            return;
+        }
+        if (!fileData.role) {
+            alert("Please specify the target role");
+            return;
+        }
+
+        // Validate file is PDF
+        const fileName = fileData.file.name.toLowerCase();
+        if (!fileName.endsWith('.pdf')) {
+            alert("Only PDF files are allowed. Please upload a PDF resume.");
+            return;
+        }
+
         const data = new FormData();
         data.append('role', fileData.role);
         data.append('notes', fileData.notes);
@@ -30,20 +48,25 @@ const FileCreate = ({ setFileUpload }) => {
 
         setStatus("Loading...")
 
-        axiosInstance.post(`/users/${userId}/files`, data, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${accessToken}`,
-            },
-        }).then((_) => {
+        try {
+            await axiosInstance.post(`/users/${userId}/files`, data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
             setShowSuccessFeedback(true);
             setStatus(null);
             setFetchFiles(true);
-        }
-        ).catch((error) => {
-            console.log(error);
+            // Close modal after a brief delay to show success message
+            setTimeout(() => {
+                setFileUpload(false);
+            }, 1500);
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert(`Failed to upload resume: ${error.response?.data?.detail || error.message}`);
             setStatus(null);
-        })
+        }
     }
 
     const handleInputChange = ({ field, value }) => {
@@ -62,6 +85,8 @@ const FileCreate = ({ setFileUpload }) => {
                 title={"Upload New Resume"}
                 setHandler={setFileUpload}
                 requestHandler={uploadFileRequest}
+                submitButtonText="Upload Resume"
+                shouldReload={false}
                 children={
                     <div className="px-6 py-6 space-y-6">
 
@@ -85,10 +110,10 @@ const FileCreate = ({ setFileUpload }) => {
                                         <FileUpload
                                             handleFileUploadChange={handleFileUploadChange}
                                             required={true}
-                                            accept=".pdf,.doc,.docx"
+                                            accept=".pdf"
                                         />
                                         <p className="text-xs text-gray-500 font-medium">
-                                            Accepted formats: PDF, DOC, DOCX
+                                            Only PDF files are accepted
                                         </p>
                                     </div>
 
@@ -97,25 +122,18 @@ const FileCreate = ({ setFileUpload }) => {
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                             Role Information
                                         </h3>
-                                        <div className="relative">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                Target Role <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="relative">
-                                                <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                                <input
-                                                    type="text"
-                                                    value={fileData.role}
-                                                    onChange={(e) => handleInputChange({ field: 'role', value: e.target.value })}
-                                                    placeholder="e.g., Software Engineer, Data Scientist"
-                                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                                    required
-                                                />
-                                            </div>
-                                            <p className="mt-1.5 text-xs text-gray-500 font-medium">
-                                                What position is this resume tailored for?
-                                            </p>
-                                        </div>
+                                        <SelectCombobox
+                                            label="Target Role"
+                                            options={jobTitles}
+                                            value={fileData.role}
+                                            onChange={(value) => handleInputChange({ field: 'role', value })}
+                                            placeholder="Type or select a role..."
+                                            icon={BriefcaseIcon}
+                                            required={true}
+                                        />
+                                        <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                                            What position is this resume tailored for?
+                                        </p>
                                     </div>
 
                                     {/* Notes Field */}

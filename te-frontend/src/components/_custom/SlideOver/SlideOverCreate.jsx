@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 
-const SlideOverForm = ({ title, setHandler, requestHandler, children }) => {
+const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButtonText = "Create Application", shouldReload = true }) => {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -30,11 +30,13 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children }) => {
         }
     };
 
-    const submitFormHandler = (e) => {
+    const submitFormHandler = async (e) => {
         e.preventDefault();
-        requestHandler();
+        await requestHandler();
         document.getElementById('createForm').reset();
-        window.location.reload();
+        if (shouldReload) {
+            window.location.reload();
+        }
     };
 
 
@@ -107,7 +109,7 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children }) => {
                                             type="submit"
                                             className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-600/25"
                                         >
-                                            Create Application
+                                            {submitButtonText}
                                         </button>
                                     </div>
                                 </form>

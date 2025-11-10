@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext'
 import ReferralCreate from '../components/referral/ReferralCreate'
 import ReferralManagement from '../components/referral/ReferralManagement'
 import MyReferrals from '../components/referral/MyReferrals'
+import SignInPrompt from '../components/_custom/Alert/SignInPrompt'
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -101,10 +102,18 @@ const Referrals = () => {
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [selectedReferralIds, setSelectedReferralIds] = useState([]);
+    const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Check if user is authenticated
+    useEffect(() => {
+        if (!accessToken) {
+            setShowSignInPrompt(true);
+        }
+    }, [accessToken]);
 
     // Fetch all referrals for Lead/Admin users
     const fetchAllReferrals = useCallback(async () => {
@@ -694,6 +703,10 @@ const Referrals = () => {
                     setIsOpen={setIsManagementModalOpen}
                     onUpdate={handleReferralUpdate}
                 />
+            <SignInPrompt
+                isOpen={showSignInPrompt}
+                onClose={() => setShowSignInPrompt(false)}
+            />
             )}
         </div>
     )

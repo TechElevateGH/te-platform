@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 
 import { Loading } from '../components/_custom/Loading'
+import SignInPrompt from '../components/_custom/Alert/SignInPrompt'
 import {
     PlusIcon,
     MagnifyingGlassIcon,
@@ -49,6 +50,14 @@ const Applications = () => {
     const [applicationId, setApplicationId] = useState(null);
 
     const [addApplication, setAddApplication] = useState(false);
+    const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+
+    // Check if user is authenticated
+    useEffect(() => {
+        if (!accessToken) {
+            setShowSignInPrompt(true);
+        }
+    }, [accessToken]);
 
     // Sync context-provided applications if available
     useEffect(() => {
@@ -570,6 +579,11 @@ const Applications = () => {
                     deleteUserApplicationRequest={deleteUserApplicationRequest}
                 />
             )}
+
+            <SignInPrompt
+                isOpen={showSignInPrompt}
+                onClose={() => setShowSignInPrompt(false)}
+            />
         </div>
     )
 }

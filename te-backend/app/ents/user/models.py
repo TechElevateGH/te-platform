@@ -59,6 +59,7 @@ class User(BaseModel):
     role: int  # UserRoles enum value
     essay: str = ""
     cover_letter: str = ""
+    resume_file_ids: list[str] = []  # List of MongoDB ObjectId strings for resume files
     mentor_id: Optional[PyObjectId] = None
 
     class Config:

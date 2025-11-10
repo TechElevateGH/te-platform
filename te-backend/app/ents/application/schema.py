@@ -1,7 +1,9 @@
 from enum import Enum
+from typing import Optional
 
 import app.ents.company.schema as company_schema
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from app.ents.application.models import PyObjectId
 
 
 class FileType(str, Enum):
@@ -25,7 +27,7 @@ class File(FileBase):
 
 
 class FileRead(FileBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
     file_id: str
     link: str
 
