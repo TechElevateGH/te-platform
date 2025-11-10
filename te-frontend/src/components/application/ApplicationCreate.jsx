@@ -86,9 +86,11 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Company Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company Information</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Company Information
+                        </h3>
                         <CompanyCombobox
-                            companies={companies}
+                            companies={companies.map(c => c.name)}
                             value={appData.company}
                             onChange={(company) => handleInputChange({ field: 'company', value: company })}
                             required={true}
@@ -97,7 +99,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Position Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Position Details
+                        </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <SelectCombobox
                                 label="Title"
@@ -122,7 +126,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Status Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Application Status</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Application Status
+                        </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <SelectCombobox
                                 label="Status"
@@ -145,7 +151,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Location Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Location</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Location
+                        </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <SelectCombobox
                                 label="Country"
@@ -167,7 +175,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Recruiter Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recruiter Information</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Recruiter Information
+                        </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <FormInput
                                 label="Recruiter Name"
@@ -176,8 +186,8 @@ const ApplicationCreate = ({ setAddApplication }) => {
                                 required={false}
                             />
                             <FormInput
-                                label="Recruiter Email"
                                 type="email"
+                                label="Recruiter Email"
                                 field="recruiter_email"
                                 handleInputChange={handleInputChange}
                                 required={false}
@@ -187,7 +197,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Notes Section */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Additional Notes</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Additional Notes
+                        </h3>
                         <FormTextArea
                             label="Notes"
                             field="notes"

@@ -28,16 +28,16 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
             setQuery('');
         }}>
             <div className="relative">
-                <Combobox.Label className="block text-sm font-semibold text-gray-700 mb-2">
+                <Combobox.Label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 transition-colors">
                     Company {required && <span className="text-red-500">*</span>}
                 </Combobox.Label>
 
                 <div className="relative">
-                    <div className="relative w-full cursor-default overflow-hidden rounded-xl bg-white text-left shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-blue-600 transition-all">
-                        <BuildingOfficeIcon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <div className="relative w-full cursor-default overflow-hidden rounded-xl bg-white dark:bg-gray-700 text-left shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus-within:ring-2 focus-within:ring-blue-600 dark:focus-within:ring-blue-500 transition-all">
+                        <BuildingOfficeIcon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
 
                         <Combobox.Input
-                            className="w-full border-none py-2.5 pl-11 pr-10 text-sm leading-5 text-gray-900 placeholder:text-gray-400 focus:ring-0 bg-transparent font-medium"
+                            className="w-full border-none py-2.5 pl-11 pr-10 text-sm leading-5 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-0 bg-transparent font-medium"
                             displayValue={(company) => company}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
@@ -65,9 +65,9 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                             required={required}
                         />
 
-                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-gray-50 transition-colors rounded-r-xl">
+                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors rounded-r-xl">
                             <ChevronUpDownIcon
-                                className="h-5 w-5 text-gray-400"
+                                className="h-5 w-5 text-gray-400 dark:text-gray-500"
                                 aria-hidden="true"
                             />
                         </Combobox.Button>
@@ -79,13 +79,13 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <Combobox.Options className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-xl bg-white py-1.5 text-base shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Combobox.Options className="absolute z-10 mt-2 max-h-80 w-full overflow-auto rounded-xl bg-white dark:bg-gray-700 py-1.5 text-base shadow-xl ring-1 ring-black dark:ring-gray-600 ring-opacity-5 focus:outline-none sm:text-sm">
                             {/* Always show custom company option if user is typing a new one */}
                             {isCustomCompany && query !== '' && (
                                 <Combobox.Option
                                     value={query}
                                     className={({ active }) =>
-                                        `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
+                                        `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                                         }`
                                     }
                                 >
@@ -94,23 +94,23 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                             <div className="flex-shrink-0">
                                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm transition-all ${active
                                                     ? 'bg-gradient-to-r from-blue-600 to-blue-700 shadow-blue-600/25'
-                                                    : 'bg-gray-100'
+                                                    : 'bg-gray-100 dark:bg-gray-600'
                                                     }`}>
-                                                    <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
+                                                    <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
                                                 </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
+                                                <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
                                                     }`}>
                                                     Add "{query}"
                                                 </p>
-                                                <p className="text-xs text-gray-500 truncate">
+                                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
                                                     Press Enter to add this custom company
                                                 </p>
                                             </div>
                                             {selected && (
                                                 <div className="flex-shrink-0">
-                                                    <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                                                    <CheckIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                                                 </div>
                                             )}
                                         </div>
@@ -121,7 +121,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                             {/* Show filtered companies */}
                             {filteredCompanies.length === 0 && !isCustomCompany && query !== '' ? (
                                 <div className="relative cursor-default select-none px-4 py-3">
-                                    <p className="text-sm text-gray-500">No companies found.</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">No companies found.</p>
                                 </div>
                             ) : (
                                 filteredCompanies.map((company) => (
@@ -129,7 +129,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                         key={company}
                                         value={company}
                                         className={({ active }) =>
-                                            `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50' : ''
+                                            `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                                             }`
                                         }
                                     >
@@ -146,21 +146,21 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                                         }}
                                                     />
                                                     <div
-                                                        className={`w-8 h-8 rounded-lg hidden items-center justify-center shadow-sm ${active ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gray-100'
+                                                        className={`w-8 h-8 rounded-lg hidden items-center justify-center shadow-sm ${active ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gray-100 dark:bg-gray-600'
                                                             }`}
                                                     >
-                                                        <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600'}`} />
+                                                        <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900' : 'text-gray-900'
+                                                    <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
                                                         }`}>
                                                         {company}
                                                     </p>
                                                 </div>
                                                 {selected && (
                                                     <div className="flex-shrink-0">
-                                                        <CheckIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                                                        <CheckIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                                                     </div>
                                                 )}
                                             </div>
@@ -173,7 +173,7 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                 </div>
 
                 {/* Helpful hint */}
-                <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">
                     Select from popular companies or type your own
                 </p>
             </div>

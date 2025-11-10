@@ -241,16 +241,16 @@ const Referrals = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
             {/* Ultra Compact Header */}
-            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between mb-2.5">
                         <div>
-                            <h1 className="text-lg font-semibold text-gray-900 mb-0.5">
+                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white mb-0.5 transition-colors">
                                 Referrals
                             </h1>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-300 transition-colors">
                                 {viewMode === 'companies'
                                     ? 'Browse companies and request employee referrals'
                                     : viewMode === 'my-requests'
@@ -260,12 +260,12 @@ const Referrals = () => {
                         </div>
                         <div className="flex items-center gap-2">
                             {/* View Toggle */}
-                            <div className="flex items-center gap-0.5 bg-white rounded-md border border-gray-200 p-0.5">
+                            <div className="flex items-center gap-0.5 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 p-0.5 transition-colors">
                                 <button
                                     onClick={() => setViewMode('companies')}
                                     className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'companies'
                                         ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                                         }`}
                                 >
                                     Companies
@@ -274,7 +274,7 @@ const Referrals = () => {
                                     onClick={() => setViewMode('my-requests')}
                                     className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'my-requests'
                                         ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                                         }`}
                                 >
                                     My Requests
@@ -284,12 +284,12 @@ const Referrals = () => {
                                         onClick={() => setViewMode('all-requests')}
                                         className={`px-2.5 py-1 rounded text-xs font-medium transition-all relative ${viewMode === 'all-requests'
                                             ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                                             }`}
                                     >
                                         All Requests
                                         {pendingReferralsCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white animate-pulse">
+                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-700 animate-pulse transition-colors">
                                                 {pendingReferralsCount}
                                             </span>
                                         )}
@@ -297,20 +297,20 @@ const Referrals = () => {
                                 )}
                             </div>
                             {!fetchReferralCompanies && viewMode === 'companies' && referralCompanies.length > 0 && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-md border border-emerald-200">
-                                    <SparklesIcon className="h-3.5 w-3.5 text-emerald-600" />
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-md border border-emerald-200 dark:border-emerald-700/50 transition-colors">
+                                    <SparklesIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-semibold text-emerald-600 uppercase mb-0.5">Available</p>
-                                        <p className="text-sm font-semibold text-emerald-900">{referralCompanies.length}</p>
+                                        <p className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase mb-0.5 transition-colors">Available</p>
+                                        <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 transition-colors">{referralCompanies.length}</p>
                                     </div>
                                 </div>
                             )}
                             {viewMode === 'all-requests' && !loadingAllReferrals && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-md border border-blue-200">
-                                    <DocumentTextIcon className="h-3.5 w-3.5 text-blue-600" />
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-md border border-blue-200 dark:border-blue-700/50 transition-colors">
+                                    <DocumentTextIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-semibold text-blue-600 uppercase mb-0.5">Total Requests</p>
-                                        <p className="text-sm font-semibold text-blue-900">{allReferrals.length}</p>
+                                        <p className="text-[9px] font-semibold text-blue-600 dark:text-blue-400 uppercase mb-0.5 transition-colors">Total Requests</p>
+                                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 transition-colors">{allReferrals.length}</p>
                                     </div>
                                 </div>
                             )}
@@ -320,56 +320,56 @@ const Referrals = () => {
                     {/* Ultra Compact Statistics Cards - Only for Companies View */}
                     {!fetchReferralCompanies && viewMode === 'companies' && referralCompanies.length > 0 && (
                         <div className="grid grid-cols-4 gap-2">
-                            <div className="bg-white rounded-md p-2 border border-emerald-100 hover:border-emerald-200 hover:shadow-sm transition-all duration-200">
+                            <div className="bg-white dark:bg-gray-800 rounded-md p-2 border border-emerald-100 dark:border-emerald-700/50 hover:border-emerald-200 dark:hover:border-emerald-600/50 hover:shadow-sm dark:hover:shadow-emerald-900/20 transition-all duration-200">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-emerald-50 rounded">
-                                        <CheckBadgeIcon className="h-3.5 w-3.5 text-emerald-600" />
+                                    <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded transition-colors">
+                                        <CheckBadgeIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-medium text-emerald-600 mb-0.5">Ready</p>
-                                        <p className="text-base font-semibold text-emerald-900">
+                                        <p className="text-[9px] font-medium text-emerald-600 dark:text-emerald-400 mb-0.5 transition-colors">Ready</p>
+                                        <p className="text-base font-semibold text-emerald-900 dark:text-white transition-colors">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Ready').length}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-md p-2 border border-amber-100 hover:border-amber-200 hover:shadow-sm transition-all duration-200">
+                            <div className="bg-white dark:bg-gray-800 rounded-md p-2 border border-amber-100 dark:border-amber-700/50 hover:border-amber-200 dark:hover:border-amber-600/50 hover:shadow-sm dark:hover:shadow-amber-900/20 transition-all duration-200">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-amber-50 rounded">
-                                        <ClockIcon className="h-3.5 w-3.5 text-amber-600" />
+                                    <div className="p-1.5 bg-amber-50 dark:bg-amber-900/30 rounded transition-colors">
+                                        <ClockIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-medium text-amber-600 mb-0.5">Incomplete</p>
-                                        <p className="text-base font-semibold text-amber-900">
+                                        <p className="text-[9px] font-medium text-amber-600 dark:text-amber-400 mb-0.5 transition-colors">Incomplete</p>
+                                        <p className="text-base font-semibold text-amber-900 dark:text-white transition-colors">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Incomplete').length}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-md p-2 border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200">
+                            <div className="bg-white dark:bg-gray-800 rounded-md p-2 border border-gray-100 dark:border-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600/50 hover:shadow-sm dark:hover:shadow-gray-900/20 transition-all duration-200">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-gray-50 rounded">
-                                        <ArrowPathIcon className="h-3.5 w-3.5 text-gray-600" />
+                                    <div className="p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded transition-colors">
+                                        <ArrowPathIcon className="h-3.5 w-3.5 text-gray-600 dark:text-gray-400" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-medium text-gray-600 mb-0.5">Pending</p>
-                                        <p className="text-base font-semibold text-gray-900">
+                                        <p className="text-[9px] font-medium text-gray-600 dark:text-gray-400 mb-0.5 transition-colors">Pending</p>
+                                        <p className="text-base font-semibold text-gray-900 dark:text-white transition-colors">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Pending').length}
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-md p-2 border border-blue-100 hover:border-blue-200 hover:shadow-sm transition-all duration-200">
+                            <div className="bg-white dark:bg-gray-800 rounded-md p-2 border border-blue-100 dark:border-blue-700/50 hover:border-blue-200 dark:hover:border-blue-600/50 hover:shadow-sm dark:hover:shadow-blue-900/20 transition-all duration-200">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-blue-50 rounded">
-                                        <BuildingOfficeIcon className="h-3.5 w-3.5 text-blue-600" />
+                                    <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded transition-colors">
+                                        <BuildingOfficeIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="text-[9px] font-medium text-blue-600 mb-0.5">Total</p>
-                                        <p className="text-base font-semibold text-blue-900">{referralCompanies.length}</p>
+                                        <p className="text-[9px] font-medium text-blue-600 dark:text-blue-400 mb-0.5 transition-colors">Total</p>
+                                        <p className="text-base font-semibold text-blue-900 dark:text-white transition-colors">{referralCompanies.length}</p>
                                     </div>
                                 </div>
                             </div>
@@ -392,22 +392,22 @@ const Referrals = () => {
                     {viewMode === 'companies' && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {/* Search and Filter Bar */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5 mb-6">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-5 mb-6 transition-colors">
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <div className="flex-1 relative">
-                                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none transition-colors" />
                                         <input
                                             type="text"
                                             placeholder="Search companies..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                            className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 focus:border-transparent transition-all text-sm font-medium"
                                         />
                                     </div>
                                     {searchQuery && (
                                         <button
                                             onClick={() => setSearchQuery('')}
-                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-xl font-semibold hover:bg-gray-100 transition-all text-sm"
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-600 transition-all text-sm"
                                         >
                                             <FunnelIcon className="h-4 w-4" />
                                             <span className="hidden sm:inline">Clear</span>
@@ -418,32 +418,32 @@ const Referrals = () => {
 
                             {/* Companies Table */}
                             {filteredCompanies.length === 0 ? (
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-16 text-center">
-                                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                                        <BuildingOfficeIcon className="h-10 w-10 text-gray-400" />
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-16 text-center transition-colors">
+                                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-5 transition-colors">
+                                        <BuildingOfficeIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">
                                         {searchQuery ? 'No companies found' : 'No referral opportunities available'}
                                     </h3>
-                                    <p className="text-gray-500 max-w-sm mx-auto font-medium">
+                                    <p className="text-gray-500 dark:text-gray-300 max-w-sm mx-auto font-medium transition-colors">
                                         {searchQuery
                                             ? 'Try adjusting your search criteria'
                                             : 'Check back later for new referral opportunities'}
                                     </p>
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
-                                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700 transition-colors">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
                                                         <div className="flex items-center gap-2">
                                                             <BuildingOfficeIcon className="h-4 w-4" />
                                                             Company
                                                         </div>
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
                                                         <div className="flex items-center gap-2">
                                                             <DocumentTextIcon className="h-4 w-4" />
                                                             Requirements
@@ -467,7 +467,7 @@ const Referrals = () => {
                                                                     alt={company.name}
                                                                     className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
                                                                 />
-                                                                <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                                <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                                                     {company.name}
                                                                 </div>
                                                             </div>
@@ -481,7 +481,7 @@ const Referrals = () => {
                                                                         ) : (
                                                                             <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
                                                                         )}
-                                                                        <span className="text-sm font-medium text-gray-700">Resume</span>
+                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Resume</span>
                                                                     </div>
                                                                 )}
                                                                 {company.referral_materials.referralEssay && (
@@ -491,7 +491,7 @@ const Referrals = () => {
                                                                         ) : (
                                                                             <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
                                                                         )}
-                                                                        <span className="text-sm font-medium text-gray-700">Referral Essay</span>
+                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Referral Essay</span>
                                                                     </div>
                                                                 )}
                                                                 {company.referral_materials.contact && (
@@ -501,7 +501,7 @@ const Referrals = () => {
                                                                         ) : (
                                                                             <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
                                                                         )}
-                                                                        <span className="text-sm font-medium text-gray-700">Contact</span>
+                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Contact</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -544,17 +544,17 @@ const Referrals = () => {
                     {viewMode === 'all-requests' && isLeadOrAdmin && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {/* Filters */}
-                            <div className="mb-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                            <div className="mb-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-colors">
                                 <div className="flex items-center gap-4 flex-wrap">
                                     {/* Status Filter */}
                                     <div className="flex-1 min-w-[180px]">
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
                                             Status
                                         </label>
                                         <select
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                         >
                                             <option value="">All Statuses</option>
                                             <option value="Pending">Pending</option>
@@ -566,7 +566,7 @@ const Referrals = () => {
 
                                     {/* Company Filter */}
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
                                             Company
                                         </label>
                                         <input
@@ -574,13 +574,13 @@ const Referrals = () => {
                                             placeholder="Search company..."
                                             value={companyFilter}
                                             onChange={(e) => setCompanyFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                         />
                                     </div>
 
                                     {/* Member Filter */}
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
                                             Member
                                         </label>
                                         <input
@@ -588,7 +588,7 @@ const Referrals = () => {
                                             placeholder="Search member..."
                                             value={memberFilter}
                                             onChange={(e) => setMemberFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                                         />
                                     </div>
 
@@ -612,16 +612,16 @@ const Referrals = () => {
 
                             {/* Export Controls */}
                             {filteredAllReferrals.length > 0 && (
-                                <div className="mb-4 flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                                <div className="mb-4 flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 transition-colors">
                                     <div className="flex items-center gap-2">
-                                        <BellAlertIcon className="h-5 w-5 text-blue-600" />
-                                        <span className="text-sm font-semibold text-gray-700">
+                                        <BellAlertIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                                             {pendingReferralsCount} pending request{pendingReferralsCount !== 1 ? 's' : ''}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {selectedReferralIds.length > 0 && (
-                                            <span className="text-sm text-gray-600">
+                                            <span className="text-sm text-gray-600 dark:text-gray-300">
                                                 {selectedReferralIds.length} selected
                                             </span>
                                         )}
@@ -646,7 +646,7 @@ const Referrals = () => {
                                 </div>
                             )}
 
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
                                 {loadingAllReferrals ? (
                                     <div className="flex justify-center items-center h-64">
                                         <Loading />
@@ -656,10 +656,10 @@ const Referrals = () => {
                                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
                                             <DocumentTextIcon className="h-10 w-10 text-gray-400" />
                                         </div>
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                                             {allReferrals.length === 0 ? 'No referral requests yet' : 'No referrals match your filters'}
                                         </h3>
-                                        <p className="text-gray-500 max-w-sm mx-auto font-medium">
+                                        <p className="text-gray-500 dark:text-gray-300 max-w-sm mx-auto font-medium">
                                             {allReferrals.length === 0
                                                 ? 'Referral requests from members will appear here'
                                                 : 'Try adjusting your filters to see more results'}
@@ -669,7 +669,7 @@ const Referrals = () => {
                                     <div className="overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
-                                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
+                                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                                                     <th className="px-3 py-4 text-left">
                                                         <input
                                                             type="checkbox"
@@ -681,69 +681,69 @@ const Referrals = () => {
                                                                     setSelectedReferralIds([]);
                                                                 }
                                                             }}
-                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                                                         />
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Member
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Company
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Role
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Job Title
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Status
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Date
                                                     </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                         Actions
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                                 {filteredAllReferrals.map((referral) => (
                                                     <tr
                                                         key={referral.id}
-                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150"
+                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150"
                                                     >
                                                         <td className="px-3 py-4">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={selectedReferralIds.includes(referral.id)}
                                                                 onChange={() => toggleReferralSelection(referral.id)}
-                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-700"
                                                             />
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div>
-                                                                <div className="font-semibold text-gray-900">{referral.user_name}</div>
-                                                                <div className="text-xs text-gray-500">{referral.user_email}</div>
+                                                                <div className="font-semibold text-gray-900 dark:text-white">{referral.user_name}</div>
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400">{referral.user_email}</div>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="h-10 w-10 rounded-lg border border-gray-200 bg-white p-1.5 flex items-center justify-center flex-shrink-0">
+                                                                <div className="h-10 w-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1.5 flex items-center justify-center flex-shrink-0">
                                                                     <img
                                                                         src={referral.company.image}
                                                                         alt={referral.company.name}
                                                                         className="h-full w-full object-contain"
                                                                     />
                                                                 </div>
-                                                                <span className="font-semibold text-gray-900">{referral.company.name}</span>
+                                                                <span className="font-semibold text-gray-900 dark:text-white">{referral.company.name}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-700">{referral.role}</span>
+                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{referral.role}</span>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-700">{referral.job_title}</span>
+                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{referral.job_title}</span>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-full ${referral.status === 'Completed'
@@ -766,7 +766,7 @@ const Referrals = () => {
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className="text-sm text-gray-600">{referral.date}</span>
+                                                            <span className="text-sm text-gray-600 dark:text-gray-300">{referral.date}</span>
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <button

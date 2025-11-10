@@ -118,27 +118,27 @@ const ImpactStats = () => {
     }, []);
 
     return (
-        <div id="impact" className="relative bg-white py-24 sm:py-32 overflow-hidden">
+        <div id="impact" className="relative bg-white dark:bg-gray-900 py-24 sm:py-32 overflow-hidden transition-colors">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full blur-3xl opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full blur-3xl opacity-50"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-full blur-3xl opacity-50"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl opacity-50"></div>
             </div>
 
             <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section header */}
                 <div className="mx-auto max-w-2xl text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 mb-4">
-                        <ChartBarIcon className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-semibold text-blue-600">Our Impact</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border border-blue-100 dark:border-blue-800 mb-4">
+                        <ChartBarIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Our Impact</span>
                     </div>
-                    <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                    <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
                         Making a{' '}
                         <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             real difference
                         </span>
                     </h2>
-                    <p className="mt-6 text-lg leading-8 text-gray-600">
+                    <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                         Our platform has empowered thousands of talented individuals to achieve their dreams in the tech industry.
                     </p>
                 </div>
@@ -151,7 +151,7 @@ const ImpactStats = () => {
                             className="group relative"
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="relative h-full bg-white rounded-3xl border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 hover:-translate-y-2">
+                            <div className="relative h-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 hover:-translate-y-2">
                                 {/* Icon */}
                                 <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                     <stat.icon className="h-8 w-8 text-white" />
@@ -164,12 +164,12 @@ const ImpactStats = () => {
                                 </div>
 
                                 {/* Label */}
-                                <div className="text-xl font-semibold text-gray-900 mb-2">
+                                <div className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                                     {stat.name}
                                 </div>
 
                                 {/* Description */}
-                                <p className="text-sm text-gray-600 leading-relaxed">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                                     {stat.description}
                                 </p>
 
@@ -183,15 +183,15 @@ const ImpactStats = () => {
                 {/* Bottom section */}
                 <div className="mt-20 text-center">
                     <div className="inline-flex flex-col gap-4">
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            These numbers represent <span className="font-semibold text-gray-900">real people</span> with
-                            <span className="font-semibold text-gray-900"> real dreams</span> who found their path through TechElevate.
+                        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                            These numbers represent <span className="font-semibold text-gray-900 dark:text-white">real people</span> with
+                            <span className="font-semibold text-gray-900 dark:text-white"> real dreams</span> who found their path through TechElevate.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-4">
                             <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
                                 Be Part of Our Impact
                             </button>
-                            <span className="text-sm text-gray-500">Join us in changing lives</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">Join us in changing lives</span>
                         </div>
                     </div>
                 </div>

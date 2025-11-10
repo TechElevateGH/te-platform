@@ -84,8 +84,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                     </Transition.Child>
 
                                     {/* Mobile Sidebar Content */}
-                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto scrollbar-hide bg-white px-6 pb-4">
-                                        <div className="flex h-20 shrink-0 items-center mt-2 border-b border-gray-100 pb-4">
+                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto scrollbar-hide bg-white dark:bg-gray-800 px-6 pb-4 transition-colors">
+                                        <div className="flex h-20 shrink-0 items-center mt-2 border-b border-gray-100 dark:border-gray-700 pb-4 transition-colors">
                                             <button
                                                 onClick={() => navigate('/')}
                                                 className="flex items-center gap-3 group"
@@ -94,8 +94,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                     <RocketLaunchIcon className="h-6 w-6 text-white" />
                                                 </div>
                                                 <div>
-                                                    <h1 className="text-lg font-bold text-gray-900">TechElevate</h1>
-                                                    <p className="text-xs text-gray-500 font-medium">Career Platform</p>
+                                                    <h1 className="text-lg font-bold text-gray-900 dark:text-white transition-colors">TechElevate</h1>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">Career Platform</p>
                                                 </div>
                                             </button>
                                         </div>
@@ -110,21 +110,21 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                                     onClick={() => { setContent(item.name); setSidebarOpen(false) }}
                                                                     className={classNames(
                                                                         item.name === content
-                                                                            ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                                                            : 'text-gray-700 hover:bg-gray-50',
+                                                                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
+                                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                                                                         'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all'
                                                                     )}
                                                                 >
                                                                     <item.icon
                                                                         className={classNames(
-                                                                            item.name === content ? 'text-blue-600' : 'text-gray-400',
+                                                                            item.name === content ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500',
                                                                             'h-5 w-5 transition-colors'
                                                                         )}
                                                                         aria-hidden="true"
                                                                     />
                                                                     <span className="flex-1 text-left">{item.name}</span>
                                                                     {item.name === content && (
-                                                                        <ChevronRightIcon className="h-4 w-4 text-blue-600" />
+                                                                        <ChevronRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                                                     )}
                                                                 </button>
                                                             </li>
@@ -152,12 +152,12 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                     onMouseLeave={() => setIsExpanded(false)}
                 >
                     <div className={classNames(
-                        "flex grow flex-col gap-y-5 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 backdrop-blur-xl border border-white/60 rounded-2xl px-4 py-6 relative overflow-hidden transition-shadow duration-300",
-                        isExpanded ? "shadow-2xl shadow-blue-500/30" : "shadow-2xl"
+                        "flex grow flex-col gap-y-5 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 dark:from-gray-800/80 dark:via-gray-900/60 dark:to-gray-800/70 backdrop-blur-xl border border-white/60 dark:border-gray-700/60 rounded-2xl px-4 py-6 relative overflow-hidden transition-shadow duration-300",
+                        isExpanded ? "shadow-2xl shadow-blue-500/30 dark:shadow-blue-900/30" : "shadow-2xl dark:shadow-gray-900/50"
                     )}>
                         {/* Glassmorphism overlay */}
-                        <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl rounded-2xl"></div>
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60 rounded-2xl"></div>
+                        <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-2xl"></div>
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60 dark:opacity-40 rounded-2xl"></div>
 
                         {/* Scrollable content */}
                         <div
@@ -168,7 +168,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                 <ul className="flex flex-1 flex-col gap-y-7">
                                     <li>
                                         {isExpanded && (
-                                            <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
                                                 Workspace
                                             </div>
                                         )}
@@ -223,7 +223,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
 
                                     <li>
                                         {isExpanded && (
-                                            <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
                                                 Learning
                                             </div>
                                         )}
@@ -276,7 +276,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
 
                                     <li>
                                         {isExpanded && (
-                                            <div className="text-xs font-semibold leading-6 text-gray-500 mb-3 tracking-wide uppercase">
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
                                                 Accounts
                                             </div>
                                         )}

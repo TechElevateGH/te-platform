@@ -57,14 +57,14 @@ const Files = () => {
 
 
     return (
-        <div className="">
-            <header className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
+        <div className="dark:bg-gray-950">
+            <header className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900 mb-1.5">
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1.5">
                             Resumes & Referral Essays
                         </h1>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
                             Manage your resumes, cover letters, and referral essays
                         </p>
                     </div>
@@ -75,15 +75,15 @@ const Files = () => {
                 <div className="w-full lg:grid lg:grid-cols-12 lg:gap-x-8">
                     {/* Referral Essay Section */}
                     <div className="pb-24 sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56 h-screen">
-                        <div className="mt-6 text-sm sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600">
+                        <div className="mt-6 text-sm sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600 dark:text-gray-300">
                             <ReferralEssay isMember={isMember} />
                         </div>
                     </div>
 
                     {/* Resumes Section */}
                     <div className="w-full lg:col-span-7 xl:relative xl:inset-0 xl:mr-6 h-screen">
-                        <header className="flex items-center justify-between border-b border-gray-200 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                            <h2 className="text-lg font-semibold text-gray-900">My Resumes</h2>
+                        <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Resumes</h2>
                             {isMember && (
                                 <button
                                     type="button"
@@ -104,39 +104,39 @@ const Files = () => {
                                     {resumes.map((resume) => (
                                         <div
                                             key={resume.id}
-                                            className="group bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-400 hover:shadow-lg transition-all duration-200"
+                                            className="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-200"
                                         >
                                             <div className="flex items-center justify-between gap-4">
                                                 {/* Left Section: Icon + Details */}
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     {/* File Icon */}
-                                                    <div className="p-2.5 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg group-hover:from-blue-100 group-hover:to-cyan-100 transition-all">
-                                                        <PaperClipIcon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                                                    <div className="p-2.5 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg group-hover:from-blue-100 group-hover:to-cyan-100 dark:group-hover:from-blue-900/40 dark:group-hover:to-cyan-900/40 transition-all">
+                                                        <PaperClipIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                                                     </div>
 
                                                     {/* Resume Details */}
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2 mb-0.5">
-                                                            <h3 className="text-xs font-semibold text-gray-900 truncate">
+                                                            <h3 className="text-xs font-semibold text-gray-900 dark:text-white truncate">
                                                                 {resume.name}
                                                             </h3>
                                                         </div>
                                                         <div className="flex items-center gap-3 text-[11px]">
                                                             <div className="flex items-center gap-1.5">
-                                                                <BriefcaseIcon className="h-3.5 w-3.5 text-blue-500" />
-                                                                <span className="font-medium text-blue-600 truncate">
+                                                                <BriefcaseIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
+                                                                <span className="font-medium text-blue-600 dark:text-blue-400 truncate">
                                                                     {resume.role}
                                                                 </span>
                                                             </div>
                                                             {resume.uploadDate && (
                                                                 <>
-                                                                    <span className="text-gray-400">•</span>
-                                                                    <span className="text-gray-500">{new Date(resume.uploadDate).toLocaleDateString()}</span>
+                                                                    <span className="text-gray-400 dark:text-gray-500">•</span>
+                                                                    <span className="text-gray-500 dark:text-gray-300">{new Date(resume.uploadDate).toLocaleDateString()}</span>
                                                                 </>
                                                             )}
                                                         </div>
                                                         {resume.notes && (
-                                                            <p className="text-[11px] text-gray-600 mt-1.5 line-clamp-1">
+                                                            <p className="text-[11px] text-gray-600 dark:text-gray-300 mt-1.5 line-clamp-1">
                                                                 {resume.notes}
                                                             </p>
                                                         )}
@@ -149,7 +149,7 @@ const Files = () => {
                                                         href={resume.link}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="px-2.5 py-1.5 bg-blue-50 text-blue-700 text-[11px] font-medium rounded-md hover:bg-blue-100 transition-all"
+                                                        className="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-medium rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all"
                                                     >
                                                         View
                                                     </a>
@@ -158,7 +158,7 @@ const Files = () => {
                                                             type="button"
                                                             onClick={() => handleDeleteClick(resume.id, resume.name)}
                                                             disabled={deletingFileId === resume.id}
-                                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                             title="Delete"
                                                         >
                                                             <TrashIcon className="h-3.5 w-3.5" />

@@ -147,7 +147,7 @@ const Workspace = ({ setLogin }) => {
 
     return (
         <>
-            <div>
+            <div className="bg-[#fafafa] dark:bg-gray-950 transition-colors">
                 <Transition.Root show={sidebarOpen} as={Fragment}>
                     <Dialog as="div" className="relative z-50 xl:hidden" onClose={setSidebarOpen}>
                         <Transition.Child
@@ -202,7 +202,7 @@ const Workspace = ({ setLogin }) => {
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
                 <div className="md:pl-28">
-                    <main className="min-h-screen bg-[#fafafa] pt-20">
+                    <main className="min-h-screen bg-[#fafafa] dark:bg-gray-950 pt-20 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :
                                 content === "Profile" ? <Profile /> :

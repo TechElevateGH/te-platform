@@ -31,40 +31,40 @@ const Hero = () => {
   ];
 
   return (
-    <div id="home" className='relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50'>
+    <div id="home" className='relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 transition-colors'>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 dark:bg-cyan-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
       {/* Floating icons */}
       {floatingIcons.map((item, idx) => (
         <div
           key={idx}
-          className={`hidden lg:block absolute ${item.position} animate-float opacity-30`}
+          className={`hidden lg:block absolute ${item.position} animate-float opacity-30 dark:opacity-20`}
           style={{
             animationDelay: item.delay,
             transform: `translateY(${scrollY * 0.1}px)`
           }}
         >
-          <item.Icon className="h-12 w-12 text-blue-500" />
+          <item.Icon className="h-12 w-12 text-blue-500 dark:text-blue-400" />
         </div>
       ))}
 
       <div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32 lg:py-40'>
         <div className="text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-lg border border-blue-100 mb-8 animate-fade-in-down">
-            <SparklesIcon className="h-5 w-5 text-blue-600" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-blue-100 dark:border-gray-700 mb-8 animate-fade-in-down">
+            <SparklesIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Empowering the Next Generation
             </span>
           </div>
 
           {/* Main heading */}
-          <h1 className="mx-auto max-w-5xl font-display text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl lg:text-8xl animate-fade-in-up">
+          <h1 className="mx-auto max-w-5xl font-display text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-7xl lg:text-8xl animate-fade-in-up">
             Unlock Your{' '}
             <span className="relative inline-block">
               <span className="relative z-10 bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
@@ -95,12 +95,12 @@ const Hero = () => {
           </h1>
 
           {/* Subheading */}
-          <p className="mx-auto mt-8 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-600 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="mx-auto mt-8 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-600 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             Breaking barriers and building bridges to tech excellence. We connect aspiring developers from
-            <span className="font-semibold text-gray-900"> Africa and beyond</span> with world-class
-            <span className="font-semibold text-gray-900"> mentorship</span>,
-            <span className="font-semibold text-gray-900"> cutting-edge resources</span>, and
-            <span className="font-semibold text-gray-900"> life-changing opportunities</span> at leading tech companies.
+            <span className="font-semibold text-gray-900 dark:text-white"> Africa and beyond</span> with world-class
+            <span className="font-semibold text-gray-900 dark:text-white"> mentorship</span>,
+            <span className="font-semibold text-gray-900 dark:text-white"> cutting-edge resources</span>, and
+            <span className="font-semibold text-gray-900 dark:text-white"> life-changing opportunities</span> at leading tech companies.
           </p>
 
           {/* CTA / Auth-aware Buttons */}
@@ -119,7 +119,7 @@ const Hero = () => {
                 </button>
                 <button
                   onClick={() => navigate('/login')}
-                  className="group px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 hover:border-blue-300 transform hover:scale-105 transition-all duration-300"
+                  className="group px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
                 >
                   <span className="flex items-center gap-2">
                     Already a Member?
@@ -144,7 +144,7 @@ const Hero = () => {
                 </button>
                 <button
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 hover:border-blue-300 transform hover:scale-105 transition-all duration-300"
+                  className="group px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
                 >
                   <span className="flex items-center gap-2">
                     Explore Features
@@ -169,7 +169,7 @@ const Hero = () => {
                 <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-gray-600 font-medium">{stat.label}</div>
+                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -178,8 +178,8 @@ const Hero = () => {
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-gray-400 rounded-full mt-2 animate-scroll"></div>
+        <div className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-gray-400 dark:bg-gray-600 rounded-full mt-2 animate-scroll"></div>
         </div>
       </div>
     </div>

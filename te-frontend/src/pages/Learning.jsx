@@ -30,6 +30,7 @@ import {
 
 import { dsaTopics } from '../data/dsaTopics'
 import { useAuth } from '../context/AuthContext'
+import { useDarkMode } from '../context/DarkModeContext'
 import LessonCreate from '../components/learning/LessonCreate'
 import LessonCreateDSA from '../components/learning/LessonCreateDSA'
 
@@ -60,10 +61,7 @@ const Learning = () => {
     const isAdmin = authState?.userRole && parseInt(authState.userRole) >= 2;
     const isLoggedIn = !!authState?.userId;
 
-    const [darkMode, setDarkMode] = useState(() => {
-        const saved = localStorage.getItem('dsaDarkMode');
-        return saved === 'true';
-    });
+    const { darkMode, toggleDarkMode } = useDarkMode();
     const [showStats, setShowStats] = useState(false);
     const [showAddLesson, setShowAddLesson] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
@@ -303,18 +301,18 @@ const Learning = () => {
     // Smooth scroll to category
     const scrollToCategory = useCallback((categoryName) => {
         const element = categoryRefs.current[categoryName];
-        
+
         if (element) {
             // Immediately set this category as active
             setActiveCategory(categoryName);
-            
+
             // Expand the category if it's collapsed
             setCollapsedCategories(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(categoryName);
                 return newSet;
             });
-            
+
             const headerOffset = 100; // Account for sticky header
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
@@ -456,10 +454,10 @@ const Learning = () => {
     }, [filteredCategories]);
 
     return (
-        <div className={`min-h-screen transition-colors duration-500 ${darkMode 
-            ? 'dark bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950' 
+        <div className={`min-h-screen transition-colors duration-500 ${darkMode
+            ? 'dark bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950'
             : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100'
-        } relative overflow-hidden`}>
+            } relative overflow-hidden`}>
             {/* Animated background elements for dark mode */}
             {darkMode && (
                 <>
@@ -469,18 +467,17 @@ const Learning = () => {
                     <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
                 </>
             )}
-            
+
             {/* Animated background pattern */}
             <div className={`absolute inset-0 ${darkMode ? 'opacity-[0.03]' : 'opacity-[0.05]'}`} style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${darkMode ? 'FFFFFF' : '9C92AC'}' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
             }}></div>
 
             {/* Header */}
-            <div className={`sticky top-0 z-40 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${
-                darkMode 
-                    ? 'bg-slate-900/80 border-slate-700/50' 
-                    : 'bg-white/80 border-purple-200/30'
-            }`}>
+            <div className={`sticky top-0 z-40 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${darkMode
+                ? 'bg-slate-900/80 border-slate-700/50'
+                : 'bg-white/80 border-purple-200/30'
+                }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -493,7 +490,7 @@ const Learning = () => {
                             </button>
                             <div>
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-1 tracking-tight">
-                                    DSA Learning Path
+                                    Data Structures and Algorithms
                                 </h1>
                                 <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
                                     <span className="flex items-center gap-1.5">
@@ -513,7 +510,7 @@ const Learning = () => {
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <button
-                                onClick={() => setDarkMode(!darkMode)}
+                                onClick={toggleDarkMode}
                                 className="flex items-center gap-2 px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all text-sm"
                                 aria-label="Toggle dark mode"
                             >
@@ -561,11 +558,10 @@ const Learning = () => {
             {/* Statistics Modal */}
             {showStats && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
-                    <div className={`rounded-3xl shadow-2xl max-w-md w-full border backdrop-blur-xl ${
-                        darkMode 
-                            ? 'bg-slate-900/90 border-slate-700/50' 
-                            : 'bg-white/90 border-white/20'
-                    }`} onClick={(e) => e.stopPropagation()}>
+                    <div className={`rounded-3xl shadow-2xl max-w-md w-full border backdrop-blur-xl ${darkMode
+                        ? 'bg-slate-900/90 border-slate-700/50'
+                        : 'bg-white/90 border-white/20'
+                        }`} onClick={(e) => e.stopPropagation()}>
                         <div className={`px-8 py-6 border-b ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -612,11 +608,10 @@ const Learning = () => {
                             </div>
 
                             <div className={`pt-6 border-t ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
-                                <div className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border ${
-                                    darkMode 
-                                        ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-700/50' 
-                                        : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200/50'
-                                }`}>
+                                <div className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border ${darkMode
+                                    ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-700/50'
+                                    : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200/50'
+                                    }`}>
                                     <FireSolidIcon className="h-7 w-7 text-orange-500" />
                                     <div className="text-center">
                                         <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{stats.percentage}%</p>
@@ -762,22 +757,20 @@ const Learning = () => {
                                             key={catIdx}
                                             id={category.category.replace(/\s+/g, '-')}
                                             ref={(el) => (categoryRefs.current[category.category] = el)}
-                                            className={`rounded-2xl border shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 ${
-                                                darkMode 
-                                                    ? 'bg-slate-900/60 border-slate-700/50 hover:bg-slate-900/70' 
-                                                    : 'bg-white/60 border-white/20 hover:bg-white/80'
-                                            }`}
+                                            className={`rounded-2xl border shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 ${darkMode
+                                                ? 'bg-slate-900/70 border-slate-700/50 hover:bg-slate-900/80 hover:border-slate-600/50'
+                                                : 'bg-white/70 border-white/30 hover:bg-white/90 hover:shadow-2xl'
+                                                }`}
                                         >
                                             {/* Category Header */}
-                                            <div className={`px-5 py-2.5 border-b cursor-pointer transition-all ${
-                                                darkMode 
-                                                    ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70' 
-                                                    : 'bg-white/50 border-gray-200/50 hover:bg-white/70'
-                                            }`} onClick={() => toggleCategoryCollapse(category.category)}>
+                                            <div className={`px-4 py-2.5 border-b cursor-pointer transition-all ${darkMode
+                                                ? 'bg-gradient-to-r from-slate-800/60 to-slate-800/40 border-slate-700/50 hover:from-slate-800/70 hover:to-slate-800/50'
+                                                : 'bg-gradient-to-r from-white/60 to-white/40 border-gray-200/50 hover:from-white/80 hover:to-white/60'
+                                                }`} onClick={() => toggleCategoryCollapse(category.category)}>
                                                 <div className="flex items-center justify-between gap-4">
                                                     <div className="flex items-center gap-3 flex-1">
                                                         <button
-                                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                                             aria-label="Toggle category"
                                                         >
                                                             {isCategoryCollapsed(category.category) ? (
@@ -787,18 +780,18 @@ const Learning = () => {
                                                             )}
                                                         </button>
                                                         <div className="flex items-center gap-3 flex-wrap">
-                                                            <h2 className="text-base font-bold text-gray-800 dark:text-white">
+                                                            <h2 className="text-base font-bold text-gray-900 dark:text-white">
                                                                 {category.category}
                                                             </h2>
                                                             <div className="flex items-center gap-2">
-                                                                <span className={`px-2 py-0.5 ${category.difficulty.color} dark:opacity-90 rounded-md text-xs font-semibold`}>
+                                                                <span className={`px-2.5 py-0.5 ${category.difficulty.color} dark:opacity-90 rounded-md text-xs font-semibold`}>
                                                                     {category.difficulty.level}
                                                                 </span>
-                                                                <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
+                                                                <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
                                                                     {category.total} topics
                                                                 </span>
                                                                 {category.completed > 0 && (
-                                                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold">
+                                                                    <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold">
                                                                         {category.completed}/{category.total} ✓
                                                                     </span>
                                                                 )}
@@ -808,7 +801,7 @@ const Learning = () => {
                                                     {category.completed > 0 && (
                                                         <div className="flex items-center gap-2">
                                                             <div className="text-right">
-                                                                <p className="text-base font-bold text-gray-800 dark:text-white">{progressPercentage}%</p>
+                                                                <p className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{progressPercentage}%</p>
                                                             </div>
                                                         </div>
                                                     )}
@@ -830,17 +823,17 @@ const Learning = () => {
                                                             <div
                                                                 key={topicIdx}
                                                                 className={`transition-all border-l-4 ${isCompleted
-                                                                    ? 'bg-emerald-50/40 dark:bg-emerald-900/10 border-emerald-500'
+                                                                    ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 dark:border-emerald-400'
                                                                     : isBookmarked
-                                                                        ? 'bg-amber-50/30 dark:bg-amber-900/10 border-amber-500'
-                                                                        : 'bg-white/30 dark:bg-gray-800/30 border-transparent'
+                                                                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-amber-500 dark:border-amber-400'
+                                                                        : 'bg-white/40 dark:bg-gray-800/40 border-transparent hover:border-indigo-400 dark:hover:border-indigo-500'
                                                                     }`}
                                                             >
-                                                                <div className="px-6 py-4 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-all">
-                                                                    <div className="flex items-start gap-4">
+                                                                <div className="px-4 py-2.5 hover:bg-white/60 dark:hover:bg-gray-700/40 transition-all">
+                                                                    <div className="flex items-start gap-3">
                                                                         {/* Number & Status */}
-                                                                        <div className="flex items-center gap-3 flex-shrink-0">
-                                                                            <div className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 dark:from-gray-600 dark:to-gray-800 flex items-center justify-center shadow-md ring-2 ring-white/20">
+                                                                        <div className="flex items-center gap-2.5 flex-shrink-0">
+                                                                            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 flex items-center justify-center shadow-sm">
                                                                                 <span className="text-white font-bold text-xs">
                                                                                     {globalIndex}
                                                                                 </span>
@@ -851,18 +844,18 @@ const Learning = () => {
                                                                                 aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
                                                                             >
                                                                                 {isCompleted ? (
-                                                                                    <CheckCircleSolidIcon className="h-6 w-6 text-emerald-500 group-hover/check:scale-110 transition-transform" />
+                                                                                    <CheckCircleSolidIcon className="h-5 w-5 text-emerald-500 dark:text-emerald-400 group-hover/check:scale-110 transition-transform" />
                                                                                 ) : (
-                                                                                    <div className="h-6 w-6 border-2 border-gray-300 dark:border-gray-600 rounded-full group-hover/check:border-emerald-500 group-hover/check:scale-110 transition-all"></div>
+                                                                                    <div className="h-5 w-5 border-2 border-gray-300 dark:border-gray-600 rounded-full group-hover/check:border-emerald-500 dark:group-hover/check:border-emerald-400 group-hover/check:scale-110 transition-all"></div>
                                                                                 )}
                                                                             </button>
                                                                         </div>
 
                                                                         {/* Topic Info */}
                                                                         <div className="flex-1 min-w-0">
-                                                                            <div className="flex items-start justify-between gap-4 mb-2">
+                                                                            <div className="flex items-start justify-between gap-3 mb-2">
                                                                                 <div className="flex items-center gap-2">
-                                                                                    <h3 className={`text-base font-bold ${isCompleted ? 'text-gray-400 dark:text-gray-600 line-through' : 'text-gray-800 dark:text-white'
+                                                                                    <h3 className={`text-sm font-semibold ${isCompleted ? 'text-gray-400 dark:text-gray-600 line-through' : 'text-gray-900 dark:text-white'
                                                                                         }`}>
                                                                                         {topic.name}
                                                                                     </h3>
@@ -880,33 +873,33 @@ const Learning = () => {
                                                                                 </div>
                                                                                 <button
                                                                                     onClick={() => toggleBookmark(category.category, topic.name)}
-                                                                                    className="group/bookmark flex-shrink-0 p-1"
+                                                                                    className="group/bookmark flex-shrink-0 p-1 rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
                                                                                     aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
                                                                                 >
                                                                                     {isBookmarked ? (
-                                                                                        <BookmarkSolidIcon className="h-5 w-5 text-amber-500 group-hover/bookmark:scale-110 transition-transform" />
+                                                                                        <BookmarkSolidIcon className="h-4 w-4 text-amber-500 dark:text-amber-400 group-hover/bookmark:scale-110 transition-transform" />
                                                                                     ) : (
-                                                                                        <BookmarkIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 group-hover/bookmark:scale-110 transition-all" />
+                                                                                        <BookmarkIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 dark:group-hover/bookmark:text-amber-400 group-hover/bookmark:scale-110 transition-all" />
                                                                                     )}
                                                                                 </button>
                                                                             </div>
 
                                                                             {/* Resources Grid */}
-                                                                            <div className="grid sm:grid-cols-2 gap-2.5">
+                                                                            <div className="grid sm:grid-cols-2 gap-2">
                                                                                 {/* Video Resource */}
                                                                                 {topic.youtubeId ? (
                                                                                     <a
                                                                                         href={`https://www.youtube.com/watch?v=${topic.youtubeId}`}
                                                                                         target="_blank"
                                                                                         rel="noopener noreferrer"
-                                                                                        className="flex items-center gap-2.5 px-3 py-2 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200/50 dark:border-red-700/50 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:shadow-md hover:scale-[1.02] transition-all group/link"
+                                                                                        className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-300 rounded-lg text-xs font-semibold hover:shadow-md hover:scale-[1.01] transition-all group/link"
                                                                                     >
                                                                                         <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
                                                                                         <span className="flex-1 truncate">Video Lecture</span>
-                                                                                        <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5 opacity-60 group-hover/link:opacity-100 transition-opacity" />
+                                                                                        <ArrowTopRightOnSquareIcon className="h-3 w-3 opacity-60 group-hover/link:opacity-100 transition-opacity" />
                                                                                     </a>
                                                                                 ) : (
-                                                                                    <div className="flex items-center gap-2.5 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/30 dark:border-gray-700/30 text-gray-400 dark:text-gray-600 rounded-lg text-sm">
+                                                                                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 rounded-lg text-xs">
                                                                                         <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
                                                                                         <span className="flex-1 italic text-xs">Coming soon</span>
                                                                                     </div>
@@ -921,14 +914,14 @@ const Learning = () => {
                                                                                                 href={resource.url}
                                                                                                 target="_blank"
                                                                                                 rel="noopener noreferrer"
-                                                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm border border-indigo-200/50 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all group/resource"
+                                                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-gray-700 backdrop-blur-sm border border-indigo-200 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:shadow-sm transition-all group/resource"
                                                                                             >
                                                                                                 <span className="truncate max-w-[100px]">{resource.name}</span>
                                                                                                 <ArrowTopRightOnSquareIcon className="h-3 w-3 opacity-60 group-hover/resource:opacity-100 transition-opacity flex-shrink-0" />
                                                                                             </a>
                                                                                         ))}
                                                                                         {topic.resources.length > 2 && (
-                                                                                            <span className="inline-flex items-center px-2.5 py-1.5 bg-gray-100/80 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium">
+                                                                                            <span className="inline-flex items-center px-2.5 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium">
                                                                                                 +{topic.resources.length - 2}
                                                                                             </span>
                                                                                         )}

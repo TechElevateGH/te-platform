@@ -94,17 +94,17 @@ const AdminApplications = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
             {/* Header */}
-            <header className="bg-white border-b border-gray-200">
+            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                                <ChartBarIcon className="h-8 w-8 text-blue-600" />
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <ChartBarIcon className="h-8 w-8 text-blue-600 dark:text-blue-500" />
                                 Member Applications Dashboard
                             </h1>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                 Monitor and manage all member job applications
                             </p>
                         </div>
@@ -115,106 +115,106 @@ const AdminApplications = () => {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                    <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-gray-600">Total Applications</p>
-                                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
+                                <p className="text-xs font-medium text-gray-600 dark:text-gray-300">Total Applications</p>
+                                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
                             </div>
-                            <UserGroupIcon className="h-8 w-8 text-gray-400" />
+                            <UserGroupIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-blue-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-blue-800 p-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-blue-600">Applied</p>
-                                <p className="text-2xl font-bold text-blue-700 mt-1">{stats.applied}</p>
+                                <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Applied</p>
+                                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400 mt-1">{stats.applied}</p>
                             </div>
-                            <ClockIcon className="h-8 w-8 text-blue-400" />
+                            <ClockIcon className="h-8 w-8 text-blue-400 dark:text-blue-500" />
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-purple-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-800 p-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-purple-600">Interviewing</p>
-                                <p className="text-2xl font-bold text-purple-700 mt-1">{stats.interviewing}</p>
+                                <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Interviewing</p>
+                                <p className="text-2xl font-bold text-purple-700 dark:text-purple-400 mt-1">{stats.interviewing}</p>
                             </div>
-                            <UserGroupIcon className="h-8 w-8 text-purple-400" />
+                            <UserGroupIcon className="h-8 w-8 text-purple-400 dark:text-purple-500" />
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-green-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-green-200 dark:border-green-800 p-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-green-600">Offers</p>
-                                <p className="text-2xl font-bold text-green-700 mt-1">{stats.offered}</p>
+                                <p className="text-xs font-medium text-green-600 dark:text-green-400">Offers</p>
+                                <p className="text-2xl font-bold text-green-700 dark:text-green-400 mt-1">{stats.offered}</p>
                             </div>
-                            <CheckCircleIcon className="h-8 w-8 text-green-400" />
+                            <CheckCircleIcon className="h-8 w-8 text-green-400 dark:text-green-500" />
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl border border-red-200 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800 p-4 transition-colors">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-red-600">Rejected</p>
-                                <p className="text-2xl font-bold text-red-700 mt-1">{stats.rejected}</p>
+                                <p className="text-xs font-medium text-red-600 dark:text-red-400">Rejected</p>
+                                <p className="text-2xl font-bold text-red-700 dark:text-red-400 mt-1">{stats.rejected}</p>
                             </div>
-                            <XCircleIcon className="h-8 w-8 text-red-400" />
+                            <XCircleIcon className="h-8 w-8 text-red-400 dark:text-red-500" />
                         </div>
                     </div>
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6 transition-colors">
                     <div className="flex items-center gap-2 mb-4">
-                        <FunnelIcon className="h-5 w-5 text-gray-600" />
-                        <h3 className="text-sm font-bold text-gray-900">Filters</h3>
+                        <FunnelIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Filters</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         {/* Search */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Search</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Search</label>
                             <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <input
                                     type="text"
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 />
                             </div>
                         </div>
 
                         {/* Member Filter */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Member</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Member</label>
                             <input
                                 type="text"
                                 placeholder="Filter by member..."
                                 value={memberFilter}
                                 onChange={(e) => setMemberFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
 
                         {/* Company Filter */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Company</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Company</label>
                             <input
                                 type="text"
                                 placeholder="Filter by company..."
                                 value={companyFilter}
                                 onChange={(e) => setCompanyFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
 
                         {/* Status Filter */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Status</label>
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status</label>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             >
                                 <option value="">All Statuses</option>
                                 <option value="Applied">Applied</option>
@@ -237,7 +237,7 @@ const AdminApplications = () => {
                                     setCompanyFilter('');
                                     setStatusFilter('');
                                 }}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                             >
                                 Clear all filters
                             </button>
@@ -246,38 +246,39 @@ const AdminApplications = () => {
                 </div>
 
                 {/* Applications Table */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                {/* Applications Table */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Member
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Company
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Position
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Level
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Applied Date
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                 {filteredApplications.length === 0 ? (
                                     <tr>
                                         <td colSpan="6" className="px-6 py-12 text-center">
-                                            <BuildingOfficeIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                                            <p className="text-sm font-medium text-gray-900">No applications found</p>
-                                            <p className="text-xs text-gray-500 mt-1">
+                                            <BuildingOfficeIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                 {applications.length === 0
                                                     ? 'No member applications yet'
                                                     : 'Try adjusting your filters'}
@@ -288,18 +289,18 @@ const AdminApplications = () => {
                                     filteredApplications.map((app) => (
                                         <tr
                                             key={app.id}
-                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all"
+                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all"
                                         >
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <div className="font-semibold text-gray-900 text-sm">{app.user_name}</div>
-                                                    <div className="text-xs text-gray-500">{app.user_email}</div>
+                                                    <div className="font-semibold text-gray-900 dark:text-white text-sm">{app.user_name}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     {app.company?.image && (
-                                                        <div className="h-8 w-8 rounded-lg border border-gray-200 bg-white p-1 flex items-center justify-center flex-shrink-0">
+                                                        <div className="h-8 w-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 p-1 flex items-center justify-center flex-shrink-0">
                                                             <img
                                                                 src={app.company.image}
                                                                 alt={app.company.name}
@@ -307,14 +308,14 @@ const AdminApplications = () => {
                                                             />
                                                         </div>
                                                     )}
-                                                    <span className="font-semibold text-gray-900 text-sm">{app.company?.name}</span>
+                                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{app.company?.name}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-700">{app.position}</span>
+                                                <span className="text-sm text-gray-700 dark:text-gray-300">{app.position}</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-600">{app.level}</span>
+                                                <span className="text-sm text-gray-600 dark:text-gray-400">{app.level}</span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(app.status)}`}>
@@ -322,7 +323,7 @@ const AdminApplications = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-600">{app.date}</span>
+                                                <span className="text-sm text-gray-600 dark:text-gray-400">{app.date}</span>
                                             </td>
                                         </tr>
                                     ))
@@ -334,7 +335,7 @@ const AdminApplications = () => {
 
                 {/* Results Count */}
                 {filteredApplications.length > 0 && (
-                    <div className="mt-4 text-center text-sm text-gray-600">
+                    <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
                         Showing {filteredApplications.length} of {applications.length} applications
                     </div>
                 )}

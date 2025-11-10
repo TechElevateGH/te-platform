@@ -121,14 +121,14 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             children={
                 !hasResume ? (
                     <div className="px-6 py-8">
-                        <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 text-center">
-                            <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <ExclamationTriangleIcon className="h-8 w-8 text-rose-600" />
+                        <div className="bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-xl p-6 text-center">
+                            <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ExclamationTriangleIcon className="h-8 w-8 text-rose-600 dark:text-rose-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-rose-900 mb-2">
+                            <h3 className="text-lg font-bold text-rose-900 dark:text-rose-200 mb-2">
                                 Resume Required
                             </h3>
-                            <p className="text-sm text-rose-700 font-medium">
+                            <p className="text-sm text-rose-700 dark:text-rose-300 font-medium">
                                 Please upload your resume before requesting a referral.
                             </p>
                         </div>
@@ -137,18 +137,18 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                     <div className="px-6 py-6 space-y-6">
                         {/* Company Section */}
                         <div className="space-y-3">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company</h3>
-                            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200">
+                            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Company</h3>
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
                                 <img
                                     src={company.image}
                                     alt={company.name}
-                                    className="h-12 w-12 rounded-lg object-cover border border-blue-200 shadow-sm"
+                                    className="h-12 w-12 rounded-lg object-cover border border-blue-200 dark:border-blue-700 shadow-sm"
                                 />
                                 <div>
-                                    <p className="text-lg font-bold text-blue-900">{company.name}</p>
+                                    <p className="text-lg font-bold text-blue-900 dark:text-blue-200">{company.name}</p>
                                     <div className="flex items-center gap-1 mt-1">
-                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
-                                        <span className="text-xs font-semibold text-emerald-700">Eligible for referral</span>
+                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                        <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Eligible for referral</span>
                                     </div>
                                 </div>
                             </div>
@@ -157,20 +157,20 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         {/* Requirements Section */}
                         {(requirements.resume || requirements.referralEssay || requirements.contact) && (
                             <div className="space-y-3">
-                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                                     <DocumentTextIcon className="h-4 w-4" />
                                     Requirements
                                 </h3>
-                                <div className="bg-white rounded-xl border border-gray-200 p-4">
+                                <div className="bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-4">
                                     <div className="grid grid-cols-1 gap-3">
                                         {requirements.resume && (
                                             <div className="flex items-center gap-3">
                                                 {hasResume ? (
-                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                 ) : (
-                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasResume ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                <span className={`text-sm font-semibold ${hasResume ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
                                                     Resume
                                                 </span>
                                             </div>
@@ -178,11 +178,11 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                         {requirements.referralEssay && (
                                             <div className="flex items-center gap-3">
                                                 {hasReferralEssay ? (
-                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                 ) : (
-                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasReferralEssay ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                <span className={`text-sm font-semibold ${hasReferralEssay ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
                                                     Referral Essay
                                                 </span>
                                             </div>
@@ -190,11 +190,11 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                         {requirements.contact && (
                                             <div className="flex items-center gap-3">
                                                 {hasContact ? (
-                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                 ) : (
-                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
                                                     Contact
                                                 </span>
                                             </div>
@@ -207,27 +207,27 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         {/* Personal Information - Auto-populated (Read-only display) */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Your Information</h3>
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
+                                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Your Information</h3>
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full border border-blue-200 dark:border-blue-700">
                                     <CheckCircleIcon className="h-3 w-3" />
                                     From Profile
                                 </span>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-500 mb-1">Name</p>
-                                    <p className="text-sm font-bold text-gray-900">{userInfo?.first_name} {userInfo?.last_name}</p>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Name</p>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{userInfo?.first_name} {userInfo?.last_name}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
-                                    <p className="text-sm font-bold text-gray-900">{userInfo?.email}</p>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{userInfo?.email}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Job Information */}
                         <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
+                            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Position Details</h3>
 
                             <div className="relative">
                                 <SelectCombobox
@@ -242,17 +242,17 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             </div>
 
                             <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Job ID <span className="text-gray-400 text-xs">(Optional)</span>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                                    Job ID <span className="text-gray-400 dark:text-gray-500 text-xs">(Optional)</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={referralData.job_id}
                                     onChange={(e) => handleInputChange({ field: 'job_id', value: e.target.value })}
                                     placeholder="e.g., R-123456 or Job Posting Number"
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all text-sm font-medium"
                                 />
-                                <p className="mt-1.5 text-xs text-gray-500">
+                                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
                                     If available, include the job posting ID or requisition number
                                 </p>
                             </div>
@@ -270,7 +270,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
 
                         {/* Resume Selection */}
                         <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Select Resume</h3>
+                            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Select Resume</h3>
                             <div className="space-y-3">
                                 {availableResumes.map((resume) => {
                                     const isSelected = selectedResumeId === resume.id;
@@ -282,34 +282,34 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 handleInputChange({ field: 'resume', value: resume.link || '' });
                                             }}
                                             className={`cursor-pointer p-4 rounded-xl border-2 transition-all hover:shadow-md ${isSelected
-                                                ? 'bg-emerald-50 border-emerald-500 shadow-sm'
-                                                : 'bg-white border-gray-200 hover:border-blue-300'
+                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 dark:border-emerald-600 shadow-sm'
+                                                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-3">
-                                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-600'}`}>
                                                     <DocumentTextIcon
-                                                        className={`h-5 w-5 ${isSelected ? 'text-emerald-600' : 'text-gray-600'}`}
+                                                        className={`h-5 w-5 ${isSelected ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-600 dark:text-gray-300'}`}
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between gap-2">
-                                                        <p className={`text-sm font-bold truncate ${isSelected ? 'text-emerald-900' : 'text-gray-900'
+                                                        <p className={`text-sm font-bold truncate ${isSelected ? 'text-emerald-900 dark:text-emerald-200' : 'text-gray-900 dark:text-white'
                                                             }`}>
                                                             {resume.name}
                                                         </p>
                                                         {isSelected && (
-                                                            <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                            <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <BriefcaseIcon className="h-3.5 w-3.5 text-gray-400" />
-                                                        <p className="text-xs font-semibold text-blue-600">
+                                                        <BriefcaseIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                                                             {resume.role}
                                                         </p>
                                                     </div>
                                                     {resume.notes && (
-                                                        <p className="text-xs text-gray-600 mt-1.5 line-clamp-2">
+                                                        <p className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 line-clamp-2">
                                                             {resume.notes}
                                                         </p>
                                                     )}
@@ -319,29 +319,29 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                     );
                                 })}
                             </div>
-                            <p className="text-xs text-gray-500 font-medium">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                                 Select the resume that best matches this role
                             </p>
                         </div>
 
                         {/* Additional Notes */}
                         <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Additional Information</h3>
+                            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Additional Information</h3>
                             <FormTextArea
                                 label="Notes"
                                 field="request_note"
                                 handleInputChange={handleInputChange}
                                 required={false}
                             />
-                            <p className="text-xs text-gray-500 font-medium">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                                 Add any additional information or context for your referral request
                             </p>
                         </div>
 
                         {/* Error Message */}
                         {submitError && (
-                            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                                <p className="text-sm font-semibold text-red-900">{submitError}</p>
+                            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4">
+                                <p className="text-sm font-semibold text-red-900 dark:text-red-200">{submitError}</p>
                             </div>
                         )}
                     </div>

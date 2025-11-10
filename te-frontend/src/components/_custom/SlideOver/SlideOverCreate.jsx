@@ -53,7 +53,7 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-950/60 backdrop-blur-md transition-all" />
+                    <div className="fixed inset-0 bg-gray-950/60 dark:bg-gray-950/80 backdrop-blur-md transition-all" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -67,7 +67,7 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all w-full max-w-2xl">
+                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all w-full max-w-2xl">
                                 <form
                                     id="createForm"
                                     className="flex flex-col"
@@ -92,15 +92,15 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
                                     </div>
 
                                     {/* Content */}
-                                    <div className="max-h-[calc(100vh-16rem)] overflow-y-auto bg-gray-50/30">
+                                    <div className="max-h-[calc(100vh-16rem)] overflow-y-auto bg-gray-50/30 dark:bg-gray-900/30 transition-colors">
                                         {children}
                                     </div>
 
                                     {/* Premium Footer */}
-                                    <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                                    <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-6 py-4 transition-colors">
                                         <button
                                             type="button"
-                                            className="px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-white rounded-xl transition-all duration-200 border border-gray-200"
+                                            className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600"
                                             onClick={() => { setOpen(false) }}
                                         >
                                             Cancel

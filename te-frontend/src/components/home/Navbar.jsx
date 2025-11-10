@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { useDarkMode } from '../../context/DarkModeContext';
+import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -15,6 +16,7 @@ const navigation = [
 const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, logout } = useAuth();
@@ -26,6 +28,15 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    useEffect(() => {
+        localStorage.setItem('appDarkMode', darkMode);
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [darkMode]);
 
     const scrollToSection = (href) => {
         if (location.pathname !== '/') {
@@ -56,7 +67,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || isWorkspace
-                ? 'bg-white/90 backdrop-blur-xl shadow-sm'
+                ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-sm dark:border-b dark:border-slate-700/50'
                 : 'bg-transparent'
                 }`}
         >
@@ -66,7 +77,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     {/* Mobile menu button */}
                     <button
                         type="button"
-                        className={`${isWorkspace ? 'md:hidden' : 'lg:hidden'} -m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 hover:bg-gray-100 transition-colors`}
+                        className={`${isWorkspace ? 'md:hidden' : 'lg:hidden'} -m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
                         onClick={handleMobileMenuToggle}
                     >
                         <span className="sr-only">Open main menu</span>
@@ -90,7 +101,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         <button
                             key={item.name}
                             onClick={() => scrollToSection(item.href)}
-                            className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors relative group"
+                            className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors relative group"
                         >
                             {item.name}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-cyan-600 group-hover:w-full transition-all duration-300"></span>
@@ -100,11 +111,24 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                 {/* Right section: Auth Buttons */}
                 <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
+                    {/* Dark Mode Toggle */}
+                    <button
+                        onClick={toggleDarkMode}
+                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
+                        title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                    >
+                        {darkMode ? (
+                            <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-amber-500 transition-colors" />
+                        ) : (
+                            <MoonIcon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                        )}
+                    </button>
+
                     {!isAuthenticated ? (
                         <>
                             <button
                                 onClick={() => navigate('/login')}
-                                className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
+                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
                             >
                                 Log in
                             </button>
@@ -119,7 +143,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         <>
                             <button
                                 onClick={() => navigate('/workspace')}
-                                className="text-sm font-semibold leading-6 text-gray-700 hover:text-blue-600 transition-colors px-4 py-2"
+                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
                             >
                                 Workspace
                             </button>
@@ -127,19 +151,19 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                             {/* Profile icon */}
                             <button
                                 onClick={() => navigate('/workspace/profile')}
-                                className="p-2 rounded-lg hover:bg-blue-50 transition-all group"
+                                className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
                                 title="Profile"
                             >
-                                <UserCircleIcon className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors" />
+                                <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                             </button>
 
                             {/* Sign out icon */}
                             <button
                                 onClick={logout}
-                                className="p-2 rounded-lg hover:bg-red-50 transition-all group"
+                                className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
                                 title="Sign Out"
                             >
-                                <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors" />
+                                <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
                             </button>
                         </>
                     )}
@@ -149,8 +173,8 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
             {/* Mobile menu - only for home page */}
             {!isWorkspace && (
                 <div className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
-                    <div className="fixed inset-0 z-50" onClick={() => setMobileMenuOpen(false)} />
-                    <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                    <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
                         <div className="flex items-center justify-between">
                             <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
                                 <img
@@ -195,6 +219,19 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                     ))}
                                 </div>
                                 <div className="py-6 space-y-2">
+                                    {/* Dark Mode Toggle - Mobile */}
+                                    <button
+                                        onClick={toggleDarkMode}
+                                        className="-mx-3 flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                    >
+                                        <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                                        {darkMode ? (
+                                            <SunIcon className="h-5 w-5 text-amber-500" />
+                                        ) : (
+                                            <MoonIcon className="h-5 w-5 text-indigo-600" />
+                                        )}
+                                    </button>
+
                                     {!isAuthenticated ? (
                                         <>
                                             <button

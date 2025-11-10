@@ -56,27 +56,27 @@ const features = [
 
 const Features = () => {
     return (
-        <div id="features" className="relative py-24 sm:py-32 bg-white overflow-hidden">
+        <div id="features" className="relative py-24 sm:py-32 bg-white dark:bg-gray-900 overflow-hidden transition-colors">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-30"></div>
-                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-30"></div>
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-blue-100 dark:bg-blue-500/20 rounded-full blur-3xl opacity-30"></div>
+                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-purple-100 dark:bg-purple-500/20 rounded-full blur-3xl opacity-30"></div>
             </div>
 
             <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section header */}
                 <div className="mx-auto max-w-2xl text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 mb-4">
-                        <SparklesIcon className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-semibold text-blue-600">Platform Features</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-4">
+                        <SparklesIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Platform Features</span>
                     </div>
-                    <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                    <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
                         Everything you need to{' '}
                         <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                             succeed in tech
                         </span>
                     </h2>
-                    <p className="mt-6 text-lg leading-8 text-gray-600">
+                    <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
                         Our comprehensive platform provides all the tools and support you need to launch and advance your career in technology.
                     </p>
                 </div>
@@ -90,17 +90,17 @@ const Features = () => {
                                 className="group relative"
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
-                                <div className="relative h-full p-8 bg-white rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                                <div className="relative h-full p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
                                     {/* Icon container */}
                                     <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                         <feature.icon className="h-7 w-7 text-white" />
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                         {feature.name}
                                     </h3>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                                         {feature.description}
                                     </p>
 
@@ -121,7 +121,7 @@ const Features = () => {
                                 <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </span>
                         </button>
-                        <span className="text-sm text-gray-500">Join 500+ aspiring tech professionals</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Join 500+ aspiring tech professionals</span>
                     </div>
                 </div>
             </div>

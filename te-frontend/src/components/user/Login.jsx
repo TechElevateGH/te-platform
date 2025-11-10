@@ -83,11 +83,11 @@ const Login = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
             {/* Background decoration */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl"></div>
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-500/30 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 dark:bg-cyan-500/30 rounded-full blur-3xl"></div>
             </div>
 
             <div className="relative max-w-md w-full">
@@ -101,13 +101,13 @@ const Login = () => {
                 </div>
 
                 {/* Main card */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8">
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8">
                     {/* Error message */}
                     {error && (
-                        <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-200 animate-fade-in">
+                        <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/30 p-4 border border-red-200 dark:border-red-800 animate-fade-in">
                             <div className="flex">
-                                <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0" />
-                                <p className="ml-3 text-sm text-red-800">{error}</p>
+                                <XCircleIcon className="h-5 w-5 text-red-400 dark:text-red-500 flex-shrink-0" />
+                                <p className="ml-3 text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         </div>
                     )}
@@ -119,7 +119,7 @@ const Login = () => {
                                 key={provider.name}
                                 type="button"
                                 onClick={() => handleOAuthLogin(provider.name)}
-                                className={`w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:shadow-lg transition-all duration-300 ${provider.color}`}
+                                className={`w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:shadow-lg transition-all duration-300 ${provider.color}`}
                             >
                                 {provider.icon}
                                 <span>Continue with {provider.name}</span>
@@ -130,22 +130,22 @@ const Login = () => {
                     {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300"></div>
+                            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-gray-500 font-medium">Or continue with email</span>
+                            <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">Or continue with email</span>
                         </div>
                     </div>
 
                     {/* Login form */}
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 Email address
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                                    <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                                 </div>
                                 <input
                                     id="email"
@@ -154,7 +154,7 @@ const Login = () => {
                                     value={loginData.username}
                                     autoComplete="email"
                                     required
-                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                     placeholder="you@example.com"
                                     onChange={(e) => handleInputChange({ name: "username", value: e.target.value })}
                                 />
@@ -163,19 +163,19 @@ const Login = () => {
 
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                     Password
                                 </label>
                                 <button
                                     type="button"
-                                    className="text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+                                    className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
                                 >
                                     Forgot password?
                                 </button>
                             </div>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                                    <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                                 </div>
                                 <input
                                     id="password"
@@ -184,7 +184,7 @@ const Login = () => {
                                     value={loginData.password}
                                     autoComplete="current-password"
                                     required
-                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                     placeholder="••••••••"
                                     onChange={(e) => handleInputChange({ name: "password", value: e.target.value })}
                                 />
@@ -215,11 +215,11 @@ const Login = () => {
 
                     {/* Sign up link */}
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                             Don't have an account?{' '}
                             <button
                                 onClick={() => navigate('/register')}
-                                className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+                                className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
                             >
                                 Create one now
                             </button>
@@ -230,17 +230,17 @@ const Login = () => {
                     <div className="mt-4 text-center">
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-200"></div>
+                                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
                             </div>
                             <div className="relative flex justify-center text-xs">
-                                <span className="px-4 bg-white text-gray-500">OR</span>
+                                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">OR</span>
                             </div>
                         </div>
                         <button
                             onClick={() => navigate('/lead-login')}
-                            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors group"
+                            className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                         >
-                            <svg className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
                             Management Login
@@ -252,7 +252,7 @@ const Login = () => {
                 <div className="mt-6 text-center">
                     <button
                         onClick={() => navigate('/')}
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
