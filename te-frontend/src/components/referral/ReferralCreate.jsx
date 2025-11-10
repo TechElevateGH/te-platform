@@ -254,8 +254,8 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 handleInputChange({ field: 'resume_id', value: resume.id });
                                             }}
                                             className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
-                                                    ? 'bg-emerald-50 border-emerald-500 shadow-md'
-                                                    : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                                ? 'bg-emerald-50 border-emerald-500 shadow-md'
+                                                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-3">

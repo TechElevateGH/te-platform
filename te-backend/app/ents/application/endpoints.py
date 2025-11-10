@@ -14,9 +14,7 @@ user_app_router = APIRouter(prefix="/users/{user_id}/applications")
 user_files_router = APIRouter(prefix="/users/{user_id}/files")
 
 
-@user_app_router.post(
-    "", response_model=Dict[str, application_schema.ApplicationRead]
-)
+@user_app_router.post("", response_model=Dict[str, application_schema.ApplicationRead])
 def create_application(
     *,
     db: Database = Depends(session.get_db),
@@ -163,9 +161,7 @@ def get_user_application_files(
     }
 
 
-@user_files_router.post(
-    "", response_model=Dict[str, application_schema.FileRead]
-)
+@user_files_router.post("", response_model=Dict[str, application_schema.FileRead])
 def add_file(
     db: Database = Depends(session.get_db),
     *,
