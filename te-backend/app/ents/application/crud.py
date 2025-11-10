@@ -17,19 +17,23 @@ def read_application_by_id(
     db: Database, *, application_id: str
 ) -> Optional[application_models.Application]:
     """Returns the `Application` with id `application_id`."""
+    from bson import ObjectId
 
-    return (
-        db.query(application_models.Application)
-        .filter(application_models.Application.id == application_id)
-        .first()
-    )
+    if not ObjectId.is_valid(application_id):
+        return None
+
+    application_data = db.applications.find_one({"_id": ObjectId(application_id)})
+    if application_data:
+        return application_models.Application(**application_data)
+    return None
 
 
 def read_application_multi(
     db: Database, *, skip: int = 0, limit: int = 100
 ) -> list[application_models.Application]:
     """Returns the next `limit` applications after `skip` applications."""
-    return db.query(application_models.Application).offset(skip).limit(limit).all()
+    applications_data = db.applications.find({}).skip(skip).limit(limit)
+    return [application_models.Application(**app) for app in applications_data]
 
 
 def create_application(

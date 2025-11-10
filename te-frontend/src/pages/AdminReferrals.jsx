@@ -6,14 +6,16 @@ import ReferralManagement from '../components/referral/ReferralManagement';
 import {
     PlusIcon,
     BuildingOfficeIcon,
-    UserGroupIcon,
     ClockIcon,
     CheckCircleIcon,
     XCircleIcon,
-    FunnelIcon,
     MagnifyingGlassIcon,
     PaperAirplaneIcon,
     EyeIcon,
+    XMarkIcon,
+    AdjustmentsHorizontalIcon,
+    ChartBarIcon,
+    ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 
 const AdminReferrals = () => {
@@ -27,6 +29,55 @@ const AdminReferrals = () => {
     const [companyFilter, setCompanyFilter] = useState('');
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+    
+    // Advanced Features State
+    const [sortBy, setSortBy] = useState('date_desc');
+    const [showColumnSelector, setShowColumnSelector] = useState(false);
+    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    const [visibleColumns, setVisibleColumns] = useState({
+        member: true,
+        email: true,
+        company: true,
+        jobTitle: true,
+        status: true,
+        date: true,
+        resume: false,
+        essay: false,
+        actions: true
+    });
+
+    // Column Management
+    const toggleColumn = (column) => {
+        setVisibleColumns(prev => ({ ...prev, [column]: !prev[column] }));
+    };
+
+    const resetColumns = () => {
+        setVisibleColumns({
+            member: true,
+            email: true,
+            company: true,
+            jobTitle: true,
+            status: true,
+            date: true,
+            resume: false,
+            essay: false,
+            actions: true
+        });
+    };
+
+    const showAllColumns = () => {
+        setVisibleColumns({
+            member: true,
+            email: true,
+            company: true,
+            jobTitle: true,
+            status: true,
+            date: true,
+            resume: true,
+            essay: true,
+            actions: true
+        });
+    };
 
     // Add Company Form
     const [companyForm, setCompanyForm] = useState({
@@ -116,9 +167,73 @@ const AdminReferrals = () => {
 
         const matchesCompany = !companyFilter ||
             ref.company?.name?.toLowerCase().includes(companyFilter.toLowerCase());
+        
+        const matchesDateRange = (!dateRange.start || new Date(ref.submitted_date) >= new Date(dateRange.start)) &&
+            (!dateRange.end || new Date(ref.submitted_date) <= new Date(dateRange.end));
 
-        return matchesSearch && matchesStatus && matchesMember && matchesCompany;
+        return matchesSearch && matchesStatus && matchesMember && matchesCompany && matchesDateRange;
     });
+
+    // Sorting logic
+    const sortedReferrals = [...filteredReferrals].sort((a, b) => {
+        switch (sortBy) {
+            case 'date_desc':
+                return new Date(b.submitted_date || 0) - new Date(a.submitted_date || 0);
+            case 'date_asc':
+                return new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
+            case 'company_asc':
+                return (a.company?.name || '').localeCompare(b.company?.name || '');
+            case 'company_desc':
+                return (b.company?.name || '').localeCompare(a.company?.name || '');
+            case 'member_asc':
+                return (a.user_name || '').localeCompare(b.user_name || '');
+            case 'member_desc':
+                return (b.user_name || '').localeCompare(a.user_name || '');
+            case 'status_asc':
+                return (a.status || '').localeCompare(b.status || '');
+            case 'status_desc':
+                return (b.status || '').localeCompare(a.status || '');
+            default:
+                return 0;
+        }
+    });
+
+    // Clear all filters
+    const clearAllFilters = () => {
+        setSearchQuery('');
+        setStatusFilter('');
+        setMemberFilter('');
+        setCompanyFilter('');
+        setDateRange({ start: '', end: '' });
+    };
+
+    // CSV Export
+    const exportToCSV = () => {
+        const headers = ['Member', 'Email', 'Company', 'Job Title', 'Status', 'Date', 'Resume', 'Essay'];
+        const rows = sortedReferrals.map(ref => [
+            ref.user_name || '',
+            ref.user_email || '',
+            ref.company?.name || '',
+            ref.job_title || '',
+            ref.status || '',
+            ref.submitted_date || '',
+            ref.has_resume ? 'Yes' : 'No',
+            ref.has_essay ? 'Yes' : 'No'
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `referrals_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     // Statistics
     const stats = {
@@ -148,110 +263,146 @@ const AdminReferrals = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+            {/* Sticky Header */}
+            <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+                <div className="max-w-7xl mx-auto px-4">
+                    {/* Title Row */}
+                    <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                                <PaperAirplaneIcon className="h-8 w-8 text-blue-600" />
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <PaperAirplaneIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                                 Referral Management
                             </h1>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Process member referral requests and manage referral companies
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                                Process member referral requests and manage companies
                             </p>
                         </div>
-                        <button
-                            onClick={() => setShowAddCompany(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
-                        >
-                            <PlusIcon className="h-5 w-5" />
-                            Add Referral Company
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {/* Column Selector */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowColumnSelector(!showColumnSelector)}
+                                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Columns
+                                </button>
+                                {showColumnSelector && (
+                                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-50">
+                                        <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
+                                            <span className="text-xs font-bold text-gray-900 dark:text-white">Visible Columns</span>
+                                            <button onClick={() => setShowColumnSelector(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                                <XMarkIcon className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                                            {Object.keys(visibleColumns).map(col => (
+                                                <label key={col} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={visibleColumns[col]}
+                                                        onChange={() => toggleColumn(col)}
+                                                        className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                            <button onClick={resetColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-500">Reset</button>
+                                            <button onClick={showAllColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">Show All</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Export CSV */}
+                            <button
+                                onClick={exportToCSV}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                <ArrowDownTrayIcon className="h-4 w-4" />
+                                Export
+                            </button>
+
+                            {/* Add Company Button */}
+                            <button
+                                onClick={() => setShowAddCompany(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                Add Company
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats Bar */}
+                    <div className="flex items-center gap-6 py-2.5 text-sm">
+                        <div className="flex items-center gap-2">
+                            <ChartBarIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Total:</span>
+                            <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
+                        </div>
+                        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                        <div className="flex items-center gap-2">
+                            <ClockIcon className="h-4 w-4 text-yellow-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Pending:</span>
+                            <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
+                        </div>
+                        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Approved:</span>
+                            <span className="font-bold text-green-600 dark:text-green-400">{stats.approved}</span>
+                        </div>
+                        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                        <div className="flex items-center gap-2">
+                            <XCircleIcon className="h-4 w-4 text-red-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Declined:</span>
+                            <span className="font-bold text-red-600 dark:text-red-400">{stats.declined}</span>
+                        </div>
+                        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                        <div className="flex items-center gap-2">
+                            <CheckCircleIcon className="h-4 w-4 text-blue-500" />
+                            <span className="text-gray-500 dark:text-gray-400">Completed:</span>
+                            <span className="font-bold text-blue-600 dark:text-blue-400">{stats.completed}</span>
+                        </div>
                     </div>
                 </div>
             </header>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                    <div className="bg-white rounded-xl border border-gray-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-600">Total Requests</p>
-                                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
-                            </div>
-                            <UserGroupIcon className="h-8 w-8 text-gray-400" />
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl border border-yellow-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-yellow-600">Pending</p>
-                                <p className="text-2xl font-bold text-yellow-700 mt-1">{stats.pending}</p>
-                            </div>
-                            <ClockIcon className="h-8 w-8 text-yellow-400" />
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl border border-green-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-green-600">Approved</p>
-                                <p className="text-2xl font-bold text-green-700 mt-1">{stats.approved}</p>
-                            </div>
-                            <CheckCircleIcon className="h-8 w-8 text-green-400" />
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl border border-red-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-red-600">Declined</p>
-                                <p className="text-2xl font-bold text-red-700 mt-1">{stats.declined}</p>
-                            </div>
-                            <XCircleIcon className="h-8 w-8 text-red-400" />
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl border border-blue-200 p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-blue-600">Completed</p>
-                                <p className="text-2xl font-bold text-blue-700 mt-1">{stats.completed}</p>
-                            </div>
-                            <CheckCircleIcon className="h-8 w-8 text-blue-400" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Filters */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <FunnelIcon className="h-5 w-5 text-gray-600" />
-                        <h3 className="text-sm font-bold text-gray-900">Filters</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Search */}
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Search</label>
+            <div className="max-w-7xl mx-auto px-4 py-3">
+                
+                {/* Filters Bar */}
+                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                        {/* Global Search */}
+                        <div className="md:col-span-4">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Search
+                            </label>
                             <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <input
                                     type="text"
-                                    placeholder="Search..."
+                                    placeholder="Search referrals (member, company, job title)..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                 />
                             </div>
                         </div>
 
                         {/* Status Filter */}
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Status</label>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Status
+                            </label>
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                             >
                                 <option value="">All Statuses</option>
                                 <option value="Pending">Pending</option>
@@ -262,138 +413,280 @@ const AdminReferrals = () => {
                         </div>
 
                         {/* Member Filter */}
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Member</label>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Member
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Filter by member..."
                                 value={memberFilter}
                                 onChange={(e) => setMemberFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                             />
                         </div>
 
                         {/* Company Filter */}
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1.5">Company</label>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Company
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Filter by company..."
                                 value={companyFilter}
                                 onChange={(e) => setCompanyFilter(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                             />
+                        </div>
+
+                        {/* Sort Dropdown */}
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Sort by
+                            </label>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                            >
+                                <option value="date_desc">Date (Newest)</option>
+                                <option value="date_asc">Date (Oldest)</option>
+                                <option value="company_asc">Company (A-Z)</option>
+                                <option value="company_desc">Company (Z-A)</option>
+                                <option value="member_asc">Member (A-Z)</option>
+                                <option value="member_desc">Member (Z-A)</option>
+                                <option value="status_asc">Status (A-Z)</option>
+                                <option value="status_desc">Status (Z-A)</option>
+                            </select>
                         </div>
                     </div>
 
-                    {/* Clear Filters */}
-                    {(searchQuery || statusFilter || memberFilter || companyFilter) && (
-                        <div className="mt-4">
+                    {/* Date Range - Second Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-3">
+                        <div className="md:col-span-4">
+                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                Date Range
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="date"
+                                    value={dateRange.start}
+                                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                                    className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                                <input
+                                    type="date"
+                                    value={dateRange.end}
+                                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                                    className="flex-1 px-2 py-2 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Active Filters & Clear */}
+                    {(searchQuery || statusFilter || memberFilter || companyFilter || dateRange.start || dateRange.end) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {statusFilter && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                        Status: {statusFilter}
+                                    </span>
+                                )}
+                                {memberFilter && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                        Member: {memberFilter}
+                                    </span>
+                                )}
+                                {companyFilter && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                        Company: {companyFilter}
+                                    </span>
+                                )}
+                                {(dateRange.start || dateRange.end) && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                        Date: {dateRange.start || '...'} to {dateRange.end || '...'}
+                                    </span>
+                                )}
+                            </div>
                             <button
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    setStatusFilter('');
-                                    setMemberFilter('');
-                                    setCompanyFilter('');
-                                }}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                                onClick={clearAllFilters}
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                             >
-                                Clear all filters
+                                <XMarkIcon className="h-3.5 w-3.5" />
+                                Clear All
                             </button>
                         </div>
                     )}
+
+                    {/* Results Count */}
+                    <div className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
+                        Showing {sortedReferrals.length} of {referrals.length} referral requests
+                    </div>
                 </div>
 
                 {/* Referrals Table */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Member
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Company
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Position
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Request Date
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                        Actions
-                                    </th>
+                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                    {visibleColumns.member && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Member
+                                        </th>
+                                    )}
+                                    {visibleColumns.email && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Email
+                                        </th>
+                                    )}
+                                    {visibleColumns.company && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Company
+                                        </th>
+                                    )}
+                                    {visibleColumns.jobTitle && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Job Title
+                                        </th>
+                                    )}
+                                    {visibleColumns.status && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                    )}
+                                    {visibleColumns.date && (
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Submitted
+                                        </th>
+                                    )}
+                                    {visibleColumns.resume && (
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Resume
+                                        </th>
+                                    )}
+                                    {visibleColumns.essay && (
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Essay
+                                        </th>
+                                    )}
+                                    {visibleColumns.actions && (
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    )}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {filteredReferrals.length === 0 ? (
+                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                                {sortedReferrals.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-12 text-center">
-                                            <PaperAirplaneIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                                            <p className="text-sm font-medium text-gray-900">No referral requests found</p>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {referrals.length === 0
-                                                    ? 'No member referral requests yet'
-                                                    : 'Try adjusting your filters'}
-                                            </p>
+                                        <td colSpan="9" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            No referral requests found
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredReferrals.map((ref) => (
+                                    sortedReferrals.map((ref) => (
                                         <tr
                                             key={ref.id}
-                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all"
+                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
                                         >
-                                            <td className="px-6 py-4">
-                                                <div>
-                                                    <div className="font-semibold text-gray-900 text-sm">{ref.user_name}</div>
-                                                    <div className="text-xs text-gray-500">{ref.user_email}</div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    {ref.company?.image && (
-                                                        <div className="h-8 w-8 rounded-lg border border-gray-200 bg-white p-1 flex items-center justify-center flex-shrink-0">
-                                                            <img
-                                                                src={ref.company.image}
-                                                                alt={ref.company.name}
-                                                                className="h-full w-full object-contain"
-                                                            />
-                                                        </div>
+                                            {visibleColumns.member && (
+                                                <td className="px-4 py-3">
+                                                    <div className="font-medium text-gray-900 dark:text-white text-sm">
+                                                        {ref.user_name}
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.email && (
+                                                <td className="px-4 py-3">
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                                        {ref.user_email}
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.company && (
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        {ref.company?.image && (
+                                                            <div className="h-6 w-6 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                                <img
+                                                                    src={ref.company.image}
+                                                                    alt={ref.company.name}
+                                                                    className="h-full w-full object-contain"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <span className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                                                            {ref.company?.name}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.jobTitle && (
+                                                <td className="px-4 py-3">
+                                                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                                                        {ref.job_title}
+                                                    </span>
+                                                </td>
+                                            )}
+                                            {visibleColumns.status && (
+                                                <td className="px-4 py-3">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(ref.status)}`}>
+                                                        {ref.status}
+                                                    </span>
+                                                </td>
+                                            )}
+                                            {visibleColumns.date && (
+                                                <td className="px-4 py-3">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                        {ref.submitted_date || ref.date || 'N/A'}
+                                                    </span>
+                                                </td>
+                                            )}
+                                            {visibleColumns.resume && (
+                                                <td className="px-4 py-3 text-center">
+                                                    {ref.has_resume ? (
+                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
+                                                            Yes
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                            No
+                                                        </span>
                                                     )}
-                                                    <span className="font-semibold text-gray-900 text-sm">{ref.company?.name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-700">{ref.job_title}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(ref.status)}`}>
-                                                    {ref.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-600">{ref.date}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedReferral(ref);
-                                                            setIsManagementModalOpen(true);
-                                                        }}
-                                                        className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-                                                    >
-                                                        <EyeIcon className="h-3.5 w-3.5" />
-                                                        View Details
-                                                    </button>
-                                                </div>
-                                            </td>
+                                                </td>
+                                            )}
+                                            {visibleColumns.essay && (
+                                                <td className="px-4 py-3 text-center">
+                                                    {ref.has_essay ? (
+                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
+                                                            Yes
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                            No
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            )}
+                                            {visibleColumns.actions && (
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedReferral(ref);
+                                                                setIsManagementModalOpen(true);
+                                                            }}
+                                                            className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                        >
+                                                            <EyeIcon className="h-3.5 w-3.5" />
+                                                            View
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))
                                 )}
@@ -403,9 +696,9 @@ const AdminReferrals = () => {
                 </div>
 
                 {/* Results Count */}
-                {filteredReferrals.length > 0 && (
-                    <div className="mt-4 text-center text-sm text-gray-600">
-                        Showing {filteredReferrals.length} of {referrals.length} referral requests
+                {sortedReferrals.length > 0 && (
+                    <div className="mt-3 text-center text-sm text-gray-600 dark:text-gray-400">
+                        Showing {sortedReferrals.length} of {referrals.length} referral requests
                     </div>
                 )}
             </div>

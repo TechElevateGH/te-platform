@@ -601,6 +601,7 @@ const Applications = () => {
                     setApplication={setApplication}
                     archiveUserApplicationRequest={archiveUserApplicationRequest}
                     deleteUserApplicationRequest={deleteUserApplicationRequest}
+                    refreshApplications={() => setFetchApplications(true)}
                 />
             )}
 

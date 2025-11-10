@@ -25,7 +25,7 @@ const classNames = (...classes) => {
 }
 
 const ApplicationInfo = ({ applicationId, setApplicationId, application, setApplication,
-    archiveUserApplicationRequest, deleteUserApplicationRequest }) => {
+    archiveUserApplicationRequest, deleteUserApplicationRequest, refreshApplications }) => {
     const { userId, accessToken } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [updateData, setUpdateData] = useState({});
@@ -112,6 +112,10 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
             .then((response) => {
                 setApplication(response.data.application);
                 setIsEditing(false);
+                // Trigger refresh of applications list
+                if (refreshApplications) {
+                    refreshApplications();
+                }
             })
             .catch((error) => {
                 console.log(error);
