@@ -25,6 +25,21 @@ def get_user_by_id(
     return {"user": user_schema.UserRead(**vars(user))}
 
 
+@router.patch("/{user_id}", response_model=Dict[str, user_schema.UserRead])
+def update_user_profile(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    data: user_schema.UserUpdate,
+    _: user_models.User = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Update user profile information
+    """
+    updated_user = user_crud.update_user_profile(db, user_id=user_id, data=data)
+    return {"user": user_schema.UserRead(**vars(updated_user))}
+
+
 @router.post("", response_model=Dict[str, user_schema.UserRead])
 def create_user(
     *,

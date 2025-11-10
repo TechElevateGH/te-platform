@@ -1,67 +1,137 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     UserCircleIcon,
     EnvelopeIcon,
     PhoneIcon,
     AcademicCapIcon,
     MapPinIcon,
-    GlobeAltIcon,
     PencilIcon,
     CheckIcon,
     XMarkIcon,
-    BriefcaseIcon,
-    LinkIcon
+    ExclamationCircleIcon,
+    CheckCircleIcon
 } from '@heroicons/react/24/outline'
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
+import axiosInstance from '../../axiosConfig';
 
 const Profile = () => {
-    const { userInfo } = useData();
+    const { userInfo, setUserInfo } = useData();
+    const { userId, accessToken } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
+    const [errors, setErrors] = useState({});
+
     const [editedInfo, setEditedInfo] = useState({
-        full_name: userInfo?.full_name || 'John Doe',
-        email: userInfo?.email || 'john.doe@example.com',
-        phone: userInfo?.phone || '+233 XX XXX XXXX',
-        university: userInfo?.university || 'University of Ghana',
-        graduation_year: userInfo?.graduation_year || '2025',
-        major: userInfo?.major || 'Computer Science',
-        company: userInfo?.company || '',
-        role: userInfo?.role || '',
-        location: userInfo?.location || 'Accra, Ghana',
-        linkedin: userInfo?.linkedin || '',
-        github: userInfo?.github || '',
-        portfolio: userInfo?.portfolio || '',
-        bio: userInfo?.bio || 'Passionate software engineer looking to make an impact in tech.',
-        interests: userInfo?.interests || 'Full-Stack Development, Cloud Computing, AI/ML'
+        full_name: '',
+        email: '',
+        contact: '',
+        university: '',
+        date_of_birth: '',
+        address: '',
+        image: ''
     });
+
+    // Initialize editedInfo when userInfo changes
+    useEffect(() => {
+        if (userInfo) {
+            setEditedInfo({
+                full_name: userInfo.full_name || '',
+                email: userInfo.email || '',
+                contact: userInfo.contact || '',
+                university: userInfo.university || '',
+                date_of_birth: userInfo.date_of_birth || '',
+                address: userInfo.address || '',
+                image: userInfo.image || ''
+            });
+        }
+    }, [userInfo]);
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!editedInfo.full_name.trim()) {
+            newErrors.full_name = 'Full name is required';
+        }
+
+        if (!editedInfo.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editedInfo.email)) {
+            newErrors.email = 'Invalid email format';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleEdit = () => {
         setIsEditing(true);
+        setNotification(null);
+        setErrors({});
     };
 
-    const handleSave = () => {
-        // TODO: Save to backend
-        setIsEditing(false);
-        console.log('Saving profile:', editedInfo);
+    const handleSave = async () => {
+        if (!validateForm()) {
+            setNotification({
+                type: 'error',
+                message: 'Please fix the errors before saving'
+            });
+            return;
+        }
+
+        setIsSaving(true);
+        setNotification(null);
+
+        try {
+            const response = await axiosInstance.patch(
+                `/users/${userId}`,
+                editedInfo,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            // Update the context with the new user info
+            setUserInfo(response.data.user);
+
+            setIsEditing(false);
+            setNotification({
+                type: 'success',
+                message: 'Profile updated successfully!'
+            });
+
+            // Auto-hide success notification after 3 seconds
+            setTimeout(() => setNotification(null), 3000);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            setNotification({
+                type: 'error',
+                message: error.response?.data?.detail || 'Failed to update profile. Please try again.'
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleCancel = () => {
-        setEditedInfo({
-            full_name: userInfo?.full_name || 'John Doe',
-            email: userInfo?.email || 'john.doe@example.com',
-            phone: userInfo?.phone || '+233 XX XXX XXXX',
-            university: userInfo?.university || 'University of Ghana',
-            graduation_year: userInfo?.graduation_year || '2025',
-            major: userInfo?.major || 'Computer Science',
-            company: userInfo?.company || '',
-            role: userInfo?.role || '',
-            location: userInfo?.location || 'Accra, Ghana',
-            linkedin: userInfo?.linkedin || '',
-            github: userInfo?.github || '',
-            portfolio: userInfo?.portfolio || '',
-            bio: userInfo?.bio || 'Passionate software engineer looking to make an impact in tech.',
-            interests: userInfo?.interests || 'Full-Stack Development, Cloud Computing, AI/ML'
-        });
+        // Reset to original values
+        if (userInfo) {
+            setEditedInfo({
+                full_name: userInfo.full_name || '',
+                email: userInfo.email || '',
+                contact: userInfo.contact || '',
+                university: userInfo.university || '',
+                date_of_birth: userInfo.date_of_birth || '',
+                address: userInfo.address || '',
+                image: userInfo.image || ''
+            });
+        }
         setIsEditing(false);
+        setErrors({});
+        setNotification(null);
     };
 
     const handleChange = (field, value) => {
@@ -69,12 +139,20 @@ const Profile = () => {
             ...prev,
             [field]: value
         }));
+        // Clear error for this field when user starts typing
+        if (errors[field]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
             {/* Header */}
-            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
+            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -97,21 +175,52 @@ const Profile = () => {
                             <div className="flex gap-3">
                                 <button
                                     onClick={handleCancel}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm"
+                                    disabled={isSaving}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
                                     <span>Cancel</span>
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm"
+                                    disabled={isSaving}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <CheckIcon className="h-4 w-4" />
-                                    <span>Save Changes</span>
+                                    {isSaving ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                            <span>Saving...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckIcon className="h-4 w-4" />
+                                            <span>Save Changes</span>
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         )}
                     </div>
+
+                    {/* Notification Banner */}
+                    {notification && (
+                        <div className={`mt-4 p-4 rounded-lg border ${notification.type === 'success'
+                                ? 'bg-emerald-50 border-emerald-200'
+                                : 'bg-red-50 border-red-200'
+                            } animate-fade-in`}>
+                            <div className="flex items-center gap-3">
+                                {notification.type === 'success' ? (
+                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                ) : (
+                                    <ExclamationCircleIcon className="h-5 w-5 text-red-600 flex-shrink-0" />
+                                )}
+                                <p className={`text-sm font-semibold ${notification.type === 'success' ? 'text-emerald-900' : 'text-red-900'
+                                    }`}>
+                                    {notification.message}
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -126,45 +235,31 @@ const Profile = () => {
                                 <UserCircleIcon className="h-28 w-28 text-gray-400" />
                             </div>
                             <div className="flex-1 mt-16">
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedInfo.full_name}
-                                        onChange={(e) => handleChange('full_name', e.target.value)}
-                                        className="text-3xl font-bold text-gray-900 mb-2 border-b-2 border-blue-500 focus:outline-none bg-transparent w-full"
-                                    />
-                                ) : (
-                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                                        {editedInfo.full_name}
-                                    </h2>
-                                )}
-                                <div className="flex items-center gap-2 text-gray-600 mb-3">
-                                    <MapPinIcon className="h-5 w-5" />
+                                <div>
+                                    <label className="text-sm font-semibold text-gray-700 mb-1 block">Full Name {isEditing && <span className="text-red-500">*</span>}</label>
                                     {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedInfo.location}
-                                            onChange={(e) => handleChange('location', e.target.value)}
-                                            className="border-b border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent"
-                                            placeholder="Location"
-                                        />
+                                        <div>
+                                            <input
+                                                type="text"
+                                                value={editedInfo.full_name}
+                                                onChange={(e) => handleChange('full_name', e.target.value)}
+                                                className={`text-2xl font-bold text-gray-900 border-b-2 ${errors.full_name ? 'border-red-500' : 'border-blue-500'} focus:outline-none bg-transparent w-full`}
+                                                placeholder="Enter your full name"
+                                            />
+                                            {errors.full_name && (
+                                                <p className="text-red-600 text-xs mt-1">{errors.full_name}</p>
+                                            )}
+                                        </div>
                                     ) : (
-                                        <span>{editedInfo.location}</span>
+                                        <h2 className="text-2xl font-bold text-gray-900">
+                                            {editedInfo.full_name || 'Not provided'}
+                                        </h2>
                                     )}
                                 </div>
-                                {isEditing ? (
-                                    <textarea
-                                        value={editedInfo.bio}
-                                        onChange={(e) => handleChange('bio', e.target.value)}
-                                        rows={2}
-                                        className="text-gray-600 w-full border rounded-lg p-2 focus:border-blue-500 focus:outline-none"
-                                        placeholder="Tell us about yourself..."
-                                    />
-                                ) : (
-                                    <p className="text-gray-600">
-                                        {editedInfo.bio}
-                                    </p>
-                                )}
+                                <div className="mt-2 flex items-center gap-2 text-gray-600">
+                                    <EnvelopeIcon className="h-5 w-5" />
+                                    <span className="text-sm">{editedInfo.email || 'No email provided'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,18 +275,26 @@ const Profile = () => {
                         </h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Email</label>
+                                <label className="text-sm font-semibold text-gray-700 mb-1 block">
+                                    Email {isEditing && <span className="text-red-500">*</span>}
+                                </label>
                                 {isEditing ? (
-                                    <input
-                                        type="email"
-                                        value={editedInfo.email}
-                                        onChange={(e) => handleChange('email', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                    />
+                                    <div>
+                                        <input
+                                            type="email"
+                                            value={editedInfo.email}
+                                            onChange={(e) => handleChange('email', e.target.value)}
+                                            className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:border-blue-500 focus:outline-none`}
+                                            placeholder="your.email@example.com"
+                                        />
+                                        {errors.email && (
+                                            <p className="text-red-600 text-xs mt-1">{errors.email}</p>
+                                        )}
+                                    </div>
                                 ) : (
                                     <p className="text-gray-900 flex items-center gap-2">
                                         <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                                        {editedInfo.email}
+                                        {editedInfo.email || 'Not provided'}
                                     </p>
                                 )}
                             </div>
@@ -200,25 +303,43 @@ const Profile = () => {
                                 {isEditing ? (
                                     <input
                                         type="tel"
-                                        value={editedInfo.phone}
-                                        onChange={(e) => handleChange('phone', e.target.value)}
+                                        value={editedInfo.contact}
+                                        onChange={(e) => handleChange('contact', e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                        placeholder="+233 XX XXX XXXX"
                                     />
                                 ) : (
                                     <p className="text-gray-900 flex items-center gap-2">
                                         <PhoneIcon className="h-5 w-5 text-gray-400" />
-                                        {editedInfo.phone}
+                                        {editedInfo.contact || 'Not provided'}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Address</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editedInfo.address}
+                                        onChange={(e) => handleChange('address', e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                        placeholder="City, Country"
+                                    />
+                                ) : (
+                                    <p className="text-gray-900 flex items-center gap-2">
+                                        <MapPinIcon className="h-5 w-5 text-gray-400" />
+                                        {editedInfo.address || 'Not provided'}
                                     </p>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Education */}
+                    {/* Education & Personal */}
                     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             <AcademicCapIcon className="h-6 w-6 text-purple-600" />
-                            Education
+                            Education & Personal
                         </h3>
                         <div className="space-y-4">
                             <div>
@@ -229,151 +350,27 @@ const Profile = () => {
                                         value={editedInfo.university}
                                         onChange={(e) => handleChange('university', e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                                        placeholder="Your University"
                                     />
                                 ) : (
-                                    <p className="text-gray-900">{editedInfo.university}</p>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-semibold text-gray-700 mb-1 block">Major</label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedInfo.major}
-                                            onChange={(e) => handleChange('major', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        />
-                                    ) : (
-                                        <p className="text-gray-900">{editedInfo.major}</p>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="text-sm font-semibold text-gray-700 mb-1 block">Graduation</label>
-                                    {isEditing ? (
-                                        <input
-                                            type="text"
-                                            value={editedInfo.graduation_year}
-                                            onChange={(e) => handleChange('graduation_year', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                            placeholder="2025"
-                                        />
-                                    ) : (
-                                        <p className="text-gray-900">{editedInfo.graduation_year}</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Employment */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <BriefcaseIcon className="h-6 w-6 text-emerald-600" />
-                            Employment
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Company</label>
-                                {isEditing ? (
-                                    <input
-                                        type="text"
-                                        value={editedInfo.company}
-                                        onChange={(e) => handleChange('company', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="Optional"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900">{editedInfo.company || 'Not currently employed'}</p>
+                                    <p className="text-gray-900">{editedInfo.university || 'Not provided'}</p>
                                 )}
                             </div>
                             <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Role</label>
+                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Date of Birth</label>
                                 {isEditing ? (
                                     <input
-                                        type="text"
-                                        value={editedInfo.role}
-                                        onChange={(e) => handleChange('role', e.target.value)}
+                                        type="date"
+                                        value={editedInfo.date_of_birth}
+                                        onChange={(e) => handleChange('date_of_birth', e.target.value)}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="Optional"
                                     />
                                 ) : (
-                                    <p className="text-gray-900">{editedInfo.role || 'N/A'}</p>
+                                    <p className="text-gray-900">{editedInfo.date_of_birth || 'Not provided'}</p>
                                 )}
                             </div>
                         </div>
                     </div>
-
-                    {/* Social Links */}
-                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                            <LinkIcon className="h-6 w-6 text-blue-600" />
-                            Social Links
-                        </h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">LinkedIn</label>
-                                {isEditing ? (
-                                    <input
-                                        type="url"
-                                        value={editedInfo.linkedin}
-                                        onChange={(e) => handleChange('linkedin', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="linkedin.com/in/yourprofile"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900 truncate">{editedInfo.linkedin || 'Not provided'}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">GitHub</label>
-                                {isEditing ? (
-                                    <input
-                                        type="url"
-                                        value={editedInfo.github}
-                                        onChange={(e) => handleChange('github', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="github.com/yourusername"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900 truncate">{editedInfo.github || 'Not provided'}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="text-sm font-semibold text-gray-700 mb-1 block">Portfolio</label>
-                                {isEditing ? (
-                                    <input
-                                        type="url"
-                                        value={editedInfo.portfolio}
-                                        onChange={(e) => handleChange('portfolio', e.target.value)}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="yourwebsite.com"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900 truncate">{editedInfo.portfolio || 'Not provided'}</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Interests Section */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-8">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <GlobeAltIcon className="h-6 w-6 text-pink-600" />
-                        Interests & Skills
-                    </h3>
-                    {isEditing ? (
-                        <textarea
-                            value={editedInfo.interests}
-                            onChange={(e) => handleChange('interests', e.target.value)}
-                            rows={3}
-                            className="w-full border border-gray-300 rounded-lg p-4 focus:border-blue-500 focus:outline-none"
-                            placeholder="e.g., Full-Stack Development, Cloud Computing, AI/ML"
-                        />
-                    ) : (
-                        <p className="text-gray-700">{editedInfo.interests}</p>
-                    )}
                 </div>
             </div>
         </div>

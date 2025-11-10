@@ -38,10 +38,36 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     // Role/Level options
     const roleLevels = ["Intern", "New grad", "Entry-level", "Mid-level", "Senior", "Staff", "Principal", "Distinguished"];
 
+    // Common job titles for suggestions
+    const jobTitleSuggestions = [
+        "Software Engineer",
+        "Software Development Engineer",
+        "Frontend Engineer",
+        "Backend Engineer",
+        "Full Stack Engineer",
+        "Data Scientist",
+        "Data Engineer",
+        "Machine Learning Engineer",
+        "DevOps Engineer",
+        "Product Manager",
+        "Product Designer",
+        "UX Designer",
+        "Technical Program Manager",
+        "Engineering Manager",
+        "Site Reliability Engineer",
+        "Security Engineer",
+        "Mobile Engineer",
+        "iOS Engineer",
+        "Android Engineer",
+        "QA Engineer",
+        "Solutions Architect"
+    ];
+
     // Referral data matching backend schema
     const [referralData, setReferralData] = useState({
         company_id: company.id,
         job_title: "",
+        job_id: "",
         role: "New grad",
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
@@ -202,30 +228,40 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Position Details</h3>
 
                             <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Job Title <span className="text-red-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={referralData.job_title}
-                                        onChange={(e) => handleInputChange({ field: 'job_title', value: e.target.value })}
-                                        placeholder="e.g., Software Engineer, Data Scientist"
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                        required
-                                    />
-                                </div>
+                                <SelectCombobox
+                                    label="Job Title"
+                                    options={jobTitleSuggestions}
+                                    value={referralData.job_title}
+                                    onChange={(value) => handleInputChange({ field: 'job_title', value })}
+                                    placeholder="e.g., Software Engineer, Data Scientist"
+                                    icon={BriefcaseIcon}
+                                    required={true}
+                                />
                             </div>
 
                             <div className="relative">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Level <span className="text-red-500">*</span>
+                                    Job ID <span className="text-gray-400 text-xs">(Optional)</span>
                                 </label>
+                                <input
+                                    type="text"
+                                    value={referralData.job_id}
+                                    onChange={(e) => handleInputChange({ field: 'job_id', value: e.target.value })}
+                                    placeholder="e.g., R-123456 or Job Posting Number"
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                />
+                                <p className="mt-1.5 text-xs text-gray-500">
+                                    If available, include the job posting ID or requisition number
+                                </p>
+                            </div>
+
+                            <div className="relative">
                                 <SelectCombobox
-                                    data={roleLevels}
+                                    label="Level"
+                                    options={roleLevels}
                                     value={referralData.role}
                                     onChange={(value) => handleInputChange({ field: 'role', value })}
+                                    required={true}
                                 />
                             </div>
                         </div>

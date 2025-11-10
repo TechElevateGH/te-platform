@@ -170,6 +170,31 @@ def remove_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
         raise HTTPException(status_code=404, detail="User not found")
 
 
+def update_user_profile(
+    db: Database, *, user_id: str, data: user_schema.UserUpdate
+) -> user_models.User:
+    """Update user profile in MongoDB"""
+    from bson import ObjectId
+
+    # Get only the fields that were actually provided (exclude None values)
+    update_data = data.dict(exclude_unset=True, exclude_none=True)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
+        )
+
+    # Update the user
+    result = db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Fetch and return the updated user
+    user_data = db.users.find_one({"_id": ObjectId(user_id)})
+    return user_models.User(**user_data)
+
+
 # def update(
 #     db: Database,
 #     *,

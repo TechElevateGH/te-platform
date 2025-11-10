@@ -142,6 +142,9 @@ const MyReferrals = () => {
                                         <p className="text-sm font-semibold text-blue-600">
                                             {referral.job_title}
                                         </p>
+                                        {referral.job_id && (
+                                            <p className="text-xs text-gray-500 mt-0.5">Job ID: {referral.job_id}</p>
+                                        )}
                                     </div>
                                 </div>
                                 {getStatusBadge(referral.status)}

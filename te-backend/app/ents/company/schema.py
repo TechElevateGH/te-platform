@@ -35,22 +35,24 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyReadBase(CompanyBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
     domain: str
     can_refer: bool = True
 
 
 class LocationRead(LocationBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
 
 
 class CompanyRead(CompanyReadBase):
     locations: list[LocationRead]
+    referral_materials: ReferralMaterials = None
 
 
 class ReferralRequest(BaseModel):
-    company_id: int
+    company_id: str  # Company name from frontend
     job_title: str
+    job_id: Optional[str] = ""
     role: str
     request_note: str
     resume: str
@@ -65,9 +67,10 @@ class ReferralStatuses(Enum):
 
 
 class ReferralReadBase(BaseModel):
-    id: int
-    user_id: int
+    id: str  # MongoDB ObjectId as string
+    user_id: str  # MongoDB ObjectId as string
     job_title: str
+    job_id: Optional[str] = ""
     role: str
     request_note: str = ""
     review_note: Optional[str] = ""
@@ -93,10 +96,6 @@ class ReferralUpdateStatus(BaseModel):
 
     status: ReferralStatuses
     review_note: Optional[str] = ""
-
-    company: CompanyBase
-    user_name: str
-    user_email: str
 
 
 class CompanyReadForReferrals(CompanyReadBase):

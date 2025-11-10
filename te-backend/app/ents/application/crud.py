@@ -8,6 +8,7 @@ import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
 import app.ents.company.crud as company_crud
 import app.ents.company.schema as company_schema
+from fastapi import HTTPException
 import app.ents.user.crud as user_crud
 from app.core.settings import settings
 from googleapiclient.http import MediaFileUpload
@@ -88,11 +89,16 @@ def create_application(
 def read_user_applications(
     db: Database, *, user_id
 ) -> list[application_models.Application]:
-    """Read all applications of user `user_id`."""
+    """Read all applications of user `user_id` from MongoDB."""
+    from bson import ObjectId
+    
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
-        raise
-    return user.applications
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Fetch applications from MongoDB where user_id matches
+    applications_data = db.applications.find({"user_id": ObjectId(user_id)})
+    return [application_models.Application(**app) for app in applications_data]
 
 
 def read_user_application(

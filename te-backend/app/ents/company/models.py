@@ -73,8 +73,9 @@ class Referral(BaseModel):
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId
-    company_id: PyObjectId
+    company_name: str  # Company name from frontend static data
     job_title: str
+    job_id: Optional[str] = ""
     role: str  # JobRoles enum value
     request_note: str = ""
     review_note: Optional[str] = ""

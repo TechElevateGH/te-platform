@@ -162,6 +162,9 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                             <div className="col-span-2">
                                                 <p className="text-xs text-gray-500">Job Title</p>
                                                 <p className="font-semibold text-gray-900 mt-1">{referral.job_title}</p>
+                                                {referral.job_id && (
+                                                    <p className="text-xs text-gray-500 mt-1">Job ID: {referral.job_id}</p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

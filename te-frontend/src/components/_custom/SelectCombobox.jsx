@@ -4,7 +4,7 @@ import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
 const SelectCombobox = ({
     label,
-    options,
+    options = [],
     value,
     onChange,
     required = true,

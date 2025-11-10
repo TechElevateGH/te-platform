@@ -52,6 +52,18 @@ class UserCreate(UserBase):
     password: str
 
 
+class UserUpdate(BaseModel):
+    """Schema for updating user profile information"""
+
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    contact: Optional[str] = None
+    address: Optional[str] = None
+    university: Optional[str] = None
+    date_of_birth: Optional[str] = None
+    image: Optional[str] = None
+
+
 class UserRead(UserBase): ...
 
 
