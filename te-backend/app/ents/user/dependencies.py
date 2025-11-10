@@ -1,3 +1,5 @@
+from typing import Union
+
 import app.core.security as security
 import app.database.session as session
 import app.ents.user.crud as user_crud
@@ -17,7 +19,7 @@ reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_STR}/auth/login"
 def get_current_user(
     db: Database = Depends(session.get_db),
     token=Depends(reusable_oauth2),
-) -> user_models.User:
+) -> Union[user_models.User, user_models.PrivilegedUser]:
     try:
         payload = jwt.decode(
             token=token,
@@ -30,12 +32,23 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
+
+    # First try to find in regular users collection
     user = user_crud.read_user_by_id(db, id=token_data.sub)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
-        )
-    return user
+    if user:
+        return user
+
+    # If not found, try privileged_users collection
+    from bson import ObjectId
+
+    if ObjectId.is_valid(token_data.sub):
+        priv_user_data = db.privileged_users.find_one({"_id": ObjectId(token_data.sub)})
+        if priv_user_data:
+            return user_models.PrivilegedUser(**priv_user_data)
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
+    )
 
 
 def get_current_active_user(
@@ -62,11 +75,11 @@ def get_current_user_by_role(
 def get_current_lead(
     current_user: user_models.User = Depends(get_current_user),
 ) -> user_models.User:
-    """Get current user if they are at least a Lead (role >= 2)"""
+    """Get current user if they are at least a Lead (role >= 4)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    if get_user_role(current_user) < 2:
+    if get_user_role(current_user) < 4:
         raise HTTPException(status_code=400, detail="Lead access required")
 
     return current_user
@@ -75,10 +88,10 @@ def get_current_lead(
 def get_current_admin(
     current_user: user_models.User = Depends(get_current_user),
 ) -> user_models.User:
-    """Get current user if they are an Admin (role = 3)"""
+    """Get current user if they are an Admin (role >= 5)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    if get_user_role(current_user) < 3:
+    if get_user_role(current_user) < 5:
         raise HTTPException(status_code=400, detail="Admin access required")
     return current_user

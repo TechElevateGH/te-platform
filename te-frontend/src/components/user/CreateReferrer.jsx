@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
 import {
-    ShieldCheckIcon,
+    BuildingOfficeIcon,
     UserPlusIcon,
     XMarkIcon,
     ClipboardDocumentIcon,
@@ -10,17 +10,38 @@ import {
     ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 
-const CreateLeadAdmin = ({ show, onClose }) => {
+const CreateReferrer = ({ show, onClose }) => {
     const { accessToken } = useAuth();
     const [formData, setFormData] = useState({
         username: '',
         token: '',
-        role: '3', // Default to Lead (3)
+        company_id: '',
     });
+    const [companies, setCompanies] = useState([]);
     const [createdCredentials, setCreatedCredentials] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // Fetch companies when component mounts
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            try {
+                const response = await axiosInstance.get('/companies/referrals', {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                setCompanies(response.data.companies || []);
+            } catch (err) {
+                console.error('Failed to fetch companies:', err);
+            }
+        };
+
+        if (show && accessToken) {
+            fetchCompanies();
+        }
+    }, [show, accessToken]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,11 +50,11 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
         try {
             const response = await axiosInstance.post(
-                '/users/leads',
+                '/users/referrers',
                 {
                     username: formData.username,
                     token: formData.token,
-                    role: parseInt(formData.role),
+                    company_id: formData.company_id,
                 },
                 {
                     headers: {
@@ -44,19 +65,19 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
             // Show the created credentials
             setCreatedCredentials({
-                username: response.data.username,
-                token: formData.token, // Use the token from form
-                role: response.data.role === 5 ? 'Admin' : 'Lead',
+                username: formData.username,
+                token: formData.token,
+                company_name: response.data.referrer.company_name,
             });
 
             // Reset form
             setFormData({
                 username: '',
                 token: '',
-                role: '3',
+                company_id: '',
             });
         } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to create account');
+            setError(err.response?.data?.detail || 'Failed to create referrer account');
         } finally {
             setLoading(false);
         }
@@ -64,7 +85,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
     const handleCopyCredentials = () => {
         if (createdCredentials) {
-            const text = `Username: ${createdCredentials.username}\nToken: ${createdCredentials.token}\nRole: ${createdCredentials.role}`;
+            const text = `Username: ${createdCredentials.username}\nToken: ${createdCredentials.token}\nCompany: ${createdCredentials.company_name}\nRole: Referrer`;
             navigator.clipboard.writeText(text);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
@@ -77,7 +98,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
         setFormData({
             username: '',
             token: '',
-            role: '3',
+            company_id: '',
         });
         onClose();
     };
@@ -88,10 +109,10 @@ const CreateLeadAdmin = ({ show, onClose }) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <ShieldCheckIcon className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">Create Lead/Admin Account</h2>
+                        <BuildingOfficeIcon className="h-6 w-6" />
+                        <h2 className="text-xl font-bold">Create Referrer Account</h2>
                     </div>
                     <button
                         onClick={handleClose}
@@ -101,14 +122,14 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                     </button>
                 </div>
 
-                {/* Success Message - Show Created Credentials */}
+                {/* Success Message */}
                 {createdCredentials && (
                     <div className="p-6 bg-green-50 border-b border-green-200">
                         <div className="flex items-start gap-3 mb-4">
                             <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
                             <div>
                                 <h3 className="font-bold text-green-900 mb-1">
-                                    Account Created Successfully!
+                                    Referrer Account Created Successfully!
                                 </h3>
                                 <p className="text-sm text-green-700">
                                     Save these credentials - the token won't be shown again.
@@ -125,13 +146,17 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                             </div>
                             <div>
                                 <span className="text-xs font-semibold text-gray-600">Token:</span>
-                                <p className="font-mono text-sm font-bold text-blue-600">
+                                <p className="font-mono text-sm font-bold text-purple-600">
                                     {createdCredentials.token}
                                 </p>
                             </div>
                             <div>
+                                <span className="text-xs font-semibold text-gray-600">Company:</span>
+                                <p className="text-sm text-gray-900">{createdCredentials.company_name}</p>
+                            </div>
+                            <div>
                                 <span className="text-xs font-semibold text-gray-600">Role:</span>
-                                <p className="text-sm text-gray-900">{createdCredentials.role}</p>
+                                <p className="text-sm text-gray-900">Referrer</p>
                             </div>
                         </div>
 
@@ -156,7 +181,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                             onClick={() => setCreatedCredentials(null)}
                             className="w-full mt-2 px-4 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
                         >
-                            Create Another Account
+                            Create Another Referrer
                         </button>
                     </div>
                 )}
@@ -185,8 +210,8 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                 onChange={(e) =>
                                     setFormData({ ...formData, username: e.target.value })
                                 }
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="e.g., love"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                placeholder="e.g., google_referrer"
                             />
                             <p className="text-xs text-gray-500 mt-1">
                                 Username for login authentication
@@ -202,8 +227,8 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                 required
                                 value={formData.token}
                                 onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-                                placeholder="e.g., peace"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono"
+                                placeholder="e.g., mysecuretoken123"
                             />
                             <p className="text-xs text-gray-500 mt-1">
                                 Access token for authentication (minimum 8 characters recommended)
@@ -212,23 +237,31 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Role *
+                                Assigned Company *
                             </label>
                             <select
-                                value={formData.role}
-                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                required
+                                value={formData.company_id}
+                                onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                             >
-                                <option value="3">Lead</option>
-                                <option value="5">Admin</option>
+                                <option value="">Select a company...</option>
+                                {companies.map((company) => (
+                                    <option key={company.id} value={company.id}>
+                                        {company.name}
+                                    </option>
+                                ))}
                             </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Referrer will only see referral requests for this company
+                            </p>
                         </div>
 
                         <div className="flex gap-3 pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -238,7 +271,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                 ) : (
                                     <>
                                         <UserPlusIcon className="h-5 w-5" />
-                                        Create Account
+                                        Create Referrer
                                     </>
                                 )}
                             </button>
@@ -257,4 +290,4 @@ const CreateLeadAdmin = ({ show, onClose }) => {
     );
 };
 
-export default CreateLeadAdmin;
+export default CreateReferrer;

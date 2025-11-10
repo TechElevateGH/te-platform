@@ -71,6 +71,26 @@ def create_lead_account(
     }
 
 
+@router.post("/referrers", response_model=Dict[str, Any])
+def create_referrer_account(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.ReferrerCreate,
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Create a Referrer account (Admin only).
+    Referrers can only view referral requests for their assigned company.
+    Returns user info and a secure token that should be shared with the Referrer user.
+    This token can only be viewed once at creation.
+    """
+    result = user_crud.create_referrer_user(db, data=data)
+    return {
+        "referrer": result,
+        "message": "Referrer account created successfully. Please share the token securely with the user.",
+    }
+
+
 @router.get("/{user_id}/essay", response_model=user_schema.Essay)
 def get_essay(
     db: Database = Depends(session.get_db),

@@ -32,12 +32,11 @@ const AdminReferrals = () => {
     // Add Company Form
     const [companyForm, setCompanyForm] = useState({
         name: '',
-        image: '',
-        description: '',
         website: '',
         industry: '',
-        size: '',
-        headquarters: '',
+        requires_resume: true,
+        requires_contact: true,
+        requires_essay: true,
     });
 
     // Fetch all referrals
@@ -49,9 +48,10 @@ const AdminReferrals = () => {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            setReferrals(response.data.referrals || []);
+            setReferrals(response.data?.referrals || []);
         } catch (error) {
             console.error('Error fetching referrals:', error);
+            setReferrals([]);
         } finally {
             setLoading(false);
         }
@@ -80,12 +80,15 @@ const AdminReferrals = () => {
                 industry: '',
                 size: '',
                 headquarters: '',
+                requires_resume: true,
+                requires_contact: true,
+                requires_essay: true,
             });
             setShowAddCompany(false);
-            alert('Company added successfully!');
+            alert('Referral company added successfully!');
         } catch (error) {
-            console.error('Error adding company:', error);
-            alert('Failed to add company. Please try again.');
+            console.error('Error adding referral company:', error);
+            alert('Failed to add referral company. Please try again.');
         }
     };
 
@@ -121,10 +124,10 @@ const AdminReferrals = () => {
     // Statistics
     const stats = {
         total: referrals.length,
-        pending: referrals.filter(r => r.status === 'Pending').length,
-        approved: referrals.filter(r => r.status === 'Approved').length,
-        declined: referrals.filter(r => r.status === 'Declined').length,
-        completed: referrals.filter(r => r.status === 'Completed').length,
+        pending: referrals.filter(r => r?.status === 'Pending').length,
+        approved: referrals.filter(r => r?.status === 'Approved').length,
+        declined: referrals.filter(r => r?.status === 'Declined').length,
+        completed: referrals.filter(r => r?.status === 'Completed').length,
     };
 
     const getStatusColor = (status) => {
@@ -165,7 +168,7 @@ const AdminReferrals = () => {
                             className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
                         >
                             <PlusIcon className="h-5 w-5" />
-                            Add Company
+                            Add Referral Company
                         </button>
                     </div>
                 </div>
@@ -516,12 +519,48 @@ const AdminReferrals = () => {
                                 </div>
                             </div>
 
+                            {/* Referral Requirements */}
+                            <div className="border-t pt-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                    Referral Requirements
+                                </label>
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={companyForm.requires_resume}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, requires_resume: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Requires Resume</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={companyForm.requires_contact}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, requires_contact: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Requires Contact Information</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={companyForm.requires_essay}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, requires_essay: e.target.checked })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Requires Referral Essay</span>
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="submit"
                                     className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
                                 >
-                                    Add Company
+                                    Add Referral Company
                                 </button>
                                 <button
                                     type="button"

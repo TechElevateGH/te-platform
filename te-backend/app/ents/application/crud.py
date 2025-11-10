@@ -6,8 +6,8 @@ from typing import Optional
 import app.core.service as service
 import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
-import app.ents.company.crud as company_crud
-import app.ents.company.schema as company_schema
+import app.ents.referralcompany.crud as referralcompany_crud
+import app.ents.referralcompany.schema as referralcompany_schema
 from fastapi import HTTPException
 import app.ents.user.crud as user_crud
 from app.core.settings import settings
@@ -39,11 +39,11 @@ def create_application(
 ):
     """Create an `Application` for user `user_id` with `data`."""
     location = None
-    company = company_crud.read_company_by_name(db, name=data.company)
+    company = referralcompany_crud.read_company_by_name(db, name=data.company)
     if not company:
-        company = company_crud.create_company(
+        company = referralcompany_crud.create_company(
             db,
-            data=company_schema.CompanyCreate(
+            data=referralcompany_schema.CompanyCreate(
                 **{
                     "name": data.company,
                     "location": {
@@ -65,7 +65,7 @@ def create_application(
                 location = loc
 
         if not location:
-            location = company_crud.add_location(
+            location = referralcompany_crud.add_location(
                 db, company=company, data=data.location
             ).locations[-1]
 
@@ -159,7 +159,7 @@ def update_application(
         db.add(location)
 
     elif not location:
-        location = company_crud.add_location(
+        location = referralcompany_crud.add_location(
             db, company=application.company, data=data.location
         ).locations[-1]
 
@@ -360,7 +360,7 @@ def delete_file(db: Database, *, file_id: str, user_id: str) -> bool:
 #     db: Database,
 #     *,
 #     db_obj: company_models.Company,
-#     data: company_schema.CompanyUpdate | dict[str, Any],
+#     data: referralcompany_schema.CompanyUpdate | dict[str, Any],
 # ) -> company_models.Company:
 #     if isinstance(data, dict):
 #         update_data = data

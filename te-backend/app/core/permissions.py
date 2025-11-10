@@ -25,19 +25,29 @@ def is_member(user) -> bool:
     return get_user_role(user) == 1
 
 
-def is_lead(user) -> bool:
-    """Check if user is a lead (role = 2)"""
+def is_referrer(user) -> bool:
+    """Check if user is a referrer (role = 2)"""
     return get_user_role(user) == 2
 
 
-def is_admin(user) -> bool:
-    """Check if user is an admin (role = 3)"""
+def is_volunteer(user) -> bool:
+    """Check if user is a volunteer (role = 3)"""
     return get_user_role(user) == 3
+
+
+def is_lead(user) -> bool:
+    """Check if user is a lead (role = 4)"""
+    return get_user_role(user) == 4
+
+
+def is_admin(user) -> bool:
+    """Check if user is an admin (role = 5)"""
+    return get_user_role(user) == 5
 
 
 def is_lead_or_admin(user) -> bool:
     """Check if user has elevated privileges (Lead or Admin)"""
-    return get_user_role(user) >= 2
+    return get_user_role(user) >= 4
 
 
 def require_member(user):
@@ -48,9 +58,25 @@ def require_member(user):
         )
 
 
+def require_referrer(user):
+    """Require at least Referrer level access"""
+    if get_user_role(user) < 2:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Referrer access required"
+        )
+
+
+def require_volunteer(user):
+    """Require at least Volunteer level access"""
+    if get_user_role(user) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Volunteer access required"
+        )
+
+
 def require_lead(user):
     """Require at least Lead level access"""
-    if get_user_role(user) < 2:
+    if get_user_role(user) < 4:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Lead access required"
         )
@@ -58,7 +84,7 @@ def require_lead(user):
 
 def require_admin(user):
     """Require Admin level access"""
-    if get_user_role(user) < 3:
+    if get_user_role(user) < 5:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
         )
@@ -66,5 +92,12 @@ def require_admin(user):
 
 def get_role_name(role_value: int) -> str:
     """Get human-readable role name"""
-    role_names = {0: "Guest", 1: "Member", 2: "Lead", 3: "Admin"}
+    role_names = {
+        0: "Guest",
+        1: "Member",
+        2: "Referrer",
+        3: "Volunteer",
+        4: "Lead",
+        5: "Admin",
+    }
     return role_names.get(role_value, "Unknown")

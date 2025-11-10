@@ -28,7 +28,7 @@ import { useLocation } from 'react-router-dom'
 const navigation = [
     { name: 'Profile', type: "app", icon: UserCircleIcon },
     { name: 'Applications', type: "app", icon: BriefcaseIcon },
-    { name: 'Resume and Referral Essay', type: "app", icon: DocumentIcon },
+    { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
     { name: 'Referrals', type: "app", icon: FolderIcon },
     { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
     { name: 'Learning', type: "learn", icon: BookOpenIcon },
@@ -47,7 +47,9 @@ const Workspace = ({ setLogin }) => {
 
     // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
     // Lead/Admin see same navigation but different page implementations
-    const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
+    const isLeadOrAdmin = userRole && parseInt(userRole) >= 4;
+    const isReferrer = userRole && parseInt(userRole) === 2;
+    const isVolunteer = userRole && parseInt(userRole) === 3;
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {
@@ -190,11 +192,11 @@ const Workspace = ({ setLogin }) => {
                                 content === "Applications" ? (
                                     isLeadOrAdmin ? <AdminApplications /> : <Applications />
                                 ) :
-                                    content === "Resume and Referral Essay" ? (
+                                    content === "Resume and Essays" ? (
                                         isLeadOrAdmin ? <AdminFiles /> : <FilesAndEssay />
                                     ) :
                                         content === "Referrals" ? (
-                                            isLeadOrAdmin ? <AdminReferrals /> : <Referrals />
+                                            (isLeadOrAdmin || isReferrer) ? <AdminReferrals /> : <Referrals />
                                         ) :
                                             content === "Opportunities" ? <Opportunities /> :
                                                 content === "Practice" ? <Practice /> :

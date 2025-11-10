@@ -8,7 +8,7 @@ from pymongo.database import Database
 
 def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.User]:
     """Read user by email from MongoDB"""
-    user_data = db.users.find_one({"email": email})
+    user_data = db.member_users.find_one({"email": email})
     if user_data:
         return user_models.User(**user_data)
     return None
@@ -16,7 +16,7 @@ def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.User
 
 def get_user_by_username(db: Database, *, username: str) -> Optional[user_models.User]:
     """Read user by username from MongoDB (for Lead/Admin login)"""
-    user_data = db.users.find_one({"username": username})
+    user_data = db.member_users.find_one({"username": username})
     if user_data:
         return user_models.User(**user_data)
     return None
@@ -27,7 +27,7 @@ def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.User]:
     from bson import ObjectId
 
     try:
-        user_data = db.users.find_one({"_id": ObjectId(id)})
+        user_data = db.member_users.find_one({"_id": ObjectId(id)})
         if user_data:
             return user_models.User(**user_data)
         return None
@@ -43,13 +43,13 @@ def read_users_by_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
 ) -> list[user_models.User]:
     """Read users by role from MongoDB"""
-    users_data = db.users.find({"role": role}).skip(skip).limit(limit)
+    users_data = db.member_users.find({"role": role}).skip(skip).limit(limit)
     return [user_models.User(**user) for user in users_data]
 
 
 def read_all_users(db: Database) -> list[user_models.User]:
     """Read all users from MongoDB (Admin only)"""
-    users_data = db.users.find({})
+    users_data = db.member_users.find({})
     return [user_models.User(**user) for user in users_data]
 
 
@@ -57,7 +57,7 @@ def read_users_by_base_role(
     db: Database, *, role=0, skip: int = 0, limit: int = 100
 ) -> list[user_models.User]:
     """Read users by base role from MongoDB (role >= specified role)"""
-    users_data = db.users.find({"role": {"$gte": role}}).skip(skip).limit(limit)
+    users_data = db.member_users.find({"role": {"$gte": role}}).skip(skip).limit(limit)
     return [user_models.User(**user) for user in users_data]
 
 
@@ -90,61 +90,96 @@ def create_user(db: Database, *, data: user_schema.UserCreate) -> user_models.Us
     )
 
     # Insert into MongoDB
-    result = db.users.insert_one(user_dict)
+    result = db.member_users.insert_one(user_dict)
 
     # Fetch and return the created user
-    user_data = db.users.find_one({"_id": result.inserted_id})
+    user_data = db.member_users.find_one({"_id": result.inserted_id})
     return user_models.User(**user_data)
 
 
 def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
     """Create a new Lead/Admin account (Admin only) - uses provided token"""
 
-    # Check if username already exists
-    existing_user = get_user_by_username(db, username=data.username)
+    # Check if username already exists in privileged_users
+    existing_user = db.privileged_users.find_one({"username": data.username})
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
         )
 
-    # Create minimal user data for Lead/Admin
+    # Create minimal privileged user data for Lead/Admin
     user_dict = {
         "username": data.username,
         "password": security.get_password_hash(data.token),  # Hash token as password
         "lead_token": data.token,  # Store plain token for Lead login
         "role": data.role,
         "is_active": True,
-        # Minimal/empty fields not needed for Lead/Admin
-        "email": "",
-        "first_name": "",
-        "middle_name": "",
-        "last_name": "",
-        "full_name": "",
-        "image": "",
-        "date_of_birth": "",
-        "contact": "",
-        "address": "",
-        "university": "",
-        "start_date": "",
-        "end_date": "",
-        "essay": "",
-        "cover_letter": "",
-        "resume_file_ids": [],
-        "mentor_id": None,
+        "company_id": None,  # Not needed for Lead/Admin
     }
 
-    # Insert into MongoDB
-    result = db.users.insert_one(user_dict)
+    # Insert into privileged_users collection
+    result = db.privileged_users.insert_one(user_dict)
 
     # Fetch the created user
-    user_data = db.users.find_one({"_id": result.inserted_id})
-    user = user_models.User(**user_data)
+    user_data = db.privileged_users.find_one({"_id": result.inserted_id})
+    user = user_models.PrivilegedUser(**user_data)
 
     # Return user info with credentials
     return {
         "user_id": str(user.id),
         "username": user.username,
         "role": user.role,
+        "token": data.token,  # Return provided token for reference
+    }
+
+
+def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> dict:
+    """Create a new Referrer account (Admin only) - uses provided token and company"""
+    from bson import ObjectId
+
+    # Check if username already exists in privileged_users
+    existing_user = db.privileged_users.find_one({"username": data.username})
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
+        )
+
+    # Validate company_id exists
+    if not ObjectId.is_valid(data.company_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company ID"
+        )
+
+    company = db.companies.find_one({"_id": ObjectId(data.company_id)})
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
+        )
+
+    # Create privileged user data for Referrer
+    user_dict = {
+        "username": data.username,
+        "password": security.get_password_hash(data.token),  # Hash token as password
+        "lead_token": data.token,  # Store plain token for Referrer login
+        "company_id": ObjectId(data.company_id),  # Store company they manage
+        "role": user_schema.UserRoles.referrer,  # Always Referrer role
+        "is_active": True,
+    }
+
+    # Insert into privileged_users collection
+    result = db.privileged_users.insert_one(user_dict)
+
+    # Fetch the created user
+    user_data = db.privileged_users.find_one({"_id": result.inserted_id})
+    user = user_models.PrivilegedUser(**user_data)
+
+    # Return user info with credentials
+    return {
+        "user_id": str(user.id),
+        "username": user.username,
+        "role": user.role,
+        "company_id": data.company_id,
+        "company_name": company.get("name", ""),
         "token": data.token,  # Return provided token for reference
     }
 
@@ -162,7 +197,7 @@ def add_user_essay(db: Database, *, user_id: str, data: user_schema.Essay) -> st
     """Add/update user essay in MongoDB"""
     from bson import ObjectId
 
-    result = db.users.update_one(
+    result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"essay": data.essay}}
     )
 
@@ -177,7 +212,7 @@ def update_essay(db: Database, user_id: str, *, data) -> str:
     from bson import ObjectId
 
     essay_text = data.get("essay")
-    result = db.users.update_one(
+    result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"essay": essay_text}}
     )
 
@@ -202,7 +237,7 @@ def add_user_cover_letter(
     """Add/update user cover letter in MongoDB"""
     from bson import ObjectId
 
-    result = db.users.update_one(
+    result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"cover_letter": data.cover_letter}}
     )
 
@@ -216,7 +251,7 @@ def add_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
     """Add resume file ID to user's resume_file_ids list in MongoDB"""
     from bson import ObjectId
 
-    result = db.users.update_one(
+    result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$addToSet": {"resume_file_ids": file_id}}
     )
 
@@ -228,7 +263,7 @@ def remove_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
     """Remove resume file ID from user's resume_file_ids list in MongoDB"""
     from bson import ObjectId
 
-    result = db.users.update_one(
+    result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$pull": {"resume_file_ids": file_id}}
     )
 
@@ -251,13 +286,15 @@ def update_user_profile(
         )
 
     # Update the user
-    result = db.users.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$set": update_data}
+    )
 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
 
     # Fetch and return the updated user
-    user_data = db.users.find_one({"_id": ObjectId(user_id)})
+    user_data = db.member_users.find_one({"_id": ObjectId(user_id)})
     return user_models.User(**user_data)
 
 

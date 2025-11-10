@@ -62,7 +62,7 @@ const LeadLogin = () => {
                         </div>
                     </div>
                     <h2 className="mt-6 text-3xl font-bold text-white">
-                        Lead & Admin Login
+                        Management Login
                     </h2>
                     <p className="mt-2 text-sm text-blue-200">
                         Enter your username and access token

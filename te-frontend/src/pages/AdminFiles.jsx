@@ -45,15 +45,15 @@ const AdminFiles = () => {
 
     // Filter users
     const filteredUsers = users.filter(user => {
-        const matchesSearch = !searchQuery || 
+        const matchesSearch = !searchQuery ||
             user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        const hasFiles = fileTypeFilter === 'resume' 
+
+        const hasFiles = fileTypeFilter === 'resume'
             ? (user.resumes && user.resumes.length > 0)
             : fileTypeFilter === 'essay'
-            ? (user.essays && user.essays.length > 0)
-            : (user.resumes?.length > 0 || user.essays?.length > 0);
+                ? (user.essays && user.essays.length > 0)
+                : (user.resumes?.length > 0 || user.essays?.length > 0);
 
         return matchesSearch && hasFiles;
     });
@@ -191,7 +191,7 @@ const AdminFiles = () => {
                             <FolderIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                             <p className="text-sm font-medium text-gray-900">No files found</p>
                             <p className="text-xs text-gray-500 mt-1">
-                                {users.length === 0 
+                                {users.length === 0
                                     ? 'No members have uploaded files yet'
                                     : 'Try adjusting your filters'}
                             </p>
@@ -318,12 +318,12 @@ const AdminFiles = () => {
                                     )}
 
                                     {/* No files for this user */}
-                                    {(!user.resumes || user.resumes.length === 0) && 
-                                     (!user.essays || user.essays.length === 0) && (
-                                        <p className="text-sm text-gray-500 text-center py-4">
-                                            No files uploaded yet
-                                        </p>
-                                    )}
+                                    {(!user.resumes || user.resumes.length === 0) &&
+                                        (!user.essays || user.essays.length === 0) && (
+                                            <p className="text-sm text-gray-500 text-center py-4">
+                                                No files uploaded yet
+                                            </p>
+                                        )}
                                 </div>
                             </div>
                         ))

@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-import app.ents.company.schema as company_schema
+import app.ents.referralcompany.schema as referralcompany_schema
 from pydantic import BaseModel, Field
 from app.ents.application.models import PyObjectId
 
@@ -62,7 +62,7 @@ class ApplicationBase(BaseModel):
     active: bool = True
     archived: bool = False
     date: str = None
-    role: company_schema.JobRoles
+    role: referralcompany_schema.JobRoles
     status: ApplicationStatuses
     role: str
     status: str
@@ -71,7 +71,7 @@ class ApplicationBase(BaseModel):
 
 class ApplicationCreate(ApplicationBase):
     company: str
-    location: company_schema.LocationBase
+    location: referralcompany_schema.LocationBase
 
 
 class ApplicationReadBase(ApplicationBase):
@@ -80,8 +80,8 @@ class ApplicationReadBase(ApplicationBase):
 
 class ApplicationRead(ApplicationBase):
     id: int
-    company: company_schema.CompanyReadBase
-    location: company_schema.LocationRead
+    company: referralcompany_schema.CompanyReadBase
+    location: referralcompany_schema.LocationRead
 
 
 class ApplicationUpdateBase(BaseModel):
@@ -100,4 +100,4 @@ class ApplicationUpdate(ApplicationUpdateBase):
     notes: str
     recruiter_name: str
     recruiter_email: str
-    location: company_schema.LocationBase
+    location: referralcompany_schema.LocationBase

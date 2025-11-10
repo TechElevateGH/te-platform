@@ -176,14 +176,14 @@ const Profile = () => {
                             </p>
                         </div>
                         <div className="flex gap-3">
-                            {/* Admin-only: Create Lead/Admin button */}
+                            {/* Admin-only: Create Privileged Account button */}
                             {isAdmin && (
                                 <button
                                     onClick={() => setShowCreateLeadAdmin(true)}
                                     className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
                                 >
                                     <ShieldCheckIcon className="h-4 w-4" />
-                                    <span>Create Lead/Admin</span>
+                                    <span>Create Privileged Account</span>
                                 </button>
                             )}
 

@@ -4,6 +4,7 @@ from typing import Any
 import app.core.security as security
 import app.database.session as session
 import app.ents.user.crud as user_crud
+import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from app.core.settings import settings
 from fastapi import APIRouter, Depends, HTTPException
@@ -52,27 +53,24 @@ def lead_login_access_token(
     db: Database = Depends(session.get_db),
 ) -> Any:
     """
-    Lead/Admin token login with username and access token
+    Privileged user token login with username and access token
+    For Referrer (role=2), Lead (role=3), and Admin (role=5)
     """
-    print(f"🔐 Lead login attempt - Username: {data.username}")
+    print(f"🔐 Privileged login attempt - Username: {data.username}")
 
-    # Find user by username
-    user = user_crud.get_user_by_username(db, username=data.username)
-    if not user:
+    # Find user in privileged_users collection
+    user_data = db.privileged_users.find_one({"username": data.username})
+    if not user_data:
         raise HTTPException(status_code=400, detail="Invalid username or token")
 
-    # Verify user has Lead or Admin role
-    if user.role < user_schema.UserRoles.lead:
-        raise HTTPException(
-            status_code=403, detail="Unauthorized: Lead or Admin access required"
-        )
+    user = user_models.PrivilegedUser(**user_data)
 
     # Verify token matches
     if not user.lead_token or user.lead_token != data.token:
         raise HTTPException(status_code=400, detail="Invalid username or token")
 
     # Check if user is active
-    if not user_crud.is_user_active(db, user=user):
+    if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -86,9 +84,7 @@ def lead_login_access_token(
         "user": {
             "id": user_id_str,
             "username": user.username,
-            "email": user.email,
             "role": user.role,
-            "full_name": user.full_name,
         },
     }
 

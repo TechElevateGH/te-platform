@@ -39,30 +39,44 @@ class PyObjectId(ObjectId):
 
 
 class User(BaseModel):
-    """MongoDB User document model"""
+    """MongoDB User document model for Members (role=1)"""
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     email: EmailStr
-    username: Optional[str] = None  # For Lead/Admin users
     first_name: str
     middle_name: str = ""
     last_name: str
     full_name: str
     image: str = ""
-    date_of_birth: Optional[str] = ""
     contact: str = ""
     address: str = ""
     password: str  # Hashed password
-    lead_token: Optional[str] = None  # For Lead/Admin login
     university: str = ""
     start_date: str = ""
     end_date: str = ""
     is_active: bool = True
-    role: int  # UserRoles enum value
+    role: int = 1  # Always Member (1) for this collection
     essay: str = ""
     cover_letter: str = ""
     resume_file_ids: list[str] = []  # List of MongoDB ObjectId strings for resume files
     mentor_id: Optional[PyObjectId] = None
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+
+class PrivilegedUser(BaseModel):
+    """MongoDB PrivilegedUser document model for Referrer/Lead/Admin (role>=2)"""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    username: str  # Required for privileged users
+    password: str  # Hashed token
+    lead_token: str  # Plain token for login
+    role: int  # UserRoles enum value (2=Referrer, 3=Lead, 5=Admin)
+    company_id: Optional[PyObjectId] = None  # For Referrer users only
+    is_active: bool = True
 
     class Config:
         populate_by_name = True

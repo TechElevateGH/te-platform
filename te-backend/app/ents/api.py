@@ -3,7 +3,7 @@ from app.ents.application.endpoints import (
     user_app_router,
     user_files_router,
 )
-from app.ents.company.endpoints import company_router, referral_router
+from app.ents.referralcompany.endpoints import company_router, referral_router
 from app.ents.home.endpoints import home_router
 from app.ents.learning.endpoints import router as learning_router
 from app.ents.problem.endpoints import router as problem_router

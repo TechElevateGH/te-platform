@@ -22,16 +22,18 @@ class UserRoles(int, Enum):
     User hierarchy levels:
     - Guest (0): Unsigned/unauthenticated users
     - Member (1): Regular signed-in users (mentees)
-    - Lead (2): Elevated privileges (mentors, team members)
-    - Admin (3): Full system access
-    - SuperAdmin (5): Legacy super admin role
+    - Referrer (2): Company-specific referral managers (can only see their company's referrals)
+    - Volunteer (3): Can add referral companies but cannot see member data
+    - Lead (4): Elevated privileges (mentors, team members) - full access
+    - Admin (5): Full system access
     """
 
     guest = 0
     member = 1
-    lead = 2
-    admin = 3
-    super_admin = 5
+    referrer = 2
+    volunteer = 3
+    lead = 4
+    admin = 5
 
 
 class LeadCreate(BaseModel):
@@ -42,6 +44,14 @@ class LeadCreate(BaseModel):
     role: UserRoles = UserRoles.lead
 
 
+class ReferrerCreate(BaseModel):
+    """Schema for creating a Referrer account (Admin only)"""
+
+    username: str
+    token: str
+    company_id: str  # MongoDB ObjectId as string
+
+
 class UserBase(BaseModel):
     email: EmailStr
     first_name: str
@@ -49,7 +59,6 @@ class UserBase(BaseModel):
     last_name: str
     full_name: str = ""
     image: str = ""
-    date_of_birth: Optional[str] = ""
     contact: str = ""
     address: str = ""
     university: str = ""
@@ -75,7 +84,6 @@ class UserUpdate(BaseModel):
     contact: Optional[str] = None
     address: Optional[str] = None
     university: Optional[str] = None
-    date_of_birth: Optional[str] = None
     image: Optional[str] = None
 
 
