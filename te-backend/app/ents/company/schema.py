@@ -61,15 +61,19 @@ class ReferralStatuses(Enum):
     completed = "Completed"
     in_review = "In review"
     cancelled = "Cancelled"
+    declined = "Declined"
 
 
 class ReferralReadBase(BaseModel):
+    id: int
     user_id: int
     job_title: str
     role: str
+    request_note: str = ""
     review_note: Optional[str] = ""
     date: str
     status: ReferralStatuses
+    resume: str = ""
 
 
 class ReferralRead(ReferralReadBase):
@@ -78,6 +82,17 @@ class ReferralRead(ReferralReadBase):
 
 class ReferralReadWithUser(ReferralReadBase):
     """Referral with user information for Lead/Admin view"""
+
+    company: CompanyBase
+    user_name: str
+    user_email: str
+
+
+class ReferralUpdateStatus(BaseModel):
+    """Schema for updating referral status"""
+
+    status: ReferralStatuses
+    review_note: Optional[str] = ""
 
     company: CompanyBase
     user_name: str

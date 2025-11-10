@@ -116,8 +116,9 @@ def request_referral(
         job_title=data.job_title,
         role=data.role,
         request_note=data.request_note,
-        status=company_schema.ReferralStatuses.in_review,
-        date=data.date,
+        resume=data.resume,
+        status=company_schema.ReferralStatuses.in_review.value,
+        referral_date=data.date,
     )
 
     db.add(referral)
@@ -125,6 +126,150 @@ def request_referral(
     db.refresh(referral)
 
     return referral
+
+
+def update_referral_status(
+    db: Database,
+    *,
+    referral_id: int,
+    data: company_schema.ReferralUpdateStatus,
+) -> company_models.Referral:
+    """
+    Update referral status and review note (for Lead/Admin users).
+    """
+    referral = (
+        db.query(company_models.Referral)
+        .filter(company_models.Referral.id == referral_id)
+        .first()
+    )
+
+    if not referral:
+        return None
+
+    referral.status = data.status.value
+    if data.review_note:
+        referral.review_note = data.review_note
+
+    db.commit()
+    db.refresh(referral)
+
+    return referral
+
+
+def export_referrals_to_google_sheets(
+    db: Database,
+    *,
+    referral_ids: list[int] = None,
+) -> str:
+    """
+    Export referrals to Google Sheets.
+    Returns the URL of the created Google Sheet.
+    """
+    from googleapiclient.discovery import build
+    from google.oauth2 import service_account
+    from datetime import datetime
+
+    # Load Google credentials
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+    SERVICE_ACCOUNT_FILE = "app/core/google_drive_creds.json"
+
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    )
+
+    service = build("sheets", "v4", credentials=credentials)
+
+    # Get referrals to export
+    if referral_ids:
+        referrals = (
+            db.query(company_models.Referral)
+            .filter(company_models.Referral.id.in_(referral_ids))
+            .all()
+        )
+    else:
+        referrals = db.query(company_models.Referral).all()
+
+    # Create new spreadsheet
+    spreadsheet = {
+        "properties": {
+            "title": f"TechElevate Referrals Export - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        },
+        "sheets": [{"properties": {"title": "Referrals"}}],
+    }
+
+    spreadsheet = service.spreadsheets().create(body=spreadsheet).execute()
+    spreadsheet_id = spreadsheet["spreadsheetId"]
+
+    # Prepare data
+    headers = [
+        "Referral ID",
+        "Member Name",
+        "Member Email",
+        "Company",
+        "Job Title",
+        "Role",
+        "Request Note",
+        "Resume Link",
+        "Date",
+        "Status",
+        "Review Note",
+    ]
+
+    rows = [headers]
+    for referral in referrals:
+        user = referral.user
+        company = referral.company
+        rows.append(
+            [
+                str(referral.id),
+                user.full_name if user else "N/A",
+                user.email if user else "N/A",
+                company.name if company else "N/A",
+                referral.job_title,
+                referral.role,
+                referral.request_note,
+                referral.resume,
+                referral.referral_date,
+                referral.status,
+                referral.review_note or "",
+            ]
+        )
+
+    # Write data to sheet
+    body = {"values": rows}
+
+    service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id,
+        range="Referrals!A1",
+        valueInputOption="RAW",
+        body=body,
+    ).execute()
+
+    # Format header row
+    requests = [
+        {
+            "repeatCell": {
+                "range": {"sheetId": 0, "startRowIndex": 0, "endRowIndex": 1},
+                "cell": {
+                    "userEnteredFormat": {
+                        "backgroundColor": {"red": 0.23, "green": 0.51, "blue": 0.96},
+                        "textFormat": {
+                            "bold": True,
+                            "foregroundColor": {"red": 1, "green": 1, "blue": 1},
+                        },
+                        "horizontalAlignment": "CENTER",
+                    }
+                },
+                "fields": "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)",
+            }
+        }
+    ]
+
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=spreadsheet_id, body={"requests": requests}
+    ).execute()
+
+    return f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}"
 
 
 # def update(

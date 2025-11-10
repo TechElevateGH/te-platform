@@ -11,12 +11,18 @@ class UserLogin(BaseModel):
 
 
 class UserRoles(int, Enum):
+    """
+    User hierarchy levels:
+    - Guest (0): Unsigned/unauthenticated users
+    - Member (1): Regular signed-in users (mentees)
+    - Lead (2): Elevated privileges (mentors, team members)
+    - Admin (3): Full system access
+    """
+
     guest = 0
-    mentee = 1
-    contributor = 2
-    mentor = 3
-    team = 4
-    admin = 5
+    member = 1
+    lead = 2
+    admin = 3
 
 
 class UserBase(BaseModel):
@@ -33,7 +39,7 @@ class UserBase(BaseModel):
     essay: str = ""
     mentor_id: Optional[int] = None
     is_active: bool = True
-    role: UserRoles = UserRoles.mentee
+    role: UserRoles = UserRoles.member
     start_date: str = date.today().strftime("%d-%m-%Y")
     end_date: str = ""
 

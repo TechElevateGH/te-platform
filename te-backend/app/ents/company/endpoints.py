@@ -6,6 +6,7 @@ import app.ents.company.dependencies as company_dependencies
 import app.ents.company.schema as company_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
+from app.core.permissions import require_lead
 from fastapi import APIRouter, Depends, HTTPException
 from pymongo.database import Database
 
@@ -151,15 +152,10 @@ def get_all_referrals(
 ) -> Any:
     """
     Get all referrals in the system (for Lead/Admin users only).
-    Requires user role to be mentor, team, or admin (role >= 3).
+    Requires user role to be Lead or Admin (role >= 2).
     """
-    # Check if user has elevated privileges (Lead = mentor/team, Admin = admin)
-    # UserRoles: guest=0, mentee=1, contributor=2, mentor=3, team=4, admin=5
-    if user.role.value < 3:
-        raise HTTPException(
-            status_code=403,
-            detail="Only Lead and Admin users can view all referral requests",
-        )
+    # Check if user has elevated privileges (Lead or Admin)
+    require_lead(user)
 
     referrals = company_crud.read_all_referrals(db, skip=skip, limit=limit)
     return {
@@ -172,16 +168,55 @@ def get_all_referrals(
 
 @referral_router.post(
     "/{referral_id}/review",
-    response_model=Dict[str, list[company_schema.CompanyRead]],
+    response_model=Dict[str, company_schema.ReferralReadWithUser],
 )
 def review_referral(
     *,
     db: Database = Depends(session.get_db),
     referral_id: int,
-    data: str,
+    data: company_schema.ReferralUpdateStatus,
     user: user_models.User = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Review referral.
+    Update referral status and review note (Lead/Admin only).
     """
-    ...
+    # Check if user has elevated privileges
+    require_lead(user)
+
+    referral = company_crud.update_referral_status(
+        db, referral_id=referral_id, data=data
+    )
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    return {"referral": company_dependencies.parse_referral_with_user(referral)}
+
+
+@referral_router.post(
+    "/export/google-sheets",
+    response_model=Dict[str, str],
+)
+def export_referrals_to_sheets(
+    db: Database = Depends(session.get_db),
+    *,
+    referral_ids: list[int] = None,
+    user: user_models.User = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Export referrals to Google Sheets (Lead/Admin only).
+    If referral_ids is provided, export only those referrals.
+    Otherwise, export all referrals.
+    """
+    # Check if user has elevated privileges
+    require_lead(user)
+
+    try:
+        sheet_url = company_crud.export_referrals_to_google_sheets(
+            db, referral_ids=referral_ids
+        )
+        return {"sheet_url": sheet_url, "message": "Referrals exported successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to export to Google Sheets: {str(e)}"
+        )

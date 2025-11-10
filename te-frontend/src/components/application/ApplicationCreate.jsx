@@ -8,7 +8,7 @@ import { countries, jobLevels, jobTitles } from '../../data/data'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import SuccessFeedback from '../_custom/Alert/SuccessFeedback'
-import { FormSelect, FormInput, FormTextArea } from '../_custom/FormInputs'
+import { FormInput, FormTextArea } from '../_custom/FormInputs'
 import CompanyCombobox from '../_custom/CompanyCombobox'
 import SelectCombobox from '../_custom/SelectCombobox'
 import { BriefcaseIcon, AcademicCapIcon, GlobeAltIcon } from '@heroicons/react/20/solid'
@@ -32,7 +32,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
         role: "",
         deadline: "",
         notes: "",
-        status: "",
+        status: "Submitted",
         referred: false,
         recruiter_name: "",
         recruiter_email: "",
@@ -124,21 +124,20 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     <div className="space-y-4">
                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Application Status</h3>
                         <div className="grid grid-cols-2 gap-4">
-                            <FormSelect
+                            <SelectCombobox
                                 label="Status"
-                                field="status"
-                                data={Object.keys(jobStatuses)}
-                                handleInputChange={handleInputChange}
-                                required={true}
+                                options={Object.keys(jobStatuses)}
+                                value={appData.status}
+                                onChange={(status) => handleInputChange({ field: 'status', value: status })}
+                                placeholder="Select status..."
+                                required={false}
                             />
-                            <FormSelect
+                            <SelectCombobox
                                 label="Referred?"
-                                field="referred"
-                                data={["No", "Yes"]}
+                                options={["No", "Yes"]}
                                 value={appData.referred ? "Yes" : "No"}
-                                handleInputChange={({ field, value }) => {
-                                    handleInputChange({ field, value: value === "Yes" });
-                                }}
+                                onChange={(value) => handleInputChange({ field: 'referred', value: value === "Yes" })}
+                                placeholder="Select..."
                                 required={false}
                             />
                         </div>

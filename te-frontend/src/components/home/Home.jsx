@@ -8,14 +8,19 @@ import CTASection from "./CTASection";
 import Footer from "./Footer";
 import { useAuth } from '../../context/AuthContext';
 import { useMemo } from 'react';
+import {
+    BriefcaseIcon,
+    AcademicCapIcon,
+    RocketLaunchIcon,
+    ChartBarIcon,
+    UsersIcon
+} from '@heroicons/react/24/outline';
 
 const roleLabels = {
     0: 'Guest',
-    1: 'Mentee',
-    2: 'Contributor',
-    3: 'Mentor',
-    4: 'Team',
-    5: 'Admin'
+    1: 'Member',
+    2: 'Lead',
+    3: 'Admin'
 };
 
 const Home = () => {
@@ -26,47 +31,120 @@ const Home = () => {
     const { isAuthenticated, userRole } = useAuth();
     const roleText = useMemo(() => roleLabels[userRole] ?? '', [userRole]);
 
+    const quickAccessLinks = [
+        {
+            label: 'Workspace',
+            desc: 'Your personal dashboard',
+            href: '/workspace',
+            icon: RocketLaunchIcon,
+            gradient: 'from-blue-500 to-cyan-500'
+        },
+        {
+            label: 'Applications',
+            desc: 'Track your job pipeline',
+            href: '/workspace#applications',
+            icon: BriefcaseIcon,
+            gradient: 'from-purple-500 to-pink-500'
+        },
+        {
+            label: 'Learning',
+            desc: 'Access curated lessons',
+            href: '/workspace#learning',
+            icon: AcademicCapIcon,
+            gradient: 'from-green-500 to-emerald-500'
+        },
+        {
+            label: 'Referrals',
+            desc: 'Get company referrals',
+            href: '/workspace#referrals',
+            icon: UsersIcon,
+            gradient: 'from-orange-500 to-amber-500'
+        }
+    ];
+
     return (
         <div className="relative">
             <Navbar />
             <Hero />
             {isAuthenticated && (
-                <section aria-label="Quick access" className="mx-auto max-w-6xl mt-10 px-4 sm:px-6 lg:px-8">
-                    <div className="rounded-2xl border border-blue-100 bg-white/70 backdrop-blur-sm shadow-sm p-6 flex flex-col gap-4">
-                        <div className="flex items-center justify-between flex-wrap gap-4">
-                            <h2 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Welcome back</h2>
+                <section aria-label="Quick access" className="relative mx-auto max-w-7xl -mt-16 px-4 sm:px-6 lg:px-8 z-10 mb-16">
+                    <div className="rounded-3xl border border-blue-100 bg-white shadow-xl p-8">
+                        {/* Header */}
+                        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                                    Welcome back! 👋
+                                </h2>
+                                <p className="text-sm text-gray-600 mt-1">Ready to continue your journey?</p>
+                            </div>
                             {roleText && (
-                                <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                                    {roleText}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs font-semibold px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md">
+                                        {roleText}
+                                    </span>
+                                </div>
                             )}
                         </div>
+
+                        {/* Quick Access Cards */}
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {[{
-                                label: 'Workspace',
-                                desc: 'Jump into your dashboard',
-                                href: '/workspace'
-                            }, {
-                                label: 'Applications',
-                                desc: 'Track your job pipeline',
-                                href: '/workspace#applications'
-                            }, {
-                                label: 'Learning',
-                                desc: 'Access curated lessons',
-                                href: '/workspace#learning'
-                            }, {
-                                label: 'Profile',
-                                desc: 'Update your information',
-                                href: '/workspace#profile'
-                            }].map((item) => (
-                                <a key={item.label} href={item.href} className="group rounded-xl border border-gray-200 bg-white p-4 hover:border-blue-300 hover:shadow-md transition-all">
-                                    <div className="font-semibold text-gray-800 group-hover:text-blue-600 flex items-center justify-between">
-                                        {item.label}
-                                        <span className="text-xs text-gray-400 group-hover:text-blue-500">→</span>
-                                    </div>
-                                    <p className="mt-1 text-xs text-gray-500 group-hover:text-gray-600">{item.desc}</p>
-                                </a>
-                            ))}
+                            {quickAccessLinks.map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                    <a
+                                        key={item.label}
+                                        href={item.href}
+                                        className="group relative overflow-hidden rounded-2xl border-2 border-gray-100 bg-white p-6 hover:border-transparent hover:shadow-xl transition-all duration-300"
+                                    >
+                                        {/* Gradient Background on Hover */}
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+
+                                        {/* Icon */}
+                                        <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} p-2.5 mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                                            <Icon className="w-full h-full text-white" />
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="relative">
+                                            <div className="font-bold text-gray-900 text-lg mb-1 group-hover:text-blue-600 transition-colors">
+                                                {item.label}
+                                            </div>
+                                            <p className="text-sm text-gray-600 group-hover:text-gray-700">{item.desc}</p>
+                                        </div>
+
+                                        {/* Arrow Indicator */}
+                                        <div className="relative mt-4 flex items-center text-xs font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span>Get started</span>
+                                            <svg className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </div>
+                                    </a>
+                                );
+                            })}
+                        </div>
+
+                        {/* Stats Bar */}
+                        <div className="mt-6 pt-6 border-t border-gray-100">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                {[
+                                    { label: 'Active Applications', value: '—', icon: BriefcaseIcon },
+                                    { label: 'Lessons Completed', value: '—', icon: AcademicCapIcon },
+                                    { label: 'Referrals Received', value: '—', icon: UsersIcon },
+                                    { label: 'Profile Score', value: '—', icon: ChartBarIcon }
+                                ].map((stat) => {
+                                    const StatIcon = stat.icon;
+                                    return (
+                                        <div key={stat.label} className="text-center">
+                                            <div className="flex justify-center mb-2">
+                                                <StatIcon className="w-5 h-5 text-gray-400" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                                            <div className="text-xs text-gray-600 mt-1">{stat.label}</div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </section>

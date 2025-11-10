@@ -2,7 +2,7 @@ import app.core.security as security
 import app.database.session as session
 import app.ents.user.crud as user_crud
 import app.ents.user.models as user_models
-import app.ents.user.schema as user_schema
+from app.core.permissions import get_user_role
 from app.core.settings import settings
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -47,59 +47,38 @@ def get_current_active_user(
 
 
 def get_current_user_by_role(
-    # role: user_schema.UserRoles ,
     current_user: user_models.User = Depends(get_current_user),
 ) -> user_models.User:
+    """Get current user if they are at least a Member (role >= 1)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    if current_user.role != 1:
-        raise HTTPException(status_code=400, detail="Unauthorized access")
+    if get_user_role(current_user) < 1:
+        raise HTTPException(status_code=400, detail="Member access required")
 
     return current_user
 
 
-def get_current_mentor(
+def get_current_lead(
     current_user: user_models.User = Depends(get_current_user),
 ) -> user_models.User:
+    """Get current user if they are at least a Lead (role >= 2)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    if current_user.role < user_schema.UserRoles.mentor:
-        raise HTTPException(status_code=400, detail="Unauthorized access")
+    if get_user_role(current_user) < 2:
+        raise HTTPException(status_code=400, detail="Lead access required")
 
     return current_user
 
 
-def get_current_user_contributor(
+def get_current_admin(
     current_user: user_models.User = Depends(get_current_user),
 ) -> user_models.User:
+    """Get current user if they are an Admin (role = 3)"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    if current_user.role < user_schema.UserRoles.contributor:
-        raise HTTPException(status_code=400, detail="Unauthorized access")
-
-    return current_user
-
-
-def get_current_user_team(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
-    if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-
-    if current_user.role < user_schema.UserRoles.contributor:
-        raise HTTPException(status_code=400, detail="Unauthorized access")
-
-    return current_user
-
-
-def get_current_user_admin(
-    current_user: user_models.User = Depends(get_current_user),
-) -> user_models.User:
-    if not current_user.role == user_schema.UserRoles.admin:
-        raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
+    if get_user_role(current_user) < 3:
+        raise HTTPException(status_code=400, detail="Admin access required")
     return current_user

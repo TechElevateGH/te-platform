@@ -40,9 +40,7 @@ def add_lesson(
     db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonCreate,
-    current_user: user_models.User = Depends(
-        user_dependencies.get_current_user_contributor
-    ),
+    current_user: user_models.User = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
     Create a lesson.

@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import ReferralCreate from '../components/referral/ReferralCreate'
+import ReferralManagement from '../components/referral/ReferralManagement'
+import MyReferrals from '../components/referral/MyReferrals'
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -10,7 +12,9 @@ import {
     ArrowPathIcon,
     MagnifyingGlassIcon,
     FunnelIcon,
-    SparklesIcon
+    SparklesIcon,
+    BellAlertIcon,
+    ArrowDownTrayIcon
 } from '@heroicons/react/20/solid'
 import {
     CheckBadgeIcon,
@@ -75,7 +79,7 @@ const mockReferralCompanies = [
 
 
 const Referrals = () => {
-    const { userRole } = useAuth();
+    const { userRole, accessToken } = useAuth();
     const {
         fetchReferralCompanies,
         setFetchReferralCompanies,
@@ -86,30 +90,21 @@ const Referrals = () => {
     } = useData();
 
     // Determine if user has elevated privileges (Lead or Admin)
-    // UserRoles mapping: mentee=1 (Member), mentor=3 (Lead), team=4 (Lead), admin=5 (Admin)
-    const isLeadOrAdmin = userRole && parseInt(userRole) >= 3;
+    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
 
     // State for view toggle
-    const [viewMode, setViewMode] = useState('companies'); // 'companies' or 'all-requests'
+    const [viewMode, setViewMode] = useState('companies'); // 'companies', 'my-requests', or 'all-requests'
     const [allReferrals, setAllReferrals] = useState([]);
     const [loadingAllReferrals, setLoadingAllReferrals] = useState(false);
-
-    // Mock data for demonstration if none available
-    const mockResumes = [
-        {
-            id: 1,
-            name: 'Software_Engineer_Resume.pdf',
-            role: 'Software Engineer'
-        }
-    ];
-
-    const displayResumes = resumes.length > 0 ? resumes : mockResumes;
-    const contact = ['contact@email.com']; // Has contact
+    const [selectedReferral, setSelectedReferral] = useState(null);
+    const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
+    const [selectedReferralIds, setSelectedReferralIds] = useState([]);
 
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All');
 
     // Fetch all referrals for Lead/Admin users
     const fetchAllReferrals = useCallback(async () => {
@@ -117,7 +112,9 @@ const Referrals = () => {
 
         setLoadingAllReferrals(true);
         try {
-            const response = await axiosInstance.get('/referrals/all');
+            const response = await axiosInstance.get('/referrals/all', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
             setAllReferrals(response.data.referrals || []);
         } catch (error) {
             console.error('Error fetching all referrals:', error);
@@ -125,7 +122,51 @@ const Referrals = () => {
         } finally {
             setLoadingAllReferrals(false);
         }
-    }, [isLeadOrAdmin]);
+    }, [isLeadOrAdmin, accessToken]);
+
+    // Count pending referrals (Pending status)
+    const pendingReferralsCount = allReferrals.filter(r => r.status === 'Pending').length;
+
+    // Handle export to Google Sheets
+    const handleExportToSheets = async () => {
+        setIsExporting(true);
+        try {
+            const response = await axiosInstance.post(
+                '/referrals/export/google-sheets',
+                { referral_ids: selectedReferralIds.length > 0 ? selectedReferralIds : null },
+                {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                }
+            );
+
+            if (response.data.sheet_url) {
+                // Open the sheet in a new tab
+                window.open(response.data.sheet_url, '_blank');
+                alert('Referrals exported successfully!');
+            }
+        } catch (error) {
+            console.error('Error exporting to Google Sheets:', error);
+            alert('Failed to export to Google Sheets. Please try again.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    // Handle referral update from management modal
+    const handleReferralUpdate = (updatedReferral) => {
+        setAllReferrals(prev =>
+            prev.map(ref => ref.id === updatedReferral.id ? updatedReferral : ref)
+        );
+    };
+
+    // Toggle referral selection for export
+    const toggleReferralSelection = (referralId) => {
+        setSelectedReferralIds(prev =>
+            prev.includes(referralId)
+                ? prev.filter(id => id !== referralId)
+                : [...prev, referralId]
+        );
+    };
 
     useEffect(() => {
         // Fetch referral companies for member view
@@ -143,9 +184,10 @@ const Referrals = () => {
     // Helper function to check if all requirements are met
     const checkRequirementsMet = (company) => {
         const requirements = [];
-        if (company.referral_materials.resume) requirements.push(displayResumes.length !== 0);
-        if (company.referral_materials.essay) requirements.push(userInfo?.essay?.length !== 0);
-        if (company.referral_materials.contact) requirements.push(contact?.length !== 0);
+        // Check actual resumes from context, not displayResumes which includes mock data
+        if (company.referral_materials.resume) requirements.push(resumes.length !== 0);
+        if (company.referral_materials.essay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
+        if (company.referral_materials.contact) requirements.push(userInfo?.contact && userInfo.contact.trim() !== '');
 
         if (requirements.length === 0) return 'No Requirements';
         const allMet = requirements.every(req => req);
@@ -159,22 +201,8 @@ const Referrals = () => {
     // Filter referral companies
     const filteredCompanies = referralCompanies.filter(company => {
         const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const status = checkRequirementsMet(company);
-        const matchesStatus = statusFilter === 'All' || status === statusFilter;
-        return matchesSearch && matchesStatus;
+        return matchesSearch;
     });
-
-    // Get status badge styling
-    const getStatusBadge = (company) => {
-        const status = checkRequirementsMet(company);
-        const styles = {
-            'Ready': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            'Incomplete': 'bg-amber-100 text-amber-700 border-amber-200',
-            'Pending': 'bg-gray-100 text-gray-700 border-gray-200',
-            'No Requirements': 'bg-blue-100 text-blue-700 border-blue-200'
-        };
-        return { style: styles[status] || styles['Pending'], label: status };
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
@@ -189,33 +217,49 @@ const Referrals = () => {
                             <p className="text-xs text-gray-600">
                                 {viewMode === 'companies'
                                     ? 'Browse companies and request employee referrals'
-                                    : 'Manage all referral requests from members'}
+                                    : viewMode === 'my-requests'
+                                        ? 'Track your referral requests and their status'
+                                        : 'Manage all referral requests from members'}
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            {/* View Toggle for Lead/Admin */}
-                            {isLeadOrAdmin && (
-                                <div className="flex items-center gap-0.5 bg-white rounded-md border border-gray-200 p-0.5">
-                                    <button
-                                        onClick={() => setViewMode('companies')}
-                                        className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'companies'
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        Companies
-                                    </button>
+                            {/* View Toggle */}
+                            <div className="flex items-center gap-0.5 bg-white rounded-md border border-gray-200 p-0.5">
+                                <button
+                                    onClick={() => setViewMode('companies')}
+                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'companies'
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    Companies
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('my-requests')}
+                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'my-requests'
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    My Requests
+                                </button>
+                                {isLeadOrAdmin && (
                                     <button
                                         onClick={() => setViewMode('all-requests')}
-                                        className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'all-requests'
+                                        className={`px-2.5 py-1 rounded text-xs font-medium transition-all relative ${viewMode === 'all-requests'
                                             ? 'bg-blue-600 text-white shadow-sm'
                                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                             }`}
                                     >
                                         All Requests
+                                        {pendingReferralsCount > 0 && (
+                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white animate-pulse">
+                                                {pendingReferralsCount}
+                                            </span>
+                                        )}
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                             {!fetchReferralCompanies && viewMode === 'companies' && referralCompanies.length > 0 && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-md border border-emerald-200">
                                     <SparklesIcon className="h-3.5 w-3.5 text-emerald-600" />
@@ -324,29 +368,15 @@ const Referrals = () => {
                                             className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
                                         />
                                     </div>
-                                    <div className="flex gap-3">
-                                        <select
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-semibold"
-                                        >
-                                            <option value="All">All Status</option>
-                                            <option value="Ready">Ready</option>
-                                            <option value="Incomplete">Incomplete</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="No Requirements">No Requirements</option>
-                                        </select>
+                                    {searchQuery && (
                                         <button
-                                            onClick={() => {
-                                                setSearchQuery('');
-                                                setStatusFilter('All');
-                                            }}
+                                            onClick={() => setSearchQuery('')}
                                             className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-xl font-semibold hover:bg-gray-100 transition-all text-sm"
                                         >
                                             <FunnelIcon className="h-4 w-4" />
                                             <span className="hidden sm:inline">Clear</span>
                                         </button>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -357,11 +387,11 @@ const Referrals = () => {
                                         <BuildingOfficeIcon className="h-10 w-10 text-gray-400" />
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                        {searchQuery || statusFilter !== 'All' ? 'No companies found' : 'No referral opportunities available'}
+                                        {searchQuery ? 'No companies found' : 'No referral opportunities available'}
                                     </h3>
                                     <p className="text-gray-500 max-w-sm mx-auto font-medium">
-                                        {searchQuery || statusFilter !== 'All'
-                                            ? 'Try adjusting your search or filter criteria'
+                                        {searchQuery
+                                            ? 'Try adjusting your search criteria'
                                             : 'Check back later for new referral opportunities'}
                                     </p>
                                 </div>
@@ -384,86 +414,75 @@ const Referrals = () => {
                                                         </div>
                                                     </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                        Status
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                                         Action
                                                     </th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
-                                                {filteredCompanies.map((company, index) => {
-                                                    const statusBadge = getStatusBadge(company);
-                                                    return (
-                                                        <tr
-                                                            key={company.id}
-                                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group"
-                                                        >
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="flex items-center gap-3">
-                                                                    <img
-                                                                        src={company.image}
-                                                                        alt={company.name}
-                                                                        className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
-                                                                    />
-                                                                    <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                                                        {company.name}
+                                                {filteredCompanies.map((company, index) => (
+                                                    <tr
+                                                        key={company.id}
+                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group"
+                                                    >
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div className="flex items-center gap-3">
+                                                                <img
+                                                                    src={company.image}
+                                                                    alt={company.name}
+                                                                    className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
+                                                                />
+                                                                <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                                    {company.name}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="flex flex-col gap-2">
+                                                                {company.referral_materials.resume && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        {resumes.length !== 0 ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                        )}
+                                                                        <span className="text-sm font-medium text-gray-700">Resume</span>
                                                                     </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                <div className="flex flex-col gap-2">
-                                                                    {company.referral_materials.resume && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {displayResumes.length !== 0 ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700">Resume</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {company.referral_materials.essay && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {userInfo?.essay?.length !== 0 ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700">Essay</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {company.referral_materials.contact && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {contact?.length !== 0 ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700">Contact</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <span className={`px-3 py-1.5 text-xs font-bold rounded-full border ${statusBadge.style}`}>
-                                                                    {statusBadge.label}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedCompany(company);
-                                                                        setReferralCompanyId(company.id);
-                                                                    }}
-                                                                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
-                                                                >
-                                                                    Request Referral
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
+                                                                )}
+                                                                {company.referral_materials.essay && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        {userInfo?.essay && userInfo.essay.trim() !== '' ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                        )}
+                                                                        <span className="text-sm font-medium text-gray-700">Essay</span>
+                                                                    </div>
+                                                                )}
+                                                                {company.referral_materials.contact && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        {userInfo?.contact && userInfo.contact.trim() !== '' ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                        )}
+                                                                        <span className="text-sm font-medium text-gray-700">Contact</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedCompany(company);
+                                                                    setReferralCompanyId(company.id);
+                                                                }}
+                                                                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                                            >
+                                                                Request Referral
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
                                             </tbody>
                                         </table>
                                     </div>
@@ -472,9 +491,52 @@ const Referrals = () => {
                         </div>
                     )}
 
+                    {/* My Requests View (for all authenticated users) */}
+                    {viewMode === 'my-requests' && (
+                        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <MyReferrals />
+                        </div>
+                    )}
+
                     {/* All Requests View (for Lead/Admin) */}
                     {viewMode === 'all-requests' && isLeadOrAdmin && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {/* Export Controls */}
+                            {allReferrals.length > 0 && (
+                                <div className="mb-4 flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                                    <div className="flex items-center gap-2">
+                                        <BellAlertIcon className="h-5 w-5 text-blue-600" />
+                                        <span className="text-sm font-semibold text-gray-700">
+                                            {pendingReferralsCount} pending request{pendingReferralsCount !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {selectedReferralIds.length > 0 && (
+                                            <span className="text-sm text-gray-600">
+                                                {selectedReferralIds.length} selected
+                                            </span>
+                                        )}
+                                        <button
+                                            onClick={handleExportToSheets}
+                                            disabled={isExporting}
+                                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-sm font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                        >
+                                            {isExporting ? (
+                                                <>
+                                                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                    Exporting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ArrowDownTrayIcon className="h-4 w-4" />
+                                                    Export to Sheets
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
                                 {loadingAllReferrals ? (
                                     <div className="flex justify-center items-center h-64">
@@ -497,6 +559,20 @@ const Referrals = () => {
                                         <table className="w-full">
                                             <thead>
                                                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
+                                                    <th className="px-3 py-4 text-left">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedReferralIds.length === allReferrals.length}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) {
+                                                                    setSelectedReferralIds(allReferrals.map(r => r.id));
+                                                                } else {
+                                                                    setSelectedReferralIds([]);
+                                                                }
+                                                            }}
+                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        />
+                                                    </th>
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                                         Member
                                                     </th>
@@ -526,6 +602,14 @@ const Referrals = () => {
                                                         key={referral.id}
                                                         className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150"
                                                     >
+                                                        <td className="px-3 py-4">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedReferralIds.includes(referral.id)}
+                                                                onChange={() => toggleReferralSelection(referral.id)}
+                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                            />
+                                                        </td>
                                                         <td className="px-6 py-4">
                                                             <div>
                                                                 <div className="font-semibold text-gray-900">{referral.user_name}</div>
@@ -549,12 +633,22 @@ const Referrals = () => {
                                                             <span className="text-sm text-gray-700">{referral.job_title}</span>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`px-3 py-1.5 text-xs font-bold rounded-full ${referral.status === 'Completed'
-                                                                ? 'bg-emerald-100 text-emerald-700'
-                                                                : referral.status === 'In review'
-                                                                    ? 'bg-amber-100 text-amber-700'
-                                                                    : 'bg-gray-100 text-gray-700'
+                                                            <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-full ${referral.status === 'Completed'
+                                                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                                                : referral.status === 'Pending'
+                                                                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                                    : referral.status === 'Declined'
+                                                                        ? 'bg-red-100 text-red-700 border border-red-200'
+                                                                        : referral.status === 'Canceled'
+                                                                            ? 'bg-gray-100 text-gray-700 border border-gray-200'
+                                                                            : 'bg-blue-100 text-blue-700 border border-blue-200'
                                                                 }`}>
+                                                                {referral.status === 'Pending' && (
+                                                                    <span className="relative flex h-2 w-2">
+                                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                                    </span>
+                                                                )}
                                                                 {referral.status}
                                                             </span>
                                                         </td>
@@ -564,8 +658,8 @@ const Referrals = () => {
                                                         <td className="px-6 py-4">
                                                             <button
                                                                 onClick={() => {
-                                                                    // TODO: Implement view/manage referral action
-                                                                    console.log('View referral:', referral);
+                                                                    setSelectedReferral(referral);
+                                                                    setIsManagementModalOpen(true);
                                                                 }}
                                                                 className="px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-all"
                                                             >
@@ -589,6 +683,16 @@ const Referrals = () => {
                 <ReferralCreate
                     company={selectedCompany}
                     setReferralCompanyId={setReferralCompanyId}
+                />
+            )}
+
+            {/* Referral Management Modal (for Lead/Admin) */}
+            {selectedReferral && isManagementModalOpen && (
+                <ReferralManagement
+                    referral={selectedReferral}
+                    isOpen={isManagementModalOpen}
+                    setIsOpen={setIsManagementModalOpen}
+                    onUpdate={handleReferralUpdate}
                 />
             )}
         </div>

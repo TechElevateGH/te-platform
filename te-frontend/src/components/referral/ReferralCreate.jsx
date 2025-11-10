@@ -1,12 +1,10 @@
 import { useState } from "react";
 import {
     ExclamationTriangleIcon,
-    UserIcon,
-    EnvelopeIcon,
-    PhoneIcon,
     BriefcaseIcon,
     CheckCircleIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    XCircleIcon
 } from '@heroicons/react/20/solid'
 import axiosInstance from "../../axiosConfig";
 import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
@@ -14,71 +12,68 @@ import { useData } from "../../context/DataContext";
 import { FormTextArea } from "../_custom/FormInputs";
 import { setNestedPropertyValue } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
+import SelectCombobox from "../_custom/SelectCombobox";
 
 
 const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const { accessToken } = useAuth();
-    const { userInfo, resumes: contextResumes } = useData();
+    const { userInfo, resumes: contextResumes, setFetchReferralCompanies } = useData();
 
-    // Mock user data for demo
-    const mockUserInfo = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@example.com',
-        phone_number: '+1 (555) 123-4567'
-    };
+    // Check if user has REAL uploaded resumes from backend (contextResumes from DataContext)
+    // DataContext initializes resumes as empty array, so if it has items, they're real
+    const hasResume = contextResumes && contextResumes.length > 0;
+    const availableResumes = hasResume ? contextResumes : [];
 
-    // Mock resumes if none available
-    const mockResumes = [
-        {
-            id: 1,
-            name: 'Software_Engineer_Resume.pdf',
-            role: 'Software Engineer',
-            notes: 'Tailored for FAANG companies'
-        },
-        {
-            id: 2,
-            name: 'Data_Science_Resume.pdf',
-            role: 'Data Scientist',
-            notes: 'Highlights ML projects'
-        }
-    ];
+    // Check user's available materials
+    const hasEssay = userInfo?.essay && userInfo.essay.trim() !== '';
+    const hasContact = userInfo?.contact && userInfo.contact.trim() !== '';
 
-    const currentUser = userInfo || mockUserInfo;
-    const availableResumes = contextResumes.length > 0 ? contextResumes : mockResumes;
-
-    // Check if resume requirement is met
-    const hasResume = availableResumes && availableResumes.length > 0;
+    // Company requirements
+    const requirements = company.referral_materials || {};
 
     const [selectedResumeId, setSelectedResumeId] = useState(
         hasResume ? availableResumes[0].id : null
     );
 
+    // Role/Level options
+    const roleLevels = ["Intern", "New grad", "Entry-level", "Mid-level", "Senior", "Staff", "Principal", "Distinguished"];
+
+    // Referral data matching backend schema
     const [referralData, setReferralData] = useState({
         company_id: company.id,
-        first_name: currentUser.first_name || '',
-        last_name: currentUser.last_name || '',
-        email: currentUser.email || '',
-        phone_number: currentUser.phone_number || '',
-        resume_id: hasResume ? availableResumes[0].id : null,
-        job_id: "",
-        job_role: "",
-        request_note: ""
+        job_title: "",
+        role: "New grad",
+        request_note: "",
+        resume: hasResume ? availableResumes[0].link || "" : "",
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+
     const createReferralRequest = async () => {
-        await axiosInstance.post(`/referrals`, referralData,
-            {
+        setIsSubmitting(true);
+        setSubmitError("");
+
+        try {
+            const response = await axiosInstance.post(`/referrals`, referralData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 }
-            }
-        ).then((_) => {
-            setReferralCompanyId(null);
-        })
-            .catch((error) => {
-                console.log(error);
             });
+
+            if (response.data) {
+                // Trigger refetch of referrals
+                setFetchReferralCompanies(true);
+                // Close modal
+                setReferralCompanyId(null);
+            }
+        } catch (error) {
+            console.error("Error creating referral:", error);
+            setSubmitError(error.response?.data?.detail || "Failed to submit referral request. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const handleInputChange = ({ field, value }) => {
@@ -93,6 +88,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             title={"Request Referral"}
             setHandler={setReferralCompanyId}
             requestHandler={createReferralRequest}
+            isSubmitting={isSubmitting}
             children={
                 !hasResume ? (
                     <div className="px-6 py-8">
@@ -129,72 +125,73 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             </div>
                         </div>
 
-                        {/* Personal Information - Auto-populated */}
+                        {/* Requirements Section */}
+                        {(requirements.resume || requirements.essay || requirements.contact) && (
+                            <div className="space-y-3">
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                    <DocumentTextIcon className="h-4 w-4" />
+                                    Requirements
+                                </h3>
+                                <div className="bg-white rounded-xl border border-gray-200 p-4">
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {requirements.resume && (
+                                            <div className="flex items-center gap-3">
+                                                {hasResume ? (
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                ) : (
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                )}
+                                                <span className={`text-sm font-semibold ${hasResume ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                    Resume
+                                                </span>
+                                            </div>
+                                        )}
+                                        {requirements.essay && (
+                                            <div className="flex items-center gap-3">
+                                                {hasEssay ? (
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                ) : (
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                )}
+                                                <span className={`text-sm font-semibold ${hasEssay ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                    Essay
+                                                </span>
+                                            </div>
+                                        )}
+                                        {requirements.contact && (
+                                            <div className="flex items-center gap-3">
+                                                {hasContact ? (
+                                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                                                ) : (
+                                                    <XCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0" />
+                                                )}
+                                                <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900' : 'text-red-900'}`}>
+                                                    Contact
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Personal Information - Auto-populated (Read-only display) */}
                         <div className="space-y-4">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Your Information</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="relative">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        First Name <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={referralData.first_name}
-                                            onChange={(e) => handleInputChange({ field: 'first_name', value: e.target.value })}
-                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="relative">
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Last Name <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            value={referralData.last_name}
-                                            onChange={(e) => handleInputChange({ field: 'last_name', value: e.target.value })}
-                                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                            required
-                                        />
-                                    </div>
-                                </div>
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Your Information</h3>
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
+                                    <CheckCircleIcon className="h-3 w-3" />
+                                    From Profile
+                                </span>
                             </div>
-
-                            <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Email <span className="text-red-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <input
-                                        type="email"
-                                        value={referralData.email}
-                                        onChange={(e) => handleInputChange({ field: 'email', value: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                        required
-                                    />
+                            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1">Name</p>
+                                    <p className="text-sm font-bold text-gray-900">{userInfo?.first_name} {userInfo?.last_name}</p>
                                 </div>
-                            </div>
-
-                            <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Phone Number <span className="text-red-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <input
-                                        type="tel"
-                                        value={referralData.phone_number}
-                                        onChange={(e) => handleInputChange({ field: 'phone_number', value: e.target.value })}
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                        required
-                                    />
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
+                                    <p className="text-sm font-bold text-gray-900">{userInfo?.email}</p>
                                 </div>
                             </div>
                         </div>
@@ -205,38 +202,30 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
 
                             <div className="relative">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Job ID <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+                                    Job Title <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <input
                                         type="text"
-                                        value={referralData.job_id}
-                                        onChange={(e) => handleInputChange({ field: 'job_id', value: e.target.value })}
-                                        placeholder="e.g., R-12345, JOB-2024-001"
-                                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
-                                    />
-                                </div>
-                                <p className="mt-1.5 text-xs text-gray-500 font-medium">
-                                    Enter the specific job posting ID if available
-                                </p>
-                            </div>
-
-                            <div className="relative">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Job Role/Title <span className="text-red-500">*</span>
-                                </label>
-                                <div className="relative">
-                                    <BriefcaseIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={referralData.job_role}
-                                        onChange={(e) => handleInputChange({ field: 'job_role', value: e.target.value })}
+                                        value={referralData.job_title}
+                                        onChange={(e) => handleInputChange({ field: 'job_title', value: e.target.value })}
                                         placeholder="e.g., Software Engineer, Data Scientist"
                                         className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
                                         required
                                     />
                                 </div>
+                            </div>
+
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Level <span className="text-red-500">*</span>
+                                </label>
+                                <SelectCombobox
+                                    data={roleLevels}
+                                    value={referralData.role}
+                                    onChange={(value) => handleInputChange({ field: 'role', value })}
+                                />
                             </div>
                         </div>
 
@@ -251,11 +240,11 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                             key={resume.id}
                                             onClick={() => {
                                                 setSelectedResumeId(resume.id);
-                                                handleInputChange({ field: 'resume_id', value: resume.id });
+                                                handleInputChange({ field: 'resume', value: resume.link || '' });
                                             }}
-                                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${isSelected
-                                                ? 'bg-emerald-50 border-emerald-500 shadow-md'
-                                                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                            className={`cursor-pointer p-4 rounded-xl border-2 transition-all hover:shadow-md ${isSelected
+                                                ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                                                : 'bg-white border-gray-200 hover:border-blue-300'
                                                 }`}
                                         >
                                             <div className="flex items-start gap-3">
@@ -309,6 +298,13 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                 Add any additional information or context for your referral request
                             </p>
                         </div>
+
+                        {/* Error Message */}
+                        {submitError && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                                <p className="text-sm font-semibold text-red-900">{submitError}</p>
+                            </div>
+                        )}
                     </div>
                 )
             }
