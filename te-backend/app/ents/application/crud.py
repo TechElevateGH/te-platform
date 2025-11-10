@@ -91,11 +91,11 @@ def read_user_applications(
 ) -> list[application_models.Application]:
     """Read all applications of user `user_id` from MongoDB."""
     from bson import ObjectId
-    
+
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     # Fetch applications from MongoDB where user_id matches
     applications_data = db.applications.find({"user_id": ObjectId(user_id)})
     return [application_models.Application(**app) for app in applications_data]

@@ -7,7 +7,7 @@ import axiosInstance from '../../axiosConfig'
 import { useAuth } from '../../context/AuthContext'
 
 
-const Essay = () => {
+const Essay = ({ isMember = true }) => {
     const { userId, accessToken } = useAuth();
     const { userInfo, setUserInfo } = useData();
     const [updateCoverLetter, setUpdateCoverLetter] = useState(false);
@@ -105,22 +105,24 @@ const Essay = () => {
                                 </button>
                             )}
 
-                            {!updateCoverLetter ? (
-                                <button
-                                    onClick={() => setUpdateCoverLetter(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all border border-blue-200"
-                                >
-                                    <PencilSquareIcon className="h-4 w-4" />
-                                    Edit
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setUpdateCoverLetter(false)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
-                                >
-                                    <XMarkIcon className="h-4 w-4" />
-                                    Cancel
-                                </button>
+                            {isMember && (
+                                !updateCoverLetter ? (
+                                    <button
+                                        onClick={() => setUpdateCoverLetter(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all border border-blue-200"
+                                    >
+                                        <PencilSquareIcon className="h-4 w-4" />
+                                        Edit
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setUpdateCoverLetter(false)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                        Cancel
+                                    </button>
+                                )
                             )}
                         </div>
                     </div>
@@ -222,22 +224,24 @@ const Essay = () => {
                                 </button>
                             )}
 
-                            {!updateReferralEssay ? (
-                                <button
-                                    onClick={() => setUpdateReferralEssay(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-purple-700 text-sm font-semibold rounded-lg hover:bg-purple-50 transition-all border border-purple-200"
-                                >
-                                    <PencilSquareIcon className="h-4 w-4" />
-                                    Edit
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setUpdateReferralEssay(false)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
-                                >
-                                    <XMarkIcon className="h-4 w-4" />
-                                    Cancel
-                                </button>
+                            {isMember && (
+                                !updateReferralEssay ? (
+                                    <button
+                                        onClick={() => setUpdateReferralEssay(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white text-purple-700 text-sm font-semibold rounded-lg hover:bg-purple-50 transition-all border border-purple-200"
+                                    >
+                                        <PencilSquareIcon className="h-4 w-4" />
+                                        Edit
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => setUpdateReferralEssay(false)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                        Cancel
+                                    </button>
+                                )
                             )}
                         </div>
                     </div>

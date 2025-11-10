@@ -65,12 +65,14 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
 
     // Referral data matching backend schema
     const [referralData, setReferralData] = useState({
-        company_id: company.id,
+        company_id: company.name,  // Send company name instead of ID
         job_title: "",
         job_id: "",
         role: "New grad",
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
+        contact: userInfo?.contact || "",
+        essay: userInfo?.essay || "",
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
 

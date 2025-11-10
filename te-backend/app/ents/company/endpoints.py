@@ -64,7 +64,7 @@ def request_referral(
 def get_user_referrals(
     db: Database = Depends(session.get_db),
     *,
-    user_id: int,
+    user_id: str,
     _: user_models.User = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -128,7 +128,7 @@ def get_company_referrals(
         db, company_id=company_id, skip=skip, limit=limit
     )
     total = company_crud.count_referrals_by_company(db, company_id=company_id)
-    
+
     return {
         "referrals": [
             company_dependencies.parse_referral_with_user(referral)
@@ -164,7 +164,7 @@ def get_referrals_by_status(
         db, status=status, skip=skip, limit=limit
     )
     total = company_crud.count_referrals_by_status(db, status=status)
-    
+
     return {
         "referrals": [
             company_dependencies.parse_referral_with_user(referral)

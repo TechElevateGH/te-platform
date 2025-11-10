@@ -1,5 +1,4 @@
-from typing import Any, Dict, List
-import logging
+from typing import Any, Dict
 import app.database.session as session
 import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
@@ -51,6 +50,25 @@ def create_user(
     """
     new_user = user_crud.create_user(db, data=data)
     return {"user": user_schema.UserRead(**vars(new_user))}
+
+
+@router.post("/leads", response_model=Dict[str, Any])
+def create_lead_account(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.LeadCreate,
+    _: user_models.User = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Create a Lead account (Admin only).
+    Returns user info and a secure token that should be shared with the Lead user.
+    This token can only be viewed once at creation.
+    """
+    result = user_crud.create_lead_user(db, data=data)
+    return {
+        "lead": result,
+        "message": "Lead account created successfully. Please share the token securely with the user."
+    }
 
 
 @router.get("/{user_id}/essay", response_model=user_schema.Essay)

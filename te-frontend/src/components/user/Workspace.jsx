@@ -35,12 +35,16 @@ const navigation = [
 
 
 const Workspace = ({ setLogin }) => {
-    const { userId, accessToken, logout } = useAuth();
+    const { userId, accessToken, logout, userRole } = useAuth();
     const { setUserInfo, setResumes, setOtherFiles, fetchFiles, setFetchFiles } = useData();
     const location = useLocation();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [content, setContent] = useState("Applications")
+
+    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    // Lead/Admin see same navigation but different page implementations
+    const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {

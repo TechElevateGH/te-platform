@@ -48,7 +48,9 @@ def read_company_referrals(
     Useful for seeing all referral requests to a particular company.
     company_id is actually the company name (string).
     """
-    referrals_data = db.referrals.find({"company_name": company_id}).skip(skip).limit(limit)
+    referrals_data = (
+        db.referrals.find({"company_name": company_id}).skip(skip).limit(limit)
+    )
     return [company_models.Referral(**ref) for ref in referrals_data]
 
 
@@ -72,11 +74,10 @@ def read_user_company_referrals(
     company_id is actually the company name (string).
     """
     from bson import ObjectId
-    
-    referrals_data = db.referrals.find({
-        "user_id": ObjectId(user_id),
-        "company_name": company_id
-    })
+
+    referrals_data = db.referrals.find(
+        {"user_id": ObjectId(user_id), "company_name": company_id}
+    )
     return [company_models.Referral(**ref) for ref in referrals_data]
 
 
@@ -116,7 +117,9 @@ def request_referral(
         "role": data.role,
         "request_note": data.request_note,
         "resume": data.resume,
-        "status": company_schema.ReferralStatuses.in_review.value,
+        "contact": data.contact or "",
+        "essay": data.essay or "",
+        "status": company_schema.ReferralStatuses.pending.value,
         "referral_date": data.date,
     }
 

@@ -6,12 +6,13 @@ import Home from './components/home/Home';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataProvider } from './context/DataContext'
 import Register from './components/user/Register';
+import LeadLogin from './pages/LeadLogin';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // const { isAuthenticated } = useAuth();
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
   return children;
 };
 
@@ -27,6 +28,7 @@ function App() {
               <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
               <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
               <Route path="/login" element={<Login />} />
+              <Route path="/lead-login" element={<LeadLogin />} />
               <Route path="/register" element={<Register />} />
             </Routes>
           </div>

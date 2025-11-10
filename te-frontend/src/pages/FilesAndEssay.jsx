@@ -11,8 +11,11 @@ import ConfirmDialog from "../components/_custom/Alert/ConfirmDialog";
 import axiosInstance from "../axiosConfig";
 
 const Files = () => {
-    const { userId, accessToken } = useAuth();
+    const { userId, accessToken, userRole } = useAuth();
     const { resumes, setFetchFiles } = useData();
+
+    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    const isMember = userRole && parseInt(userRole) === 1; // Only Members can upload resumes/essays
 
     const [addFile, setAddFile] = useState(false);
     const [deletingFileId, setDeletingFileId] = useState(null);
@@ -73,7 +76,7 @@ const Files = () => {
                     {/* Referral Essay Section */}
                     <div className="pb-24 sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56 h-screen">
                         <div className="mt-6 text-sm sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600">
-                            <ReferralEssay />
+                            <ReferralEssay isMember={isMember} />
                         </div>
                     </div>
 
@@ -81,19 +84,21 @@ const Files = () => {
                     <div className="w-full lg:col-span-7 xl:relative xl:inset-0 xl:mr-6 h-screen">
                         <header className="flex items-center justify-between border-b border-gray-200 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
                             <h2 className="text-lg font-semibold text-gray-900">My Resumes</h2>
-                            <button
-                                type="button"
-                                className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
-                                onClick={() => setAddFile(true)}
-                            >
-                                <PlusIcon className="h-4 w-4" aria-hidden="true" />
-                                Upload Resume
-                            </button>
+                            {isMember && (
+                                <button
+                                    type="button"
+                                    className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                    onClick={() => setAddFile(true)}
+                                >
+                                    <PlusIcon className="h-4 w-4" aria-hidden="true" />
+                                    Upload Resume
+                                </button>
+                            )}
                         </header>
 
                         <div className="px-4 py-6 sm:col-span-2 sm:px-0">
                             {resumes.length === 0 ? (
-                                <EmptyResumes onUploadClick={() => setAddFile(true)} />
+                                <EmptyResumes onUploadClick={() => isMember && setAddFile(true)} isMember={isMember} />
                             ) : (
                                 <div className="space-y-3">
                                     {resumes.map((resume) => (
@@ -148,15 +153,17 @@ const Files = () => {
                                                     >
                                                         View
                                                     </a>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDeleteClick(resume.id, resume.name)}
-                                                        disabled={deletingFileId === resume.id}
-                                                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Delete"
-                                                    >
-                                                        <TrashIcon className="h-3.5 w-3.5" />
-                                                    </button>
+                                                    {isMember && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeleteClick(resume.id, resume.name)}
+                                                            disabled={deletingFileId === resume.id}
+                                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Delete"
+                                                        >
+                                                            <TrashIcon className="h-3.5 w-3.5" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

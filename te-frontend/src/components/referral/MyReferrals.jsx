@@ -5,7 +5,6 @@ import {
     XCircleIcon,
     MinusCircleIcon,
     BriefcaseIcon,
-    CalendarIcon,
     DocumentTextIcon
 } from "@heroicons/react/20/solid";
 import axiosInstance from "../../axiosConfig";
@@ -109,104 +108,98 @@ const MyReferrals = () => {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900">
-                    My Referral Requests
-                </h2>
-                <span className="text-sm font-semibold text-gray-500">
-                    {referrals.length} {referrals.length === 1 ? 'Request' : 'Requests'}
-                </span>
-            </div>
-
-            <div className="grid gap-4">
-                {referrals.filter(r => r && r.status).map((referral) => (
-                    <div
-                        key={referral.id}
-                        className="bg-white rounded-xl border-2 border-gray-200 hover:border-blue-300 hover:shadow-md transition-all overflow-hidden"
-                    >
-                        <div className="p-6">
-                            {/* Header with Company and Status */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    {referral.company?.image && (
-                                        <img
-                                            src={referral.company.image}
-                                            alt={referral.company.name}
-                                            className="h-12 w-12 rounded-lg object-cover border border-gray-200"
-                                        />
-                                    )}
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900">
-                                            {referral.company?.name || "Company"}
-                                        </h3>
-                                        <p className="text-sm font-semibold text-blue-600">
-                                            {referral.job_title}
-                                        </p>
-                                        {referral.job_id && (
-                                            <p className="text-xs text-gray-500 mt-0.5">Job ID: {referral.job_id}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                {getStatusBadge(referral.status)}
-                            </div>
-
-                            {/* Details Grid */}
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <BriefcaseIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-600">
-                                        Level: <span className="font-bold text-gray-900">{referral.role}</span>
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CalendarIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-600">
-                                        Submitted: <span className="font-bold text-gray-900">{referral.referral_date}</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Resume Link */}
-                            {referral.resume && (
-                                <div className="mb-4">
-                                    <a
-                                        href={referral.resume}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                                    >
-                                        <DocumentTextIcon className="h-4 w-4" />
-                                        View Resume
-                                    </a>
-                                </div>
-                            )}
-
-                            {/* Request Note */}
-                            {referral.request_note && (
-                                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                                        Your Note
-                                    </p>
-                                    <p className="text-sm text-gray-700 font-medium leading-relaxed">
-                                        {referral.request_note}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Review Note (only if reviewed) */}
-                            {referral.review_note && (
-                                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                    <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">
-                                        Review from Team
-                                    </p>
-                                    <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                                        {referral.review_note}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Company
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Job Title
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Level
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    Notes
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {referrals.filter(r => r && r.status).map((referral) => (
+                                <tr
+                                    key={referral.id}
+                                    className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150"
+                                >
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-lg border border-gray-200 bg-white p-1.5 flex items-center justify-center flex-shrink-0">
+                                                <img
+                                                    src={referral.company?.image}
+                                                    alt={referral.company?.name}
+                                                    className="h-full w-full object-contain"
+                                                />
+                                            </div>
+                                            <span className="font-semibold text-gray-900">{referral.company?.name || 'Company'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <div className="font-semibold text-gray-900">{referral.job_title}</div>
+                                            {referral.job_id && (
+                                                <div className="text-xs text-gray-500 mt-0.5">Job ID: {referral.job_id}</div>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-sm text-gray-700">{referral.role}</span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {getStatusBadge(referral.status)}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-sm text-gray-600">{referral.referral_date}</span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="space-y-2">
+                                            {referral.request_note && (
+                                                <div className="text-xs">
+                                                    <span className="font-semibold text-gray-500">Your note:</span>
+                                                    <p className="text-gray-700 mt-0.5 line-clamp-2">{referral.request_note}</p>
+                                                </div>
+                                            )}
+                                            {referral.review_note && (
+                                                <div className="text-xs">
+                                                    <span className="font-semibold text-blue-600">Team review:</span>
+                                                    <p className="text-blue-900 mt-0.5 line-clamp-2">{referral.review_note}</p>
+                                                </div>
+                                            )}
+                                            {referral.resume && (
+                                                <a
+                                                    href={referral.resume}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                                                >
+                                                    <DocumentTextIcon className="h-3.5 w-3.5" />
+                                                    View Resume
+                                                </a>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

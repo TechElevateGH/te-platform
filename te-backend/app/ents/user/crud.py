@@ -14,6 +14,14 @@ def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.User
     return None
 
 
+def get_user_by_username(db: Database, *, username: str) -> Optional[user_models.User]:
+    """Read user by username from MongoDB (for Lead/Admin login)"""
+    user_data = db.users.find_one({"username": username})
+    if user_data:
+        return user_models.User(**user_data)
+    return None
+
+
 def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.User]:
     """Read user by ID from MongoDB"""
     from bson import ObjectId
@@ -81,6 +89,72 @@ def create_user(db: Database, *, data: user_schema.UserCreate) -> user_models.Us
     # Fetch and return the created user
     user_data = db.users.find_one({"_id": result.inserted_id})
     return user_models.User(**user_data)
+
+
+def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
+    """Create a new Lead account (Admin only) - generates a secure token"""
+    import secrets
+    
+    # Check if username already exists
+    existing_user = get_user_by_username(db, username=data.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists"
+        )
+    
+    # Check if email already exists
+    existing_email = read_user_by_email(db, email=data.email)
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists"
+        )
+    
+    # Generate secure token (32 characters alphanumeric)
+    lead_token = secrets.token_urlsafe(32)
+    
+    # Create user data
+    user_dict = {
+        "username": data.username,
+        "email": data.email,
+        "first_name": data.first_name,
+        "middle_name": "",
+        "last_name": data.last_name,
+        "full_name": data.full_name or f"{data.first_name} {data.last_name}",
+        "password": security.get_password_hash(lead_token),  # Store hashed token as password
+        "lead_token": lead_token,  # Store plain token for Lead login
+        "role": data.role,
+        "is_active": True,
+        "image": "",
+        "date_of_birth": "",
+        "contact": "",
+        "address": "",
+        "university": "",
+        "start_date": "",
+        "end_date": "",
+        "essay": "",
+        "cover_letter": "",
+        "resume_file_ids": [],
+        "mentor_id": None
+    }
+    
+    # Insert into MongoDB
+    result = db.users.insert_one(user_dict)
+    
+    # Fetch the created user
+    user_data = db.users.find_one({"_id": result.inserted_id})
+    user = user_models.User(**user_data)
+    
+    # Return user info with the plain token (only shown once)
+    return {
+        "user_id": str(user.id),
+        "username": user.username,
+        "email": user.email,
+        "role": user.role,
+        "full_name": user.full_name,
+        "token": lead_token  # Return token only once at creation
+    }
 
 
 def read_user_essay(db: Database, *, user_id: str) -> str:

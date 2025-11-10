@@ -43,6 +43,7 @@ class User(BaseModel):
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     email: EmailStr
+    username: Optional[str] = None  # For Lead/Admin users
     first_name: str
     middle_name: str = ""
     last_name: str
@@ -52,6 +53,7 @@ class User(BaseModel):
     contact: str = ""
     address: str = ""
     password: str  # Hashed password
+    lead_token: Optional[str] = None  # For Lead/Admin login
     university: str = ""
     start_date: str = ""
     end_date: str = ""

@@ -73,13 +73,15 @@ class Referral(BaseModel):
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId
-    company_name: str  # Company name from frontend static data
+    company_name: Optional[str] = ""  # Company name from frontend static data
     job_title: str
     job_id: Optional[str] = ""
     role: str  # JobRoles enum value
     request_note: str = ""
     review_note: Optional[str] = ""
     resume: str = ""  # Google Drive link
+    contact: str = ""  # User's contact info
+    essay: str = ""  # Referral essay/cover letter URL
     referral_date: str
     status: str  # ReferralStatuses enum value
 

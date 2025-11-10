@@ -10,6 +10,12 @@ class UserLogin(BaseModel):
     password: str
 
 
+class LeadLogin(BaseModel):
+    """Schema for Lead/Admin login with username and token"""
+    username: str
+    token: str
+
+
 class UserRoles(int, Enum):
     """
     User hierarchy levels:
@@ -25,6 +31,16 @@ class UserRoles(int, Enum):
     lead = 2
     admin = 3
     super_admin = 5
+
+
+class LeadCreate(BaseModel):
+    """Schema for creating a Lead account (Admin only)"""
+    username: str
+    email: EmailStr
+    first_name: str
+    last_name: str
+    full_name: str = ""
+    role: UserRoles = UserRoles.lead
 
 
 class UserBase(BaseModel):

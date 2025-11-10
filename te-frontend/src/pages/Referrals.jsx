@@ -93,6 +93,7 @@ const Referrals = () => {
     // Determine if user has elevated privileges (Lead or Admin)
     // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
     const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
+    const isMember = userRole && parseInt(userRole) === 1; // Only Members can request referrals
 
     // State for view toggle
     const [viewMode, setViewMode] = useState('companies'); // 'companies', 'my-requests', or 'all-requests'
@@ -107,6 +108,11 @@ const Referrals = () => {
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Filters for All Requests view
+    const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
+    const [companyFilter, setCompanyFilter] = useState('');
+    const [memberFilter, setMemberFilter] = useState('');
 
     // Check if user is authenticated
     useEffect(() => {
@@ -135,6 +141,27 @@ const Referrals = () => {
 
     // Count pending referrals (Pending status)
     const pendingReferralsCount = allReferrals.filter(r => r && r.status === 'Pending').length;
+
+    // Apply filters to all referrals
+    const filteredAllReferrals = allReferrals.filter(referral => {
+        if (!referral || !referral.status) return false;
+
+        // Status filter
+        if (statusFilter && referral.status !== statusFilter) return false;
+
+        // Company filter (case-insensitive partial match)
+        if (companyFilter && !referral.company.name.toLowerCase().includes(companyFilter.toLowerCase())) return false;
+
+        // Member filter (search in both name and email, case-insensitive)
+        if (memberFilter) {
+            const searchTerm = memberFilter.toLowerCase();
+            const nameMatch = referral.user_name?.toLowerCase().includes(searchTerm);
+            const emailMatch = referral.user_email?.toLowerCase().includes(searchTerm);
+            if (!nameMatch && !emailMatch) return false;
+        }
+
+        return true;
+    });
 
     // Handle export to Google Sheets
     const handleExportToSheets = async () => {
@@ -482,10 +509,16 @@ const Referrals = () => {
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <button
                                                                 onClick={() => {
+                                                                    if (!isMember) return;
                                                                     setSelectedCompany(company);
                                                                     setReferralCompanyId(company.id);
                                                                 }}
-                                                                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                                                disabled={!isMember}
+                                                                title={!isMember ? "Only Members can request referrals" : ""}
+                                                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
+                                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
+                                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                    }`}
                                                             >
                                                                 Request Referral
                                                             </button>
@@ -510,8 +543,75 @@ const Referrals = () => {
                     {/* All Requests View (for Lead/Admin) */}
                     {viewMode === 'all-requests' && isLeadOrAdmin && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {/* Filters */}
+                            <div className="mb-4 bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                                <div className="flex items-center gap-4 flex-wrap">
+                                    {/* Status Filter */}
+                                    <div className="flex-1 min-w-[180px]">
+                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        >
+                                            <option value="">All Statuses</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Declined">Declined</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Company Filter */}
+                                    <div className="flex-1 min-w-[200px]">
+                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                            Company
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Search company..."
+                                            value={companyFilter}
+                                            onChange={(e) => setCompanyFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Member Filter */}
+                                    <div className="flex-1 min-w-[200px]">
+                                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                                            Member
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Search member..."
+                                            value={memberFilter}
+                                            onChange={(e) => setMemberFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* Clear Filters */}
+                                    {(statusFilter !== 'Pending' || companyFilter || memberFilter) && (
+                                        <div className="flex items-end">
+                                            <button
+                                                onClick={() => {
+                                                    setStatusFilter('Pending');
+                                                    setCompanyFilter('');
+                                                    setMemberFilter('');
+                                                }}
+                                                className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
+                                            >
+                                                Clear Filters
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Export Controls */}
-                            {allReferrals.length > 0 && (
+                            {filteredAllReferrals.length > 0 && (
                                 <div className="mb-4 flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                                     <div className="flex items-center gap-2">
                                         <BellAlertIcon className="h-5 w-5 text-blue-600" />
@@ -551,16 +651,18 @@ const Referrals = () => {
                                     <div className="flex justify-center items-center h-64">
                                         <Loading />
                                     </div>
-                                ) : allReferrals.length === 0 ? (
+                                ) : filteredAllReferrals.length === 0 ? (
                                     <div className="p-16 text-center">
                                         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
                                             <DocumentTextIcon className="h-10 w-10 text-gray-400" />
                                         </div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                            No referral requests yet
+                                            {allReferrals.length === 0 ? 'No referral requests yet' : 'No referrals match your filters'}
                                         </h3>
                                         <p className="text-gray-500 max-w-sm mx-auto font-medium">
-                                            Referral requests from members will appear here
+                                            {allReferrals.length === 0
+                                                ? 'Referral requests from members will appear here'
+                                                : 'Try adjusting your filters to see more results'}
                                         </p>
                                     </div>
                                 ) : (
@@ -571,10 +673,10 @@ const Referrals = () => {
                                                     <th className="px-3 py-4 text-left">
                                                         <input
                                                             type="checkbox"
-                                                            checked={selectedReferralIds.length === allReferrals.length}
+                                                            checked={selectedReferralIds.length === filteredAllReferrals.length && filteredAllReferrals.length > 0}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) {
-                                                                    setSelectedReferralIds(allReferrals.map(r => r.id));
+                                                                    setSelectedReferralIds(filteredAllReferrals.map(r => r.id));
                                                                 } else {
                                                                     setSelectedReferralIds([]);
                                                                 }
@@ -606,7 +708,7 @@ const Referrals = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100">
-                                                {allReferrals.filter(r => r && r.status).map((referral) => (
+                                                {filteredAllReferrals.map((referral) => (
                                                     <tr
                                                         key={referral.id}
                                                         className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150"
@@ -627,11 +729,13 @@ const Referrals = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src={referral.company.image}
-                                                                    alt={referral.company.name}
-                                                                    className="h-8 w-8 rounded-lg object-cover border border-gray-200"
-                                                                />
+                                                                <div className="h-10 w-10 rounded-lg border border-gray-200 bg-white p-1.5 flex items-center justify-center flex-shrink-0">
+                                                                    <img
+                                                                        src={referral.company.image}
+                                                                        alt={referral.company.name}
+                                                                        className="h-full w-full object-contain"
+                                                                    />
+                                                                </div>
                                                                 <span className="font-semibold text-gray-900">{referral.company.name}</span>
                                                             </div>
                                                         </td>

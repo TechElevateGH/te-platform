@@ -56,12 +56,14 @@ class ReferralRequest(BaseModel):
     role: str
     request_note: str
     resume: str
+    contact: str = ""  # User's contact (phone/email)
+    essay: str = ""  # Referral essay/cover letter URL
     date: str = date.today().strftime("%d-%m-%Y")
 
 
 class ReferralStatuses(Enum):
     completed = "Completed"
-    in_review = "In review"
+    pending = "Pending"
     cancelled = "Cancelled"
     declined = "Declined"
 
@@ -77,6 +79,8 @@ class ReferralReadBase(BaseModel):
     date: str
     status: ReferralStatuses
     resume: str = ""
+    contact: str = ""  # User's contact info
+    essay: str = ""  # Referral essay/cover letter URL
 
 
 class ReferralRead(ReferralReadBase):

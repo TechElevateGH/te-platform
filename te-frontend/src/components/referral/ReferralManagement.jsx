@@ -7,7 +7,11 @@ import {
     BriefcaseIcon,
     UserIcon,
     CalendarIcon,
-    ChatBubbleLeftRightIcon
+    ChatBubbleLeftRightIcon,
+    ClipboardDocumentIcon,
+    DocumentDuplicateIcon,
+    PhoneIcon,
+    ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { FormTextArea } from '../_custom/FormInputs';
 import SelectCombobox from '../_custom/SelectCombobox';
@@ -19,8 +23,35 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
     const [status, setStatus] = useState(referral.status);
     const [reviewNote, setReviewNote] = useState(referral.review_note || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [copiedField, setCopiedField] = useState(null);
 
-    const statusOptions = ['In review', 'Completed', 'Declined', 'Cancelled'];
+    const statusOptions = ['Pending', 'Completed', 'Declined', 'Cancelled'];
+
+    const copyToClipboard = async (text, fieldName) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedField(fieldName);
+            setTimeout(() => setCopiedField(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
+    // Convert Google Drive download link to preview link
+    const getViewableResumeUrl = (url) => {
+        if (!url) return url;
+
+        // If it's a Google Drive webContentLink (download), convert to view link
+        // webContentLink format: https://drive.google.com/uc?id=FILE_ID&export=download
+        // View format: https://drive.google.com/file/d/FILE_ID/view
+
+        const fileIdMatch = url.match(/[?&]id=([^&]+)/);
+        if (fileIdMatch && fileIdMatch[1]) {
+            return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
+        }
+
+        return url;
+    };
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
@@ -54,7 +85,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
         switch (status) {
             case 'Completed':
                 return 'text-emerald-700 bg-emerald-50 border-emerald-200';
-            case 'In review':
+            case 'Pending':
                 return 'text-amber-700 bg-amber-50 border-amber-200';
             case 'Declined':
                 return 'text-red-700 bg-red-50 border-red-200';
@@ -128,12 +159,58 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <p className="text-xs text-gray-500">Name</p>
-                                                <p className="font-semibold text-gray-900 mt-1">{referral.user_name}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="font-semibold text-gray-900">{referral.user_name}</p>
+                                                    <button
+                                                        onClick={() => copyToClipboard(referral.user_name, 'name')}
+                                                        className="p-1 rounded hover:bg-gray-200 transition-colors"
+                                                        title="Copy name"
+                                                    >
+                                                        {copiedField === 'name' ? (
+                                                            <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                                        ) : (
+                                                            <ClipboardDocumentIcon className="h-4 w-4 text-gray-400" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500">Email</p>
-                                                <p className="font-semibold text-gray-900 mt-1">{referral.user_email}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="font-semibold text-gray-900">{referral.user_email}</p>
+                                                    <button
+                                                        onClick={() => copyToClipboard(referral.user_email, 'email')}
+                                                        className="p-1 rounded hover:bg-gray-200 transition-colors"
+                                                        title="Copy email"
+                                                    >
+                                                        {copiedField === 'email' ? (
+                                                            <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                                        ) : (
+                                                            <ClipboardDocumentIcon className="h-4 w-4 text-gray-400" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </div>
+                                            {referral.contact && (
+                                                <div className="col-span-2">
+                                                    <p className="text-xs text-gray-500">Contact</p>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <PhoneIcon className="h-4 w-4 text-gray-400" />
+                                                        <p className="font-semibold text-gray-900">{referral.contact}</p>
+                                                        <button
+                                                            onClick={() => copyToClipboard(referral.contact, 'contact')}
+                                                            className="p-1 rounded hover:bg-gray-200 transition-colors"
+                                                            title="Copy contact"
+                                                        >
+                                                            {copiedField === 'contact' ? (
+                                                                <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                                                            ) : (
+                                                                <ClipboardDocumentIcon className="h-4 w-4 text-gray-400" />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -171,6 +248,65 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
 
                                     {/* Request Details */}
                                     <div className="space-y-3">
+                                        {referral.essay && (
+                                            <div>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                                        <DocumentDuplicateIcon className="h-4 w-4" />
+                                                        Referral Essay
+                                                    </label>
+                                                    <button
+                                                        onClick={() => copyToClipboard(referral.essay, 'essay')}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                                    >
+                                                        {copiedField === 'essay' ? (
+                                                            <>
+                                                                <CheckCircleIcon className="h-4 w-4" />
+                                                                Copied!
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <ClipboardDocumentIcon className="h-4 w-4" />
+                                                                Copy Essay
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                <div className="rounded-xl border border-gray-200 bg-white p-4 max-h-48 overflow-y-auto">
+                                                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                                        {referral.essay}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {referral.resume && (
+                                            <div>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                                        Resume
+                                                    </label>
+                                                    <a
+                                                        href={referral.resume}
+                                                        download
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                                    >
+                                                        <ArrowDownTrayIcon className="h-4 w-4" />
+                                                        Download Resume
+                                                    </a>
+                                                </div>
+                                                <a
+                                                    href={getViewableResumeUrl(referral.resume)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                                >
+                                                    <DocumentTextIcon className="h-4 w-4" />
+                                                    View Resume
+                                                </a>
+                                            </div>
+                                        )}
+
                                         <div>
                                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                                                 <ChatBubbleLeftRightIcon className="h-4 w-4" />
@@ -182,23 +318,6 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                 </p>
                                             </div>
                                         </div>
-
-                                        {referral.resume && (
-                                            <div>
-                                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                                    Resume
-                                                </label>
-                                                <a
-                                                    href={referral.resume}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-2 flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                                                >
-                                                    <DocumentTextIcon className="h-4 w-4" />
-                                                    View Resume
-                                                </a>
-                                            </div>
-                                        )}
 
                                         <div>
                                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">

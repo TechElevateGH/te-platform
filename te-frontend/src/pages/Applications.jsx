@@ -32,8 +32,11 @@ import ApplicationInfo from '../components/application/ApplicationInfo'
 const initialApplications = [];
 
 const Applications = () => {
-    const { userId, accessToken, logout } = useAuth();
+    const { userId, accessToken, logout, userRole } = useAuth();
     const { fetchApplications, setFetchApplications, applications: contextApplications } = useData();
+
+    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    const isMember = userRole && parseInt(userRole) === 1; // Only Members can track applications
 
     // Start empty; fetch from backend or context
     const [applications, setApplications] = useState(initialApplications);
@@ -267,7 +270,7 @@ const Applications = () => {
                                 </div>
                             )}
                         </div>
-                        {!fetchApplications && (
+                        {!fetchApplications && isMember && (
                             <button
                                 onClick={() => setAddApplication(true)}
                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs"
@@ -400,7 +403,7 @@ const Applications = () => {
                                     ? 'Try adjusting your search or filter criteria'
                                     : 'Start tracking your job applications by adding your first one'}
                             </p>
-                            {!searchQuery && statusFilter === 'All' && (
+                            {!searchQuery && statusFilter === 'All' && isMember && (
                                 <button
                                     onClick={() => setAddApplication(true)}
                                     className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
@@ -471,8 +474,9 @@ const Applications = () => {
                                         {paginatedApplications.map((app, idx) => (
                                             <tr
                                                 key={app.id}
-                                                onClick={() => openApplicationModal(app)}
-                                                className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 cursor-pointer transition-all duration-150 group"
+                                                onClick={() => isMember && openApplicationModal(app)}
+                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                title={!isMember ? "Only Members can edit applications" : ""}
                                             >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-3">
