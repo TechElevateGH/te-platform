@@ -703,11 +703,12 @@ const Referrals = () => {
                     setIsOpen={setIsManagementModalOpen}
                     onUpdate={handleReferralUpdate}
                 />
+            )}
+
             <SignInPrompt
                 isOpen={showSignInPrompt}
                 onClose={() => setShowSignInPrompt(false)}
             />
-            )}
         </div>
     )
 }

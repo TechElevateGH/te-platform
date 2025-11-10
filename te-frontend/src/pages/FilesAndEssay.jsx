@@ -33,14 +33,14 @@ const Files = () => {
     const handleDeleteConfirm = async () => {
         const { fileId } = confirmDelete;
         setDeletingFileId(fileId);
-        
+
         try {
             await axiosInstance.delete(`/users/${userId}/files/${fileId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            
+
             // Refresh the files list
             setFetchFiles(true);
         } catch (error) {
@@ -170,7 +170,7 @@ const Files = () => {
 
             {addFile && <FileCreate setFileUpload={setAddFile} />}
 
-                        <ConfirmDialog
+            <ConfirmDialog
                 isOpen={confirmDelete.isOpen}
                 onClose={() => setConfirmDelete({ isOpen: false, fileId: null, fileName: '' })}
                 onConfirm={handleDeleteConfirm}

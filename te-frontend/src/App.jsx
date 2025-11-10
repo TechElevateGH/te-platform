@@ -25,6 +25,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+              <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Routes>

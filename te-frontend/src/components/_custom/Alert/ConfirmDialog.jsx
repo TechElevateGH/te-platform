@@ -2,12 +2,12 @@ import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { ExclamationTriangleIcon, TrashIcon, CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 
-const ConfirmDialog = ({ 
-    isOpen, 
-    onClose, 
-    onConfirm, 
-    title = "Confirm Action", 
-    message = "Are you sure you want to proceed?", 
+const ConfirmDialog = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title = "Confirm Action",
+    message = "Are you sure you want to proceed?",
     confirmText = "Confirm",
     cancelText = "Cancel",
     type = "warning" // "warning", "danger", "success", "info"

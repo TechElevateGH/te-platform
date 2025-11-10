@@ -89,6 +89,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             setHandler={setReferralCompanyId}
             requestHandler={createReferralRequest}
             isSubmitting={isSubmitting}
+            submitButtonText="Request Referral"
             children={
                 !hasResume ? (
                     <div className="px-6 py-8">

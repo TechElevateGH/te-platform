@@ -17,7 +17,7 @@ user_files_router = APIRouter(prefix="/users/{user_id}/files")
 def file_to_read(file):
     """Convert File model to FileRead schema by converting ObjectId to string"""
     file_dict = file.model_dump(by_alias=True)
-    file_dict['id'] = str(file_dict.pop('_id'))
+    file_dict["id"] = str(file_dict.pop("_id"))
     return application_schema.FileRead(**file_dict)
 
 
@@ -152,7 +152,7 @@ def get_user_application_files(
     Retrieve application files (resume and other files)
     """
     files = application_crud.read_user_application_files(db, user_id=user_id)
-    
+
     return {
         "files": application_schema.FilesRead(
             resumes=[
@@ -188,19 +188,20 @@ def add_file(
     """
     # Validate file type - only accept PDFs for resumes
     if kind == application_schema.FileType.resume:
-        if not file.filename.lower().endswith('.pdf'):
+        if not file.filename.lower().endswith(".pdf"):
             from fastapi import HTTPException
+
             raise HTTPException(
                 status_code=400,
-                detail="Only PDF files are accepted for resumes. Please upload a PDF file."
+                detail="Only PDF files are accepted for resumes. Please upload a PDF file.",
             )
-    
+
     uploaded_file = application_crud.create_file(db, kind, file, user_id, role, notes)
-    
+
     # Convert File model to FileRead schema, converting ObjectId to string
     file_dict = uploaded_file.model_dump(by_alias=True)
-    file_dict['id'] = str(file_dict.pop('_id'))
-    
+    file_dict["id"] = str(file_dict.pop("_id"))
+
     return {"file": application_schema.FileRead(**file_dict)}
 
 
@@ -219,10 +220,8 @@ def get_user_resumes(
     resumes = application_crud.get_user_files(
         db, user_id, application_schema.FileType.resume
     )
-    
-    return {
-        "resumes": [file_to_read(resume) for resume in resumes]
-    }
+
+    return {"resumes": [file_to_read(resume) for resume in resumes]}
 
 
 @user_files_router.get(
@@ -238,9 +237,7 @@ def resume_review(
     Get all resumes of user `user_id`
     """
     resumes = application_crud.resume_review(db, user_id)
-    return {
-        "resumes": [file_to_read(resume) for resume in resumes]
-    }
+    return {"resumes": [file_to_read(resume) for resume in resumes]}
 
 
 @user_files_router.delete("/{file_id}", status_code=status.HTTP_200_OK)
@@ -255,8 +252,8 @@ def delete_file(
     Delete a file for user `user_id`
     """
     success = application_crud.delete_file(db, file_id=file_id, user_id=user_id)
-    
+
     if not success:
         return {"error": "File not found or unauthorized"}
-    
+
     return {"message": "File deleted successfully"}

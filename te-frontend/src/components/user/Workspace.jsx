@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect, useCallback } from 'react'
 import {
     FolderIcon,
     XMarkIcon,
+    UserCircleIcon,
 
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
@@ -18,9 +19,11 @@ import Practice from '../../pages/Practice'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
+import { useLocation } from 'react-router-dom'
 
 
 const navigation = [
+    { name: 'Profile', type: "app", icon: UserCircleIcon },
     { name: 'Applications', type: "app", icon: BriefcaseIcon },
     { name: 'Resume and Referral Essay', type: "app", icon: DocumentIcon },
     { name: 'Referrals', type: "app", icon: FolderIcon },
@@ -34,6 +37,7 @@ const navigation = [
 const Workspace = ({ setLogin }) => {
     const { userId, accessToken, logout } = useAuth();
     const { setUserInfo, setResumes, setOtherFiles, fetchFiles, setFetchFiles } = useData();
+    const location = useLocation();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [content, setContent] = useState("Applications")
@@ -79,6 +83,14 @@ const Workspace = ({ setLogin }) => {
             setContent(prevContent);
         }
     }, [content]);
+
+    // Handle URL-based navigation (e.g., /workspace/profile)
+    useEffect(() => {
+        if (location.pathname === '/workspace/profile') {
+            setContent('Profile');
+            sessionStorage.setItem('content', 'Profile');
+        }
+    }, [location]);
 
     useEffect(() => {
         const fetchData = async () => {

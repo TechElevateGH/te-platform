@@ -275,7 +275,9 @@ def create_file(db, kind, file, user_id, role="", notes=""):
 
     # If it's a resume, add the file ID to user's profile for fast retrieval
     if kind == application_schema.FileType.resume:
-        user_crud.add_resume_file_id(db, user_id=user_id, file_id=str(result.inserted_id))
+        user_crud.add_resume_file_id(
+            db, user_id=user_id, file_id=str(result.inserted_id)
+        )
 
     return new_file
 
@@ -319,18 +321,25 @@ def delete_file(db: Database, *, file_id: str, user_id: str) -> bool:
     from app.ents.user import crud as user_crud
 
     # First, get the file to check if it's a resume
-    file_data = db.files.find_one({"_id": ObjectId(file_id), "user_id": ObjectId(user_id)})
-    
+    file_data = db.files.find_one(
+        {"_id": ObjectId(file_id), "user_id": ObjectId(user_id)}
+    )
+
     if not file_data:
         return False
-    
+
     # Delete the file from MongoDB
-    result = db.files.delete_one({"_id": ObjectId(file_id), "user_id": ObjectId(user_id)})
-    
+    result = db.files.delete_one(
+        {"_id": ObjectId(file_id), "user_id": ObjectId(user_id)}
+    )
+
     # If it was a resume, remove from user's resume_file_ids
-    if result.deleted_count > 0 and file_data.get("type") == application_schema.FileType.resume.value:
+    if (
+        result.deleted_count > 0
+        and file_data.get("type") == application_schema.FileType.resume.value
+    ):
         user_crud.remove_resume_file_id(db, user_id=user_id, file_id=file_id)
-    
+
     return result.deleted_count > 0
 
 

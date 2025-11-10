@@ -46,7 +46,7 @@ const SignInPrompt = ({ isOpen, onClose }) => {
                             <Dialog.Panel className="relative transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all w-full max-w-md">
                                 {/* Decorative gradient header */}
                                 <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-br from-blue-500 via-cyan-500 to-purple-500 opacity-10" />
-                                
+
                                 <div className="relative p-8">
                                     {/* Icon */}
                                     <div className="flex items-center justify-center mb-6">
@@ -83,7 +83,7 @@ const SignInPrompt = ({ isOpen, onClose }) => {
                                             Sign In
                                             <ArrowRightIcon className="h-4 w-4" />
                                         </button>
-                                        
+
                                         <button
                                             type="button"
                                             className="w-full px-6 py-3.5 bg-white text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 border-2 border-gray-200"
