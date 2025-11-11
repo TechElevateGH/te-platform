@@ -58,17 +58,13 @@ const learningPath = [
 ];
 
 const Learning = ({ setContent }) => {
-    const { userId, userRole: authUserRole, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { userRole: authUserRole, isAuthenticated, isLoading: authLoading } = useAuth();
     const userRole = authUserRole ? parseInt(authUserRole) : 0;
     const isAdmin = userRole >= 3; // Volunteer and above can manage content
     const isMember = userRole === 1; // Only Members (role=1) can track progress
     const isReferrer = userRole === 2; // Referrers cannot access learning content
-    const canAccessLearning = userRole !== 2; // Everyone except Referrers (includes guests with role=0)
     const isLoggedIn = isAuthenticated;
     const isLeadOrAdmin = userRole >= 4; // Lead (4) or Admin (5)
-
-    // Debug: Log auth state
-    console.log('Learning - Auth State:', { userId, authUserRole, isLoggedIn, isAuthenticated, authLoading, userRole, isMember, isLeadOrAdmin, canAccessLearning });
 
     const { darkMode, toggleDarkMode } = useDarkMode();
     const [showStats, setShowStats] = useState(false);
@@ -190,10 +186,6 @@ const Learning = ({ setContent }) => {
             await axios.post('/learning/progress', updates);
         } catch (error) {
             console.error('Error saving progress:', error);
-            // If user is not a member, they'll get a 403 error
-            if (error.response?.status === 403) {
-                console.log('Progress tracking is only available for Members');
-            }
         }
     }, [isLoggedIn, isMember]);
 

@@ -13,7 +13,6 @@ import {
     ArrowPathIcon,
     MagnifyingGlassIcon,
     FunnelIcon,
-    SparklesIcon,
     BellAlertIcon,
     ArrowDownTrayIcon,
     ClipboardDocumentIcon

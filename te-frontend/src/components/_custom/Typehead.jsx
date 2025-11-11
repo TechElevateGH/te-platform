@@ -40,7 +40,6 @@ const Typeahead = ({ name, value, data, handler }) => {
     };
 
     const navigateSuggestions = (step) => {
-        console.log(suggestions);
         const currentIndex = suggestions.indexOf(currentValue);
         const newIndex = currentIndex + step;
 

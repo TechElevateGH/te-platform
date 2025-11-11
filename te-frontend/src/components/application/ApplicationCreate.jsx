@@ -59,7 +59,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
                 }, 1500);
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error creating application:', error);
             });
 
     }

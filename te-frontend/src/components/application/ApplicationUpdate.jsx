@@ -51,7 +51,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                 setApplication(response.data.application)
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error updating application:', error);
             });
     }, [updateData, application.id, accessToken, setApplication]);
 
@@ -67,7 +67,6 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
     }
 
     const handleInputChange = ({ field, value, hideCustomInput = true }) => {
-        console.log(field, value)
         if (value === "Other.......") {
             setShowCustomInputs({ ...showCustomInputs, [customInputMap[field]]: true });
             setUpdateData(setNestedPropertyValue({ ...updateData }, field, ""));

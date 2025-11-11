@@ -26,12 +26,11 @@ const classNames = (...classes) => {
 
 const ApplicationInfo = ({ applicationId, setApplicationId, application, setApplication,
     archiveUserApplicationRequest, deleteUserApplicationRequest, refreshApplications }) => {
-    const { userId, accessToken } = useAuth();
+    const { accessToken } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [updateData, setUpdateData] = useState({});
 
     const getUserApplicationRequest = useCallback(async () => {
-        console.log(userId);
         axiosInstance.get(`/applications/${applicationId}`,
             {
                 headers: {
@@ -42,9 +41,9 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                 setApplication(response.data.application)
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error fetching application:', error);
             });
-    }, [accessToken, applicationId, setApplication, userId]);
+    }, [accessToken, applicationId, setApplication]);
 
 
     useEffect(() => {
@@ -118,7 +117,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                 }
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error updating application:', error);
             });
     };
 

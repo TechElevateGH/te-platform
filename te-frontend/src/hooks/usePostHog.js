@@ -45,6 +45,7 @@ export function usePostHogPageView(pageName, properties = {}) {
 
     useEffect(() => {
         capturePageView({ page: pageName, ...properties });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pageName]);
 }
 

@@ -57,8 +57,6 @@ const MyReferrals = ({ onFeedbackCount }) => {
             const unseenFeedbackCount = referrals.filter(r =>
                 r.review_note && r.review_note.trim() && !seenFeedback.has(r.id)
             ).length;
-            console.log('MyReferrals - Total referrals:', referrals.length);
-            console.log('MyReferrals - Unseen feedback count:', unseenFeedbackCount);
             onFeedbackCount(unseenFeedbackCount);
         }
     }, [referrals, seenFeedback, onFeedbackCount]);

@@ -54,7 +54,6 @@ const Workspace = ({ setLogin }) => {
         }
 
         const baseNavigation = [
-            // { name: 'Profile', type: "app", icon: UserCircleIcon },
             { name: 'Applications', type: "app", icon: BriefcaseIcon },
             { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
             { name: 'Referrals', type: "app", icon: FolderIcon },
@@ -88,7 +87,6 @@ const Workspace = ({ setLogin }) => {
         })
             .then((response) => {
                 setUserInfo(response.data.user)
-                console.log(response.data.user)
             })
             .catch((error) => {
                 if (error.response.status === 401) {

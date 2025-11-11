@@ -15,7 +15,6 @@ const AutoSuggest = ({ name, handler, data }) => {
         } else {
             setSuggestions([]);
         }
-        console.log(inputValue, value)
     };
 
     const renderSuggestions = () => {

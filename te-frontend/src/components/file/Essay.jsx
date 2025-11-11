@@ -51,7 +51,7 @@ const ReferralEssay = () => {
                 setUpdateCoverLetter(false);
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error updating cover letter:', error);
             })
     };
 
@@ -67,7 +67,7 @@ const ReferralEssay = () => {
                 setUpdateReferralEssay(false);
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error updating referral essay:', error);
             })
     };
 

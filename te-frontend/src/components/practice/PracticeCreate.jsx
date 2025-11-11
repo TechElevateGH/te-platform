@@ -33,7 +33,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
                 setLessonData({});
             })
             .catch((error) => {
-                console.log(error);
+                console.error('Error creating lesson:', error);
             });
     }
 
@@ -42,19 +42,17 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
             setUploadingFile(true)
             const formData = new FormData();
             formData.append('file', file);
-            console.log(formData, file)
             axiosInstance.post("/learning/file/upload", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${accessToken}`,
                 },
             }).then((response) => {
-                console.log(response);
                 handleInputChange({ field: "link", value: response.data.file.link });
                 setUploadingFile(false);
             }
             ).catch((error) => {
-                console.log(error);
+                console.error('Error uploading file:', error);
             })
         }
     }

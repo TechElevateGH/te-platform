@@ -111,17 +111,6 @@ const ResumeReviews = () => {
             const myReqs = myResponse.data?.reviews || [];
             setMyRequests(myReqs);
 
-            // Debug logging
-            console.log('ResumeReviews - My requests count:', myReqs.length);
-            console.log('ResumeReviews - Requests with feedback:', myReqs.filter(r => r.feedback && r.feedback.trim()).length);
-            console.log('ResumeReviews - My requests data:', myReqs.map(r => ({
-                job_title: r.job_title,
-                status: r.status,
-                has_feedback: !!r.feedback,
-                feedback: r.feedback,
-                reviewer_name: r.reviewer_name
-            })));
-
             // If volunteer or above, fetch all requests
             if (isVolunteerOrAbove) {
                 const allResponse = await axiosInstance.get('/resume-reviews/all', {

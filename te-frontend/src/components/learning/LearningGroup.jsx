@@ -17,7 +17,6 @@ const LearningGroup = ({ subcategory, rawLessons }) => {
         }, {});
     };
     let playlistToLessons = mapPlaylistsToLessons(lessons)
-    console.log(userRole)
 
     return (
         <div className="px-6 mt-3">

@@ -31,8 +31,6 @@ const Register = () => {
     });
 
     const handleOAuthRegister = (provider) => {
-        // TODO: Implement OAuth registration flow
-        console.log(`Register with ${provider}`);
         setError(`${provider} authentication will be implemented soon!`);
     };
 

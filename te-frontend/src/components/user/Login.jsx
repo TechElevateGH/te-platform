@@ -45,8 +45,6 @@ const Login = () => {
     };
 
     const handleOAuthLogin = (provider) => {
-        // TODO: Implement OAuth login flow
-        console.log(`Login with ${provider}`);
         setError(`${provider} authentication will be implemented soon!`);
     };
 
