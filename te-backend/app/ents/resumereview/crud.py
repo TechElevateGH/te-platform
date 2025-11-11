@@ -111,7 +111,7 @@ def update_review_request(
 ) -> dict:
     """Update a resume review request"""
     update_data = {}
-    
+
     # Always set updated_at when any update happens
     update_data["updated_at"] = datetime.utcnow().isoformat()
 

@@ -14,7 +14,7 @@ class ResumeReview(BaseModel):
     resume_link: str  # Google Docs link to resume
     job_title: str  # Target job title
     level: str  # Entry, Mid, Senior, etc.
-    status: str = "Pending"  # Pending, In Review, Completed, Declined
+    status: str = "Pending"  # Pending, In Review, Completed, Declined, Cancelled
     submitted_date: str  # Date when request was submitted
     reviewed_by: Optional[PyObjectId] = None  # Volunteer/Lead/Admin who reviews
     reviewer_name: Optional[str] = None  # Reviewer's name

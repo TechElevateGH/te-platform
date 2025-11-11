@@ -318,7 +318,7 @@ const FilesManagement = () => {
                         <div>
                             <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                 <FolderIcon className="h-5 w-5 text-blue-600 dark:text-blue-500" />
-                                Member Files & Resume Reviews
+                                Resumes and Essays
                             </h1>
                             <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                                 Manage member files, essays, and assign resume review requests
@@ -473,72 +473,73 @@ const FilesManagement = () => {
 
                 {activeTab === 'resumes' && (
                     <>
-                        {/* Stats Bar for Resumes */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="flex items-center gap-6 flex-wrap text-xs">
-                                <div className="flex items-center gap-2">
-                                    <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members with Resumes:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.resumes && u.resumes.length > 0).length}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">Total Resumes:</span>
-                                    <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Filters Bar */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                                {/* Member Filter */}
-                                <div className="md:col-span-5">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        Member Name or Email
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Filter by member name or email..."
-                                        value={memberFilter}
-                                        onChange={(e) => setMemberFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    />
+                        {/* Combined Stats & Filters Bar for Resumes */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                {/* Stats */}
+                                <div className="flex items-center gap-6 flex-wrap text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">Members with Resumes:</span>
+                                        <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.resumes && u.resumes.length > 0).length}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <DocumentIcon className="h-4 w-4 text-blue-500" />
+                                        <span className="font-medium text-blue-600 dark:text-blue-400">Total Resumes:</span>
+                                        <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
+                                    </div>
                                 </div>
 
-                                {/* File Type Filter */}
-                                <div className="md:col-span-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        File Type
-                                    </label>
-                                    <select
-                                        value={fileTypeFilter}
-                                        onChange={(e) => setFileTypeFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    >
-                                        <option value="">All Types</option>
-                                        <option value="resume">Resumes Only</option>
-                                        <option value="essay">Essays Only</option>
-                                    </select>
-                                </div>
+                                {/* Filters */}
+                                <div className="flex flex-wrap items-end gap-3">
+                                    {/* Member Filter */}
+                                    <div className="flex-1 min-w-[200px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            Member Name or Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Filter by member name or email..."
+                                            value={memberFilter}
+                                            onChange={(e) => setMemberFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
 
-                                {/* Sort Dropdown */}
-                                <div className="md:col-span-4">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        Sort by
-                                    </label>
-                                    <select
-                                        value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    >
-                                        <option value="name_asc">Name (A-Z)</option>
-                                        <option value="name_desc">Name (Z-A)</option>
-                                        <option value="email_asc">Email (A-Z)</option>
-                                        <option value="email_desc">Email (Z-A)</option>
-                                        <option value="files_desc">Most Files</option>
-                                        <option value="files_asc">Least Files</option>
-                                    </select>
+                                    {/* File Type Filter */}
+                                    <div className="w-[140px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            File Type
+                                        </label>
+                                        <select
+                                            value={fileTypeFilter}
+                                            onChange={(e) => setFileTypeFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        >
+                                            <option value="">All Types</option>
+                                            <option value="resume">Resumes Only</option>
+                                            <option value="essay">Essays Only</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Sort Dropdown */}
+                                    <div className="w-[160px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            Sort by
+                                        </label>
+                                        <select
+                                            value={sortBy}
+                                            onChange={(e) => setSortBy(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        >
+                                            <option value="name_asc">Name (A-Z)</option>
+                                            <option value="name_desc">Name (Z-A)</option>
+                                            <option value="email_asc">Email (A-Z)</option>
+                                            <option value="email_desc">Email (Z-A)</option>
+                                            <option value="files_desc">Most Files</option>
+                                            <option value="files_asc">Least Files</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
@@ -695,102 +696,101 @@ const FilesManagement = () => {
                 {/* Resume Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <>
-                        {/* Stats Bar for Resume Reviews */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="flex items-center gap-6 flex-wrap text-xs">
-                                <div className="flex items-center gap-2">
-                                    <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Total Requests:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{resumeReviews.length}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <ClockIcon className="h-4 w-4 text-yellow-500" />
-                                    <span className="font-medium text-yellow-600 dark:text-yellow-400">Pending:</span>
-                                    <span className="font-bold text-yellow-700 dark:text-yellow-400">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentTextIcon className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">In Review:</span>
-                                    <span className="font-bold text-blue-700 dark:text-blue-400">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-600 dark:text-green-400">Completed:</span>
-                                    <span className="font-bold text-green-700 dark:text-green-400">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Filters Bar for Resume Reviews */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                                {/* Status Filter */}
-                                <div className="md:col-span-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        Status Filter
-                                    </label>
-                                    <select
-                                        value={resumeReviewStatusFilter}
-                                        onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                    >
-                                        <option value="active">Active (Pending + In Review)</option>
-                                        <option value="">All Statuses</option>
-                                        <option value="Pending">Pending Only</option>
-                                        <option value="In Review">In Review Only</option>
-                                        <option value="Completed">Completed Only</option>
-                                        <option value="Declined">Declined Only</option>
-                                    </select>
+                        {/* Combined Stats & Filters Bar for Resume Reviews */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                {/* Stats */}
+                                <div className="flex items-center gap-6 flex-wrap text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">Total Requests:</span>
+                                        <span className="font-bold text-gray-900 dark:text-white">{resumeReviews.length}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ClockIcon className="h-4 w-4 text-yellow-500" />
+                                        <span className="font-medium text-yellow-600 dark:text-yellow-400">Pending:</span>
+                                        <span className="font-bold text-yellow-700 dark:text-yellow-400">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <DocumentTextIcon className="h-4 w-4 text-blue-500" />
+                                        <span className="font-medium text-blue-600 dark:text-blue-400">In Review:</span>
+                                        <span className="font-bold text-blue-700 dark:text-blue-400">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                                        <span className="font-medium text-green-600 dark:text-green-400">Completed:</span>
+                                        <span className="font-bold text-green-700 dark:text-green-400">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
+                                    </div>
                                 </div>
 
-                                {/* Search Filter */}
-                                <div className="md:col-span-5">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        Search Member or Job Title
-                                    </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Filter by member name, email, or job title..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                    />
-                                </div>
+                                {/* Filters */}
+                                <div className="flex flex-wrap items-end gap-3">
+                                    {/* Status Filter */}
+                                    <div className="w-[180px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            Status Filter
+                                        </label>
+                                        <select
+                                            value={resumeReviewStatusFilter}
+                                            onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        >
+                                            <option value="active">Active (Pending + In Review)</option>
+                                            <option value="">All Statuses</option>
+                                            <option value="Pending">Pending Only</option>
+                                            <option value="In Review">In Review Only</option>
+                                            <option value="Completed">Completed Only</option>
+                                            <option value="Declined">Declined Only</option>
+                                        </select>
+                                    </div>
 
-                                {/* Level Filter */}
-                                <div className="md:col-span-2">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                        Level
-                                    </label>
-                                    <select
-                                        value={levelFilter}
-                                        onChange={(e) => setLevelFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                    >
-                                        <option value="">All Levels</option>
-                                        <option value="Intern">Intern</option>
-                                        <option value="Entry">Entry</option>
-                                        <option value="Mid">Mid</option>
-                                        <option value="Senior">Senior</option>
-                                    </select>
-                                </div>
+                                    {/* Search Filter */}
+                                    <div className="flex-1 min-w-[200px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            Search Member or Job Title
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Filter by member name, email, or job title..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        />
+                                    </div>
 
-                                {/* Clear Filters */}
-                                {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
-                                    <div className="md:col-span-2">
+                                    {/* Level Filter */}
+                                    <div className="w-[120px]">
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                            Level
+                                        </label>
+                                        <select
+                                            value={levelFilter}
+                                            onChange={(e) => setLevelFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        >
+                                            <option value="">All Levels</option>
+                                            <option value="Intern">Intern</option>
+                                            <option value="Entry">Entry</option>
+                                            <option value="Mid">Mid</option>
+                                            <option value="Senior">Senior</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Clear Filters */}
+                                    {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
                                         <button
                                             onClick={() => {
                                                 setSearchQuery('');
                                                 setLevelFilter('');
                                                 setResumeReviewStatusFilter('active');
                                             }}
-                                            className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1.5"
+                                            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1.5"
                                         >
                                             <XMarkIcon className="h-4 w-4" />
-                                            Clear Filters
+                                            Clear
                                         </button>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -917,12 +917,18 @@ const FilesManagement = () => {
                 {/* Essays Tab */}
                 {activeTab === 'essays' && (
                     <>
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                        {/* Combined Stats Bar for Essays */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
                             <div className="flex items-center gap-6 flex-wrap text-xs">
                                 <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-300">Total Essays:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{stats.totalEssays}</span>
+                                    <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members with Essays:</span>
+                                    <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.essays && u.essays.length > 0).length}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <DocumentIcon className="h-4 w-4 text-emerald-500" />
+                                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Total Essays:</span>
+                                    <span className="font-bold text-emerald-700 dark:text-emerald-400">{stats.totalEssays}</span>
                                 </div>
                             </div>
                         </div>

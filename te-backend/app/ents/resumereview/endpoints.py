@@ -90,20 +90,17 @@ def update_resume_review_request(
     }
 
 
-@router.delete("/{review_id}", response_model=Dict[str, Any])
-def delete_resume_review_request(
+@router.patch("/{review_id}/cancel", response_model=Dict[str, Any])
+def cancel_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
     review_id: str,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Delete a resume review request (Only Member, Lead, or Admin)
-    - Members can only delete their own requests
-    - Lead and Admin can delete any request
+    Cancel a resume review request (Members can cancel their own requests)
+    Changes status to 'Cancelled' instead of deleting
     """
-    from app.core.permissions import get_user_role
-
     # Get the review to check ownership
     review = review_crud.get_review_by_id(db, review_id=review_id)
     if not review:
@@ -112,21 +109,57 @@ def delete_resume_review_request(
             detail="Resume review request not found",
         )
 
-    user_role = get_user_role(current_user)
-
-    # Only Member (1), Lead (4), or Admin (5) can delete
-    if user_role not in [1, 4, 5]:
+    # Only the member who created it can cancel
+    if str(review.user_id) != str(current_user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only Members, Leads, or Admins can delete resume review requests",
+            detail="You can only cancel your own resume review requests",
         )
 
-    # Members can only delete their own requests
-    if user_role == 1 and str(review.user_id) != str(current_user.id):
+    # Update status to Cancelled
+    updated_review = review_crud.update_review_request(
+        db,
+        review_id=review_id,
+        reviewer_id=str(current_user.id),
+        reviewer_name=current_user.full_name if hasattr(current_user, "full_name") else current_user.username,
+        data=review_schema.ResumeReviewUpdate(status="Cancelled"),
+    )
+
+    return {
+        "message": "Resume review request cancelled successfully",
+        "review": updated_review,
+    }
+
+
+@router.delete("/{review_id}", response_model=Dict[str, Any])
+def delete_resume_review_request(
+    *,
+    db: Database = Depends(session.get_db),
+    review_id: str,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Delete a resume review request (Admin only - hard delete)
+    This permanently removes the request from the database
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Admin (5) can permanently delete
+    if user_role != 5:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only delete your own resume review requests",
+            detail="Only Admins can permanently delete resume review requests",
+        )
+
+    # Get the review to verify it exists
+    review = review_crud.get_review_by_id(db, review_id=review_id)
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume review request not found",
         )
 
     review_crud.delete_review_request(db, review_id=review_id)
-    return {"message": "Resume review request deleted successfully"}
+    return {"message": "Resume review request permanently deleted successfully"}

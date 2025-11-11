@@ -15,7 +15,7 @@ import {
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
     SparklesIcon,
-    TrashIcon
+    XCircleIcon
 } from '@heroicons/react/24/outline';
 import { trackEvent } from '../analytics/events';
 
@@ -180,26 +180,26 @@ const ResumeReviews = () => {
         }
     };
 
-    const handleDeleteReview = async (reviewId, jobTitle) => {
-        // Only Member (1), Lead (4), or Admin (5) can delete
-        if (![1, 4, 5].includes(userRoleInt)) {
-            setToast({ message: 'You do not have permission to delete', type: 'error' });
+    const handleCancelReview = async (reviewId, jobTitle) => {
+        // Only Member (1) can cancel their own requests
+        if (userRoleInt !== 1) {
+            setToast({ message: 'You do not have permission to cancel', type: 'error' });
             return;
         }
 
-        if (!window.confirm(`Are you sure you want to delete the resume review request for "${jobTitle}"?\n\nThis action cannot be undone.`)) {
+        if (!window.confirm(`Are you sure you want to cancel the resume review request for "${jobTitle}"?\n\nYou can submit a new request anytime.`)) {
             return;
         }
 
         try {
-            await axiosInstance.delete(`/resume-reviews/${reviewId}`, {
+            await axiosInstance.patch(`/resume-reviews/${reviewId}/cancel`, {}, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            setToast({ message: 'Review request deleted', type: 'success' });
+            setToast({ message: 'Review request cancelled', type: 'success' });
             fetchData();
         } catch (error) {
-            console.error('Error deleting review:', error);
-            setToast({ message: error.response?.data?.detail || 'Failed to delete', type: 'error' });
+            console.error('Error cancelling review:', error);
+            setToast({ message: error.response?.data?.detail || 'Failed to cancel', type: 'error' });
         }
     };
 
@@ -208,7 +208,8 @@ const ResumeReviews = () => {
             'Pending': 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800',
             'In Review': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
             'Completed': 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
-            'Declined': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800'
+            'Declined': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
+            'Cancelled': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
         };
         return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     };
@@ -411,6 +412,7 @@ const ResumeReviews = () => {
                                     <option value="In Review">In Review</option>
                                     <option value="Completed">Completed</option>
                                     <option value="Declined">Declined</option>
+                                    <option value="Cancelled">Cancelled</option>
                                 </select>
                             </div>
                         </div>
@@ -459,17 +461,17 @@ const ResumeReviews = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        {/* Delete button - Only for Member (1), Lead (4), Admin (5) */}
-                                        {[1, 4, 5].includes(userRoleInt) && (
+                                        {/* Cancel button - Only for Member (1) */}
+                                        {userRoleInt === 1 && request.status !== 'Cancelled' && request.status !== 'Completed' && (
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteReview(request.id, request.job_title);
+                                                    handleCancelReview(request.id, request.job_title);
                                                 }}
-                                                className="ml-3 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                                title="Delete request"
+                                                className="ml-3 p-2 text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 rounded transition-colors"
+                                                title="Cancel request"
                                             >
-                                                <TrashIcon className="h-5 w-5" />
+                                                <XCircleIcon className="h-5 w-5" />
                                             </button>
                                         )}
                                     </div>
@@ -498,6 +500,7 @@ const ResumeReviews = () => {
                                     <option value="In Review">In Review</option>
                                     <option value="Completed">Completed</option>
                                     <option value="Declined">Declined</option>
+                                    <option value="Cancelled">Cancelled</option>
                                 </select>
                             </div>
 
@@ -719,16 +722,6 @@ const ResumeReviews = () => {
                                                                     className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
                                                                 >
                                                                     Complete
-                                                                </button>
-                                                            )}
-                                                            {/* Delete button - Only for Lead (4) or Admin (5) */}
-                                                            {[4, 5].includes(userRoleInt) && (
-                                                                <button
-                                                                    onClick={() => handleDeleteReview(review.id, review.job_title)}
-                                                                    className="px-2.5 py-1.5 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition-colors flex items-center gap-1"
-                                                                    title="Delete request"
-                                                                >
-                                                                    <TrashIcon className="h-3.5 w-3.5" />
                                                                 </button>
                                                             )}
                                                         </div>
