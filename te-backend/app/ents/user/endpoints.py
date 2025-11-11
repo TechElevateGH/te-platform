@@ -43,10 +43,16 @@ def create_lead_account(
     """
     Create a new Lead account (Admin only).
 
-    - **data**: Lead account details (username, company association, etc.)
-    - Returns: User info and secure token (visible only once)
+    Leads authenticate using their username and token.
+    
+    - **username**: Lead's username for login
+    - **token**: Secure token for authentication
+    - **role**: Lead (4) or Admin (5)
+    - Returns: User info and token (visible only once)
 
-    **Important**: The generated token should be shared securely with the Lead user.
+    **Authentication**: Lead users log in at `/auth/lead-login` with username + token.
+
+    **Important**: The token should be shared securely with the Lead user.
     It cannot be retrieved again after creation.
 
     **Requires**: Admin (role=5) access
@@ -72,12 +78,17 @@ def create_referrer_account(
     """
     Create a new Referrer account (Admin only).
 
-    Referrers can only view referral requests for their assigned company.
+    Referrers authenticate using ONLY their token (no username required).
+    The username is stored for admin reference only.
+    
+    - **username**: Internal identifier for admin reference (not used for login)
+    - **token**: Secure token for authentication (referrers log in with this only)
+    - **company_id**: Assigned company that the referrer manages
+    - Returns: User info and token (visible only once)
 
-    - **data**: Referrer account details (username, assigned company, etc.)
-    - Returns: User info and secure token (visible only once)
+    **Authentication**: Referrer users log in at `/auth/referrer-login` with token only.
 
-    **Important**: The generated token should be shared securely with the Referrer.
+    **Important**: The token should be shared securely with the Referrer.
     It cannot be retrieved again after creation.
 
     **Requires**: Admin (role=5) access
@@ -87,8 +98,6 @@ def create_referrer_account(
         "referrer": result,
         "message": "Referrer account created successfully. Please share the token securely with the user.",
     }
-
-
 @router.patch("/privileged/{user_id}", response_model=Dict[str, Any])
 def update_privileged_user(
     *,

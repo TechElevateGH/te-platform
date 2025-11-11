@@ -6,6 +6,8 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserLogin(BaseModel):
+    """Schema for Member user login with email and password"""
+
     username: str
     password: str
 
@@ -14,6 +16,12 @@ class LeadLogin(BaseModel):
     """Schema for Lead/Admin login with username and token"""
 
     username: str
+    token: str
+
+
+class ReferrerLogin(BaseModel):
+    """Schema for Referrer login with token only (no username required)"""
+
     token: str
 
 
@@ -37,19 +45,28 @@ class UserRoles(int, Enum):
 
 
 class LeadCreate(BaseModel):
-    """Schema for creating a Lead/Admin account (Admin only)"""
+    """
+    Schema for creating a Lead/Admin account (Admin only).
+    
+    Leads authenticate with username + token at /auth/lead-login.
+    """
 
-    username: str
-    token: str
+    username: str  # Used for login
+    token: str  # Used for login
     role: UserRoles = UserRoles.lead
 
 
 class ReferrerCreate(BaseModel):
-    """Schema for creating a Referrer account (Admin only)"""
+    """
+    Schema for creating a Referrer account (Admin only).
+    
+    Referrers authenticate with ONLY token at /auth/referrer-login.
+    Username is stored for admin reference only, not used for authentication.
+    """
 
-    username: str
-    token: str
-    company_id: str  # MongoDB ObjectId as string
+    username: str  # For admin reference only (not used for login)
+    token: str  # Used for login (referrers authenticate with token only)
+    company_id: str  # MongoDB ObjectId as string - assigned company
 
 
 class PrivilegedUserUpdate(BaseModel):

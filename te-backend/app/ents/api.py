@@ -7,7 +7,7 @@ from app.ents.referral_company.endpoints import referral_company_router, referra
 from app.ents.home.endpoints import home_router
 from app.ents.learning.endpoints import router as learning_router
 from app.ents.problem.endpoints import router as problem_router
-from app.ents.user.auth import router as auth_router
+from app.ents.user.auth import auth_router
 from app.ents.user.endpoints import router as users_router
 from app.ents.resumereview.endpoints import router as resume_review_router
 from fastapi import APIRouter
@@ -18,7 +18,7 @@ api_router = APIRouter()
 api_router.include_router(home_router, tags=["Home"])
 
 # Authentication
-api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(auth_router, prefix="/auth")  # Has its own tags
 
 # User management
 api_router.include_router(users_router)  # Tags: Users

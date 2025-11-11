@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheckIcon, KeyIcon, UserIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { BuildingOfficeIcon, KeyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
-const LeadLogin = () => {
+const ReferrerLogin = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
-    const [username, setUsername] = useState('');
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -18,8 +17,7 @@ const LeadLogin = () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/auth/lead-login', {
-                username,
+            const response = await axiosInstance.post('/auth/referrer-login', {
                 token
             });
 
@@ -31,9 +29,14 @@ const LeadLogin = () => {
                     response.data.user.role
                 );
 
+                // Store company info for later use
+                if (response.data.user.company_name) {
+                    sessionStorage.setItem('companyName', response.data.user.company_name);
+                }
+
                 // Check if there's a redirect URL from session expiry
                 const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-                if (redirectPath && redirectPath !== '/lead-login') {
+                if (redirectPath && redirectPath !== '/referrer-login') {
                     sessionStorage.removeItem('redirectAfterLogin');
                     navigate(redirectPath);
                 } else {
@@ -42,20 +45,20 @@ const LeadLogin = () => {
                 }
             }
         } catch (err) {
-            console.error('Lead login error:', err);
-            setError(err.response?.data?.detail || 'Invalid username or token');
+            console.error('Referrer login error:', err);
+            setError(err.response?.data?.detail || 'Invalid access token');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 {/* Back to Member Login */}
                 <button
                     onClick={() => navigate('/login')}
-                    className="flex items-center gap-2 text-sm font-medium text-blue-200 hover:text-white transition-colors"
+                    className="flex items-center gap-2 text-sm font-medium text-emerald-200 hover:text-white transition-colors"
                 >
                     <ArrowLeftIcon className="h-4 w-4" />
                     Back to Member Login
@@ -64,15 +67,15 @@ const LeadLogin = () => {
                 {/* Header */}
                 <div className="text-center">
                     <div className="flex justify-center">
-                        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
-                            <ShieldCheckIcon className="h-12 w-12 text-white" />
+                        <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl shadow-xl">
+                            <BuildingOfficeIcon className="h-12 w-12 text-white" />
                         </div>
                     </div>
                     <h2 className="mt-6 text-3xl font-bold text-white">
-                        Management Login
+                        Company Referrer Access
                     </h2>
-                    <p className="mt-2 text-sm text-blue-200">
-                        Enter your username and access token
+                    <p className="mt-2 text-sm text-emerald-200">
+                        Enter your secure access token to continue
                     </p>
                 </div>
 
@@ -85,36 +88,14 @@ const LeadLogin = () => {
                             </div>
                         )}
 
-                        {/* Username Field */}
-                        <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-blue-100 mb-2">
-                                Username
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <UserIcon className="h-5 w-5 text-blue-300" />
-                                </div>
-                                <input
-                                    id="username"
-                                    name="username"
-                                    type="text"
-                                    required
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="Enter your username"
-                                />
-                            </div>
-                        </div>
-
                         {/* Token Field */}
                         <div>
-                            <label htmlFor="token" className="block text-sm font-medium text-blue-100 mb-2">
+                            <label htmlFor="token" className="block text-sm font-medium text-emerald-100 mb-2">
                                 Access Token
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <KeyIcon className="h-5 w-5 text-blue-300" />
+                                    <KeyIcon className="h-5 w-5 text-emerald-300" />
                                 </div>
                                 <input
                                     id="token"
@@ -123,10 +104,14 @@ const LeadLogin = () => {
                                     required
                                     value={token}
                                     onChange={(e) => setToken(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-                                    placeholder="Enter your access token"
+                                    autoComplete="off"
+                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono text-sm"
+                                    placeholder="Enter your secure token"
                                 />
                             </div>
+                            <p className="mt-2 text-xs text-emerald-200">
+                                This token was provided to you by your administrator
+                            </p>
                         </div>
 
                         {/* Submit Button */}
@@ -134,7 +119,7 @@ const LeadLogin = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                             >
                                 {loading ? (
                                     <>
@@ -143,48 +128,60 @@ const LeadLogin = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <ShieldCheckIcon className="h-5 w-5 mr-2" />
-                                        Sign In
+                                        <BuildingOfficeIcon className="h-5 w-5 mr-2" />
+                                        Access Referrals Portal
                                     </>
                                 )}
                             </button>
                         </div>
 
                         {/* Info Box */}
-                        <div className="mt-6 bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
-                            <p className="text-xs text-blue-100">
-                                <strong>Note:</strong> Management accounts can only be created by Admins. If you need access, please contact your administrator.
+                        <div className="mt-6 bg-emerald-500/20 border border-emerald-400/30 rounded-lg p-4">
+                            <p className="text-xs text-emerald-100 mb-2">
+                                <strong>For Company Referrers:</strong>
                             </p>
+                            <ul className="text-xs text-emerald-100 space-y-1 list-disc list-inside">
+                                <li>No username required - just use your token</li>
+                                <li>Access is limited to your company's referral requests</li>
+                                <li>Contact an admin if you've lost your token</li>
+                            </ul>
                         </div>
 
                         {/* Alternative Login Links */}
                         <div className="mt-6 pt-6 border-t border-white/10">
-                            <p className="text-center text-xs text-blue-200 mb-3">
-                                Not a lead or admin?
+                            <p className="text-center text-xs text-emerald-200 mb-3">
+                                Not a referrer?
                             </p>
                             <div className="flex gap-3 justify-center">
                                 <button
                                     type="button"
                                     onClick={() => navigate('/login')}
-                                    className="text-xs font-medium text-blue-200 hover:text-white transition-colors underline"
+                                    className="text-xs font-medium text-emerald-200 hover:text-white transition-colors underline"
                                 >
                                     Member Login
                                 </button>
-                                <span className="text-blue-300">•</span>
+                                <span className="text-emerald-300">•</span>
                                 <button
                                     type="button"
-                                    onClick={() => navigate('/referrer-login')}
-                                    className="text-xs font-medium text-blue-200 hover:text-white transition-colors underline"
+                                    onClick={() => navigate('/lead-login')}
+                                    className="text-xs font-medium text-emerald-200 hover:text-white transition-colors underline"
                                 >
-                                    Referrer Access
+                                    Management Login
                                 </button>
                             </div>
                         </div>
                     </form>
+                </div>
+
+                {/* Security Note */}
+                <div className="text-center">
+                    <p className="text-xs text-emerald-300">
+                        🔒 Your access token is encrypted and secure
+                    </p>
                 </div>
             </div>
         </div>
     );
 };
 
-export default LeadLogin;
+export default ReferrerLogin;

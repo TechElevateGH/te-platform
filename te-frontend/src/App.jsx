@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataProvider } from './context/DataContext'
 import Register from './components/user/Register';
 import LeadLogin from './pages/LeadLogin';
+import ReferrerLogin from './pages/ReferrerLogin';
 import UserAccountManagement from './pages/UserAccountManagement';
 import ResumeReviews from './pages/ResumeReviews';
 import PostHogProvider from './providers/PostHogProvider';
@@ -48,6 +49,7 @@ function App() {
                     <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/lead-login" element={<LeadLogin />} />
+                    <Route path="/referrer-login" element={<ReferrerLogin />} />
                     <Route path="/register" element={<Register />} />
                   </Routes>
                 </div>
