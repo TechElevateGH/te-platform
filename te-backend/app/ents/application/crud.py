@@ -1,52 +1,30 @@
 import os
 import tempfile
 from datetime import date
-from typing import Optional
+from uuid import uuid4
 
 import app.core.service as service
 import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
 from fastapi import HTTPException
-import app.ents.user.crud as user_crud
 from app.core.settings import settings
 from googleapiclient.http import MediaFileUpload
 from pymongo.database import Database
 
 
-def read_application_by_id(
-    db: Database, *, application_id: str
-) -> Optional[application_models.Application]:
-    """Returns the `Application` with id `application_id`."""
-    from bson import ObjectId
-
-    if not ObjectId.is_valid(application_id):
-        return None
-
-    application_data = db.applications.find_one({"_id": ObjectId(application_id)})
-    if application_data:
-        return application_models.Application(**application_data)
-    return None
-
-
-def read_application_multi(
-    db: Database, *, skip: int = 0, limit: int = 100
-) -> list[application_models.Application]:
-    """Returns the next `limit` applications after `skip` applications."""
-    applications_data = db.applications.find({}).skip(skip).limit(limit)
-    return [application_models.Application(**app) for app in applications_data]
+# ============= Application CRUD Operations (Embedded in member_users) =============
 
 
 def create_application(
     db: Database, *, user_id: str, data: application_schema.ApplicationCreate
-):
-    """Create an `Application` for user `user_id` with `data`."""
+) -> application_models.Application:
+    """Create an Application for user (embedded in member_users document)"""
     from bson import ObjectId
-    from datetime import date
 
-    # Create application document for MongoDB - just store company and location as simple data
+    # Create application data (embedded document with UUID)
     application_data = {
-        "user_id": ObjectId(user_id),
-        "company": data.company,  # Store company name as string
+        "id": str(uuid4()),  # Generate unique ID
+        "company": data.company,
         "location": {
             "country": data.location.country,
             "city": data.location.city,
@@ -63,58 +41,156 @@ def create_application(
         "archived": False,
     }
 
-    # Insert into MongoDB
-    result = db.applications.insert_one(application_data)
+    # Add to user's applications array using $push
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$push": {"applications": application_data}}
+    )
 
-    # Fetch the created document to return
-    created_application = db.applications.find_one({"_id": result.inserted_id})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    # Convert to Application model and return
-    return application_models.Application(**created_application)
+    return application_models.Application(**application_data)
 
 
 def read_user_applications(
-    db: Database, *, user_id
+    db: Database, *, user_id: str
 ) -> list[application_models.Application]:
-    """Read all applications of user `user_id` from MongoDB."""
+    """Read all applications for a user from their embedded applications array"""
     from bson import ObjectId
 
-    user = user_crud.read_user_by_id(db, id=user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    user = db.member_users.find_one({"_id": ObjectId(user_id)}, {"applications": 1})
 
-    # Fetch applications from MongoDB where user_id matches
-    applications_data = db.applications.find({"user_id": ObjectId(user_id)})
-    return [application_models.Application(**app) for app in applications_data]
+    if not user or "applications" not in user:
+        return []
 
-
-def read_all_applications(db: Database) -> list[application_models.Application]:
-    """Read all applications from all users (Admin only)."""
-    # Fetch all applications from MongoDB
-    applications_data = db.applications.find({})
-    return [application_models.Application(**app) for app in applications_data]
+    return [
+        application_models.Application(**app) for app in user.get("applications", [])
+    ]
 
 
 def read_user_application(
     db: Database, *, user_id: str, application_id: str
-) -> application_models.Application:
-    user = user_crud.read_user_by_id(db, id=user_id)
-    if not user:
-        ...
+) -> application_models.Application | None:
+    """Read a single application by UUID from user's applications array"""
+    from bson import ObjectId
 
-    application = read_application_by_id(db, application_id=application_id)
-    return application
+    user = db.member_users.find_one(
+        {"_id": ObjectId(user_id)},
+        {"applications": {"$elemMatch": {"id": application_id}}},
+    )
+
+    if not user or "applications" not in user or not user["applications"]:
+        return None
+
+    return application_models.Application(**user["applications"][0])
 
 
-# ============= Resume CRUD Operations (Multiple allowed per member) =============
+def read_all_applications(db: Database) -> list[dict]:
+    """Read all applications from all users (Admin/Lead only) - uses aggregation"""
+    # Use aggregation to unwind applications from all users with user info
+    pipeline = [
+        {"$match": {"role": 1}},  # Only members
+        {"$unwind": {"path": "$applications", "preserveNullAndEmptyArrays": False}},
+        {
+            "$project": {
+                "user_id": "$_id",
+                "user_name": "$full_name",
+                "user_email": "$email",
+                "company": "$applications.company",
+                "location": "$applications.location",
+                "date": "$applications.date",
+                "title": "$applications.title",
+                "notes": "$applications.notes",
+                "recruiter_name": "$applications.recruiter_name",
+                "recruiter_email": "$applications.recruiter_email",
+                "role": "$applications.role",
+                "status": "$applications.status",
+                "referred": "$applications.referred",
+                "active": "$applications.active",
+                "archived": "$applications.archived",
+            }
+        },
+    ]
+
+    results = list(db.member_users.aggregate(pipeline))
+    return results
+
+
+def update_application(
+    db: Database,
+    *,
+    user_id: str,
+    application_id: str,  # UUID
+    data: application_schema.ApplicationUpdate,
+) -> bool:
+    """Update an application using array filters with UUID"""
+    from bson import ObjectId
+
+    # Prepare update data
+    update_fields = {}
+    if data.status is not None:
+        update_fields["applications.$[app].status"] = data.status
+    if data.referred is not None:
+        update_fields["applications.$[app].referred"] = data.referred
+    if data.notes is not None:
+        update_fields["applications.$[app].notes"] = data.notes
+    if data.recruiter_name is not None:
+        update_fields["applications.$[app].recruiter_name"] = data.recruiter_name
+    if data.recruiter_email is not None:
+        update_fields["applications.$[app].recruiter_email"] = data.recruiter_email
+    if data.location is not None:
+        update_fields["applications.$[app].location"] = {
+            "country": data.location.country,
+            "city": data.location.city,
+        }
+
+    # Update using array filter to target specific application by UUID
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields},
+        array_filters=[{"app.id": application_id}],
+    )
+
+    return result.modified_count > 0
+
+
+def archive_application(db: Database, *, user_id: str, application_id: str) -> bool:
+    """Archive an application using array filter with UUID"""
+    from bson import ObjectId
+
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"applications.$[app].archived": True}},
+        array_filters=[{"app.id": application_id}],
+    )
+
+    return result.modified_count > 0
+
+
+def delete_application(db: Database, *, user_id: str, application_id: str) -> bool:
+    """Delete an application from user's applications array by UUID"""
+    from bson import ObjectId
+
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$pull": {"applications": {"id": application_id}}}
+    )
+
+    return result.modified_count > 0
+
+
+# ============= Resume CRUD Operations (Embedded in member_users) =============
 
 
 def read_resumes(db: Database, *, user_id: str) -> list[application_models.Resume]:
-    """Read all resumes for a user from MongoDB"""
+    """Read all resumes for a user from their embedded resumes array"""
     from bson import ObjectId
 
-    resumes_data = db.resumes.find({"user_id": ObjectId(user_id)}).sort("date", -1)
-    return [application_models.Resume(**resume) for resume in resumes_data]
+    user = db.member_users.find_one({"_id": ObjectId(user_id)}, {"resumes": 1})
+
+    if not user or "resumes" not in user:
+        return []
+
+    return [application_models.Resume(**resume) for resume in user.get("resumes", [])]
 
 
 def upload_file(file, parent) -> application_schema.FileUpload:
@@ -150,128 +226,45 @@ def upload_file(file, parent) -> application_schema.FileUpload:
 def create_resume(
     db: Database, file, user_id: str, role: str = "", notes: str = ""
 ) -> application_models.Resume:
-    """Upload and create a new resume for a member"""
+    """Upload and create a new resume for a member (embedded in user document)"""
     from bson import ObjectId
 
     # Upload to Google Drive
     uploaded_file = upload_file(file=file, parent=settings.GDRIVE_RESUMES)
 
-    new_resume_data = {
+    new_resume = {
+        "id": str(uuid4()),  # Generate unique ID
         "file_id": uploaded_file.file_id,
         "name": uploaded_file.name,
         "link": uploaded_file.link[: uploaded_file.link.find("&export=download")]
         if "&export=download" in uploaded_file.link
         else uploaded_file.link,
         "date": date.today().strftime("%Y-%m-%d"),
-        "user_id": ObjectId(user_id),
         "role": role,
         "notes": notes,
     }
 
-    # Insert into MongoDB
-    result = db.resumes.insert_one(new_resume_data)
-    new_resume_data["_id"] = result.inserted_id
-
-    # Add to user's resume_file_ids for fast retrieval
-    user_crud.add_resume_file_id(db, user_id=user_id, file_id=str(result.inserted_id))
-
-    return application_models.Resume(**new_resume_data)
-
-
-def delete_resume(db: Database, *, file_id: str, user_id: str) -> bool:
-    """Delete a resume by ID (only if it belongs to the user)"""
-    from bson import ObjectId
-
-    if not ObjectId.is_valid(file_id):
-        return False
-
-    # Delete from MongoDB
-    result = db.resumes.delete_one(
-        {"_id": ObjectId(file_id), "user_id": ObjectId(user_id)}
+    # Add to user's resumes array using $push
+    db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$push": {"resumes": new_resume}}
     )
 
-    # Remove from user's resume_file_ids
-    if result.deleted_count > 0:
-        user_crud.remove_resume_file_id(db, user_id=user_id, file_id=file_id)
-
-    return result.deleted_count > 0
+    return application_models.Resume(**new_resume)
 
 
-# ============= Essay CRUD Operations (1 of each type per member) =============
-def update_application(
-    db: Database,
-    *,
-    user_id: str,
-    application_id: str,
-    data: application_schema.ApplicationUpdate,
-) -> application_models.Application:
-    """Update an application with new data"""
+def delete_resume(db: Database, *, resume_id: str, user_id: str) -> bool:
+    """Delete a resume by UUID from user's embedded resumes array"""
     from bson import ObjectId
 
-    # Verify user exists
-    user = user_crud.read_user_by_id(db, id=user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    # Remove from user's resumes array using $pull
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$pull": {"resumes": {"id": resume_id}}}
+    )
 
-    # Get the application
-    application = read_application_by_id(db, application_id=application_id)
-    if not application:
-        raise HTTPException(status_code=404, detail="Application not found")
-
-    # Prepare update data
-    update_data = {
-        "status": data.status,
-        "referred": data.referred,
-        "notes": data.notes,
-        "recruiter_name": data.recruiter_name,
-        "recruiter_email": data.recruiter_email,
-        "location": {
-            "country": data.location.country,
-            "city": data.location.city,
-        },
-    }
-
-    # Update in MongoDB
-    db.applications.update_one({"_id": ObjectId(application_id)}, {"$set": update_data})
-
-    # Fetch and return updated application
-    updated_app = db.applications.find_one({"_id": ObjectId(application_id)})
-    return application_models.Application(**updated_app)
+    return result.modified_count > 0
 
 
-def archive_application(
-    db: Database, *, user_id: str, application_id: str
-) -> application_models.Application:
-    application = read_application_by_id(db, application_id=application_id)
-    if not application:
-        ...
-
-    if application.user_id != user_id:
-        return None
-
-    application.archived = True
-
-    db.add(application)
-    db.commit()
-    db.refresh(application)
-
-    return application
-
-
-def delete_application(
-    db: Database, *, application_id: str
-) -> application_models.Application:
-    application = read_application_by_id(db, application_id=application_id)
-    if not application:
-        ...
-
-    application.active = False
-
-    db.add(application)
-    db.commit()
-    db.refresh(application)
-
-    return application
+# ============= Helper Functions =============
 
 
 def upload_member_file(file, parent) -> application_schema.FileUpload:

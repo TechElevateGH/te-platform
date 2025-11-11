@@ -1,14 +1,14 @@
 from app.ents.application.endpoints import (
-    apps_router,
-    user_apps_router,
-    resumes_router,
+    applications_router,
+    user_applications_router,
+    user_resumes_router,
 )
 from app.ents.referral_company.endpoints import referral_company_router, referral_router
 from app.ents.home.endpoints import home_router
 from app.ents.learning.endpoints import router as learning_router
 from app.ents.problem.endpoints import router as problem_router
 from app.ents.user.auth import router as auth_router
-from app.ents.user.endpoints import router as user_router
+from app.ents.user.endpoints import router as users_router
 from app.ents.resumereview.endpoints import router as resume_review_router
 from fastapi import APIRouter
 
@@ -17,16 +17,20 @@ api_router = APIRouter()
 # Public endpoints
 api_router.include_router(home_router, tags=["Home"])
 
-# Authentication endpoints - professional /auth/* structure
+# Authentication
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 
-# User management endpoints
-api_router.include_router(user_router, tags=["Users"])
+# User management
+api_router.include_router(users_router)  # Tags: Users
 
-# Application management
-api_router.include_router(apps_router, tags=["Applications"])
-api_router.include_router(resumes_router, tags=["Resumes"])
-api_router.include_router(user_apps_router, tags=["User Applications"])
+# Applications & Resumes (embedded in user documents)
+api_router.include_router(
+    user_applications_router
+)  # Has its own tags from router definition
+api_router.include_router(applications_router)  # Admin/Lead endpoints
+api_router.include_router(
+    user_resumes_router
+)  # Has its own tags from router definition
 
 # Company and referral management
 api_router.include_router(referral_company_router, tags=["Referral Companies"])

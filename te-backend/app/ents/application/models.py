@@ -39,10 +39,9 @@ class PyObjectId(ObjectId):
 
 
 class Application(BaseModel):
-    """MongoDB Application document model"""
+    """Embedded Application document - stored in MemberUser.applications array"""
 
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    user_id: PyObjectId
+    id: str  # UUID for identifying this application
     company: str  # Just store company name as string
     location: dict  # Store location as {"country": "...", "city": "..."}
     date: str
@@ -57,16 +56,13 @@ class Application(BaseModel):
     archived: bool = False
 
     class Config:
-        populate_by_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
 
 
 class Resume(BaseModel):
-    """MongoDB Resume document model - Members can have multiple resumes"""
+    """Embedded Resume document - stored in MemberUser.resumes array"""
 
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    user_id: PyObjectId
+    id: str  # UUID for identifying this resume
     file_id: str  # Google Drive file ID
     date: str
     link: str  # Google Drive link
@@ -75,9 +71,7 @@ class Resume(BaseModel):
     notes: str = ""  # Additional notes about this resume
 
     class Config:
-        populate_by_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
 
 
 class ResumeReview(BaseModel):

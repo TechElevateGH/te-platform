@@ -4,33 +4,131 @@ import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.database import Database
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["Users"])
+
+
+# ============= Privileged User Management (Admin Only) =============
 
 
 @router.get("/privileged", response_model=list[Dict[str, Any]])
-def get_all_privileged_users(
+def list_privileged_users(
     db: Database = Depends(session.get_db),
     _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
-    Get all privileged users (Admin only).
-    Returns list of all privileged users (role >= 2).
+    List all privileged users (Admin only).
+
+    Returns all users with role >= 2 (Leads, Admins, Referrers, etc.)
+
+    **Requires**: Admin (role=5) access
     """
     users = user_crud.read_all_privileged_users(db)
     return users
 
 
+@router.post(
+    "/privileged/leads",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_lead_account(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.LeadCreate,
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Create a new Lead account (Admin only).
+
+    - **data**: Lead account details (username, company association, etc.)
+    - Returns: User info and secure token (visible only once)
+
+    **Important**: The generated token should be shared securely with the Lead user.
+    It cannot be retrieved again after creation.
+
+    **Requires**: Admin (role=5) access
+    """
+    result = user_crud.create_lead_user(db, data=data)
+    return {
+        "lead": result,
+        "message": "Lead account created successfully. Please share the token securely with the user.",
+    }
+
+
+@router.post(
+    "/privileged/referrers",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_referrer_account(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.ReferrerCreate,
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Create a new Referrer account (Admin only).
+
+    Referrers can only view referral requests for their assigned company.
+
+    - **data**: Referrer account details (username, assigned company, etc.)
+    - Returns: User info and secure token (visible only once)
+
+    **Important**: The generated token should be shared securely with the Referrer.
+    It cannot be retrieved again after creation.
+
+    **Requires**: Admin (role=5) access
+    """
+    result = user_crud.create_referrer_user(db, data=data)
+    return {
+        "referrer": result,
+        "message": "Referrer account created successfully. Please share the token securely with the user.",
+    }
+
+
+@router.patch("/privileged/{user_id}", response_model=Dict[str, Any])
+def update_privileged_user(
+    *,
+    db: Database = Depends(session.get_db),
+    user_id: str,
+    data: user_schema.PrivilegedUserUpdate,
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Update a privileged user account (Admin only).
+
+    Can update username, token, and active status.
+
+    - **user_id**: Privileged user's ID
+    - **data**: Fields to update
+    - Returns: Updated user information
+
+    **Requires**: Admin (role=5) access
+    """
+    result = user_crud.update_privileged_user(db, user_id=user_id, data=data)
+    return {
+        "user": result,
+        "message": "Privileged account updated successfully.",
+    }
+
+
+# ============= Member User Management =============
+
+
 @router.get("", response_model=list[Dict[str, Any]])
-def get_all_member_users(
+def list_member_users(
     db: Database = Depends(session.get_db),
     _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
-    Get all member users (Admin only).
-    Returns list of all member users (role = 1).
+    List all member users (Admin only).
+
+    Returns all users with role = 1 (Members).
+
+    **Requires**: Admin (role=5) access
     """
     users = user_crud.read_all_users(db)
     # Convert to dict format for JSON serialization
@@ -45,20 +143,56 @@ def get_all_member_users(
     return result
 
 
+@router.post(
+    "",
+    response_model=Dict[str, user_schema.MemberUserRead],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_member_user(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.MemberUserCreate,
+) -> Any:
+    """
+    Create a new Member user account (public registration).
+
+    - **data**: Member account details (email, password, name, etc.)
+    - Returns: Created user information
+
+    **Note**: This is a public endpoint for member self-registration.
+    Password is automatically hashed before storage.
+    """
+    new_user = user_crud.create_user(db, data=data)
+    return {"user": user_schema.MemberUserRead(**vars(new_user))}
+
+
 @router.get("/{user_id}", response_model=Dict[str, user_schema.MemberUserRead])
 def get_user_by_id(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get user with id `user_id`
+    Retrieve user details by ID.
+
+    - **user_id**: User's ID
+    - Returns: User information
+
+    **Authorization**:
+    - Members (role=1): Can only view their own profile
+    - Leads/Admins: Can view any user's profile
     """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only view your own profile",
+        )
+
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
-        from fastapi import HTTPException, status
-
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
@@ -66,114 +200,94 @@ def get_user_by_id(
 
 
 @router.patch("/{user_id}", response_model=Dict[str, user_schema.MemberUserRead])
-def update_user_profile(
+def update_member_profile(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
     data: user_schema.MemberUserUpdate,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Update user profile information
+    Update member user profile information.
+
+    - **user_id**: User's ID
+    - **data**: Fields to update (name, contact, university, etc.)
+    - Returns: Updated user information
+
+    **Authorization**:
+    - Members (role=1): Can only update their own profile
+    - Admins: Can update any member's profile
     """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only update your own profile",
+        )
+
     updated_user = user_crud.update_user_profile(db, user_id=user_id, data=data)
     return {"user": user_schema.MemberUserRead(**vars(updated_user))}
 
 
-@router.post("", response_model=Dict[str, user_schema.MemberUserRead])
-def create_user(
-    *,
-    db: Database = Depends(session.get_db),
-    data: user_schema.MemberUserCreate,
-) -> Any:
-    """
-    Create a User.
-    """
-    new_user = user_crud.create_user(db, data=data)
-    return {"user": user_schema.MemberUserRead(**vars(new_user))}
-
-
-@router.post("/leads", response_model=Dict[str, Any])
-def create_lead_account(
-    *,
-    db: Database = Depends(session.get_db),
-    data: user_schema.LeadCreate,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
-) -> Any:
-    """
-    Create a Lead account (Admin only).
-    Returns user info and a secure token that should be shared with the Lead user.
-    This token can only be viewed once at creation.
-    """
-    result = user_crud.create_lead_user(db, data=data)
-    return {
-        "lead": result,
-        "message": "Lead account created successfully. Please share the token securely with the user.",
-    }
-
-
-@router.patch("/privileged/{user_id}", response_model=Dict[str, Any])
-def update_privileged_account(
-    *,
-    db: Database = Depends(session.get_db),
-    user_id: str,
-    data: user_schema.PrivilegedUserUpdate,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
-) -> Any:
-    """
-    Update a privileged user account (Admin only).
-    Can update username, token, and active status.
-    """
-    result = user_crud.update_privileged_user(db, user_id=user_id, data=data)
-    return {
-        "user": result,
-        "message": "Privileged account updated successfully.",
-    }
-
-
-@router.post("/referrers", response_model=Dict[str, Any])
-def create_referrer_account(
-    *,
-    db: Database = Depends(session.get_db),
-    data: user_schema.ReferrerCreate,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
-) -> Any:
-    """
-    Create a Referrer account (Admin only).
-    Referrers can only view referral requests for their assigned company.
-    Returns user info and a secure token that should be shared with the Referrer user.
-    This token can only be viewed once at creation.
-    """
-    result = user_crud.create_referrer_user(db, data=data)
-    return {
-        "referrer": result,
-        "message": "Referrer account created successfully. Please share the token securely with the user.",
-    }
+# ============= Essay Management (Text stored in user document) =============
 
 
 @router.get("/{user_id}/essay", response_model=user_schema.Essay)
-def get_essay(
+def get_referral_essay(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
+    """
+    Retrieve user's referral essay.
+
+    - **user_id**: User's ID
+    - Returns: Referral essay text
+
+    **Authorization**:
+    - Members: Can view their own essay
+    - Leads/Admins: Can view any member's essay
+    """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Can only view your own essay"
+        )
+
     essay = user_crud.read_user_essay(db, user_id=user_id)
     return user_schema.Essay(essay=essay)
 
 
 @router.post("/{user_id}/essay", response_model=user_schema.Essay)
-def update_essay(
+def update_referral_essay(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
     data: user_schema.Essay,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ):
     """
-    Update essay for user.
+    Update user's referral essay.
+
+    - **user_id**: User's ID (must match authenticated user)
+    - **data**: Essay text content
+    - Returns: Updated essay text
+
+    **Note**: Essay is stored as text in the user's MongoDB document.
     Only available for Members (role=1).
     """
+    # Ensure user can only update their own essay
+    if str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only update your own essay",
+        )
+
     essay = user_crud.add_user_essay(db, user_id=user_id, data=data)
     return user_schema.Essay(essay=essay)
 
@@ -183,8 +297,26 @@ def get_cover_letter(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ):
+    """
+    Retrieve user's cover letter.
+
+    - **user_id**: User's ID
+    - Returns: Cover letter text
+
+    **Authorization**:
+    - Members: Can view their own cover letter
+    - Leads/Admins: Can view any member's cover letter
+    """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only view your own cover letter",
+        )
+
     cover_letter = user_crud.read_user_cover_letter(db, user_id=user_id)
     return user_schema.CoverLetter(cover_letter=cover_letter)
 
@@ -195,59 +327,90 @@ def update_cover_letter(
     *,
     user_id: str,
     data: user_schema.CoverLetter,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ):
     """
-    Update cover letter for user.
+    Update user's cover letter.
+
+    - **user_id**: User's ID (must match authenticated user)
+    - **data**: Cover letter text content
+    - Returns: Updated cover letter text
+
+    **Note**: Cover letter is stored as text in the user's MongoDB document.
     Only available for Members (role=1).
     """
+    # Ensure user can only update their own cover letter
+    if str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only update your own cover letter",
+        )
+
     cover_letter = user_crud.add_user_cover_letter(db, user_id=user_id, data=data)
     return user_schema.CoverLetter(cover_letter=cover_letter)
 
 
-@router.get("/all-files", response_model=Dict[str, Any])
-def get_all_users_files(
+# ============= Admin Dashboard - All User Files =============
+
+
+@router.get("/files/all", response_model=Dict[str, Any])
+def list_all_user_files(
     db: Database = Depends(session.get_db),
     *,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get all users with their files (Lead and Admin only).
-    Returns list of users with their resumes and essays.
+    Retrieve all members' files and essays (Lead/Admin dashboard).
+
+    Returns aggregated view of:
+    - All resumes (PDFs in Google Drive)
+    - Referral essays (text)
+    - Cover letters (text)
+
+    Uses MongoDB projection for efficient queries.
+
+    **Requires**: Lead (role >= 4) or Admin (role >= 5) access
     """
     from app.core.permissions import require_lead
 
     # Require at least Lead access
     require_lead(current_user)
 
-    import app.ents.application.crud as application_crud
+    # Use projection to fetch only needed fields from member_users
+    users_data = db.member_users.find(
+        {"role": user_schema.UserRoles.member.value},
+        {
+            "_id": 1,
+            "full_name": 1,
+            "email": 1,
+            "resumes": 1,
+            "referral_essay": 1,
+            "cover_letter": 1,
+        },
+    )
 
-    users = user_crud.read_all_users(db)
     users_with_files = []
-
-    for user in users:
-        # Only include members (role = 1)
-        if user.role != user_schema.UserRoles.member.value:
-            continue
-
-        # Get user's resumes
-        resumes = application_crud.read_resumes(db, user_id=str(user.id))
-
+    for user in users_data:
         user_data = {
-            "id": str(user.id),
-            "full_name": user.full_name,
-            "email": user.email,
+            "id": str(user["_id"]),
+            "full_name": user.get("full_name", ""),
+            "email": user.get("email", ""),
             "resumes": [
                 {
-                    "id": str(f.id),
-                    "name": f.name,
-                    "url": f.link,
-                    "uploaded_at": f.date,
+                    "id": r.get("id", ""),  # UUID
+                    "file_id": r.get("file_id", ""),
+                    "name": r.get("name", ""),
+                    "url": r.get("link", ""),
+                    "uploaded_at": r.get("date", ""),
+                    "role": r.get("role", ""),
+                    "notes": r.get("notes", ""),
                 }
-                for f in resumes
+                for r in user.get("resumes", [])
             ],
-            "referral_essay": user.referral_essay or "",
-            "cover_letter": user.cover_letter or "",
+            "referral_essay": user.get("referral_essay", ""),
+            "cover_letter": user.get("cover_letter", ""),
         }
         users_with_files.append(user_data)
 

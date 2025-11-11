@@ -72,7 +72,8 @@ class MemberUserBase(BaseModel):
     university: str = ""
     referral_essay: str = ""  # Referral essay text
     cover_letter: str = ""  # Cover letter text
-    resume_file_ids: list[str] = []  # List of MongoDB ObjectId strings for resume files
+    resumes: list = []  # List of embedded Resume objects
+    applications: list = []  # List of embedded Application objects
     mentor_id: Optional[int] = None
     is_active: bool = True
     role: UserRoles = UserRoles.member

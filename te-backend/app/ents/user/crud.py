@@ -271,30 +271,6 @@ def add_user_cover_letter(
     return data.cover_letter
 
 
-def add_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
-    """Add resume file ID to user's resume_file_ids list in MongoDB"""
-    from bson import ObjectId
-
-    result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$addToSet": {"resume_file_ids": file_id}}
-    )
-
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-
-
-def remove_resume_file_id(db: Database, *, user_id: str, file_id: str) -> None:
-    """Remove resume file ID from user's resume_file_ids list in MongoDB"""
-    from bson import ObjectId
-
-    result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$pull": {"resume_file_ids": file_id}}
-    )
-
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-
-
 def update_user_profile(
     db: Database, *, user_id: str, data: user_schema.MemberUserUpdate
 ) -> user_models.MemberUser:
