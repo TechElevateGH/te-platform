@@ -233,9 +233,9 @@ def get_all_users_files(
         # Get user's files
         files = application_crud.read_user_application_files(db, user_id=str(user.id))
 
-        # Separate resumes and essays
-        resumes = [f for f in files if f.type == "resume"]
-        essays = [f for f in files if f.type == "essay"]
+        # Separate resumes and essays (case-insensitive)
+        resumes = [f for f in files if f.type.lower() == "resume"]
+        essays = [f for f in files if f.type.lower() == "essay"]
 
         user_data = {
             "id": str(user.id),
@@ -245,8 +245,8 @@ def get_all_users_files(
                 {
                     "id": str(f.id),
                     "name": f.name,
-                    "url": f.url,
-                    "uploaded_at": f.uploaded_at,
+                    "url": f.link,
+                    "uploaded_at": f.date,
                 }
                 for f in resumes
             ],
@@ -254,8 +254,8 @@ def get_all_users_files(
                 {
                     "id": str(f.id),
                     "name": f.name,
-                    "url": f.url,
-                    "uploaded_at": f.uploaded_at,
+                    "url": f.link,
+                    "uploaded_at": f.date,
                 }
                 for f in essays
             ],

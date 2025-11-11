@@ -98,9 +98,53 @@ export const NotificationProvider = ({ children }) => {
                     setUnreadCount(updated.filter(n => !n.read).length);
                     return updated;
                 });
+
+                // For members: check referral request updates
+                const referralsResponse = await axiosInstance.get('/referralcompanies/my-referrals', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const myReferrals = referralsResponse.data?.referrals || [];
+                const referralNotifications = myReferrals
+                    .filter(referral => {
+                        const feedbackDate = referral.feedback_date
+                            ? new Date(referral.feedback_date)
+                            : null;
+
+                        if (!feedbackDate) return false;
+
+                        const lastCheck = lastChecked ? new Date(lastChecked) : new Date(0);
+
+                        // Show notification if there's feedback or status changed to Completed/Declined
+                        const hasUpdate = referral.review_note ||
+                            referral.status === 'Completed' ||
+                            referral.status === 'Declined';
+
+                        return feedbackDate > lastCheck && hasUpdate;
+                    })
+                    .map(referral => ({
+                        id: `referral_${referral.id}`,
+                        type: 'referral_update',
+                        title: 'Referral Request Updated',
+                        message: referral.review_note
+                            ? `Your referral request for "${referral.job_title}" at ${referral.company?.name} has feedback`
+                            : `Your referral request for "${referral.job_title}" at ${referral.company?.name} status changed to ${referral.status}`,
+                        link: '/workspace/referrals',
+                        timestamp: referral.feedback_date || referral.date,
+                        read: false
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id));
+
+                setNotifications(prev => {
+                    // Remove old referral_update notifications and add new ones
+                    const filtered = prev.filter(n => n.type !== 'referral_update');
+                    const updated = [...referralNotifications, ...filtered];
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
             }
 
-            // For volunteers+: check for new resume review requests
+            // For volunteers+: check for new resume review requests and new referral requests
             if (isVolunteerOrAbove) {
                 const response = await axiosInstance.get('/resume-reviews/all', {
                     headers: { Authorization: `Bearer ${accessToken}` }
@@ -131,6 +175,36 @@ export const NotificationProvider = ({ children }) => {
                     const filtered = prev.filter(n => n.type !== 'new_request');
                     const updated = [...newRequests, ...filtered];
                     // Update unread count based on all unread notifications
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
+
+                // Check for new referral requests
+                const allReferralsResponse = await axiosInstance.get('/referralcompanies/all', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const allReferrals = allReferralsResponse.data?.referrals || [];
+                const newReferralRequests = allReferrals
+                    .filter(referral => {
+                        const submittedDate = new Date(referral.date);
+                        return referral.status === 'Pending' && submittedDate > lastCheck;
+                    })
+                    .map(referral => ({
+                        id: `ref_request_${referral.id}`,
+                        type: 'new_referral_request',
+                        title: 'New Referral Request',
+                        message: `${referral.user_name} requested referral for "${referral.job_title}" at ${referral.company?.name}`,
+                        link: '/workspace/referrals',
+                        timestamp: referral.date,
+                        read: false
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id));
+
+                setNotifications(prev => {
+                    // Remove old new_referral_request notifications and add new ones
+                    const filtered = prev.filter(n => n.type !== 'new_referral_request');
+                    const updated = [...newReferralRequests, ...filtered];
                     setUnreadCount(updated.filter(n => !n.read).length);
                     return updated;
                 });

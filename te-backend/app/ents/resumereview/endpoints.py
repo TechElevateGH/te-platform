@@ -121,7 +121,9 @@ def cancel_resume_review_request(
         db,
         review_id=review_id,
         reviewer_id=str(current_user.id),
-        reviewer_name=current_user.full_name if hasattr(current_user, "full_name") else current_user.username,
+        reviewer_name=current_user.full_name
+        if hasattr(current_user, "full_name")
+        else current_user.username,
         data=review_schema.ResumeReviewUpdate(status="Cancelled"),
     )
 
