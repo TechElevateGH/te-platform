@@ -17,10 +17,32 @@ export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [lastChecked, setLastChecked] = useState(null);
+    const [dismissedIds, setDismissedIds] = useState(new Set());
 
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const isMember = userRoleInt === 1;
     const isVolunteerOrAbove = userRoleInt >= 3;
+
+    // Load dismissed notification IDs from localStorage
+    useEffect(() => {
+        if (userId) {
+            const stored = localStorage.getItem(`dismissedNotifications_${userId}`);
+            if (stored) {
+                try {
+                    setDismissedIds(new Set(JSON.parse(stored)));
+                } catch (e) {
+                    console.error('Error loading dismissed notifications:', e);
+                }
+            }
+        }
+    }, [userId]);
+
+    // Save dismissed notification IDs to localStorage
+    const saveDismissedIds = (ids) => {
+        if (userId) {
+            localStorage.setItem(`dismissedNotifications_${userId}`, JSON.stringify([...ids]));
+        }
+    };
 
     // Fetch notifications
     const fetchNotifications = useCallback(async () => {
@@ -65,7 +87,8 @@ export const NotificationProvider = ({ children }) => {
                         link: '/workspace/resume-reviews',
                         timestamp: review.updated_at || review.review_date || review.assigned_date,
                         read: false
-                    }));
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id)); // Filter out dismissed
 
                 setNotifications(prev => {
                     // Remove old review_update notifications and add new ones
@@ -100,7 +123,8 @@ export const NotificationProvider = ({ children }) => {
                         link: '/admin/files',
                         timestamp: review.submitted_date,
                         read: false
-                    }));
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id)); // Filter out dismissed
 
                 setNotifications(prev => {
                     // Remove old new_request notifications and add new ones
@@ -114,7 +138,7 @@ export const NotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching notifications:', error);
         }
-    }, [accessToken, isMember, isVolunteerOrAbove, lastChecked]);
+    }, [accessToken, isMember, isVolunteerOrAbove, lastChecked, dismissedIds]);
 
     // Poll for notifications every 30 seconds
     useEffect(() => {
@@ -128,15 +152,23 @@ export const NotificationProvider = ({ children }) => {
 
     // Mark notification as read
     const markAsRead = (notificationId) => {
-        setNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-        );
+        const newDismissedIds = new Set(dismissedIds);
+        newDismissedIds.add(notificationId);
+        setDismissedIds(newDismissedIds);
+        saveDismissedIds(newDismissedIds);
+
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
         setUnreadCount(prev => Math.max(0, prev - 1));
     };
 
     // Mark all as read
     const markAllAsRead = () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        const newDismissedIds = new Set(dismissedIds);
+        notifications.forEach(n => newDismissedIds.add(n.id));
+        setDismissedIds(newDismissedIds);
+        saveDismissedIds(newDismissedIds);
+
+        setNotifications([]);
         setUnreadCount(0);
         setLastChecked(new Date().toISOString());
         localStorage.setItem(`lastNotificationCheck_${userId}`, new Date().toISOString());
@@ -144,8 +176,15 @@ export const NotificationProvider = ({ children }) => {
 
     // Clear all notifications
     const clearAll = () => {
+        const newDismissedIds = new Set(dismissedIds);
+        notifications.forEach(n => newDismissedIds.add(n.id));
+        setDismissedIds(newDismissedIds);
+        saveDismissedIds(newDismissedIds);
+
         setNotifications([]);
         setUnreadCount(0);
+        setLastChecked(new Date().toISOString());
+        localStorage.setItem(`lastNotificationCheck_${userId}`, new Date().toISOString());
     };
 
     // Initialize last checked from localStorage

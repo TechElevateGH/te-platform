@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
 import { BellIcon, CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { BellAlertIcon } from '@heroicons/react/24/solid';
@@ -8,7 +7,6 @@ const NotificationBell = () => {
     const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const navigate = useNavigate();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -22,10 +20,9 @@ const NotificationBell = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleNotificationClick = (notification) => {
-        markAsRead(notification.id);
-        navigate(notification.link);
-        setIsOpen(false);
+    const handleMarkAsRead = (e, notificationId) => {
+        e.stopPropagation();
+        markAsRead(notificationId);
     };
 
     const getTimeAgo = (timestamp) => {
@@ -100,26 +97,20 @@ const NotificationBell = () => {
 
                     {/* Notifications List */}
                     <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
+                        {notifications.filter(n => !n.read).length === 0 ? (
                             <div className="px-4 py-8 text-center">
                                 <BellIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No notifications</p>
                                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">You're all caught up!</p>
                             </div>
                         ) : (
-                            notifications.map((notification) => (
+                            notifications.filter(n => !n.read).map((notification) => (
                                 <div
                                     key={notification.id}
-                                    onClick={() => handleNotificationClick(notification)}
-                                    className={`px-4 py-3 border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-colors ${notification.read
-                                        ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                        : 'bg-red-50/50 dark:bg-red-900/10 hover:bg-red-100/50 dark:hover:bg-red-900/20'
-                                        }`}
+                                    className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 transition-colors bg-red-50/50 dark:bg-red-900/10"
                                 >
                                     <div className="flex items-start gap-3">
-                                        {!notification.read && (
-                                            <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-red-600"></span>
-                                        )}
+                                        <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-red-600"></span>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
                                                 {notification.title}
@@ -131,6 +122,13 @@ const NotificationBell = () => {
                                                 {getTimeAgo(notification.timestamp)}
                                             </p>
                                         </div>
+                                        <button
+                                            onClick={(e) => handleMarkAsRead(e, notification.id)}
+                                            className="flex-shrink-0 p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800 rounded hover:border-red-300 dark:hover:border-red-700 transition-all"
+                                            title="Mark as read"
+                                        >
+                                            <CheckIcon className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </div>
                             ))
