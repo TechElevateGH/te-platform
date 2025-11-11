@@ -100,23 +100,13 @@ const Hero = () => {
             <span className="font-semibold text-gray-900 dark:text-white"> Africa and beyond</span> with world-class
             <span className="font-semibold text-gray-900 dark:text-white"> mentorship</span>,
             <span className="font-semibold text-gray-900 dark:text-white"> cutting-edge resources</span>, and
-            <span className="font-semibold text-gray-900 dark:text-white"> life-changing opportunities</span> at leading tech companies.
+            <span className="font-semibold text-gray-900 dark:text-white"> life-changing opportunities.</span>
           </p>
 
           {/* CTA / Auth-aware Buttons */}
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             {!isAuthenticated && (
               <>
-                <button
-                  onClick={() => navigate('/register')}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Get Started Free
-                    <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </button>
                 <button
                   onClick={() => navigate('/login')}
                   className="group px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
@@ -128,19 +118,29 @@ const Hero = () => {
                     </svg>
                   </span>
                 </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Get Started Free
+                    <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
               </>
             )}
             {isAuthenticated && (
               <>
                 <button
                   onClick={() => navigate('/workspace')}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                  className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500/90 to-blue-500/90 backdrop-blur-md text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden border border-white/20"
                 >
                   <span className="relative z-10 flex items-center gap-2">
                     Go to Workspace
                     <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-700 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/90 to-blue-600/90 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
                 <button
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
