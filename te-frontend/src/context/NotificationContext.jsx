@@ -1,0 +1,175 @@
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
+import axiosInstance from '../axiosConfig';
+
+const NotificationContext = createContext();
+
+export const useNotifications = () => {
+    const context = useContext(NotificationContext);
+    if (!context) {
+        throw new Error('useNotifications must be used within NotificationProvider');
+    }
+    return context;
+};
+
+export const NotificationProvider = ({ children }) => {
+    const { accessToken, userId, userRole } = useAuth();
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [lastChecked, setLastChecked] = useState(null);
+
+    const userRoleInt = userRole ? parseInt(userRole) : 0;
+    const isMember = userRoleInt === 1;
+    const isVolunteerOrAbove = userRoleInt >= 3;
+
+    // Fetch notifications
+    const fetchNotifications = useCallback(async () => {
+        if (!accessToken) return;
+
+        try {
+            // For members: check their resume reviews for updates
+            if (isMember) {
+                const response = await axiosInstance.get('/resume-reviews/my-requests', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const myReviews = response.data?.reviews || [];
+                const lastCheck = lastChecked ? new Date(lastChecked) : new Date(0);
+
+                // Find reviews with new feedback or status changes since last check
+                const newNotifications = myReviews
+                    .filter(review => {
+                        // Check if review was updated after our last check
+                        const updateTime = review.updated_at
+                            ? new Date(review.updated_at)
+                            : review.review_date
+                                ? new Date(review.review_date)
+                                : review.assigned_date
+                                    ? new Date(review.assigned_date)
+                                    : null;
+
+                        if (!updateTime) return false;
+
+                        // Only show notification if there's actual content (feedback or non-pending status)
+                        const hasUpdate = review.feedback || review.status !== 'Pending';
+
+                        return updateTime > lastCheck && hasUpdate;
+                    })
+                    .map(review => ({
+                        id: `review_${review.id}`,
+                        type: 'review_update',
+                        title: 'Resume Review Updated',
+                        message: review.feedback
+                            ? `Your review for "${review.job_title}" has new feedback`
+                            : `Your review for "${review.job_title}" status changed to ${review.status}`,
+                        link: '/workspace/resume-reviews',
+                        timestamp: review.updated_at || review.review_date || review.assigned_date,
+                        read: false
+                    }));
+
+                setNotifications(prev => {
+                    // Remove old review_update notifications and add new ones
+                    const filtered = prev.filter(n => n.type !== 'review_update');
+                    const updated = [...newNotifications, ...filtered];
+                    // Update unread count based on all unread notifications
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
+            }
+
+            // For volunteers+: check for new resume review requests
+            if (isVolunteerOrAbove) {
+                const response = await axiosInstance.get('/resume-reviews/all', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const allReviews = response.data?.reviews || [];
+                const lastCheck = lastChecked ? new Date(lastChecked) : new Date(0);
+
+                // Find new pending requests submitted after last check
+                const newRequests = allReviews
+                    .filter(review => {
+                        const submittedDate = new Date(review.submitted_date);
+                        return review.status === 'Pending' && submittedDate > lastCheck;
+                    })
+                    .map(review => ({
+                        id: `request_${review.id}`,
+                        type: 'new_request',
+                        title: 'New Resume Review Request',
+                        message: `${review.user_name} requested review for "${review.job_title}"`,
+                        link: '/admin/files',
+                        timestamp: review.submitted_date,
+                        read: false
+                    }));
+
+                setNotifications(prev => {
+                    // Remove old new_request notifications and add new ones
+                    const filtered = prev.filter(n => n.type !== 'new_request');
+                    const updated = [...newRequests, ...filtered];
+                    // Update unread count based on all unread notifications
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        }
+    }, [accessToken, isMember, isVolunteerOrAbove, lastChecked]);
+
+    // Poll for notifications every 30 seconds
+    useEffect(() => {
+        if (!accessToken) return;
+
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 30000);
+
+        return () => clearInterval(interval);
+    }, [accessToken, fetchNotifications]);
+
+    // Mark notification as read
+    const markAsRead = (notificationId) => {
+        setNotifications(prev =>
+            prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+    };
+
+    // Mark all as read
+    const markAllAsRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setUnreadCount(0);
+        setLastChecked(new Date().toISOString());
+        localStorage.setItem(`lastNotificationCheck_${userId}`, new Date().toISOString());
+    };
+
+    // Clear all notifications
+    const clearAll = () => {
+        setNotifications([]);
+        setUnreadCount(0);
+    };
+
+    // Initialize last checked from localStorage
+    useEffect(() => {
+        if (userId) {
+            const stored = localStorage.getItem(`lastNotificationCheck_${userId}`);
+            if (stored) {
+                setLastChecked(stored);
+            }
+        }
+    }, [userId]);
+
+    const value = {
+        notifications,
+        unreadCount,
+        markAsRead,
+        markAllAsRead,
+        clearAll,
+        fetchNotifications
+    };
+
+    return (
+        <NotificationContext.Provider value={value}>
+            {children}
+        </NotificationContext.Provider>
+    );
+};

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from bson import ObjectId
 from pymongo.database import Database
 from fastapi import HTTPException, status
@@ -62,6 +62,7 @@ def read_all_review_requests(db: Database) -> list[dict]:
                 "review_date": review.get("review_date"),
                 "feedback": review.get("feedback", ""),
                 "notes": review.get("notes", ""),
+                "updated_at": review.get("updated_at"),
             }
         )
     return result
@@ -94,6 +95,7 @@ def read_user_review_requests(db: Database, *, user_id: str) -> list[dict]:
                 "review_date": review.get("review_date"),
                 "feedback": review.get("feedback", ""),
                 "notes": review.get("notes", ""),
+                "updated_at": review.get("updated_at"),
             }
         )
     return result
@@ -109,6 +111,9 @@ def update_review_request(
 ) -> dict:
     """Update a resume review request"""
     update_data = {}
+    
+    # Always set updated_at when any update happens
+    update_data["updated_at"] = datetime.utcnow().isoformat()
 
     if data.status is not None:
         update_data["status"] = data.status
@@ -167,6 +172,7 @@ def update_review_request(
         "review_date": updated_review.get("review_date"),
         "feedback": updated_review.get("feedback", ""),
         "notes": updated_review.get("notes", ""),
+        "updated_at": updated_review.get("updated_at"),
     }
 
 

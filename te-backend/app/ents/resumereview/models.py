@@ -22,6 +22,7 @@ class ResumeReview(BaseModel):
     review_date: Optional[str] = None  # Date when reviewed
     feedback: str = ""  # Reviewer's feedback/comments
     notes: str = ""  # Additional notes
+    updated_at: Optional[str] = None  # Last update timestamp
 
     class Config:
         populate_by_name = True

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useDarkMode } from '../../context/DarkModeContext';
 import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
+import NotificationBell from './NotificationBell';
 
 const navigation = [
     { name: 'Home', href: '#home' },
@@ -127,6 +128,9 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                     {/* Right section: Auth Buttons */}
                     <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
+                        {/* Notification Bell - Show only when authenticated */}
+                        {isAuthenticated && <NotificationBell />}
+
                         {/* Dark Mode Toggle */}
                         <button
                             onClick={toggleDarkMode}
