@@ -230,12 +230,8 @@ def get_all_users_files(
         if user.role != user_schema.UserRoles.member.value:
             continue
 
-        # Get user's files
-        files = application_crud.read_user_application_files(db, user_id=str(user.id))
-
-        # Separate resumes and essays (case-insensitive)
-        resumes = [f for f in files if f.type.lower() == "resume"]
-        essays = [f for f in files if f.type.lower() == "essay"]
+        # Get user's resumes
+        resumes = application_crud.read_resumes(db, user_id=str(user.id))
 
         user_data = {
             "id": str(user.id),
@@ -250,15 +246,8 @@ def get_all_users_files(
                 }
                 for f in resumes
             ],
-            "essays": [
-                {
-                    "id": str(f.id),
-                    "name": f.name,
-                    "url": f.link,
-                    "uploaded_at": f.date,
-                }
-                for f in essays
-            ],
+            "referral_essay": user.referral_essay or "",
+            "cover_letter": user.cover_letter or "",
         }
         users_with_files.append(user_data)
 

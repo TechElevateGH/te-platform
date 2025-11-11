@@ -62,8 +62,8 @@ class Application(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class File(BaseModel):
-    """MongoDB File document model"""
+class Resume(BaseModel):
+    """MongoDB Resume document model - Members can have multiple resumes"""
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId
@@ -71,11 +71,8 @@ class File(BaseModel):
     date: str
     link: str  # Google Drive link
     name: str
-    role: str = ""  # Target role for this file
-    notes: str = ""  # Additional notes about this file
-    reviewed: bool = False
-    active: bool = True
-    type: str  # FileType enum value
+    role: str = ""  # Target role for this resume
+    notes: str = ""  # Additional notes about this resume
 
     class Config:
         populate_by_name = True

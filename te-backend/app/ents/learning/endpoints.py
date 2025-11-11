@@ -277,7 +277,7 @@ def lesson_file_upload(
     """
     Create other lesson.
     """
-    uploaded_file = application_crud.upload_file(
+    uploaded_file = application_crud.upload_member_file(
         file=file, parent=settings.GDRIVE_LESSONS
     )
     return {"file": uploaded_file}

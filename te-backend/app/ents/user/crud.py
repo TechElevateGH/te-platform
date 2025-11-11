@@ -209,20 +209,20 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
 
 
 def read_user_essay(db: Database, *, user_id: str) -> str:
-    """Read user essay from MongoDB"""
+    """Read user referral essay from MongoDB"""
     user = read_user_by_id(db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return user.essay
+    return user.referral_essay
 
 
 def add_user_essay(db: Database, *, user_id: str, data: user_schema.Essay) -> str:
-    """Add/update user essay in MongoDB"""
+    """Add/update user referral essay in MongoDB"""
     from bson import ObjectId
 
     result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": {"essay": data.essay}}
+        {"_id": ObjectId(user_id)}, {"$set": {"referral_essay": data.essay}}
     )
 
     if result.matched_count == 0:
@@ -232,12 +232,12 @@ def add_user_essay(db: Database, *, user_id: str, data: user_schema.Essay) -> st
 
 
 def update_essay(db: Database, user_id: str, *, data) -> str:
-    """Update user essay in MongoDB"""
+    """Update user referral essay in MongoDB"""
     from bson import ObjectId
 
     essay_text = data.get("essay")
     result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": {"essay": essay_text}}
+        {"_id": ObjectId(user_id)}, {"$set": {"referral_essay": essay_text}}
     )
 
     if result.matched_count == 0:

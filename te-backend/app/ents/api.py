@@ -1,7 +1,7 @@
 from app.ents.application.endpoints import (
-    app_router,
-    user_app_router,
-    user_files_router,
+    apps_router,
+    user_apps_router,
+    resumes_router,
 )
 from app.ents.referral_company.endpoints import referral_company_router, referral_router
 from app.ents.home.endpoints import home_router
@@ -24,9 +24,9 @@ api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(user_router, tags=["Users"])
 
 # Application management
-api_router.include_router(app_router, tags=["Applications"])
-api_router.include_router(user_files_router, tags=["Files"])
-api_router.include_router(user_app_router, tags=["User Applications"])
+api_router.include_router(apps_router, tags=["Applications"])
+api_router.include_router(resumes_router, tags=["Resumes"])
+api_router.include_router(user_apps_router, tags=["User Applications"])
 
 # Company and referral management
 api_router.include_router(referral_company_router, tags=["Referral Companies"])

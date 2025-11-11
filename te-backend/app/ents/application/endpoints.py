@@ -10,21 +10,21 @@ from app.utilities.errors import OperationCompleted, UnauthorizedUser
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status, HTTPException
 from pymongo.database import Database
 
-app_router = APIRouter(prefix="/applications")
-user_app_router = APIRouter(prefix="/users/{user_id}/applications")
-user_files_router = APIRouter(prefix="/users/{user_id}/files")
+apps_router = APIRouter(prefix="/applications")
+user_apps_router = APIRouter(prefix="/users/{user_id}/applications")
+resumes_router = APIRouter(prefix="/users/{user_id}/resumes")
 
 logger = logging.getLogger(__name__)
 
 
-def file_to_read(file):
-    """Convert File model to FileRead schema by converting ObjectId to string"""
-    file_dict = file.model_dump(by_alias=True)
-    file_dict["id"] = str(file_dict.pop("_id"))
-    return application_schema.FileRead(**file_dict)
+def resume_to_read(resume):
+    """Convert Resume model to ResumeRead schema by converting ObjectId to string"""
+    resume_dict = resume.model_dump(by_alias=True)
+    resume_dict["id"] = str(resume_dict.pop("_id"))
+    return application_schema.ResumeRead(**resume_dict)
 
 
-@user_app_router.post("", response_model=Dict[str, application_schema.ApplicationRead])
+@user_apps_router.post("", response_model=Dict[str, application_schema.ApplicationRead])
 def create_application(
     *,
     db: Database = Depends(session.get_db),
@@ -39,7 +39,7 @@ def create_application(
     return {"application": application_dependencies.parse_application(application)}
 
 
-@user_app_router.get(
+@user_apps_router.get(
     "", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )
 def get_user_applications(
@@ -62,7 +62,7 @@ def get_user_applications(
     }
 
 
-@app_router.get("/all")
+@apps_router.get("/all")
 def get_all_applications(
     db: Database = Depends(session.get_db),
     current_user=Depends(user_dependencies.get_current_user),
@@ -96,7 +96,7 @@ def get_all_applications(
         raise HTTPException(status_code=500, detail="Failed to load applications")
 
 
-@app_router.get(
+@apps_router.get(
     "/{application_id}",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
@@ -116,7 +116,7 @@ def get_user_application(
     return {"application": application_dependencies.parse_application(application)}
 
 
-@app_router.put(
+@apps_router.put(
     "/{application_id}",
     response_model=Dict[str, application_schema.ApplicationRead],
 )
@@ -138,7 +138,7 @@ def update_user_application(
     return {"application": application_dependencies.parse_application(application)}
 
 
-@app_router.put("/archive", status_code=status.HTTP_202_ACCEPTED)
+@apps_router.put("/archive", status_code=status.HTTP_202_ACCEPTED)
 def archive_user_application(
     db: Database = Depends(session.get_db),
     *,
@@ -157,7 +157,7 @@ def archive_user_application(
     return {"data": OperationCompleted()}
 
 
-@app_router.delete("/delete", status_code=status.HTTP_202_ACCEPTED)
+@apps_router.delete("/delete", status_code=status.HTTP_202_ACCEPTED)
 def delete_user_application(
     db: Database = Depends(session.get_db),
     *,
@@ -179,108 +179,58 @@ def delete_user_application(
     return {"data": OperationCompleted()}
 
 
-@user_files_router.get("", response_model=Dict[str, application_schema.FilesRead])
-def get_user_application_files(
+
+
+# ============= Resume Endpoints (Multiple resumes allowed per member) =============
+
+@resumes_router.get("", response_model=Dict[str, application_schema.ResumesRead])
+def get_resumes(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
     _=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve application files (resume and other files)
+    Retrieve all resumes for user `user_id`
     """
-    files = application_crud.read_user_application_files(db, user_id=user_id)
+    resumes = application_crud.read_resumes(db, user_id=user_id)
 
     return {
-        "files": application_schema.FilesRead(
-            resumes=[
-                file_to_read(file)
-                for file in files
-                if file.type == application_schema.FileType.resume.value
-            ],
-            other_files=[
-                file_to_read(file)
-                for file in files
-                if file.type == application_schema.FileType.otherFile.value
-            ],
+        "resumes": application_schema.ResumesRead(
+            resumes=[resume_to_read(resume) for resume in resumes]
         )
     }
 
 
-@user_files_router.post("", response_model=Dict[str, application_schema.FileRead])
-def add_file(
+@resumes_router.post("", response_model=Dict[str, application_schema.ResumeRead])
+def add_resume(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
-    kind: application_schema.FileType = Form(
-        default=application_schema.FileType.resume
-    ),
     file: UploadFile = File(...),
     role: str = Form(default=""),
     notes: str = Form(default=""),
     _=Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Upload resume for user `user_id` with role and notes.
-    Only PDF files are accepted for resumes.
+    Upload a new resume for user `user_id`.
+    Only PDF files are accepted.
     Only available for Members (role=1).
     """
-    # Validate file type - only accept PDFs for resumes
-    if kind == application_schema.FileType.resume:
-        if not file.filename.lower().endswith(".pdf"):
-            from fastapi import HTTPException
+    # Validate file type - only accept PDFs
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are accepted. Please upload a PDF file.",
+        )
 
-            raise HTTPException(
-                status_code=400,
-                detail="Only PDF files are accepted for resumes. Please upload a PDF file.",
-            )
+    uploaded_resume = application_crud.create_resume(db, file, user_id, role, notes)
 
-    uploaded_file = application_crud.create_file(db, kind, file, user_id, role, notes)
-
-    # Convert File model to FileRead schema, converting ObjectId to string
-    file_dict = uploaded_file.model_dump(by_alias=True)
-    file_dict["id"] = str(file_dict.pop("_id"))
-
-    return {"file": application_schema.FileRead(**file_dict)}
+    return {"resume": resume_to_read(uploaded_resume)}
 
 
-@user_files_router.get(
-    "/resumes", response_model=Dict[str, list[application_schema.FileRead]]
-)
-def get_user_resumes(
-    db: Database = Depends(session.get_db),
-    *,
-    user_id: str,
-    _=Depends(user_dependencies.get_current_user),
-) -> Any:
-    """
-    Get all resumes of user `user_id`
-    """
-    resumes = application_crud.get_user_files(
-        db, user_id, application_schema.FileType.resume
-    )
-
-    return {"resumes": [file_to_read(resume) for resume in resumes]}
-
-
-@user_files_router.get(
-    ".resumes", response_model=Dict[str, list[application_schema.FileRead]]
-)
-def resume_review(
-    db: Database = Depends(session.get_db),
-    *,
-    user_id: str,
-    _=Depends(user_dependencies.get_current_user),
-) -> Any:
-    """
-    Get all resumes of user `user_id`
-    """
-    resumes = application_crud.resume_review(db, user_id)
-    return {"resumes": [file_to_read(resume) for resume in resumes]}
-
-
-@user_files_router.delete("/{file_id}", status_code=status.HTTP_200_OK)
-def delete_file(
+@resumes_router.delete("/{file_id}", status_code=status.HTTP_200_OK)
+def delete_resume(
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
@@ -288,33 +238,34 @@ def delete_file(
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Delete a file for user `user_id` (Only Member, Lead, or Admin)
-    - Members can only delete their own files
-    - Lead and Admin can delete any files
+    Delete a resume for user `user_id` (Only Member, Lead, or Admin)
+    - Members can only delete their own resumes
+    - Lead and Admin can delete any resumes
     """
     from app.core.permissions import get_user_role
 
     user_role = get_user_role(current_user)
 
-    # Only Member (1), Lead (4), or Admin (5) can delete files
+    # Only Member (1), Lead (4), or Admin (5) can delete resumes
     if user_role not in [1, 4, 5]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only Members, Leads, or Admins can delete files",
+            detail="Only Members, Leads, or Admins can delete resumes",
         )
 
-    # Members can only delete their own files
+    # Members can only delete their own resumes
     if user_role == 1 and str(current_user.id) != str(user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only delete your own files",
+            detail="You can only delete your own resumes",
         )
 
-    success = application_crud.delete_file(db, file_id=file_id, user_id=user_id)
+    success = application_crud.delete_resume(db, file_id=file_id, user_id=user_id)
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Resume not found"
         )
 
-    return {"message": "File deleted successfully"}
+    return {"message": "Resume deleted successfully"}
+

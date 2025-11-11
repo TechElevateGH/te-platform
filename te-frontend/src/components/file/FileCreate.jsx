@@ -20,6 +20,7 @@ const FileCreate = ({ setFileUpload }) => {
     const [fileData, setFileData] = useState({
         role: "",
         notes: "",
+        document_type: "Resume", // Default document type
         file: null
     })
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
@@ -44,12 +45,13 @@ const FileCreate = ({ setFileUpload }) => {
         const data = new FormData();
         data.append('role', fileData.role);
         data.append('notes', fileData.notes);
+        data.append('document_type', fileData.document_type);
         data.append('file', fileData.file);
 
         setStatus("Loading...")
 
         try {
-            await axiosInstance.post(`/users/${userId}/files`, data, {
+            await axiosInstance.post(`/users/${userId}/member-files`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${accessToken}`,
@@ -82,10 +84,10 @@ const FileCreate = ({ setFileUpload }) => {
     return (
         <>
             <SlideOverForm
-                title={"Upload New Resume"}
+                title={"Upload Member File"}
                 setHandler={setFileUpload}
                 requestHandler={uploadFileRequest}
-                submitButtonText="Upload Resume"
+                submitButtonText="Upload File"
                 shouldReload={false}
                 children={
                     <div className="px-6 py-6 space-y-6">
@@ -93,7 +95,7 @@ const FileCreate = ({ setFileUpload }) => {
                         {showSuccessFeedback &&
                             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                                 <SuccessFeedback
-                                    message={"Resume successfully uploaded."}
+                                    message={`${fileData.document_type} successfully uploaded.`}
                                     setShowSuccessFeedback={setShowSuccessFeedback}
                                 />
                             </div>
@@ -102,10 +104,33 @@ const FileCreate = ({ setFileUpload }) => {
                         {
                             status === "Loading..." ? <Loading /> :
                                 <>
-                                    {/* Resume File Upload */}
+                                    {/* Document Type Selection */}
                                     <div className="space-y-4">
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Resume File
+                                            Document Type
+                                        </h3>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {['Resume', 'Referral Essay', 'Cover Letter'].map((type) => (
+                                                <button
+                                                    key={type}
+                                                    type="button"
+                                                    onClick={() => handleInputChange({ field: 'document_type', value: type })}
+                                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                                                        fileData.document_type === type
+                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                                                    }`}
+                                                >
+                                                    {type}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* File Upload */}
+                                    <div className="space-y-4">
+                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            {fileData.document_type} File
                                         </h3>
                                         <FileUpload
                                             handleFileUploadChange={handleFileUploadChange}

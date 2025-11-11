@@ -52,7 +52,7 @@ const Files = () => {
         setDeletingFileId(fileId);
 
         try {
-            await axiosInstance.delete(`/users/${userId}/files/${fileId}`, {
+            await axiosInstance.delete(`/users/${userId}/member-files/${fileId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -62,7 +62,7 @@ const Files = () => {
             setFetchFiles(true);
         } catch (error) {
             console.error("Delete error:", error);
-            alert(`Failed to delete resume: ${error.response?.data?.detail || error.message}`);
+            alert(`Failed to delete file: ${error.response?.data?.detail || error.message}`);
         } finally {
             setDeletingFileId(null);
         }

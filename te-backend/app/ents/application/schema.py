@@ -4,37 +4,30 @@ import app.ents.referral_company.schema as referral_company_schema
 from pydantic import BaseModel
 
 
-class FileType(str, Enum):
-    resume: str = "Resume"
-    otherFile: str = "Other File"
-
-
-class Essay(BaseModel):
-    essay: str
-
-
-class FileBase(BaseModel):
+# Resume Schemas (Members can have multiple resumes - PDFs in Google Drive)
+class ResumeBase(BaseModel):
     name: str
     date: str
-    role: str = ""
+    role: str = ""  # Target role for this resume
     notes: str = ""
 
 
-class File(FileBase):
+class Resume(ResumeBase):
     file_id: str
 
 
-class FileRead(FileBase):
+class ResumeRead(ResumeBase):
     id: str  # MongoDB ObjectId as string
     file_id: str
     link: str
 
 
-class FilesRead(BaseModel):
-    resumes: list[FileRead]
-    other_files: list[FileRead]
+class ResumesRead(BaseModel):
+    """Response containing all resumes for a member"""
+    resumes: list[ResumeRead]
 
 
+# File Upload Response
 class FileUpload(BaseModel):
     file_id: str
     name: str

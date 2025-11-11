@@ -56,8 +56,8 @@ class MemberUser(BaseModel):
     end_date: str = ""
     is_active: bool = True
     role: int = 1  # Always Member (1) for this collection
-    essay: str = ""
-    cover_letter: str = ""
+    referral_essay: str = ""  # Referral essay text (stored in MongoDB)
+    cover_letter: str = ""  # Cover letter text (stored in MongoDB)
     resume_file_ids: list[str] = []  # List of MongoDB ObjectId strings for resume files
     mentor_id: Optional[PyObjectId] = None
 

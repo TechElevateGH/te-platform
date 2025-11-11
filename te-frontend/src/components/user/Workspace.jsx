@@ -96,14 +96,17 @@ const Workspace = ({ setLogin }) => {
     }, [accessToken, logout, setUserInfo, userId]);
 
     const getUserFilesRequest = useCallback(async () => {
-        axiosInstance.get(`/users/${userId}/files`, {
+        axiosInstance.get(`/users/${userId}/member-files`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         })
             .then((response) => {
                 setResumes(response.data.files.resumes);
-                setOtherFiles(response.data.files.other_files);
+                setOtherFiles([
+                    ...(response.data.files.referral_essays || []),
+                    ...(response.data.files.cover_letters || [])
+                ]);
             })
             .catch((error) => {
                 if (error.response.status === 401) {
