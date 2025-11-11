@@ -209,12 +209,17 @@ def update_cover_letter(
 def get_all_users_files(
     db: Database = Depends(session.get_db),
     *,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get all users with their files (Admin only).
+    Get all users with their files (Lead and Admin only).
     Returns list of users with their resumes and essays.
     """
+    from app.core.permissions import require_lead
+
+    # Require at least Lead access
+    require_lead(current_user)
+
     import app.ents.application.crud as application_crud
 
     users = user_crud.read_all_users(db)

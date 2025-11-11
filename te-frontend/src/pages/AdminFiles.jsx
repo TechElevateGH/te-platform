@@ -35,8 +35,10 @@ const AdminFiles = () => {
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
 
-    // Check if user is admin (role === 5)
-    const isAdmin = userRole && parseInt(userRole) === 5;
+    // Check user role - Lead (4) and Admin (5) can access
+    const userRoleInt = userRole ? parseInt(userRole) : 0;
+    const isAdmin = userRoleInt === 5;
+    const isLeadOrAbove = userRoleInt >= 4; // Lead or Admin
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
@@ -290,7 +292,7 @@ const AdminFiles = () => {
                                 Member Files & Resume Reviews
                             </h1>
                             <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
-                                Manage member files and assign resume review requests
+                                Manage member files, essays, and assign resume review requests
                             </p>
                         </div>
 

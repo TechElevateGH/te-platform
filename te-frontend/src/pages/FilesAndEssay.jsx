@@ -16,8 +16,10 @@ const Files = () => {
     const { userId, accessToken, userRole } = useAuth();
     const { resumes, setFetchFiles } = useData();
 
-    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
-    const isMember = userRole && parseInt(userRole) === 1; // Only Members can upload resumes/essays
+    // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
+    const userRoleInt = userRole ? parseInt(userRole) : 0;
+    const isMember = userRoleInt === 1; // Only Members can upload resumes/essays
+    const canDelete = [1, 4, 5].includes(userRoleInt); // Member, Lead, or Admin can delete
 
     const [activeTab, setActiveTab] = useState('resumes');
     const [addFile, setAddFile] = useState(false);
@@ -220,23 +222,25 @@ const Files = () => {
                                                                 </div>
                                                             </td>
                                                             <td className="px-6 py-4">
-                                                                <button
-                                                                    onClick={() => handleDeleteClick(file.id, file.name)}
-                                                                    disabled={deletingFileId === file.id}
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {deletingFileId === file.id ? (
-                                                                        <>
-                                                                            <div className="animate-spin h-3 w-3 border-2 border-red-700 dark:border-red-400 border-t-transparent rounded-full" />
-                                                                            Deleting...
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <TrashIcon className="h-4 w-4" />
-                                                                            Delete
-                                                                        </>
-                                                                    )}
-                                                                </button>
+                                                                {canDelete && (
+                                                                    <button
+                                                                        onClick={() => handleDeleteClick(file.id, file.name)}
+                                                                        disabled={deletingFileId === file.id}
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        {deletingFileId === file.id ? (
+                                                                            <>
+                                                                                <div className="animate-spin h-3 w-3 border-2 border-red-700 dark:border-red-400 border-t-transparent rounded-full" />
+                                                                                Deleting...
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <TrashIcon className="h-4 w-4" />
+                                                                                Delete
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                )}
                                                             </td>
                                                         </tr>
                                                     ))}

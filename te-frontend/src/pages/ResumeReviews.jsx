@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
+import Toast from '../components/_custom/Toast';
 import {
     DocumentTextIcon,
     PlusIcon,
@@ -13,7 +14,8 @@ import {
     ArrowDownTrayIcon,
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
-    SparklesIcon
+    SparklesIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
 import { trackEvent } from '../analytics/events';
 
@@ -22,6 +24,7 @@ const ResumeReviews = () => {
     const [reviews, setReviews] = useState([]);
     const [myRequests, setMyRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState(null);
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [statusFilter, setStatusFilter] = useState('');
@@ -146,7 +149,7 @@ const ResumeReviews = () => {
                 resume_link: formData.resume_link,
             });
 
-            alert('Resume review request submitted successfully!');
+            setToast({ message: 'Resume review request submitted', type: 'success' });
             setFormData({
                 resume_link: '',
                 job_title: '',
@@ -157,7 +160,7 @@ const ResumeReviews = () => {
             fetchData();
         } catch (error) {
             console.error('Error submitting request:', error);
-            alert('Failed to submit request. Please try again.');
+            setToast({ message: 'Failed to submit request', type: 'error' });
         }
     };
 
@@ -169,11 +172,34 @@ const ResumeReviews = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            alert('Status updated successfully!');
+            setToast({ message: 'Status updated successfully', type: 'success' });
             fetchData();
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Failed to update status.');
+            setToast({ message: 'Failed to update status', type: 'error' });
+        }
+    };
+
+    const handleDeleteReview = async (reviewId, jobTitle) => {
+        // Only Member (1), Lead (4), or Admin (5) can delete
+        if (![1, 4, 5].includes(userRoleInt)) {
+            setToast({ message: 'You do not have permission to delete', type: 'error' });
+            return;
+        }
+
+        if (!window.confirm(`Are you sure you want to delete the resume review request for "${jobTitle}"?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            await axiosInstance.delete(`/resume-reviews/${reviewId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setToast({ message: 'Review request deleted', type: 'success' });
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            setToast({ message: error.response?.data?.detail || 'Failed to delete', type: 'error' });
         }
     };
 
@@ -397,8 +423,7 @@ const ResumeReviews = () => {
                             }).map(request => (
                                 <div
                                     key={request.id}
-                                    onClick={() => handleReviewClick(request)}
-                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow relative cursor-pointer"
+                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow relative"
                                 >
                                     {request.feedback && request.feedback.trim() && !seenReviewFeedback.has(request.id) && (
                                         <span className="absolute -top-2 -right-2 flex h-5 w-5 bg-red-500 rounded-full items-center justify-center">
@@ -406,7 +431,10 @@ const ResumeReviews = () => {
                                         </span>
                                     )}
                                     <div className="flex items-start justify-between">
-                                        <div className="flex-1">
+                                        <div
+                                            className="flex-1 cursor-pointer"
+                                            onClick={() => handleReviewClick(request)}
+                                        >
                                             <div className="flex items-center gap-3 mb-2">
                                                 <h3 className="font-semibold text-gray-900 dark:text-white">{request.job_title}</h3>
                                                 <span className={`px-2 py-1 text-xs font-bold rounded-full border ${getStatusColor(request.status)}`}>
@@ -431,6 +459,19 @@ const ResumeReviews = () => {
                                                 </div>
                                             )}
                                         </div>
+                                        {/* Delete button - Only for Member (1), Lead (4), Admin (5) */}
+                                        {[1, 4, 5].includes(userRoleInt) && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteReview(request.id, request.job_title);
+                                                }}
+                                                className="ml-3 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                                title="Delete request"
+                                            >
+                                                <TrashIcon className="h-5 w-5" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -680,6 +721,16 @@ const ResumeReviews = () => {
                                                                     Complete
                                                                 </button>
                                                             )}
+                                                            {/* Delete button - Only for Lead (4) or Admin (5) */}
+                                                            {[4, 5].includes(userRoleInt) && (
+                                                                <button
+                                                                    onClick={() => handleDeleteReview(review.id, review.job_title)}
+                                                                    className="px-2.5 py-1.5 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition-colors flex items-center gap-1"
+                                                                    title="Delete request"
+                                                                >
+                                                                    <TrashIcon className="h-3.5 w-3.5" />
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 )}
@@ -892,6 +943,15 @@ const ResumeReviews = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
             )}
         </div>
     );

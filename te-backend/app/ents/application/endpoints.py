@@ -1,4 +1,5 @@
 from typing import Any, Union, Dict
+import logging
 
 import app.database.session as session
 import app.ents.application.crud as application_crud
@@ -12,6 +13,8 @@ from pymongo.database import Database
 app_router = APIRouter(prefix="/applications")
 user_app_router = APIRouter(prefix="/users/{user_id}/applications")
 user_files_router = APIRouter(prefix="/users/{user_id}/files")
+
+logger = logging.getLogger(__name__)
 
 
 def file_to_read(file):
@@ -82,18 +85,14 @@ def get_all_applications(
                 parsed["user_name"] = user.full_name if user else "Unknown User"
                 parsed["user_email"] = user.email if user else ""
                 enriched_apps.append(parsed)
-            except Exception as exc:  # pragma: no cover - defensive logging
-                print(f"Error processing application {app.id}: {exc}")
-                import traceback
-
-                traceback.print_exc()
+            except Exception as exc:
+                logger.error(
+                    f"Error processing application {app.id}: {exc}", exc_info=True
+                )
 
         return {"applications": enriched_apps}
     except Exception as exc:
-        print(f"Error in get_all_applications: {exc}")
-        import traceback
-
-        traceback.print_exc()
+        logger.error(f"Error in get_all_applications: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to load applications")
 
 
@@ -289,11 +288,33 @@ def delete_file(
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Delete a file for user `user_id`
+    Delete a file for user `user_id` (Only Member, Lead, or Admin)
+    - Members can only delete their own files
+    - Lead and Admin can delete any files
     """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Member (1), Lead (4), or Admin (5) can delete files
+    if user_role not in [1, 4, 5]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Members, Leads, or Admins can delete files",
+        )
+
+    # Members can only delete their own files
+    if user_role == 1 and str(current_user.id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own files",
+        )
+
     success = application_crud.delete_file(db, file_id=file_id, user_id=user_id)
 
     if not success:
-        return {"error": "File not found or unauthorized"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
+        )
 
     return {"message": "File deleted successfully"}

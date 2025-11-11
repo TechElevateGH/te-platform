@@ -1,7 +1,18 @@
 from app.core.settings import settings
 from app.ents.api import api_router
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+import logging
+import time
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def create_app():
@@ -55,24 +66,55 @@ def enable_cors(app):
 
 app = create_app()
 enable_cors(app)
-
-
-@app.middleware("http")
-async def debug_preflight(request: Request, call_next):
-    """Log incoming OPTIONS preflight details for diagnostics.
-
-    Helps identify why CORS might be returning 400 in the middleware before
-    the route handler. This middleware runs after CORS, so for a rejected
-    preflight it won't execute; for accepted ones it will log headers.
-    """
-    if request.method == "OPTIONS" and "/auth/login" in str(request.url.path):
-        print("⚙️ Preflight debug headers:")
-        for k, v in request.headers.items():
-            print(f"  {k}: {v}")
-    return await call_next(request)
-
-
 app.include_router(api_router, prefix=settings.API_STR)
+
+
+# Error Handlers
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions with consistent JSON response"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors with detailed error messages"""
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"detail": exc.errors(), "body": exc.body},
+    )
+
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log all requests with timing information"""
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+
+    logger.info(
+        f"{request.method} {request.url.path} "
+        f"completed in {process_time:.4f}s with status {response.status_code}"
+    )
+    return response
+
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
+    )
+    return response
 
 
 @app.on_event("startup")
@@ -83,10 +125,10 @@ def on_startup():
     # Test MongoDB connection
     try:
         mongodb.command("ping")
-        print("✓ MongoDB connection successful")
-        print(f"✓ Connected to database: {mongodb.name}")
+        logger.info("✓ MongoDB connection successful")
+        logger.info(f"✓ Connected to database: {mongodb.name}")
     except Exception as e:
-        print(f"✗ MongoDB connection failed: {e}")
+        logger.error(f"✗ MongoDB connection failed: {e}")
         return
 
     # Seed initial data
@@ -94,9 +136,9 @@ def on_startup():
 
     try:
         init_db(mongodb)
-        print("✓ Initial data seeded successfully")
+        logger.info("✓ Initial data seeded successfully")
     except Exception as e:
-        print(f"Warning: Could not seed initial data: {e}")
+        logger.warning(f"Could not seed initial data: {e}")
 
 
 @app.on_event("shutdown")
@@ -105,4 +147,4 @@ def on_shutdown():
     from app.database.session import client
 
     client.close()
-    print("✓ MongoDB connection closed")
+    logger.info("✓ MongoDB connection closed")

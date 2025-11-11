@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
+import Toast from '../components/_custom/Toast';
 import {
     DocumentIcon,
     ArrowDownTrayIcon,
@@ -22,10 +23,19 @@ const FilesManagement = () => {
     const [resumeReviews, setResumeReviews] = useState([]);
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('files'); // 'files' or 'reviews'
+
+    // Check user role first to set default tab
+    const userRoleInt = userRole ? parseInt(userRole) : 0;
+    const isAdmin = userRoleInt === 5;
+    const isLeadOrAbove = userRoleInt >= 4; // Lead or Admin
+    const isVolunteerOrAbove = userRoleInt >= 3; // Volunteer, Lead, or Admin
+
+    // Default tab: Resumes for Lead+, Reviews for Volunteer
+    const [activeTab, setActiveTab] = useState(userRoleInt >= 4 ? 'resumes' : 'reviews');
     const [searchQuery, setSearchQuery] = useState('');
     const [fileTypeFilter, setFileTypeFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
+    const [levelFilter, setLevelFilter] = useState('');
     const [sortBy, setSortBy] = useState('name_asc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [assigningReview, setAssigningReview] = useState(null);
@@ -34,9 +44,8 @@ const FilesManagement = () => {
     const [reviewFeedback, setReviewFeedback] = useState('');
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
-
-    // Check if user is admin (role === 5)
-    const isAdmin = userRole && parseInt(userRole) === 5;
+    const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('active'); // Default to Pending + In Review
+    const [toast, setToast] = useState(null);
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
@@ -142,12 +151,12 @@ const FilesManagement = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            alert(`Review assigned to ${reviewerName} successfully!`);
+            setToast({ message: `Review assigned to ${reviewerName}`, type: 'success' });
             fetchResumeReviews();
             setAssigningReview(null);
         } catch (error) {
             console.error('Error assigning review:', error);
-            alert('Failed to assign review.');
+            setToast({ message: 'Failed to assign review', type: 'error' });
         }
     };
 
@@ -179,12 +188,12 @@ const FilesManagement = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            alert('Review updated successfully!');
+            setToast({ message: 'Review updated successfully', type: 'success' });
             fetchResumeReviews();
             handleCloseReviewModal();
         } catch (error) {
             console.error('Error updating review:', error);
-            alert('Failed to update review.');
+            setToast({ message: 'Failed to update review', type: 'error' });
         } finally {
             setSubmittingReview(false);
         }
@@ -242,6 +251,28 @@ const FilesManagement = () => {
 
     const hasActiveFilters = searchQuery || memberFilter || fileTypeFilter;
 
+    // Filter resume reviews - default to Pending and In Review only
+    const filteredResumeReviews = resumeReviews.filter(review => {
+        // Status filter
+        let statusMatch = true;
+        if (resumeReviewStatusFilter === 'active') {
+            statusMatch = review.status === 'Pending' || review.status === 'In Review';
+        } else if (resumeReviewStatusFilter) {
+            statusMatch = review.status === resumeReviewStatusFilter;
+        }
+
+        // Search filter (member name, email, or job title)
+        const searchMatch = !searchQuery ||
+            review.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            review.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            review.job_title?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // Level filter
+        const levelMatch = !levelFilter || review.level === levelFilter;
+
+        return statusMatch && searchMatch && levelMatch;
+    });
+
     // Export to CSV
     const exportToCSV = () => {
         const headers = ['Member Name', 'Email', 'Resumes', 'Essays', 'Total Files'];
@@ -290,7 +321,7 @@ const FilesManagement = () => {
                                 Member Files & Resume Reviews
                             </h1>
                             <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
-                                Manage member files and assign resume review requests
+                                Manage member files, essays, and assign resume review requests
                             </p>
                         </div>
 
@@ -382,65 +413,78 @@ const FilesManagement = () => {
             <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[72px] z-10">
                 <div className="max-w-7xl mx-auto px-4">
                     <nav className="flex gap-4">
-                        <button
-                            onClick={() => setActiveTab('files')}
-                            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'files'
-                                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <FolderIcon className="h-4 w-4" />
-                                Member Files
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('reviews')}
-                            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'reviews'
-                                ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                }`}
-                        >
-                            <div className="flex items-center gap-2">
-                                <DocumentTextIcon className="h-4 w-4" />
-                                Resume Reviews
-                                {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
-                                        {resumeReviews.filter(r => r.status === 'Pending').length}
-                                    </span>
-                                )}
-                            </div>
-                        </button>
+                        {/* Resumes Tab - Only Lead+ */}
+                        {userRoleInt >= 4 && (
+                            <button
+                                onClick={() => setActiveTab('resumes')}
+                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'resumes'
+                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <FolderIcon className="h-4 w-4" />
+                                    Resumes
+                                </div>
+                            </button>
+                        )}
+
+                        {/* Resume Reviews Tab - Volunteer+ */}
+                        {userRoleInt >= 3 && (
+                            <button
+                                onClick={() => setActiveTab('reviews')}
+                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'reviews'
+                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <DocumentTextIcon className="h-4 w-4" />
+                                    Resume Reviews
+                                    {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
+                                        <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
+                                            {resumeReviews.filter(r => r.status === 'Pending').length}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        )}
+
+                        {/* Essays Tab - Volunteer+ */}
+                        {userRoleInt >= 3 && (
+                            <button
+                                onClick={() => setActiveTab('essays')}
+                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'essays'
+                                    ? 'border-green-600 text-green-600 dark:text-green-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <DocumentIcon className="h-4 w-4" />
+                                    Essays
+                                </div>
+                            </button>
+                        )}
                     </nav>
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-3">
 
-                {activeTab === 'files' && (
+                {activeTab === 'resumes' && (
                     <>
-                        {/* Stats Bar for Member Files */}
+                        {/* Stats Bar for Resumes */}
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
                             <div className="flex items-center gap-6 flex-wrap text-xs">
                                 <div className="flex items-center gap-2">
                                     <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{stats.totalUsers}</span>
+                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members with Resumes:</span>
+                                    <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.resumes && u.resumes.length > 0).length}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <DocumentIcon className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">Resumes:</span>
+                                    <span className="font-medium text-blue-600 dark:text-blue-400">Total Resumes:</span>
                                     <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-purple-500" />
-                                    <span className="font-medium text-purple-600 dark:text-purple-400">Essays:</span>
-                                    <span className="font-bold text-purple-700 dark:text-purple-400">{stats.totalEssays}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <ChartBarIcon className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-600 dark:text-green-400">Total Files:</span>
-                                    <span className="font-bold text-green-700 dark:text-green-400">{stats.totalFiles}</span>
                                 </div>
                             </div>
                         </div>
@@ -522,11 +566,6 @@ const FilesManagement = () => {
                                     </button>
                                 </div>
                             )}
-
-                            {/* Results Count */}
-                            <div className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
-                                Showing {sortedUsers.length} of {users.filter(u => u.resumes?.length > 0 || u.essays?.length > 0).length} members with files
-                            </div>
                         </div>
 
                         {/* Files Table */}
@@ -682,6 +721,79 @@ const FilesManagement = () => {
                             </div>
                         </div>
 
+                        {/* Filters Bar for Resume Reviews */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                                {/* Status Filter */}
+                                <div className="md:col-span-3">
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                        Status Filter
+                                    </label>
+                                    <select
+                                        value={resumeReviewStatusFilter}
+                                        onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    >
+                                        <option value="active">Active (Pending + In Review)</option>
+                                        <option value="">All Statuses</option>
+                                        <option value="Pending">Pending Only</option>
+                                        <option value="In Review">In Review Only</option>
+                                        <option value="Completed">Completed Only</option>
+                                        <option value="Declined">Declined Only</option>
+                                    </select>
+                                </div>
+
+                                {/* Search Filter */}
+                                <div className="md:col-span-5">
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                        Search Member or Job Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="Filter by member name, email, or job title..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    />
+                                </div>
+
+                                {/* Level Filter */}
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                        Level
+                                    </label>
+                                    <select
+                                        value={levelFilter}
+                                        onChange={(e) => setLevelFilter(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    >
+                                        <option value="">All Levels</option>
+                                        <option value="Intern">Intern</option>
+                                        <option value="Entry">Entry</option>
+                                        <option value="Mid">Mid</option>
+                                        <option value="Senior">Senior</option>
+                                    </select>
+                                </div>
+
+                                {/* Clear Filters */}
+                                {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
+                                    <div className="md:col-span-2">
+                                        <button
+                                            onClick={() => {
+                                                setSearchQuery('');
+                                                setLevelFilter('');
+                                                setResumeReviewStatusFilter('active');
+                                            }}
+                                            className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1.5"
+                                        >
+                                            <XMarkIcon className="h-4 w-4" />
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
@@ -699,14 +811,14 @@ const FilesManagement = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {resumeReviews.length === 0 ? (
+                                        {filteredResumeReviews.length === 0 ? (
                                             <tr>
                                                 <td colSpan={isAdmin ? "7" : "6"} className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                                                     No resume review requests found
                                                 </td>
                                             </tr>
                                         ) : (
-                                            resumeReviews.map((review) => (
+                                            filteredResumeReviews.map((review) => (
                                                 <tr key={review.id} className="hover:bg-purple-50/30 dark:hover:bg-purple-900/10 transition-colors">
                                                     <td className="px-4 py-3">
                                                         <div>
@@ -802,7 +914,105 @@ const FilesManagement = () => {
                     </>
                 )}
 
+                {/* Essays Tab */}
+                {activeTab === 'essays' && (
+                    <>
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="flex items-center gap-6 flex-wrap text-xs">
+                                <div className="flex items-center gap-2">
+                                    <DocumentIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="font-medium text-gray-600 dark:text-gray-300">Total Essays:</span>
+                                    <span className="font-bold text-gray-900 dark:text-white">{stats.totalEssays}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Member Name
+                                            </th>
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Email
+                                            </th>
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Essays
+                                            </th>
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                        {users.filter(u => u.essays && u.essays.length > 0).length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" className="px-3 py-6 text-center">
+                                                    <DocumentIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No essays found</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        No members have uploaded essays yet
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            users.filter(u => u.essays && u.essays.length > 0).map((user) => (
+                                                <tr
+                                                    key={user.id}
+                                                    className="hover:bg-gradient-to-r hover:from-green-50/30 hover:to-emerald-50/30 dark:hover:from-green-900/20 dark:hover:to-emerald-900/20 transition-all"
+                                                >
+                                                    <td className="px-3 py-2">
+                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                                                            {user.full_name}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                            {user.email}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                            {user.essays?.length || 0}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2">
+                                                        <div className="flex items-center gap-2">
+                                                            {user.essays && user.essays.length > 0 && (
+                                                                <a
+                                                                    href={user.essays[0].url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors"
+                                                                >
+                                                                    <EyeIcon className="h-3.5 w-3.5" />
+                                                                    View
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
+                )}
+
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
 
             {/* Resume Review Modal */}
             {showReviewModal && selectedReview && (

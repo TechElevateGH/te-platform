@@ -6,6 +6,9 @@ from app.core.settings import settings
 from datetime import datetime
 from typing import Optional, List
 from bson import ObjectId
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================
@@ -126,11 +129,8 @@ def read_lessons_v1():
     response = drive_service.files(q=settings.GDRIVE_LESSONS)
     files = response.get("files", [])
 
-    # DSA Textbook Chapters
-
-    #
-    for f in files:
-        print(f)
+    # Log files for debugging if needed
+    logger.debug(f"Found {len(files)} files in Google Drive")
 
 
 # User Progress CRUD Operations

@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Any
+import logging
 
 import app.core.security as security
 import app.database.session as session
@@ -12,6 +13,7 @@ from pymongo.database import Database
 
 # Professional auth router without prefix - will be mounted at /auth
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/login")
@@ -22,10 +24,7 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    print(f"🔍 Login attempt - Username: {data.username}")
-    print(f"🔍 Data received: {data}")
-    print(f"🔍 DB session type: {type(db)}")
-    print(f"🔍 DB connection: {db}")
+    logger.info(f"Login attempt for user: {data.username}")
 
     user = security.authenticate(db, email=data.username, password=data.password)
     if not user:
@@ -56,7 +55,7 @@ def lead_login_access_token(
     Privileged user token login with username and access token
     For Referrer (role=2), Lead (role=3), and Admin (role=5)
     """
-    print(f"🔐 Privileged login attempt - Username: {data.username}")
+    logger.info(f"Privileged login attempt for user: {data.username}")
 
     # Find user in privileged_users collection
     user_data = db.privileged_users.find_one({"username": data.username})

@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.database import Database
 import app.database.session as session
 import app.ents.user.dependencies as user_dependencies
@@ -98,7 +98,35 @@ def delete_resume_review_request(
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Delete a resume review request (User can delete their own, Volunteers+ can delete any)
+    Delete a resume review request (Only Member, Lead, or Admin)
+    - Members can only delete their own requests
+    - Lead and Admin can delete any request
     """
+    from app.core.permissions import get_user_role
+
+    # Get the review to check ownership
+    review = review_crud.get_review_by_id(db, review_id=review_id)
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume review request not found",
+        )
+
+    user_role = get_user_role(current_user)
+
+    # Only Member (1), Lead (4), or Admin (5) can delete
+    if user_role not in [1, 4, 5]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Members, Leads, or Admins can delete resume review requests",
+        )
+
+    # Members can only delete their own requests
+    if user_role == 1 and str(review.user_id) != str(current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own resume review requests",
+        )
+
     review_crud.delete_review_request(db, review_id=review_id)
     return {"message": "Resume review request deleted successfully"}

@@ -2,6 +2,9 @@ from app.core.security import get_password_hash
 import app.ents.user.schema as user_schema
 from pymongo.database import Database
 from datetime import date
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def init_db(db: Database) -> None:
@@ -23,11 +26,11 @@ def init_db(db: Database) -> None:
             "is_active": True,
         }
         result = privileged_users_collection.insert_one(admin_data)
-        print(
+        logger.info(
             f"✓ Admin created: admin / token: {admin_token} (ID: {result.inserted_id})"
         )
     else:
-        print("✓ Admin user already exists: admin")
+        logger.info("✓ Admin user already exists: admin")
 
     # 2. Create Lead privileged user with username/token
     lead_user = privileged_users_collection.find_one({"username": "lead"})
@@ -42,9 +45,11 @@ def init_db(db: Database) -> None:
             "is_active": True,
         }
         result = privileged_users_collection.insert_one(lead_data)
-        print(f"✓ Lead created: lead / token: {lead_token} (ID: {result.inserted_id})")
+        logger.info(
+            f"✓ Lead created: lead / token: {lead_token} (ID: {result.inserted_id})"
+        )
     else:
-        print("✓ Lead user already exists: lead")
+        logger.info("✓ Lead user already exists: lead")
 
     # 3. Create Amazon company for referrer
     amazon_company = companies_collection.find_one({"name": "Amazon"})
@@ -69,10 +74,10 @@ def init_db(db: Database) -> None:
         }
         result = companies_collection.insert_one(amazon_data)
         amazon_id = result.inserted_id
-        print(f"✓ Amazon company created (ID: {amazon_id})")
+        logger.info(f"✓ Amazon company created (ID: {amazon_id})")
     else:
         amazon_id = amazon_company["_id"]
-        print("✓ Amazon company already exists")
+        logger.info("✓ Amazon company already exists")
 
     # 4. Create Referrer user for Amazon
     referrer_user = privileged_users_collection.find_one({"username": "amzn"})
@@ -87,11 +92,11 @@ def init_db(db: Database) -> None:
             "is_active": True,
         }
         result = privileged_users_collection.insert_one(referrer_data)
-        print(
+        logger.info(
             f"✓ Referrer created: amzn / token: {referrer_token} for Amazon (ID: {result.inserted_id})"
         )
     else:
-        print("✓ Referrer user already exists: amzn")
+        logger.info("✓ Referrer user already exists: amzn")
 
     # 5. Create Member user with email/password
     member_user = users_collection.find_one({"email": "info@techelevate.org"})
@@ -118,8 +123,8 @@ def init_db(db: Database) -> None:
             "end_date": "",
         }
         result = users_collection.insert_one(member_data)
-        print(
+        logger.info(
             f"✓ Member created: info@techelevate.org / password: {member_password} (ID: {result.inserted_id})"
         )
     else:
-        print("✓ Member user already exists: info@techelevate.org")
+        logger.info("✓ Member user already exists: info@techelevate.org")

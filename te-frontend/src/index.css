@@ -120,6 +120,29 @@ code {
     }
   }
 
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scale-in {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
   .animate-fade-in-down {
     animation: fade-in-down 0.8s ease-out;
   }
@@ -170,6 +193,14 @@ code {
 
   .animate-shimmer {
     animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out;
   }
 
   /* Glass morphism utility */
