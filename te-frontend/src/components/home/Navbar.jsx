@@ -16,10 +16,25 @@ const navigation = [
 const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, logout } = useAuth();
+
+    const handleLogoutClick = () => {
+        setShowLogoutConfirm(true);
+    };
+
+    const confirmLogout = () => {
+        setShowLogoutConfirm(false);
+        logout();
+        navigate('/');
+    };
+
+    const cancelLogout = () => {
+        setShowLogoutConfirm(false);
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -159,7 +174,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                             {/* Sign out icon */}
                             <button
-                                onClick={logout}
+                                onClick={handleLogoutClick}
                                 className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
                                 title="Sign Out"
                             >
@@ -256,13 +271,49 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                                 Workspace
                                             </button>
                                             <button
-                                                onClick={logout}
+                                                onClick={handleLogoutClick}
                                                 className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 hover:bg-red-50"
                                             >
                                                 Logout
                                             </button>
                                         </>
                                     )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={cancelLogout} />
+                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                                <ArrowLeftOnRectangleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    Confirm Logout
+                                </h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                                    Are you sure you want to log out? You'll need to sign in again to access your account.
+                                </p>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={confirmLogout}
+                                        className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        Yes, Logout
+                                    </button>
+                                    <button
+                                        onClick={cancelLogout}
+                                        className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white text-sm font-semibold rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>

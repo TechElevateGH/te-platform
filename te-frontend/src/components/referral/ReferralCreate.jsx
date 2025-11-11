@@ -13,6 +13,7 @@ import { FormTextArea } from "../_custom/FormInputs";
 import { setNestedPropertyValue } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
 import SelectCombobox from "../_custom/SelectCombobox";
+import { trackEvent } from "../../analytics/events";
 
 
 const ReferralCreate = ({ company, setReferralCompanyId }) => {
@@ -91,6 +92,15 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             });
 
             if (response.data) {
+                // Track successful referral request
+                trackEvent.referralRequested({
+                    company: company.name,
+                    job_title: referralData.job_title,
+                    level: referralData.role,
+                    has_job_id: !!referralData.job_id,
+                    has_note: !!referralData.request_note,
+                });
+
                 // Trigger refetch of referrals
                 setFetchReferralCompanies(true);
                 // Close modal

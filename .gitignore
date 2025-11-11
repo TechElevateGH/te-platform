@@ -1,5 +1,9 @@
-venv
 .vscode
 __pycache__
-./.env
 .ruff_cache
+
+# All .env files
+.env*
+
+# venv files
+venv/

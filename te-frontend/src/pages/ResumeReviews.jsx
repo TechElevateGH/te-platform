@@ -15,6 +15,7 @@ import {
     ChartBarIcon,
     SparklesIcon
 } from '@heroicons/react/24/outline';
+import { trackEvent } from '../analytics/events';
 
 const ResumeReviews = () => {
     const { accessToken, userRole } = useAuth();
@@ -147,6 +148,15 @@ const ResumeReviews = () => {
             await axiosInstance.post('/resume-reviews', formData, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+
+            // Track resume review request
+            trackEvent.resumeReviewRequested({
+                job_title: formData.job_title,
+                level: formData.level,
+                has_notes: !!formData.notes,
+                resume_link: formData.resume_link,
+            });
+
             alert('Resume review request submitted successfully!');
             setFormData({
                 resume_link: '',

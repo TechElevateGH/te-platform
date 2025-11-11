@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useReducer, useState } from 'react';
+import posthog from 'posthog-js';
 
 const AuthenticationContext = createContext();
 
@@ -48,6 +49,12 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
 
     dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
+
+    // Identify user in PostHog
+    posthog.identify(userId, {
+      role: userRole,
+      isPrivileged: isPrivileged,
+    });
   };
 
   const logout = () => {
@@ -56,6 +63,9 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('userRole');
     sessionStorage.removeItem('wasPrivilegedUser');
     dispatch({ type: 'logout' });
+
+    // Reset PostHog user
+    posthog.reset();
   };
 
   const isAuthenticated = !!state.accessToken;

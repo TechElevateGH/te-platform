@@ -10,6 +10,7 @@ import Register from './components/user/Register';
 import LeadLogin from './pages/LeadLogin';
 import UserAccountManagement from './pages/UserAccountManagement';
 import ResumeReviews from './pages/ResumeReviews';
+import PostHogProvider from './providers/PostHogProvider';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,24 +33,26 @@ function App() {
 
   return (
     <BrowserRouter>
-      <DarkModeProvider>
-        <AuthProvider>
-          <DataProvider>
-            <div className="App gentium-book">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
-                <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
-                <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
-                <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/lead-login" element={<LeadLogin />} />
-                <Route path="/register" element={<Register />} />
-              </Routes>
-            </div>
-          </DataProvider>
-        </AuthProvider >
-      </DarkModeProvider>
+      <PostHogProvider>
+        <DarkModeProvider>
+          <AuthProvider>
+            <DataProvider>
+              <div className="App gentium-book">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+                  <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+                  <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
+                  <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/lead-login" element={<LeadLogin />} />
+                  <Route path="/register" element={<Register />} />
+                </Routes>
+              </div>
+            </DataProvider>
+          </AuthProvider >
+        </DarkModeProvider>
+      </PostHogProvider>
     </BrowserRouter>
   );
 }

@@ -10,6 +10,7 @@ import EmptyResumes from "../components/_custom/Alert/EmptyResumes";
 import SignInPrompt from "../components/_custom/Alert/SignInPrompt";
 import ConfirmDialog from "../components/_custom/Alert/ConfirmDialog";
 import axiosInstance from "../axiosConfig";
+import { trackEvent } from "../analytics/events";
 
 const Files = () => {
     const { userId, accessToken, userRole } = useAuth();
@@ -71,6 +72,15 @@ const Files = () => {
             await axiosInstance.post('/resume-reviews', reviewFormData, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+
+            // Track resume review request
+            trackEvent.resumeReviewRequested({
+                job_title: reviewFormData.job_title,
+                level: reviewFormData.level,
+                has_notes: !!reviewFormData.notes,
+                resume_link: reviewFormData.resume_link,
+            });
+
             alert('Resume review request submitted successfully!');
             setReviewFormData({
                 resume_link: '',
