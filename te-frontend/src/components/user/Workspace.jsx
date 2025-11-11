@@ -68,12 +68,12 @@ const Workspace = ({ setLogin }) => {
             const adminSections = [
                 { name: 'Learning Analytics', type: "analytics", icon: BookOpenIcon },
             ];
-            
+
             // Admin also gets Account Management
             if (isAdmin) {
                 adminSections.push({ name: 'Account Management', type: "accounts", icon: UserGroupIcon });
             }
-            
+
             return [...baseNavigation, ...adminSections];
         }
 
@@ -225,19 +225,19 @@ const Workspace = ({ setLogin }) => {
                         {
                             content === "Account Management" ? <UserAccountManagement /> :
                                 content === "Learning Analytics" ? <LearningAnalytics /> :
-                                content === "Profile" ? <Profile /> :
-                                    content === "Applications" ? (
-                                        isLeadOrAdmin ? <ApplicationManagement /> : <Applications />
-                                    ) :
-                                        content === "Resume and Essays" ? (
-                                            isLeadOrAdmin ? <FilesManagement /> : <FilesAndEssay />
+                                    content === "Profile" ? <Profile /> :
+                                        content === "Applications" ? (
+                                            isLeadOrAdmin ? <ApplicationManagement /> : <Applications />
                                         ) :
-                                            content === "Referrals" ? (
-                                                (isLeadOrAdmin || isReferrer) ? <ReferralsManagement /> : <Referrals />
+                                            content === "Resume and Essays" ? (
+                                                isLeadOrAdmin ? <FilesManagement /> : <FilesAndEssay />
                                             ) :
-                                                content === "Opportunities" ? <Opportunities /> :
-                                                    content === "Practice" ? <Practice /> :
-                                                        <Learning setContent={setContentHandler} />
+                                                content === "Referrals" ? (
+                                                    (isLeadOrAdmin || isReferrer) ? <ReferralsManagement /> : <Referrals />
+                                                ) :
+                                                    content === "Opportunities" ? <Opportunities /> :
+                                                        content === "Practice" ? <Practice /> :
+                                                            <Learning setContent={setContentHandler} />
                         }
                     </main>
                 </div>

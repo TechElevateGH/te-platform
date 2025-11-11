@@ -34,8 +34,8 @@ class CompanyCreate(CompanyBase):
     referral_materials: ReferralMaterials = None
 
 
-class AdminCompanyCreate(BaseModel):
-    """Simplified schema for admin to add referral companies"""
+class ReferralCompanyCreate(BaseModel):
+    """Schema for creating referral companies"""
 
     name: str
     image: str = ""

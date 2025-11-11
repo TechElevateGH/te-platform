@@ -341,8 +341,8 @@ const FilesManagement = () => {
                         <button
                             onClick={() => setActiveTab('files')}
                             className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'files'
-                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -353,8 +353,8 @@ const FilesManagement = () => {
                         <button
                             onClick={() => setActiveTab('reviews')}
                             className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'reviews'
-                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -680,12 +680,12 @@ const FilesManagement = () => {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending'
-                                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                                                : review.status === 'In Review'
-                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                                    : review.status === 'Completed'
-                                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                                            : review.status === 'In Review'
+                                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                                : review.status === 'Completed'
+                                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                                             }`}>
                                                             {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
                                                             {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}

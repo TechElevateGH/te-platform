@@ -292,6 +292,8 @@ def get_all_members_progress(db: Database) -> List[dict]:
                     "completed_count": len(progress.get("completed_topics", [])),
                     "bookmarked_count": len(progress.get("bookmarked_topics", [])),
                     "notes_count": len(progress.get("topic_notes", {})),
+                    "completed_topics": progress.get("completed_topics", []),
+                    "bookmarked_topics": progress.get("bookmarked_topics", []),
                     "last_updated": progress.get("last_updated"),
                     "created_at": progress.get("created_at"),
                 }

@@ -1,6 +1,6 @@
 from enum import Enum
 
-import app.ents.referralcompany.schema as referralcompany_schema
+import app.ents.referral_company.schema as referral_company_schema
 from pydantic import BaseModel
 
 
@@ -67,7 +67,7 @@ class ApplicationBase(BaseModel):
 
 class ApplicationCreate(ApplicationBase):
     company: str
-    location: referralcompany_schema.LocationBase
+    location: referral_company_schema.LocationBase
 
 
 class ApplicationReadBase(ApplicationBase):
@@ -96,4 +96,4 @@ class ApplicationUpdateBase(BaseModel):
 
 
 class ApplicationUpdate(ApplicationUpdateBase):
-    location: referralcompany_schema.LocationBase
+    location: referral_company_schema.LocationBase

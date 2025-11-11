@@ -341,7 +341,7 @@ def delete_file(db: Database, *, file_id: str, user_id: str) -> bool:
 #     db: Database,
 #     *,
 #     db_obj: company_models.Company,
-#     data: referralcompany_schema.CompanyUpdate | dict[str, Any],
+#     data: referral_company_schema.CompanyUpdate | dict[str, Any],
 # ) -> company_models.Company:
 #     if isinstance(data, dict):
 #         update_data = data
