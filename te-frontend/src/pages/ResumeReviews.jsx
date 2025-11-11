@@ -24,8 +24,11 @@ const ResumeReviews = () => {
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [statusFilter, setStatusFilter] = useState('');
+    const [myRequestsStatusFilter, setMyRequestsStatusFilter] = useState('active'); // 'active' means Pending + In Review
     const [levelFilter, setLevelFilter] = useState('');
     const [sortBy, setSortBy] = useState('date_desc');
+    const [selectedReview, setSelectedReview] = useState(null);
+    const [seenReviewFeedback, setSeenReviewFeedback] = useState(new Set());
 
     // Check if user is volunteer or above (role >= 3)
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -75,6 +78,27 @@ const ResumeReviews = () => {
         setVisibleColumns(allColumns);
     };
 
+    // Load seen feedback from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem(`seenReviewFeedback_${accessToken?.substring(0, 10)}`);
+        if (saved) {
+            setSeenReviewFeedback(new Set(JSON.parse(saved)));
+        }
+    }, [accessToken]);
+
+    // Handle review click
+    const handleReviewClick = (review) => {
+        setSelectedReview(review);
+
+        // Mark this review's feedback as seen if it has feedback
+        if (review.feedback && review.feedback.trim() && !seenReviewFeedback.has(review.id)) {
+            const newSeen = new Set(seenReviewFeedback);
+            newSeen.add(review.id);
+            setSeenReviewFeedback(newSeen);
+            localStorage.setItem(`seenReviewFeedback_${accessToken?.substring(0, 10)}`, JSON.stringify([...newSeen]));
+        }
+    };
+
     // Fetch data
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -83,7 +107,19 @@ const ResumeReviews = () => {
             const myResponse = await axiosInstance.get('/resume-reviews/my-requests', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            setMyRequests(myResponse.data?.reviews || []);
+            const myReqs = myResponse.data?.reviews || [];
+            setMyRequests(myReqs);
+
+            // Debug logging
+            console.log('ResumeReviews - My requests count:', myReqs.length);
+            console.log('ResumeReviews - Requests with feedback:', myReqs.filter(r => r.feedback && r.feedback.trim()).length);
+            console.log('ResumeReviews - My requests data:', myReqs.map(r => ({
+                job_title: r.job_title,
+                status: r.status,
+                has_feedback: !!r.feedback,
+                feedback: r.feedback,
+                reviewer_name: r.reviewer_name
+            })));
 
             // If volunteer or above, fetch all requests
             if (isVolunteerOrAbove) {
@@ -332,13 +368,44 @@ const ResumeReviews = () => {
                 {/* My Requests Section */}
                 {!isVolunteerOrAbove && myRequests.length > 0 && (
                     <div className="mb-6">
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                            <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                            My Resume Review Requests
-                        </h2>
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                My Resume Review Requests
+                            </h2>
+                            <div className="flex items-center gap-3">
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</label>
+                                <select
+                                    value={myRequestsStatusFilter}
+                                    onChange={(e) => setMyRequestsStatusFilter(e.target.value)}
+                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 transition-colors"
+                                >
+                                    <option value="active">Active (Pending + In Review)</option>
+                                    <option value="">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Review">In Review</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Declined">Declined</option>
+                                </select>
+                            </div>
+                        </div>
                         <div className="space-y-3">
-                            {myRequests.map(request => (
-                                <div key={request.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            {myRequests.filter(request => {
+                                if (myRequestsStatusFilter === 'active') {
+                                    return request.status === 'Pending' || request.status === 'In Review';
+                                }
+                                return !myRequestsStatusFilter || request.status === myRequestsStatusFilter;
+                            }).map(request => (
+                                <div
+                                    key={request.id}
+                                    onClick={() => handleReviewClick(request)}
+                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow relative cursor-pointer"
+                                >
+                                    {request.feedback && request.feedback.trim() && !seenReviewFeedback.has(request.id) && (
+                                        <span className="absolute -top-2 -right-2 flex h-5 w-5 bg-red-500 rounded-full items-center justify-center">
+                                            <span className="text-white text-[10px] font-bold">!</span>
+                                        </span>
+                                    )}
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
@@ -355,20 +422,16 @@ const ResumeReviews = () => {
                                             </p>
                                             {request.feedback && (
                                                 <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
-                                                    <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Feedback from {request.reviewer_name}</p>
-                                                    <p className="text-sm text-gray-700 dark:text-gray-300">{request.feedback}</p>
+                                                    <div className="flex items-start gap-2">
+                                                        <span className="inline-flex rounded-full h-2 w-2 mt-1 bg-blue-500"></span>
+                                                        <div className="flex-1">
+                                                            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Feedback from {request.reviewer_name}</p>
+                                                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{request.feedback}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
-                                        <a
-                                            href={request.resume_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="ml-4 px-3 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
-                                        >
-                                            <EyeIcon className="h-3.5 w-3.5" />
-                                            View Resume
-                                        </a>
                                     </div>
                                 </div>
                             ))}
@@ -729,6 +792,105 @@ const ResumeReviews = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Resume Review Details Modal */}
+            {selectedReview && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={() => setSelectedReview(null)}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-700 dark:to-pink-700 px-6 py-5">
+                            <div className="flex items-start justify-between mb-4">
+                                <div>
+                                    <h2 className="text-xl font-bold text-white mb-1">Resume Review</h2>
+                                    <p className="text-sm text-white/95 font-medium">{selectedReview.job_title}</p>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedReview(null)}
+                                    className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-lg"
+                                >
+                                    <XMarkIcon className="h-6 w-6" />
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className={`px-3 py-1.5 text-xs font-bold rounded-full border ${getStatusColor(selectedReview.status)}`}>
+                                    {selectedReview.status}
+                                </span>
+                                <span className="text-xs text-white/80 font-medium">Submitted {selectedReview.submitted_date}</span>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+                            {/* Info Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Level</p>
+                                    <p className="text-base font-bold text-gray-900 dark:text-white">{selectedReview.level}</p>
+                                </div>
+                                {selectedReview.reviewer_name && (
+                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Reviewer</p>
+                                        <p className="text-base font-bold text-gray-900 dark:text-white">{selectedReview.reviewer_name}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Resume Link */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Resume</p>
+                                <a
+                                    href={selectedReview.resume_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border-2 border-purple-200 dark:border-purple-700 rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/20"
+                                >
+                                    <DocumentTextIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                    View Resume
+                                </a>
+                            </div>
+
+                            {/* Notes */}
+                            {selectedReview.notes && (
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Your Notes</p>
+                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedReview.notes}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Feedback */}
+                            {selectedReview.feedback && selectedReview.feedback.trim() && (
+                                <div>
+                                    <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-3">
+                                        Feedback from {selectedReview.reviewer_name || 'Reviewer'}
+                                    </p>
+                                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800 shadow-sm">
+                                        <p className="text-sm text-purple-900 dark:text-purple-200 leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Member Info (for volunteers and above) */}
+                            {isVolunteerOrAbove && (
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Member Information</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Name</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedReview.member_name}</p>
+                                        </div>
+                                        {selectedReview.member_email && (
+                                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Email</p>
+                                                <p className="text-sm font-bold text-gray-900 dark:text-white break-all">{selectedReview.member_email}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

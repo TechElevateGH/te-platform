@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ReferralEssay from "../components/file/ReferralEssay";
-import { PlusIcon, PaperClipIcon, BriefcaseIcon } from '@heroicons/react/20/solid'
+import ResumeReviews from "./ResumeReviews";
+import { PlusIcon, PaperClipIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
@@ -17,6 +18,7 @@ const Files = () => {
     // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
     const isMember = userRole && parseInt(userRole) === 1; // Only Members can upload resumes/essays
 
+    const [activeTab, setActiveTab] = useState('resumes');
     const [addFile, setAddFile] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [deletingFileId, setDeletingFileId] = useState(null);
@@ -86,130 +88,159 @@ const Files = () => {
 
 
     return (
-        <div className="dark:bg-gray-950">
-            <header className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-7xl mx-auto px-6 py-6">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1.5">
-                            Resumes & Referral Essays
-                        </h1>
-                        <p className="text-xs text-gray-600 dark:text-gray-300">
-                            Manage your resumes, cover letters, and referral essays
-                        </p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
+            {/* Premium Header */}
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Resumes & Essays</h1>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Manage your resumes, cover letters, and referral essays</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {/* Modern Tab Switcher */}
+                            <div className="inline-flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                                <button
+                                    onClick={() => setActiveTab('resumes')}
+                                    className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === 'resumes'
+                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                                        }`}
+                                >
+                                    <span className="relative z-10">My Resumes</span>
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('reviews')}
+                                    className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === 'reviews'
+                                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                                        }`}
+                                >
+                                    <span className="relative z-10">Resume Reviews</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            <div className="flex mx-6">
-                <div className="w-full lg:grid lg:grid-cols-12 lg:gap-x-8">
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+                <div className="lg:grid lg:grid-cols-12 lg:gap-6">
                     {/* Referral Essay Section */}
-                    <div className="pb-24 sm:pb-32 lg:col-span-5 lg:px-0 lg:pb-56 h-screen">
-                        <div className="mt-6 text-sm sm:w-96 lg:w-72 xl:w-96 mx-auto text-gray-600 dark:text-gray-300">
+                    <div className="lg:col-span-5 mb-6 lg:mb-0">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-6 transition-colors">
                             <ReferralEssay isMember={isMember} />
                         </div>
                     </div>
 
-                    {/* Resumes Section */}
-                    <div className="w-full lg:col-span-7 xl:relative xl:inset-0 xl:mr-6 h-screen">
-                        <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">My Resumes</h2>
-                            {isMember && (
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-purple-700 hover:to-pink-700 active:scale-95 transition-all duration-200"
-                                        onClick={() => setShowReviewModal(true)}
-                                    >
-                                        <DocumentTextIcon className="h-4 w-4" aria-hidden="true" />
-                                        Request Review
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-xl hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
-                                        onClick={() => setAddFile(true)}
-                                    >
-                                        <PlusIcon className="h-4 w-4" aria-hidden="true" />
-                                        Upload Resume
-                                    </button>
-                                </div>
-                            )}
-                        </header>
-
-                        <div className="px-4 py-6 sm:col-span-2 sm:px-0">
-                            {resumes.length === 0 ? (
-                                <EmptyResumes onUploadClick={() => isMember && setAddFile(true)} isMember={isMember} />
-                            ) : (
-                                <div className="space-y-3">
-                                    {resumes.map((resume) => (
-                                        <div
-                                            key={resume.id}
-                                            className="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-200"
-                                        >
-                                            <div className="flex items-center justify-between gap-4">
-                                                {/* Left Section: Icon + Details */}
-                                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                    {/* File Icon */}
-                                                    <div className="p-2.5 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-lg group-hover:from-blue-100 group-hover:to-cyan-100 dark:group-hover:from-blue-900/40 dark:group-hover:to-cyan-900/40 transition-all">
-                                                        <PaperClipIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                                                    </div>
-
-                                                    {/* Resume Details */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 mb-0.5">
-                                                            <h3 className="text-xs font-semibold text-gray-900 dark:text-white truncate">
-                                                                {resume.name}
-                                                            </h3>
-                                                        </div>
-                                                        <div className="flex items-center gap-3 text-[11px]">
-                                                            <div className="flex items-center gap-1.5">
-                                                                <BriefcaseIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400" />
-                                                                <span className="font-medium text-blue-600 dark:text-blue-400 truncate">
-                                                                    {resume.role}
-                                                                </span>
-                                                            </div>
-                                                            {resume.uploadDate && (
-                                                                <>
-                                                                    <span className="text-gray-400 dark:text-gray-500">•</span>
-                                                                    <span className="text-gray-500 dark:text-gray-300">{new Date(resume.uploadDate).toLocaleDateString()}</span>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                        {resume.notes && (
-                                                            <p className="text-[11px] text-gray-600 dark:text-gray-300 mt-1.5 line-clamp-1">
-                                                                {resume.notes}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Right Section: Actions */}
-                                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                                    <a
-                                                        href={resume.link}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-2.5 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-medium rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all"
-                                                    >
-                                                        View
-                                                    </a>
-                                                    {isMember && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleDeleteClick(resume.id, resume.name)}
-                                                            disabled={deletingFileId === resume.id}
-                                                            className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            title="Delete"
-                                                        >
-                                                            <TrashIcon className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    )}
-                                                </div>
+                    {/* Main Content Section with Tabs */}
+                    <div className="lg:col-span-7">
+                        {/* Tab Content */}
+                        {activeTab === 'resumes' ? (
+                            <div className="space-y-4">
+                                {/* Header with Actions */}
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-4 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">My Resumes</h2>
+                                        {isMember && (
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg text-xs"
+                                                    onClick={() => setShowReviewModal(true)}
+                                                >
+                                                    <DocumentTextIcon className="h-4 w-4" />
+                                                    <span>Request Review</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs"
+                                                    onClick={() => setAddFile(true)}
+                                                >
+                                                    <PlusIcon className="h-4 w-4" />
+                                                    <span>Upload Resume</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                    ))}
+                                        )}
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Resumes List */}
+                                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
+                                    {resumes.length === 0 ? (
+                                        <EmptyResumes />
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead>
+                                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                            <div className="flex items-center gap-2">
+                                                                <DocumentTextIcon className="h-4 w-4" />
+                                                                Resume Name
+                                                            </div>
+                                                        </th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                                                            Actions
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                                    {resumes.map((file) => (
+                                                        <tr
+                                                            key={file.id}
+                                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group"
+                                                        >
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                                                        <PaperClipIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <a
+                                                                            href={file.link}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                                        >
+                                                                            {file.name}
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <button
+                                                                    onClick={() => handleDeleteClick(file.id, file.name)}
+                                                                    disabled={deletingFileId === file.id}
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {deletingFileId === file.id ? (
+                                                                        <>
+                                                                            <div className="animate-spin h-3 w-3 border-2 border-red-700 dark:border-red-400 border-t-transparent rounded-full" />
+                                                                            Deleting...
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <TrashIcon className="h-4 w-4" />
+                                                                            Delete
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <ResumeReviews />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

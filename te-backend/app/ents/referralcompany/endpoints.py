@@ -1,30 +1,29 @@
 from typing import Any, Dict
 
 import app.database.session as session
-import app.ents.referral_company.crud as referral_company_crud
-import app.ents.referral_company.dependencies as referral_company_dependencies
-import app.ents.referral_company.schema as referral_company_schema
+import app.ents.referralcompany.crud as referralcompany_crud
+import app.ents.referralcompany.dependencies as referralcompany_dependencies
+import app.ents.referralcompany.schema as referralcompany_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from app.core.permissions import require_lead
 from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.database import Database
-from typing import Union
 
-referral_company_router = APIRouter(prefix="/companies")
+company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
 
 
-@referral_company_router.post(
+@company_router.post(
     "",
-    response_model=Dict[str, referral_company_schema.CompanyReadBase],
+    response_model=Dict[str, referralcompany_schema.CompanyReadBase],
     status_code=status.HTTP_201_CREATED,
 )
-def add_referral_company(
+def add_company(
     db: Database = Depends(session.get_db),
     *,
-    data: referral_company_schema.ReferralCompanyCreate,
-    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+    data: referralcompany_schema.AdminCompanyCreate,
+    user: user_models.MemberUser = Depends(
         user_dependencies.get_current_volunteer_or_above
     ),
 ) -> Any:
@@ -32,13 +31,13 @@ def add_referral_company(
     Add a new referral company to the system.
     Requires role: Volunteer (3), Lead (4), or Admin (5).
     """
-    company = referral_company_crud.create_referral_company(db, data=data)
-    return {"company": referral_company_dependencies.parse_company_basic(company)}
+    company = referralcompany_crud.create_admin_company(db, data=data)
+    return {"company": referralcompany_dependencies.parse_company_basic(company)}
 
 
-@referral_company_router.get(
+@company_router.get(
     "/referrals",
-    response_model=Dict[str, list[referral_company_schema.CompanyReadForReferrals]],
+    response_model=Dict[str, list[referralcompany_schema.CompanyReadForReferrals]],
 )
 def get_referral_companies(
     db: Database = Depends(session.get_db),
@@ -49,12 +48,10 @@ def get_referral_companies(
     """
     Retrieve Companies.
     """
-    companies = referral_company_crud.read_referral_companies(
-        db, skip=skip, limit=limit
-    )
+    companies = referralcompany_crud.read_referral_companies(db, skip=skip, limit=limit)
     return {
         "companies": [
-            referral_company_dependencies.parse_company_for_referrals(user.id, company)
+            referralcompany_dependencies.parse_company_for_referrals(user.id, company)
             for company in companies
         ]
     }
@@ -62,29 +59,29 @@ def get_referral_companies(
 
 @referral_router.post(
     "",
-    response_model=Dict[str, referral_company_schema.ReferralRead],
+    response_model=Dict[str, referralcompany_schema.ReferralRead],
 )
 def request_referral(
     db: Database = Depends(session.get_db),
     *,
-    data: referral_company_schema.ReferralRequest,
+    data: referralcompany_schema.ReferralRequest,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
     Request a referral for `user`.
     Only available for Members (role=1).
     """
-    referral = referral_company_crud.request_referral(
+    referral = referralcompany_crud.request_referral(
         db,
         user_id=user.id,
         data=data,
     )
-    return {"referral": referral_company_dependencies.parse_referral(referral)}
+    return {"referral": referralcompany_dependencies.parse_referral(referral)}
 
 
 @referral_router.get(
     "",
-    response_model=Dict[str, list[referral_company_schema.ReferralRead]],
+    response_model=Dict[str, list[referralcompany_schema.ReferralRead]],
 )
 def get_user_referrals(
     db: Database = Depends(session.get_db),
@@ -95,10 +92,10 @@ def get_user_referrals(
     """
     Get all referrals of `user`.
     """
-    referrals = referral_company_crud.read_user_referrals(db, user_id=user_id)
+    referrals = referralcompany_crud.read_user_referrals(db, user_id=user_id)
     return {
         "referrals": [
-            referral_company_dependencies.parse_referral(referral)
+            referralcompany_dependencies.parse_referral(referral)
             for referral in referrals
         ]
     }
@@ -106,7 +103,7 @@ def get_user_referrals(
 
 @referral_router.get(
     "/all",
-    response_model=Dict[str, list[referral_company_schema.ReferralReadWithUser]],
+    response_model=Dict[str, list[referralcompany_schema.ReferralReadWithUser]],
 )
 def get_all_referrals(
     db: Database = Depends(session.get_db),
@@ -144,16 +141,16 @@ def get_all_referrals(
         company_name = company.get("name", "")
 
         # Get only referrals for this referrer's company (by company name)
-        referrals = referral_company_crud.read_company_referrals(
+        referrals = referralcompany_crud.read_company_referrals(
             db, company_id=company_name, skip=skip, limit=limit
         )
     else:
         # Lead/Admin can see all referrals
-        referrals = referral_company_crud.read_all_referrals(db, skip=skip, limit=limit)
+        referrals = referralcompany_crud.read_all_referrals(db, skip=skip, limit=limit)
 
     return {
         "referrals": [
-            referral_company_dependencies.parse_referral_with_user(referral)
+            referralcompany_dependencies.parse_referral_with_user(referral)
             for referral in referrals
         ]
     }
@@ -178,14 +175,14 @@ def get_company_referrals(
     # Check if user has elevated privileges
     require_lead(user)
 
-    referrals = referral_company_crud.read_company_referrals(
+    referrals = referralcompany_crud.read_company_referrals(
         db, company_id=company_id, skip=skip, limit=limit
     )
-    total = referral_company_crud.count_referrals_by_company(db, company_id=company_id)
+    total = referralcompany_crud.count_referrals_by_company(db, company_id=company_id)
 
     return {
         "referrals": [
-            referral_company_dependencies.parse_referral_with_user(referral)
+            referralcompany_dependencies.parse_referral_with_user(referral)
             for referral in referrals
         ],
         "total": total,
@@ -214,14 +211,14 @@ def get_referrals_by_status(
     # Check if user has elevated privileges
     require_lead(user)
 
-    referrals = referral_company_crud.read_referrals_by_status(
+    referrals = referralcompany_crud.read_referrals_by_status(
         db, status=status, skip=skip, limit=limit
     )
-    total = referral_company_crud.count_referrals_by_status(db, status=status)
+    total = referralcompany_crud.count_referrals_by_status(db, status=status)
 
     return {
         "referrals": [
-            referral_company_dependencies.parse_referral_with_user(referral)
+            referralcompany_dependencies.parse_referral_with_user(referral)
             for referral in referrals
         ],
         "total": total,
@@ -232,7 +229,7 @@ def get_referrals_by_status(
 
 @referral_router.get(
     "/user/{user_id}/company/{company_id}",
-    response_model=Dict[str, list[referral_company_schema.ReferralRead]],
+    response_model=Dict[str, list[referralcompany_schema.ReferralRead]],
 )
 def get_user_company_referrals(
     db: Database = Depends(session.get_db),
@@ -253,12 +250,12 @@ def get_user_company_referrals(
             detail="Not authorized to access these referrals",
         )
 
-    referrals = referral_company_crud.read_user_company_referrals(
+    referrals = referralcompany_crud.read_user_company_referrals(
         db, user_id=user_id, company_id=company_id
     )
     return {
         "referrals": [
-            referral_company_dependencies.parse_referral(referral)
+            referralcompany_dependencies.parse_referral(referral)
             for referral in referrals
         ]
     }
@@ -266,13 +263,13 @@ def get_user_company_referrals(
 
 @referral_router.patch(
     "/{referral_id}",
-    response_model=Dict[str, referral_company_schema.ReferralReadWithUser],
+    response_model=Dict[str, referralcompany_schema.ReferralReadWithUser],
 )
 def update_referral(
     *,
     db: Database = Depends(session.get_db),
     referral_id: str,
-    data: referral_company_schema.ReferralUpdateStatus,
+    data: referralcompany_schema.ReferralUpdateStatus,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -317,27 +314,84 @@ def update_referral(
     # Update the referral, passing user role for feedback_date tracking
     from app.core.permissions import get_user_role
 
-    referral = referral_company_crud.update_referral_status(
+    referral = referralcompany_crud.update_referral_status(
         db, referral_id=referral_id, data=data, user_role=get_user_role(user)
     )
 
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
 
-    return {
-        "referral": referral_company_dependencies.parse_referral_with_user(referral)
-    }
+    return {"referral": referralcompany_dependencies.parse_referral_with_user(referral)}
+
+
+@referral_router.patch(
+    "/{referral_id}/cancel",
+    response_model=Dict[str, referralcompany_schema.ReferralReadWithUser],
+)
+def cancel_referral(
+    *,
+    db: Database = Depends(session.get_db),
+    referral_id: str,
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Cancel a referral request.
+    - Members (role=1): Can only cancel their own pending referral requests
+    """
+    from app.core.permissions import get_user_role, is_member
+    from bson import ObjectId
+
+    # Only Members can cancel (not Referrers or higher)
+    if not is_member(user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only members can cancel referral requests",
+        )
+
+    # Get the referral to verify ownership and status
+    referral_data = db.referrals.find_one({"_id": ObjectId(referral_id)})
+    if not referral_data:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    # Verify the referral belongs to this user
+    if str(referral_data.get("user_id")) != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to cancel this referral",
+        )
+
+    # Only allow cancelling if status is Pending
+    if referral_data.get("status") != "Pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Can only cancel pending referral requests",
+        )
+
+    # Update status to Cancelled
+    cancel_data = referralcompany_schema.ReferralUpdateStatus(
+        status=referralcompany_schema.ReferralStatuses.cancelled,
+        review_note=referral_data.get("review_note", ""),
+    )
+
+    referral = referralcompany_crud.update_referral_status(
+        db, referral_id=referral_id, data=cancel_data, user_role=get_user_role(user)
+    )
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    return {"referral": referralcompany_dependencies.parse_referral_with_user(referral)}
 
 
 @referral_router.post(
     "/{referral_id}/review",
-    response_model=Dict[str, referral_company_schema.ReferralReadWithUser],
+    response_model=Dict[str, referralcompany_schema.ReferralReadWithUser],
 )
 def review_referral(
     *,
     db: Database = Depends(session.get_db),
     referral_id: str,
-    data: referral_company_schema.ReferralUpdateStatus,
+    data: referralcompany_schema.ReferralUpdateStatus,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -349,16 +403,14 @@ def review_referral(
     # Check if user has elevated privileges
     require_lead(user)
 
-    referral = referral_company_crud.update_referral_status(
+    referral = referralcompany_crud.update_referral_status(
         db, referral_id=referral_id, data=data, user_role=get_user_role(user)
     )
 
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
 
-    return {
-        "referral": referral_company_dependencies.parse_referral_with_user(referral)
-    }
+    return {"referral": referralcompany_dependencies.parse_referral_with_user(referral)}
 
 
 @referral_router.post(
@@ -380,7 +432,7 @@ def export_referrals_to_sheets(
     require_lead(user)
 
     try:
-        sheet_url = referral_company_crud.export_referrals_to_google_sheets(
+        sheet_url = referralcompany_crud.export_referrals_to_google_sheets(
             db, referral_ids=referral_ids
         )
         return {"sheet_url": sheet_url, "message": "Referrals exported successfully"}

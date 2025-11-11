@@ -111,6 +111,12 @@ const Referrals = () => {
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [myReferralsFeedbackCount, setMyReferralsFeedbackCount] = useState(0);
+
+    // Memoized callback to prevent unnecessary re-renders
+    const handleFeedbackCount = useCallback((count) => {
+        setMyReferralsFeedbackCount(count);
+    }, []);
 
     // Filters for All Requests view
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
@@ -298,52 +304,49 @@ const Referrals = () => {
                             </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            {/* View Toggle */}
-                            <div className="flex items-center gap-0.5 bg-white dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 p-0.5 transition-colors">
+                            {/* Modern View Toggle */}
+                            <div className="inline-flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                                 <button
                                     onClick={() => setViewMode('companies')}
-                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'companies'
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                                    className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'companies'
+                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                         }`}
                                 >
-                                    Companies
+                                    <span className="relative z-10">Companies</span>
                                 </button>
                                 <button
                                     onClick={() => setViewMode('my-requests')}
-                                    className={`px-2.5 py-1 rounded text-xs font-medium transition-all ${viewMode === 'my-requests'
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                                    className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'my-requests'
+                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                         }`}
                                 >
-                                    My Requests
+                                    <span className="relative z-10">My Requests</span>
+                                    {myReferralsFeedbackCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-800 shadow-sm">
+                                            {myReferralsFeedbackCount}
+                                        </span>
+                                    )}
                                 </button>
                                 {isLeadOrAdmin && (
                                     <button
                                         onClick={() => setViewMode('all-requests')}
-                                        className={`px-2.5 py-1 rounded text-xs font-medium transition-all relative ${viewMode === 'all-requests'
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                                        className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'all-requests'
+                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                             }`}
                                     >
-                                        All Requests
+                                        <span className="relative z-10">All Requests</span>
                                         {pendingReferralsCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-700 animate-pulse transition-colors">
+                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-800 shadow-sm">
                                                 {pendingReferralsCount}
                                             </span>
                                         )}
                                     </button>
                                 )}
                             </div>
-                            {!fetchReferralCompanies && viewMode === 'companies' && referralCompanies.length > 0 && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-md border border-emerald-200 dark:border-emerald-700/50 transition-colors">
-                                    <SparklesIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                                    <div className="leading-none">
-                                        <p className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase mb-0.5 transition-colors">Available</p>
-                                        <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 transition-colors">{referralCompanies.length}</p>
-                                    </div>
-                                </div>
-                            )}
+
                             {viewMode === 'all-requests' && !loadingAllReferrals && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-md border border-blue-200 dark:border-blue-700/50 transition-colors">
                                     <DocumentTextIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
@@ -493,7 +496,7 @@ const Referrals = () => {
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                                 {filteredCompanies.map((company, index) => (
                                                     <tr
                                                         key={company.id}
@@ -575,7 +578,7 @@ const Referrals = () => {
                     {/* My Requests View (for all authenticated users) */}
                     {viewMode === 'my-requests' && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <MyReferrals />
+                            <MyReferrals onFeedbackCount={handleFeedbackCount} />
                         </div>
                     )}
 

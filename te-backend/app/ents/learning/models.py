@@ -89,9 +89,12 @@ class UserProgress(BaseModel):
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     user_id: PyObjectId  # Reference to user ID (MongoDB ObjectId)
-    completed_topics: List[str] = Field(
+
+    # New structure: List of dicts with topic_key, completed_at, and count
+    completed_topics: List[Dict[str, Any]] = Field(
         default_factory=list
-    )  # List of "category::topic" strings
+    )  # [{"topic_key": "category::topic", "completed_at": datetime, "count": 1}]
+
     bookmarked_topics: List[str] = Field(
         default_factory=list
     )  # List of "category::topic" strings

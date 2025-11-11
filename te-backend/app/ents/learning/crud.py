@@ -180,21 +180,63 @@ def update_user_progress(
 def toggle_completed_topic(
     db: Database, user_id: int, topic_key: str
 ) -> Optional[learning_models.UserProgress]:
-    """Toggle a topic's completion status"""
+    """Toggle a topic's completion status with date tracking and count"""
     progress = get_user_progress(db, user_id)
 
     if not progress:
-        # Create new progress if doesn't exist
-        progress = create_user_progress(
-            db, user_id, learning_schema.ProgressCreate(completed_topics=[topic_key])
+        # Create new progress if doesn't exist with new structure
+        new_completion = {
+            "topic_key": topic_key,
+            "completed_at": datetime.utcnow(),
+            "count": 1,
+        }
+        db["user_progress"].insert_one(
+            {
+                "user_id": ObjectId(user_id),
+                "completed_topics": [new_completion],
+                "bookmarked_topics": [],
+                "topic_notes": {},
+                "last_updated": datetime.utcnow(),
+                "created_at": datetime.utcnow(),
+            }
         )
+        progress_data = db["user_progress"].find_one({"user_id": ObjectId(user_id)})
+        return learning_models.UserProgress(**progress_data)
     else:
-        # Toggle the topic
+        # Check if topic already exists in completed topics
         completed = progress.completed_topics
-        if topic_key in completed:
-            completed.remove(topic_key)
+        existing_topic = None
+        existing_index = -1
+
+        # Handle both old format (list of strings) and new format (list of dicts)
+        for i, topic in enumerate(completed):
+            if isinstance(topic, dict):
+                if topic.get("topic_key") == topic_key:
+                    existing_topic = topic
+                    existing_index = i
+                    break
+            elif isinstance(topic, str) and topic == topic_key:
+                # Migrate old format to new format
+                existing_topic = {
+                    "topic_key": topic,
+                    "completed_at": datetime.utcnow(),
+                    "count": 1,
+                }
+                existing_index = i
+                break
+
+        if existing_topic:
+            # Topic exists - increment count and update date
+            completed[existing_index] = {
+                "topic_key": topic_key,
+                "completed_at": datetime.utcnow(),
+                "count": existing_topic.get("count", 1) + 1,
+            }
         else:
-            completed.append(topic_key)
+            # Topic doesn't exist - add it
+            completed.append(
+                {"topic_key": topic_key, "completed_at": datetime.utcnow(), "count": 1}
+            )
 
         db["user_progress"].update_one(
             {"user_id": ObjectId(user_id)},
@@ -284,16 +326,58 @@ def get_all_members_progress(db: Database) -> List[dict]:
         # Get user details from member_users collection
         user_data = db.member_users.find_one({"_id": progress["user_id"]})
         if user_data:
+            # Process completed topics to extract topic names with metadata
+            completed_topics_list = []
+            completed_topics_raw = progress.get("completed_topics", [])
+
+            for topic in completed_topics_raw:
+                if isinstance(topic, dict):
+                    # New format with metadata
+                    topic_key = topic.get("topic_key", "")
+                    if "::" in topic_key:
+                        category, topic_name = topic_key.split("::", 1)
+                        completed_topics_list.append(
+                            {
+                                "topic_name": topic_name,
+                                "category": category,
+                                "completed_at": topic.get("completed_at").isoformat()
+                                if topic.get("completed_at")
+                                else None,
+                                "count": topic.get("count", 1),
+                            }
+                        )
+                elif isinstance(topic, str):
+                    # Old format - migrate on read
+                    if "::" in topic:
+                        category, topic_name = topic.split("::", 1)
+                        completed_topics_list.append(
+                            {
+                                "topic_name": topic_name,
+                                "category": category,
+                                "completed_at": None,
+                                "count": 1,
+                            }
+                        )
+
+            # Process bookmarked topics
+            bookmarked_topics_list = []
+            for topic in progress.get("bookmarked_topics", []):
+                if "::" in topic:
+                    category, topic_name = topic.split("::", 1)
+                    bookmarked_topics_list.append(
+                        {"topic_name": topic_name, "category": category}
+                    )
+
             result.append(
                 {
                     "user_id": str(progress["user_id"]),
                     "full_name": user_data.get("full_name", "Unknown"),
                     "email": user_data.get("email", ""),
-                    "completed_count": len(progress.get("completed_topics", [])),
-                    "bookmarked_count": len(progress.get("bookmarked_topics", [])),
+                    "completed_count": len(completed_topics_list),
+                    "bookmarked_count": len(bookmarked_topics_list),
                     "notes_count": len(progress.get("topic_notes", {})),
-                    "completed_topics": progress.get("completed_topics", []),
-                    "bookmarked_topics": progress.get("bookmarked_topics", []),
+                    "completed_topics": completed_topics_list,
+                    "bookmarked_topics": bookmarked_topics_list,
                     "last_updated": progress.get("last_updated"),
                     "created_at": progress.get("created_at"),
                 }

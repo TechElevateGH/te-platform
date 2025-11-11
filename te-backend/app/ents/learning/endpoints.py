@@ -297,6 +297,7 @@ def get_user_progress(
     """
     Get current user's learning progress.
     Only available for Members (role=1).
+    Returns completed_topics as list of topic_keys for backward compatibility.
     """
     progress = learning_crud.get_user_progress(db, current_user.id)
 
@@ -306,9 +307,17 @@ def get_user_progress(
             db, current_user.id, learning_schema.ProgressCreate()
         )
 
+    # Format completed_topics for frontend - extract just the topic_keys
+    completed_topic_keys = []
+    for topic in progress.completed_topics:
+        if isinstance(topic, dict):
+            completed_topic_keys.append(topic.get("topic_key", ""))
+        elif isinstance(topic, str):
+            completed_topic_keys.append(topic)
+
     return {
         "user_id": str(progress.user_id),
-        "completed_topics": progress.completed_topics,
+        "completed_topics": completed_topic_keys,
         "bookmarked_topics": progress.bookmarked_topics,
         "topic_notes": progress.topic_notes,
         "last_updated": progress.last_updated,

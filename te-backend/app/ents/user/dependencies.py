@@ -75,7 +75,9 @@ def get_current_user_by_role(
 
 
 def get_current_lead(
-    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(get_current_user),
+    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        get_current_user
+    ),
 ) -> Union[user_models.MemberUser, user_models.PrivilegedUser]:
     """Get current user if they are at least a Lead (role >= 4)"""
     if not current_user.is_active:
@@ -88,7 +90,9 @@ def get_current_lead(
 
 
 def get_current_admin(
-    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(get_current_user),
+    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        get_current_user
+    ),
 ) -> Union[user_models.MemberUser, user_models.PrivilegedUser]:
     """Get current user if they are an Admin (role >= 5)"""
     if not current_user.is_active:
@@ -116,7 +120,9 @@ def get_current_member_only(
 
 
 def get_current_volunteer_or_above(
-    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(get_current_user),
+    current_user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        get_current_user
+    ),
 ) -> Union[user_models.MemberUser, user_models.PrivilegedUser]:
     """Get current user if they are at least a Volunteer (role >= 3)"""
     if not current_user.is_active:

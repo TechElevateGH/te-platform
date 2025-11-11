@@ -544,11 +544,6 @@ const ReferralsManagement = () => {
                             </button>
                         </div>
                     )}
-
-                    {/* Results Count */}
-                    <div className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
-                        Showing {sortedReferrals.length} of {referrals.length} referral requests
-                    </div>
                 </div>
 
                 {/* Referrals Table */}
