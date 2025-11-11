@@ -29,6 +29,7 @@ import {
 } from '@heroicons/react/24/solid'
 
 import { dsaTopics } from '../data/dsaTopics'
+import { pythonTopics } from '../data/pythonTopics'
 import { useAuth } from '../context/AuthContext'
 import { useDarkMode } from '../context/DarkModeContext'
 import LessonCreate from '../components/learning/LessonCreate'
@@ -56,15 +57,24 @@ const learningPath = [
     'Advanced Topics'
 ];
 
-const Learning = () => {
-    const { state: authState } = useAuth();
-    const isAdmin = authState?.userRole && parseInt(authState.userRole) >= 2;
-    const isLoggedIn = !!authState?.userId;
+const Learning = ({ setContent }) => {
+    const { userId, userRole: authUserRole, isAuthenticated, isLoading: authLoading } = useAuth();
+    const userRole = authUserRole ? parseInt(authUserRole) : 0;
+    const isAdmin = userRole >= 3; // Volunteer and above can manage content
+    const isMember = userRole === 1; // Only Members (role=1) can track progress
+    const isReferrer = userRole === 2; // Referrers cannot access learning content
+    const canAccessLearning = userRole !== 2; // Everyone except Referrers (includes guests with role=0)
+    const isLoggedIn = isAuthenticated;
+    const isLeadOrAdmin = userRole >= 4; // Lead (4) or Admin (5)
+
+    // Debug: Log auth state
+    console.log('Learning - Auth State:', { userId, authUserRole, isLoggedIn, isAuthenticated, authLoading, userRole, isMember, isLeadOrAdmin, canAccessLearning });
 
     const { darkMode, toggleDarkMode } = useDarkMode();
     const [showStats, setShowStats] = useState(false);
     const [showAddLesson, setShowAddLesson] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
+    const [activeTab, setActiveTab] = useState('dsa'); // 'dsa', 'python', 'system-design'
     const [expandedTopics, setExpandedTopics] = useState(new Set());
     const [collapsedCategories, setCollapsedCategories] = useState(() => {
         // Collapse all categories by default
@@ -74,6 +84,15 @@ const Learning = () => {
     const [completedTopics, setCompletedTopics] = useState(new Set());
     const [bookmarkedTopics, setBookmarkedTopics] = useState(new Set());
     const [isLoading, setIsLoading] = useState(true);
+
+    // Python-specific progress
+    const [pythonCompletedTopics, setPythonCompletedTopics] = useState(new Set());
+    const [pythonBookmarkedTopics, setPythonBookmarkedTopics] = useState(new Set());
+    const [pythonTopicNotes, setPythonTopicNotes] = useState({});
+    const [pythonExpandedTopics, setPythonExpandedTopics] = useState(new Set());
+    const [pythonCollapsedCategories, setPythonCollapsedCategories] = useState(() => {
+        return new Set(Object.keys(pythonTopics));
+    });
 
     // Lesson management state
     const [allLessons, setAllLessons] = useState([]);
@@ -163,20 +182,24 @@ const Learning = () => {
         setShowLessonModal(true);
     };
 
-    // Debounced save to backend
+    // Debounced save to backend (only for Members)
     const saveProgressToBackend = useCallback(async (updates) => {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn || !isMember) return;
 
         try {
             await axios.post('/learning/progress', updates);
         } catch (error) {
             console.error('Error saving progress:', error);
+            // If user is not a member, they'll get a 403 error
+            if (error.response?.status === 403) {
+                console.log('Progress tracking is only available for Members');
+            }
         }
-    }, [isLoggedIn]);
+    }, [isLoggedIn, isMember]);
 
     // Save to localStorage for non-logged-in users or as backup
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && isMember) {
             localStorage.setItem('dsaCompletedTopics', JSON.stringify([...completedTopics]));
 
             // Debounce backend save
@@ -187,24 +210,24 @@ const Learning = () => {
                 }, 1000);
             }
         }
-    }, [completedTopics, isLoading, isLoggedIn, saveProgressToBackend]);
+    }, [completedTopics, isLoading, isLoggedIn, isMember, saveProgressToBackend]);
 
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && isMember) {
             localStorage.setItem('dsaBookmarkedTopics', JSON.stringify([...bookmarkedTopics]));
 
             // Debounce backend save
-            if (isLoggedIn) {
+            if (isLoggedIn && isMember) {
                 if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
                 saveTimeoutRef.current = setTimeout(() => {
                     saveProgressToBackend({ bookmarked_topics: [...bookmarkedTopics] });
                 }, 1000);
             }
         }
-    }, [bookmarkedTopics, isLoading, isLoggedIn, saveProgressToBackend]);
+    }, [bookmarkedTopics, isLoading, isLoggedIn, isMember, saveProgressToBackend]);
 
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && isMember) {
             localStorage.setItem('dsaTopicNotes', JSON.stringify(topicNotes));
 
             // Debounce backend save
@@ -215,7 +238,7 @@ const Learning = () => {
                 }, 2000); // Longer delay for notes
             }
         }
-    }, [topicNotes, isLoading, isLoggedIn, saveProgressToBackend]);
+    }, [topicNotes, isLoading, isLoggedIn, isMember, saveProgressToBackend]);
 
     useEffect(() => {
         localStorage.setItem('dsaDarkMode', darkMode);
@@ -453,6 +476,36 @@ const Learning = () => {
         };
     }, [filteredCategories]);
 
+    // Block Referrers from accessing learning content
+    if (isLoggedIn && isReferrer) {
+        return (
+            <div className={`min-h-screen flex items-center justify-center ${darkMode
+                ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950'
+                : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100'
+                }`}>
+                <div className="max-w-md mx-auto p-8 text-center">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                        <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                        Access Restricted
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                        Learning content is only available for Members and Volunteers. As a Referrer, you have access to referral management features.
+                    </p>
+                    <button
+                        onClick={() => window.location.href = '/referrals'}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                        Go to Referrals
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={`min-h-screen transition-colors duration-500 ${darkMode
             ? 'dark bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950'
@@ -474,7 +527,7 @@ const Learning = () => {
             }}></div>
 
             {/* Header */}
-            <div className={`sticky top-0 z-40 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${darkMode
+            <div className={`sticky top-0 z-50 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${darkMode
                 ? 'bg-slate-900/80 border-slate-700/50'
                 : 'bg-white/80 border-purple-200/30'
                 }`}>
@@ -488,24 +541,26 @@ const Learning = () => {
                             >
                                 <Bars3Icon className="w-5 h-5" />
                             </button>
-                            <div>
+                            <div className="flex-1">
                                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-1 tracking-tight">
-                                    Data Structures and Algorithms
+                                    Learning Hub
                                 </h1>
-                                <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-                                    <span className="flex items-center gap-1.5">
-                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                        {stats.totalTopics} Topics
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                        {stats.completed} Completed
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                                        {stats.bookmarked} Saved
-                                    </span>
-                                </div>
+                                {isMember && (
+                                    <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
+                                        <span className="flex items-center gap-1.5">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                            {stats.totalTopics} Topics
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                            {stats.completed} Completed
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                            <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                                            {stats.bookmarked} Saved
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -520,13 +575,26 @@ const Learning = () => {
                                     <MoonIcon className="w-4 h-4" />
                                 )}
                             </button>
-                            <button
-                                onClick={() => setShowStats(!showStats)}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all text-sm"
-                            >
-                                <ChartBarIcon className="h-4 w-4" />
-                                <span className="hidden sm:inline">Stats</span>
-                            </button>
+                            {isMember && (
+                                <button
+                                    onClick={() => setShowStats(!showStats)}
+                                    className="group flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:border-indigo-400 dark:hover:border-indigo-500 transition-all text-sm"
+                                >
+                                    <ChartBarIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                    <span className="hidden sm:inline">Stats</span>
+                                </button>
+                            )}
+                            {isLeadOrAdmin && setContent && (
+                                <button
+                                    onClick={() => setContent('Learning Analytics')}
+                                    className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 text-sm whitespace-nowrap overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                                    <ChartBarIcon className="h-4 w-4 relative z-10 group-hover:scale-110 transition-transform" />
+                                    <span className="relative z-10">Member Analytics</span>
+                                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
+                                </button>
+                            )}
                             <a
                                 href="https://www.youtube.com/@techelevategh/videos"
                                 target="_blank"
@@ -539,24 +607,59 @@ const Learning = () => {
                         </div>
                     </div>
 
-                    {/* Progress Bar */}
-                    <div className="mt-3">
-                        <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Progress</span>
-                            <span className="text-sm font-bold text-gray-800 dark:text-white">{stats.percentage}%</span>
-                        </div>
-                        <div className="w-full bg-gradient-to-r from-gray-200/50 via-indigo-200/50 to-purple-200/50 dark:from-gray-700/50 dark:via-indigo-700/50 dark:to-purple-700/50 backdrop-blur-sm rounded-full h-1.5 overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out shadow-lg"
-                                style={{ width: `${stats.percentage}%` }}
-                            ></div>
-                        </div>
+                    {/* Tabs Navigation */}
+                    <div className="mt-4 border-b border-gray-200 dark:border-gray-700">
+                        <nav className="-mb-px flex gap-6" aria-label="Tabs">
+                            <button
+                                onClick={() => setActiveTab('dsa')}
+                                className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'dsa'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                Data Structures & Algorithms
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('python')}
+                                className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'python'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                Python Programming
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('system-design')}
+                                className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'system-design'
+                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                System Design
+                            </button>
+                        </nav>
                     </div>
+
+                    {/* Progress Bar - Member Only */}
+                    {isMember && (
+                        <div className="mt-3">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Progress</span>
+                                <span className="text-sm font-bold text-gray-800 dark:text-white">{stats.percentage}%</span>
+                            </div>
+                            <div className="w-full bg-gradient-to-r from-gray-200/50 via-indigo-200/50 to-purple-200/50 dark:from-gray-700/50 dark:via-indigo-700/50 dark:to-purple-700/50 backdrop-blur-sm rounded-full h-1.5 overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out shadow-lg"
+                                    style={{ width: `${stats.percentage}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            {/* Statistics Modal */}
-            {showStats && (
+            {/* Statistics Modal - Member Only */}
+            {isMember && showStats && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
                     <div className={`rounded-3xl shadow-2xl max-w-md w-full border backdrop-blur-xl ${darkMode
                         ? 'bg-slate-900/90 border-slate-700/50'
@@ -624,495 +727,906 @@ const Learning = () => {
                 </div>
             )}
 
-            {/* Book Recommendation & Learning Tip */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Book Card */}
-                    <div className="glass dark:bg-gradient-to-br dark:from-amber-900/20 dark:to-orange-900/20 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-700/30 border-amber-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
-                        <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
-                                    <BookOpenIcon className="h-6 w-6 text-white" />
+            {/* Book Recommendation & Learning Tip for DSA */}
+            {activeTab === "dsa" && !authLoading && !isLoggedIn && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Book Card */}
+                        <div className="glass dark:bg-gradient-to-br dark:from-amber-900/20 dark:to-orange-900/20 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-700/30 border-amber-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+                                        <BookOpenIcon className="h-6 w-6 text-white" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-xs font-semibold">
-                                        📚 Recommended
-                                    </span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                        <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full text-xs font-semibold">
+                                            📚 Recommended
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
+                                        A Common-Sense Guide to DSA
+                                    </p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                        by Jay Wengrow
+                                    </p>
                                 </div>
-                                <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
-                                    A Common-Sense Guide to DSA
-                                </p>
-                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    by Jay Wengrow
-                                </p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Learning Tip Card */}
-                    <div className="glass dark:bg-gradient-to-br dark:from-indigo-900/20 dark:to-purple-900/20 bg-gradient-to-br from-indigo-50 to-purple-50 dark:border-indigo-700/30 border-indigo-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
-                        <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0">
-                                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                                    <LightBulbIcon className="h-6 w-6 text-white" />
+                        {/* Learning Tip Card */}
+                        <div className="glass dark:bg-gradient-to-br dark:from-indigo-900/20 dark:to-purple-900/20 bg-gradient-to-br from-indigo-50 to-purple-50 dark:border-indigo-700/30 border-indigo-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                                        <LightBulbIcon className="h-6 w-6 text-white" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-semibold">
-                                        💡 Pro Tip
-                                    </span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 mb-1">
+                                        <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-semibold">
+                                            💡 Pro Tip
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
+                                        Practice Daily
+                                    </p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                        Solve at least one problem every day
+                                    </p>
                                 </div>
-                                <p className="text-sm font-bold text-gray-800 dark:text-white mb-0.5">
-                                    Practice Daily
-                                </p>
-                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                    Solve at least one problem every day
-                                </p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </div>)}
 
             {/* Main Content with Sidebar */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-                <div className="flex gap-6">
-                    {/* Sidebar Navigation */}
-                    {showSidebar && (
-                        <>
-                            {/* Mobile Overlay */}
-                            <div
-                                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
-                                onClick={() => setShowSidebar(false)}
-                            ></div>
-
-                            {/* Sidebar Container - Fixed on mobile, Sticky on desktop */}
-                            <aside className="fixed lg:relative top-0 left-0 h-full lg:h-auto w-64 z-[60] lg:z-auto flex-shrink-0">
-                                <div className="lg:sticky lg:top-24 glass dark:bg-gray-800/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-5 shadow-2xl h-full lg:h-auto lg:max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                                    <div className="flex items-center justify-between mb-4 lg:block">
-                                        <h3 className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Categories</h3>
-                                        <button
-                                            onClick={() => setShowSidebar(false)}
-                                            className="lg:hidden p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700/50"
-                                            aria-label="Close sidebar"
-                                        >
-                                            <XMarkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                                        </button>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-12">
+                {/* DSA Tab Content */}
+                {activeTab === 'dsa' && (
+                    <div className="flex gap-6">
+                        {/* Sign-in Prompt for Non-logged-in Users */}
+                        {!authLoading && !isLoggedIn && (
+                            <div className="w-full glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-indigo-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl mb-6">
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+                                        <AcademicCapIcon className="w-10 h-10 text-white" />
                                     </div>
-                                    <nav className="space-y-1">
-                                        {filteredCategories.map((category, idx) => {
-                                            const progressPercentage = Math.round((category.completed / category.total) * 100);
-                                            const isActive = activeCategory === category.category;
-
-                                            return (
-                                                <button
-                                                    key={idx}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        scrollToCategory(category.category);
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${isActive
-                                                        ? 'bg-indigo-500 text-white shadow-md'
-                                                        : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between mb-1.5">
-                                                        <span className="text-sm font-medium truncate">{category.category}</span>
-                                                        <span className="text-xs opacity-75">{category.completed}/{category.total}</span>
-                                                    </div>
-                                                    <div className="w-full bg-white/30 dark:bg-gray-600/30 rounded-full h-1.5 overflow-hidden">
-                                                        <div
-                                                            className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-indigo-500'
-                                                                }`}
-                                                            style={{ width: `${progressPercentage}%` }}
-                                                        ></div>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })}
-                                    </nav>
-                                </div>
-                            </aside>
-                        </>
-                    )}
-
-                    {/* Topics by Category */}
-                    <div className="flex-1 min-w-0">
-                        {filteredCategories.length === 0 ? (
-                            <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-3xl border border-white/20 shadow-xl p-16 text-center">
-                                <SparklesIcon className="h-20 w-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No topics found</h3>
-                                <p className="text-gray-600 dark:text-gray-400">Adjust your search or filter to see results</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                {filteredCategories.map((category, catIdx) => {
-                                    const progressPercentage = Math.round((category.completed / category.total) * 100);
-
-                                    return (
-                                        <div
-                                            key={catIdx}
-                                            id={category.category.replace(/\s+/g, '-')}
-                                            ref={(el) => (categoryRefs.current[category.category] = el)}
-                                            className={`rounded-2xl border shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 ${darkMode
-                                                ? 'bg-slate-900/70 border-slate-700/50 hover:bg-slate-900/80 hover:border-slate-600/50'
-                                                : 'bg-white/70 border-white/30 hover:bg-white/90 hover:shadow-2xl'
-                                                }`}
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-purple-900 dark:text-purple-100 mb-2 text-xl">Track Your Learning Progress</h3>
+                                        <p className="text-sm text-purple-800 dark:text-purple-200 mb-5 leading-relaxed">
+                                            Sign in to save your progress, bookmark topics, take notes, and track your DSA journey. Stay motivated with personalized stats!
+                                        </p>
+                                        <a
+                                            href="/login"
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
                                         >
-                                            {/* Category Header */}
-                                            <div className={`px-4 py-2.5 border-b cursor-pointer transition-all ${darkMode
-                                                ? 'bg-gradient-to-r from-slate-800/60 to-slate-800/40 border-slate-700/50 hover:from-slate-800/70 hover:to-slate-800/50'
-                                                : 'bg-gradient-to-r from-white/60 to-white/40 border-gray-200/50 hover:from-white/80 hover:to-white/60'
-                                                }`} onClick={() => toggleCategoryCollapse(category.category)}>
-                                                <div className="flex items-center justify-between gap-4">
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                        <button
-                                                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                                                            aria-label="Toggle category"
-                                                        >
-                                                            {isCategoryCollapsed(category.category) ? (
-                                                                <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                                                            ) : (
-                                                                <ChevronUpIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                            <AcademicCapIcon className="w-5 h-5" />
+                                            <span>Sign In to Track Progress</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sidebar Navigation */}
+                        {showSidebar && (
+                            <>
+                                {/* Mobile Overlay */}
+                                <div
+                                    className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
+                                    onClick={() => setShowSidebar(false)}
+                                ></div>
+
+                                {/* Sidebar Container - Fixed on mobile, Sticky on desktop */}
+                                <aside className="fixed lg:relative top-0 left-0 h-full lg:h-auto w-64 z-[70] lg:z-auto flex-shrink-0">
+                                    <div className="lg:sticky lg:top-24 glass dark:bg-gray-800/95 backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-5 shadow-2xl h-full lg:h-auto lg:max-h-[calc(100vh-7rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                                        <div className="flex items-center justify-between mb-4 lg:block">
+                                            <h3 className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Categories</h3>
+                                            <button
+                                                onClick={() => setShowSidebar(false)}
+                                                className="lg:hidden p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700/50"
+                                                aria-label="Close sidebar"
+                                            >
+                                                <XMarkIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                            </button>
+                                        </div>
+                                        <nav className="space-y-1">
+                                            {filteredCategories.map((category, idx) => {
+                                                const progressPercentage = Math.round((category.completed / category.total) * 100);
+                                                const isActive = activeCategory === category.category;
+
+                                                return (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            scrollToCategory(category.category);
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${isActive
+                                                            ? 'bg-indigo-500 text-white shadow-md'
+                                                            : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center justify-between mb-1.5">
+                                                            <span className="text-sm font-medium truncate">{category.category}</span>
+                                                            {isMember && (
+                                                                <span className="text-xs opacity-75">{category.completed}/{category.total}</span>
                                                             )}
-                                                        </button>
-                                                        <div className="flex items-center gap-3 flex-wrap">
-                                                            <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                                                                {category.category}
-                                                            </h2>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className={`px-2.5 py-0.5 ${category.difficulty.color} dark:opacity-90 rounded-md text-xs font-semibold`}>
-                                                                    {category.difficulty.level}
-                                                                </span>
-                                                                <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
-                                                                    {category.total} topics
-                                                                </span>
-                                                                {category.completed > 0 && (
-                                                                    <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold">
-                                                                        {category.completed}/{category.total} ✓
-                                                                    </span>
-                                                                )}
-                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    {category.completed > 0 && (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="text-right">
-                                                                <p className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{progressPercentage}%</p>
+                                                        {isMember && (
+                                                            <div className="w-full bg-white/30 dark:bg-gray-600/30 rounded-full h-1.5 overflow-hidden">
+                                                                <div
+                                                                    className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-indigo-500'
+                                                                        }`}
+                                                                    style={{ width: `${progressPercentage}%` }}
+                                                                ></div>
                                                             </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </nav>
+                                    </div>
+                                </aside>
+                            </>
+                        )}
 
-                                            {/* Topics Table */}
-                                            {!isCategoryCollapsed(category.category) && (
-                                                <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                                                    {category.topics.map((topic, topicIdx) => {
-                                                        const isCompleted = isTopicCompleted(category.category, topic.name);
-                                                        const isBookmarked = isTopicBookmarked(category.category, topic.name);
-                                                        const isExpanded = isTopicExpanded(category.category, topic.name);
-                                                        const globalIndex = allTopicsFlat.findIndex(
-                                                            t => t.category === category.category && t.name === topic.name
-                                                        ) + 1;
+                        {/* Topics by Category */}
+                        <div className="flex-1 min-w-0">
+                            {filteredCategories.length === 0 ? (
+                                <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-3xl border border-white/20 shadow-xl p-16 text-center">
+                                    <SparklesIcon className="h-20 w-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No topics found</h3>
+                                    <p className="text-gray-600 dark:text-gray-400">Adjust your search or filter to see results</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {filteredCategories.map((category, catIdx) => {
+                                        const progressPercentage = Math.round((category.completed / category.total) * 100);
 
-                                                        return (
-                                                            <div
-                                                                key={topicIdx}
-                                                                className={`transition-all border-l-4 ${isCompleted
-                                                                    ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 dark:border-emerald-400'
-                                                                    : isBookmarked
-                                                                        ? 'bg-amber-50/40 dark:bg-amber-900/10 border-amber-500 dark:border-amber-400'
-                                                                        : 'bg-white/40 dark:bg-gray-800/40 border-transparent hover:border-indigo-400 dark:hover:border-indigo-500'
-                                                                    }`}
+                                        return (
+                                            <div
+                                                key={catIdx}
+                                                id={category.category.replace(/\s+/g, '-')}
+                                                ref={(el) => (categoryRefs.current[category.category] = el)}
+                                                className={`rounded-2xl border shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-300 ${darkMode
+                                                    ? 'bg-slate-900/70 border-slate-700/50 hover:bg-slate-900/80 hover:border-slate-600/50'
+                                                    : 'bg-white/70 border-white/30 hover:bg-white/90 hover:shadow-2xl'
+                                                    }`}
+                                            >
+                                                {/* Category Header */}
+                                                <div className={`px-4 py-2.5 border-b cursor-pointer transition-all ${darkMode
+                                                    ? 'bg-gradient-to-r from-slate-800/60 to-slate-800/40 border-slate-700/50 hover:from-slate-800/70 hover:to-slate-800/50'
+                                                    : 'bg-gradient-to-r from-white/60 to-white/40 border-gray-200/50 hover:from-white/80 hover:to-white/60'
+                                                    }`} onClick={() => toggleCategoryCollapse(category.category)}>
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-3 flex-1">
+                                                            <button
+                                                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                                aria-label="Toggle category"
                                                             >
-                                                                <div className="px-4 py-2.5 hover:bg-white/60 dark:hover:bg-gray-700/40 transition-all">
-                                                                    <div className="flex items-start gap-3">
-                                                                        {/* Number & Status */}
-                                                                        <div className="flex items-center gap-2.5 flex-shrink-0">
-                                                                            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 flex items-center justify-center shadow-sm">
-                                                                                <span className="text-white font-bold text-xs">
-                                                                                    {globalIndex}
-                                                                                </span>
-                                                                            </div>
-                                                                            <button
-                                                                                onClick={() => toggleTopicCompletion(category.category, topic.name)}
-                                                                                className="group/check flex-shrink-0"
-                                                                                aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
-                                                                            >
-                                                                                {isCompleted ? (
-                                                                                    <CheckCircleSolidIcon className="h-5 w-5 text-emerald-500 dark:text-emerald-400 group-hover/check:scale-110 transition-transform" />
-                                                                                ) : (
-                                                                                    <div className="h-5 w-5 border-2 border-gray-300 dark:border-gray-600 rounded-full group-hover/check:border-emerald-500 dark:group-hover/check:border-emerald-400 group-hover/check:scale-110 transition-all"></div>
-                                                                                )}
-                                                                            </button>
-                                                                        </div>
+                                                                {isCategoryCollapsed(category.category) ? (
+                                                                    <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                                                ) : (
+                                                                    <ChevronUpIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                                                                )}
+                                                            </button>
+                                                            <div className="flex items-center gap-3 flex-wrap">
+                                                                <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                                                                    {category.category}
+                                                                </h2>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={`px-2.5 py-0.5 ${category.difficulty.color} dark:opacity-90 rounded-md text-xs font-semibold`}>
+                                                                        {category.difficulty.level}
+                                                                    </span>
+                                                                    <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
+                                                                        {category.total} topics
+                                                                    </span>
+                                                                    {isMember && category.completed > 0 && (
+                                                                        <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-md text-xs font-semibold">
+                                                                            {category.completed}/{category.total} ✓
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {isMember && category.completed > 0 && (
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="text-right">
+                                                                    <p className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">{progressPercentage}%</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
 
-                                                                        {/* Topic Info */}
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <div className="flex items-start justify-between gap-3 mb-2">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <h3 className={`text-sm font-semibold ${isCompleted ? 'text-gray-400 dark:text-gray-600 line-through' : 'text-gray-900 dark:text-white'
-                                                                                        }`}>
-                                                                                        {topic.name}
-                                                                                    </h3>
+                                                {/* Topics Table */}
+                                                {!isCategoryCollapsed(category.category) && (
+                                                    <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                                        {category.topics.map((topic, topicIdx) => {
+                                                            const isCompleted = isTopicCompleted(category.category, topic.name);
+                                                            const isBookmarked = isTopicBookmarked(category.category, topic.name);
+                                                            const isExpanded = isTopicExpanded(category.category, topic.name);
+                                                            const globalIndex = allTopicsFlat.findIndex(
+                                                                t => t.category === category.category && t.name === topic.name
+                                                            ) + 1;
+
+                                                            return (
+                                                                <div
+                                                                    key={topicIdx}
+                                                                    className={`transition-all border-l-2 ${isCompleted
+                                                                        ? 'bg-emerald-50/40 dark:bg-emerald-900/10 border-emerald-500 dark:border-emerald-400'
+                                                                        : isBookmarked
+                                                                            ? 'bg-amber-50/30 dark:bg-amber-900/10 border-amber-500 dark:border-amber-400'
+                                                                            : 'bg-white/20 dark:bg-gray-800/20 border-transparent hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-white/40 dark:hover:bg-gray-800/30'
+                                                                        } backdrop-blur-sm`}
+                                                                >
+                                                                    <div className="px-3 py-2 hover:bg-white/30 dark:hover:bg-gray-700/30 transition-all">
+                                                                        <div className="flex items-start gap-2">
+                                                                            {/* Number & Status */}
+                                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                                <div className="relative w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 flex items-center justify-center shadow-sm">
+                                                                                    <span className="text-white font-bold text-xs">
+                                                                                        {globalIndex}
+                                                                                    </span>
+                                                                                </div>
+                                                                                {isMember && (
                                                                                     <button
-                                                                                        onClick={() => toggleTopicExpanded(category.category, topic.name)}
-                                                                                        className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                                                                        aria-label="Toggle details"
+                                                                                        onClick={() => toggleTopicCompletion(category.category, topic.name)}
+                                                                                        className="group/check flex-shrink-0"
+                                                                                        aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
                                                                                     >
-                                                                                        {isExpanded ? (
-                                                                                            <ChevronUpIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                                                                        {isCompleted ? (
+                                                                                            <CheckCircleSolidIcon className="h-4 w-4 text-emerald-500 dark:text-emerald-400 group-hover/check:scale-110 transition-transform" />
                                                                                         ) : (
-                                                                                            <ChevronDownIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                                                                            <div className="h-4 w-4 border-2 border-gray-300 dark:border-gray-600 rounded-full group-hover/check:border-emerald-500 dark:group-hover/check:border-emerald-400 group-hover/check:scale-110 transition-all"></div>
                                                                                         )}
                                                                                     </button>
-                                                                                </div>
-                                                                                <button
-                                                                                    onClick={() => toggleBookmark(category.category, topic.name)}
-                                                                                    className="group/bookmark flex-shrink-0 p-1 rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
-                                                                                    aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
-                                                                                >
-                                                                                    {isBookmarked ? (
-                                                                                        <BookmarkSolidIcon className="h-4 w-4 text-amber-500 dark:text-amber-400 group-hover/bookmark:scale-110 transition-transform" />
-                                                                                    ) : (
-                                                                                        <BookmarkIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 dark:group-hover/bookmark:text-amber-400 group-hover/bookmark:scale-110 transition-all" />
-                                                                                    )}
-                                                                                </button>
+                                                                                )}
                                                                             </div>
 
-                                                                            {/* Resources Grid */}
-                                                                            <div className="grid sm:grid-cols-2 gap-2">
-                                                                                {/* Video Resource */}
-                                                                                {topic.youtubeId ? (
-                                                                                    <a
-                                                                                        href={`https://www.youtube.com/watch?v=${topic.youtubeId}`}
-                                                                                        target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border border-red-200 dark:border-red-700/50 text-red-700 dark:text-red-300 rounded-lg text-xs font-semibold hover:shadow-md hover:scale-[1.01] transition-all group/link"
-                                                                                    >
-                                                                                        <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
-                                                                                        <span className="flex-1 truncate">Video Lecture</span>
-                                                                                        <ArrowTopRightOnSquareIcon className="h-3 w-3 opacity-60 group-hover/link:opacity-100 transition-opacity" />
-                                                                                    </a>
-                                                                                ) : (
-                                                                                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 rounded-lg text-xs">
-                                                                                        <PlayCircleIcon className="h-4 w-4 flex-shrink-0" />
-                                                                                        <span className="flex-1 italic text-xs">Coming soon</span>
+                                                                            {/* Topic Info */}
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="flex items-start justify-between gap-2 mb-1.5">
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <h3 className={`text-xs font-semibold ${isCompleted ? 'text-gray-400 dark:text-gray-600 line-through' : 'text-gray-900 dark:text-white'
+                                                                                            }`}>
+                                                                                            {topic.name}
+                                                                                        </h3>
+                                                                                        <button
+                                                                                            onClick={() => toggleTopicExpanded(category.category, topic.name)}
+                                                                                            className="p-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                                                            aria-label="Toggle details"
+                                                                                        >
+                                                                                            {isExpanded ? (
+                                                                                                <ChevronUpIcon className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                                                                                            ) : (
+                                                                                                <ChevronDownIcon className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                                                                                            )}
+                                                                                        </button>
                                                                                     </div>
-                                                                                )}
+                                                                                    {isMember && (
+                                                                                        <button
+                                                                                            onClick={() => toggleBookmark(category.category, topic.name)}
+                                                                                            className="group/bookmark flex-shrink-0 p-0.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                                                                            aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                                                                                        >
+                                                                                            {isBookmarked ? (
+                                                                                                <BookmarkSolidIcon className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 group-hover/bookmark:scale-110 transition-transform" />
+                                                                                            ) : (
+                                                                                                <BookmarkIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 dark:group-hover/bookmark:text-amber-400 group-hover/bookmark:scale-110 transition-all" />
+                                                                                            )}
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
 
-                                                                                {/* Practice Resources */}
-                                                                                {topic.resources && topic.resources.length > 0 && (
-                                                                                    <div className="flex flex-wrap gap-1.5">
-                                                                                        {topic.resources.slice(0, 2).map((resource, resIdx) => (
-                                                                                            <a
-                                                                                                key={resIdx}
-                                                                                                href={resource.url}
-                                                                                                target="_blank"
-                                                                                                rel="noopener noreferrer"
-                                                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-gray-700 backdrop-blur-sm border border-indigo-200 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:shadow-sm transition-all group/resource"
-                                                                                            >
-                                                                                                <span className="truncate max-w-[100px]">{resource.name}</span>
-                                                                                                <ArrowTopRightOnSquareIcon className="h-3 w-3 opacity-60 group-hover/resource:opacity-100 transition-opacity flex-shrink-0" />
-                                                                                            </a>
-                                                                                        ))}
-                                                                                        {topic.resources.length > 2 && (
-                                                                                            <span className="inline-flex items-center px-2.5 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium">
-                                                                                                +{topic.resources.length - 2}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                )}
+                                                                                {/* Resources Grid */}
+                                                                                <div className="grid sm:grid-cols-2 gap-1.5">
+                                                                                    {/* Video Resource */}
+                                                                                    {topic.youtubeId ? (
+                                                                                        <a
+                                                                                            href={`https://www.youtube.com/watch?v=${topic.youtubeId}`}
+                                                                                            target="_blank"
+                                                                                            rel="noopener noreferrer"
+                                                                                            className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-r from-red-50/80 to-rose-50/80 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200/60 dark:border-red-700/30 text-red-700 dark:text-red-300 rounded-md text-xs font-medium hover:shadow-sm hover:scale-[1.01] transition-all group/link backdrop-blur-sm"
+                                                                                        >
+                                                                                            <PlayCircleIcon className="h-3 w-3 flex-shrink-0" />
+                                                                                            <span className="flex-1 truncate">Video</span>
+                                                                                            <ArrowTopRightOnSquareIcon className="h-2.5 w-2.5 opacity-60 group-hover/link:opacity-100 transition-opacity" />
+                                                                                        </a>
+                                                                                    ) : (
+                                                                                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50/50 dark:bg-gray-800/30 border border-gray-200/50 dark:border-gray-700/30 text-gray-400 dark:text-gray-600 rounded-md text-xs backdrop-blur-sm">
+                                                                                            <PlayCircleIcon className="h-3 w-3 flex-shrink-0" />
+                                                                                            <span className="flex-1 italic text-xs">Soon</span>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* Practice Resources */}
+                                                                                    {topic.resources && topic.resources.length > 0 && (
+                                                                                        <div className="flex flex-wrap gap-1">
+                                                                                            {topic.resources.slice(0, 2).map((resource, resIdx) => (
+                                                                                                <a
+                                                                                                    key={resIdx}
+                                                                                                    href={resource.url}
+                                                                                                    target="_blank"
+                                                                                                    rel="noopener noreferrer"
+                                                                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white/60 dark:bg-gray-700/40 backdrop-blur-md border border-indigo-200/60 dark:border-indigo-700/30 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-indigo-50/80 dark:hover:bg-indigo-900/20 hover:shadow-sm transition-all group/resource"
+                                                                                                >
+                                                                                                    <span className="truncate max-w-[90px]">{resource.name}</span>
+                                                                                                    <ArrowTopRightOnSquareIcon className="h-2.5 w-2.5 opacity-60 group-hover/resource:opacity-100 transition-opacity flex-shrink-0" />
+                                                                                                </a>
+                                                                                            ))}
+                                                                                            {topic.resources.length > 2 && (
+                                                                                                <span className="inline-flex items-center px-2 py-1 bg-gray-100/60 dark:bg-gray-700/40 text-gray-600 dark:text-gray-400 rounded-md text-xs font-medium backdrop-blur-sm">
+                                                                                                    +{topic.resources.length - 2}
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
 
-                                                                {/* Expandable Notes Section */}
-                                                                {isExpanded && (
-                                                                    <div className="px-6 pb-5 pt-2 bg-white/20 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700/50">
-                                                                        <div className="space-y-3">
-                                                                            {/* Lessons Section */}
-                                                                            {(() => {
-                                                                                const topicLessons = getLessonsForTopic(category.category, topic.name);
-                                                                                return (
-                                                                                    <div>
-                                                                                        <div className="flex items-center justify-between mb-2">
-                                                                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                                                                                <VideoCameraIcon className="w-4 h-4" />
-                                                                                                Lessons {topicLessons.length > 0 && `(${topicLessons.length})`}
-                                                                                            </h4>
-                                                                                            {isAdmin && (
-                                                                                                <button
-                                                                                                    onClick={() => openCreateLessonModal(category.category, topic.name)}
-                                                                                                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
-                                                                                                >
-                                                                                                    <PlusIcon className="w-3.5 h-3.5" />
-                                                                                                    Add Lesson
-                                                                                                </button>
-                                                                                            )}
-                                                                                        </div>
-                                                                                        {topicLessons.length > 0 ? (
-                                                                                            <div className="space-y-2">
-                                                                                                {topicLessons.map((lesson) => (
-                                                                                                    <div
-                                                                                                        key={lesson.id}
-                                                                                                        className="p-3 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg hover:shadow-md transition-all"
+                                                                    {/* Expandable Notes Section */}
+                                                                    {isExpanded && (
+                                                                        <div className="px-6 pb-5 pt-2 bg-white/20 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700/50">
+                                                                            <div className="space-y-3">
+                                                                                {/* Lessons Section */}
+                                                                                {(() => {
+                                                                                    const topicLessons = getLessonsForTopic(category.category, topic.name);
+                                                                                    return (
+                                                                                        <div>
+                                                                                            <div className="flex items-center justify-between mb-2">
+                                                                                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                                                                                    <VideoCameraIcon className="w-4 h-4" />
+                                                                                                    Lessons {topicLessons.length > 0 && `(${topicLessons.length})`}
+                                                                                                </h4>
+                                                                                                {isAdmin && (
+                                                                                                    <button
+                                                                                                        onClick={() => openCreateLessonModal(category.category, topic.name)}
+                                                                                                        className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
                                                                                                     >
-                                                                                                        <div className="flex items-start justify-between gap-3">
-                                                                                                            <div className="flex-1">
-                                                                                                                <h5 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
-                                                                                                                    {lesson.title}
-                                                                                                                </h5>
-                                                                                                                {lesson.description && (
-                                                                                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                                                                                                                        {lesson.description}
-                                                                                                                    </p>
-                                                                                                                )}
-                                                                                                                <div className="flex flex-wrap gap-2 items-center">
-                                                                                                                    {lesson.video_id && (
-                                                                                                                        <a
-                                                                                                                            href={`https://www.youtube.com/watch?v=${lesson.video_id}`}
-                                                                                                                            target="_blank"
-                                                                                                                            rel="noopener noreferrer"
-                                                                                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-xs font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                                                                                                                        >
-                                                                                                                            <PlayCircleIcon className="w-3.5 h-3.5" />
-                                                                                                                            Watch Video
-                                                                                                                        </a>
+                                                                                                        <PlusIcon className="w-3.5 h-3.5" />
+                                                                                                        Add Lesson
+                                                                                                    </button>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            {topicLessons.length > 0 ? (
+                                                                                                <div className="space-y-2">
+                                                                                                    {topicLessons.map((lesson) => (
+                                                                                                        <div
+                                                                                                            key={lesson.id}
+                                                                                                            className="p-3 bg-white dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg hover:shadow-md transition-all"
+                                                                                                        >
+                                                                                                            <div className="flex items-start justify-between gap-3">
+                                                                                                                <div className="flex-1">
+                                                                                                                    <h5 className="font-semibold text-sm text-gray-900 dark:text-white mb-1">
+                                                                                                                        {lesson.title}
+                                                                                                                    </h5>
+                                                                                                                    {lesson.description && (
+                                                                                                                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                                                                                                            {lesson.description}
+                                                                                                                        </p>
                                                                                                                     )}
-                                                                                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${lesson.difficulty === 'Beginner' || lesson.difficulty === 'Easy'
-                                                                                                                        ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                                                                                                                        : lesson.difficulty === 'Medium'
-                                                                                                                            ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
-                                                                                                                            : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                                                                                                                        }`}>
-                                                                                                                        {lesson.difficulty}
-                                                                                                                    </span>
-                                                                                                                    {lesson.duration_minutes && (
-                                                                                                                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                                                                                                            <ClockIcon className="w-3 h-3" />
-                                                                                                                            {lesson.duration_minutes} min
-                                                                                                                        </span>
-                                                                                                                    )}
-                                                                                                                    {lesson.instructor && (
-                                                                                                                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                                                                                            by {lesson.instructor}
-                                                                                                                        </span>
-                                                                                                                    )}
-                                                                                                                </div>
-                                                                                                                {lesson.resources && lesson.resources.length > 0 && (
-                                                                                                                    <div className="mt-2 flex flex-wrap gap-1">
-                                                                                                                        {lesson.resources.map((resource, idx) => (
+                                                                                                                    <div className="flex flex-wrap gap-2 items-center">
+                                                                                                                        {lesson.video_id && (
                                                                                                                             <a
-                                                                                                                                key={idx}
-                                                                                                                                href={resource.url}
+                                                                                                                                href={`https://www.youtube.com/watch?v=${lesson.video_id}`}
                                                                                                                                 target="_blank"
                                                                                                                                 rel="noopener noreferrer"
-                                                                                                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                                                                                                                className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-xs font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                                                                                                                             >
-                                                                                                                                {resource.title}
-                                                                                                                                <ArrowTopRightOnSquareIcon className="w-2.5 h-2.5" />
+                                                                                                                                <PlayCircleIcon className="w-3.5 h-3.5" />
+                                                                                                                                Watch Video
                                                                                                                             </a>
-                                                                                                                        ))}
+                                                                                                                        )}
+                                                                                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${lesson.difficulty === 'Beginner' || lesson.difficulty === 'Easy'
+                                                                                                                            ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                                                                                                                            : lesson.difficulty === 'Medium'
+                                                                                                                                ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400'
+                                                                                                                                : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+                                                                                                                            }`}>
+                                                                                                                            {lesson.difficulty}
+                                                                                                                        </span>
+                                                                                                                        {lesson.duration_minutes && (
+                                                                                                                            <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                                                                                                <ClockIcon className="w-3 h-3" />
+                                                                                                                                {lesson.duration_minutes} min
+                                                                                                                            </span>
+                                                                                                                        )}
+                                                                                                                        {lesson.instructor && (
+                                                                                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                                                                                by {lesson.instructor}
+                                                                                                                            </span>
+                                                                                                                        )}
                                                                                                                     </div>
-                                                                                                                )}
+                                                                                                                    {lesson.resources && lesson.resources.length > 0 && (
+                                                                                                                        <div className="mt-2 flex flex-wrap gap-1">
+                                                                                                                            {lesson.resources.map((resource, idx) => (
+                                                                                                                                <a
+                                                                                                                                    key={idx}
+                                                                                                                                    href={resource.url}
+                                                                                                                                    target="_blank"
+                                                                                                                                    rel="noopener noreferrer"
+                                                                                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                                                                                                                >
+                                                                                                                                    {resource.title}
+                                                                                                                                    <ArrowTopRightOnSquareIcon className="w-2.5 h-2.5" />
+                                                                                                                                </a>
+                                                                                                                            ))}
+                                                                                                                        </div>
+                                                                                                                    )}
+                                                                                                                </div>
                                                                                                             </div>
                                                                                                         </div>
-                                                                                                    </div>
-                                                                                                ))}
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
-                                                                                                No lessons available yet. {isAdmin && 'Click "Add Lesson" to create one!'}
-                                                                                            </p>
-                                                                                        )}
-                                                                                    </div>
-                                                                                );
-                                                                            })()}
+                                                                                                    ))}
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                <p className="text-xs text-gray-500 dark:text-gray-400 italic py-2">
+                                                                                                    No lessons available yet. {isAdmin && 'Click "Add Lesson" to create one!'}
+                                                                                                </p>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    );
+                                                                                })()}
 
-                                                                            {/* All Resources */}
+                                                                                {/* All Resources */}
+                                                                                {topic.resources && topic.resources.length > 0 && (
+                                                                                    <div>
+                                                                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                                                                            <BookOpenIcon className="w-4 h-4" />
+                                                                                            All Practice Resources
+                                                                                        </h4>
+                                                                                        <div className="flex flex-wrap gap-2">
+                                                                                            {topic.resources.map((resource, resIdx) => (
+                                                                                                <a
+                                                                                                    key={resIdx}
+                                                                                                    href={resource.url}
+                                                                                                    target="_blank"
+                                                                                                    rel="noopener noreferrer"
+                                                                                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium hover:shadow-md transition-all"
+                                                                                                >
+                                                                                                    <span>{resource.name}</span>
+                                                                                                    <ArrowTopRightOnSquareIcon className="h-3 w-3" />
+                                                                                                </a>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+
+                                                                                {/* Notes Editor - Only for Members */}
+                                                                                {isMember && (
+                                                                                    <div>
+                                                                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                                                                            <PencilSquareIcon className="w-4 h-4" />
+                                                                                            Personal Notes
+                                                                                        </label>
+                                                                                        <textarea
+                                                                                            value={getTopicNote(category.category, topic.name)}
+                                                                                            onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)}
+                                                                                            placeholder="Add your notes, key points, or reminders here..."
+                                                                                            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                                                                                            rows="4"
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Footer CTA */}
+                            <div className="mt-6">
+                                <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-xl p-6 border border-white/20 shadow-xl text-center">
+                                    <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                        <AcademicCapIcon className="h-6 w-6 text-white" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+                                        Ready to Master DSA?
+                                    </h3>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
+                                        Subscribe for in-depth tutorials and live workshops
+                                    </p>
+                                    <a
+                                        href="https://www.youtube.com/@techelevategh/videos"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm"
+                                    >
+                                        <PlayCircleIcon className="h-4 w-4" />
+                                        <span>Subscribe on YouTube</span>
+                                        <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Python Programming Tab Content */}
+                {activeTab === 'python' && (
+                    <div className="space-y-6">
+                        {/* Sign-in Prompt for Non-logged-in Users */}
+                        {!authLoading && !isLoggedIn && (
+                            <div className="glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-indigo-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl">
+                                <div className="flex items-start gap-6">
+                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+                                        <AcademicCapIcon className="w-10 h-10 text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-purple-900 dark:text-purple-100 mb-2 text-xl">Track Your Learning Progress</h3>
+                                        <p className="text-sm text-purple-800 dark:text-purple-200 mb-5 leading-relaxed">
+                                            Sign in to save your progress, bookmark topics, and keep notes as you learn Python. Your journey will be synced across all devices!
+                                        </p>
+                                        <a
+                                            href="/login"
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
+                                        >
+                                            <AcademicCapIcon className="w-5 h-5" />
+                                            <span>Sign In to Track Progress</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Python Progress Header - Only for Members */}
+                        {isMember && (
+                            <div className="glass dark:bg-gradient-to-r dark:from-blue-900/30 dark:to-indigo-900/30 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30 shadow-lg">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Python Programming</h2>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">From beginner to advanced mastery</p>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                                                {pythonCompletedTopics.size}
+                                            </div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Completed</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                                                {Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0)}
+                                            </div>
+                                            <div className="text-xs text-gray-500 dark:text-gray-400">Total Topics</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                        <div
+                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500"
+                                            style={{
+                                                width: `${Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0) > 0
+                                                    ? (pythonCompletedTopics.size / Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0)) * 100
+                                                    : 0}%`
+                                            }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Python Topics Grid */}
+                        <div className="grid gap-6">
+                            {Object.entries(pythonTopics).map(([categoryName, categoryData], idx) => {
+                                const isCategoryCollapsed = pythonCollapsedCategories.has(categoryName);
+                                const categoryCompleted = categoryData.topics.filter(topic =>
+                                    pythonCompletedTopics.has(`${categoryName}::${topic.name}`)
+                                ).length;
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        className="glass dark:bg-slate-800/60 bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                                    >
+                                        {/* Category Header */}
+                                        <div
+                                            className="px-8 py-6 border-b border-gray-200/50 dark:border-slate-700/50 cursor-pointer bg-gradient-to-r from-transparent via-gray-50/30 to-transparent dark:via-slate-700/20 hover:from-blue-50/50 hover:via-indigo-50/50 hover:to-blue-50/50 dark:hover:from-blue-900/20 dark:hover:via-indigo-900/20 dark:hover:to-blue-900/20 transition-all"
+                                            onClick={() => {
+                                                const newCollapsed = new Set(pythonCollapsedCategories);
+                                                if (newCollapsed.has(categoryName)) {
+                                                    newCollapsed.delete(categoryName);
+                                                } else {
+                                                    newCollapsed.add(categoryName);
+                                                }
+                                                setPythonCollapsedCategories(newCollapsed);
+                                            }}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-5">
+                                                    <div className={`flex-shrink-0 transition-transform duration-200 ${isCategoryCollapsed ? '' : 'rotate-0'}`}>
+                                                        {isCategoryCollapsed ? (
+                                                            <ChevronDownIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                                                        ) : (
+                                                            <ChevronUpIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                                            {categoryName}
+                                                        </h3>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className={`px-3.5 py-1.5 ${categoryData.difficulty.color} rounded-lg text-xs font-bold shadow-sm uppercase tracking-wide`}>
+                                                                {categoryData.difficulty.level}
+                                                            </span>
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                                                {categoryData.topics.length} {categoryData.topics.length === 1 ? 'Topic' : 'Topics'}
+                                                            </span>
+                                                            {isMember && categoryCompleted > 0 && (
+                                                                <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-xs font-bold">
+                                                                    <CheckCircleSolidIcon className="w-4 h-4" />
+                                                                    {categoryCompleted} Completed
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {isMember && (
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="text-right">
+                                                            <div className="text-base font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                                                                {categoryCompleted}/{categoryData.topics.length}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                                                {Math.round((categoryCompleted / categoryData.topics.length) * 100)}% Complete
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-40 bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
+                                                            <div
+                                                                className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm relative overflow-hidden"
+                                                                style={{ width: `${(categoryCompleted / categoryData.topics.length) * 100}%` }}
+                                                            >
+                                                                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Topics List */}
+                                        {!isCategoryCollapsed && (
+                                            <div className="p-6 space-y-3">
+                                                {categoryData.topics.map((topic, topicIdx) => {
+                                                    const topicKey = `${categoryName}::${topic.name}`;
+                                                    const isCompleted = pythonCompletedTopics.has(topicKey);
+                                                    const isBookmarked = pythonBookmarkedTopics.has(topicKey);
+                                                    const isExpanded = pythonExpandedTopics.has(topicKey);
+
+                                                    return (
+                                                        <div
+                                                            key={topicIdx}
+                                                            className={`group relative rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${isCompleted
+                                                                ? 'border-green-400 dark:border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20'
+                                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg'
+                                                                }`}
+                                                            onClick={() => {
+                                                                const newExpanded = new Set(pythonExpandedTopics);
+                                                                if (newExpanded.has(topicKey)) {
+                                                                    newExpanded.delete(topicKey);
+                                                                } else {
+                                                                    newExpanded.add(topicKey);
+                                                                }
+                                                                setPythonExpandedTopics(newExpanded);
+                                                            }}
+                                                        >
+                                                            {/* Topic Row */}
+                                                            <div className="p-5">
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    {/* Left side - Topic info */}
+                                                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                                        {/* Expand/Collapse Icon */}
+                                                                        <div className="flex-shrink-0">
+                                                                            {isExpanded ? (
+                                                                                <ChevronUpIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                                                                            ) : (
+                                                                                <ChevronDownIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Topic Title and Description */}
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="flex items-center gap-3 mb-1">
+                                                                                <h4 className={`font-bold text-gray-900 dark:text-white text-base ${isCompleted ? 'line-through opacity-70' : ''
+                                                                                    }`}>
+                                                                                    {topic.name}
+                                                                                </h4>
+                                                                                {isCompleted && (
+                                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full text-xs font-bold flex-shrink-0">
+                                                                                        <CheckCircleSolidIcon className="w-3 h-3" />
+                                                                                        Completed
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                                                                                {topic.description}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Right side - Actions and badges */}
+                                                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                                                        {/* Resources badge */}
+                                                                        {!isExpanded && topic.resources && topic.resources.length > 0 && (
+                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-xs font-semibold">
+                                                                                <BookOpenIcon className="w-3.5 h-3.5" />
+                                                                                {topic.resources.length} resource{topic.resources.length > 1 ? 's' : ''}
+                                                                            </span>
+                                                                        )}
+
+                                                                        {/* Progress tracking buttons - Only for Members */}
+                                                                        {isMember && (
+                                                                            <>
+                                                                                {/* Bookmark button */}
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        const newBookmarked = new Set(pythonBookmarkedTopics);
+                                                                                        if (newBookmarked.has(topicKey)) {
+                                                                                            newBookmarked.delete(topicKey);
+                                                                                        } else {
+                                                                                            newBookmarked.add(topicKey);
+                                                                                        }
+                                                                                        setPythonBookmarkedTopics(newBookmarked);
+                                                                                    }}
+                                                                                    className="p-2 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all"
+                                                                                    title={isBookmarked ? "Remove bookmark" : "Bookmark topic"}
+                                                                                >
+                                                                                    {isBookmarked ? (
+                                                                                        <BookmarkSolidIcon className="w-5 h-5 text-amber-500" />
+                                                                                    ) : (
+                                                                                        <BookmarkIcon className="w-5 h-5 text-gray-400 group-hover:text-amber-400" />
+                                                                                    )}
+                                                                                </button>
+
+                                                                                {/* Complete button */}
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        const newCompleted = new Set(pythonCompletedTopics);
+                                                                                        if (newCompleted.has(topicKey)) {
+                                                                                            newCompleted.delete(topicKey);
+                                                                                        } else {
+                                                                                            newCompleted.add(topicKey);
+                                                                                        }
+                                                                                        setPythonCompletedTopics(newCompleted);
+                                                                                    }}
+                                                                                    className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-all"
+                                                                                    title={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+                                                                                >
+                                                                                    {isCompleted ? (
+                                                                                        <CheckCircleSolidIcon className="w-5 h-5 text-green-600 dark:text-green-500" />
+                                                                                    ) : (
+                                                                                        <CheckCircleIcon className="w-5 h-5 text-gray-400 group-hover:text-green-500" />
+                                                                                    )}
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Expanded Content */}
+                                                                {isExpanded && (
+                                                                    <div className="mt-5 pt-5 border-t-2 border-gray-200 dark:border-gray-700 space-y-5">
+                                                                        <div className="grid md:grid-cols-2 gap-6">
+                                                                            {/* Key Points */}
+                                                                            {topic.keyPoints && topic.keyPoints.length > 0 && (
+                                                                                <div className="text-left">
+                                                                                    <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                                                                        <LightBulbIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                                                        Key Concepts
+                                                                                    </h5>
+                                                                                    <ul className="space-y-2.5 text-left">
+                                                                                        {topic.keyPoints.map((point, i) => (
+                                                                                            <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-3 leading-relaxed">
+                                                                                                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
+                                                                                                <span className="flex-1 text-left">{point}</span>
+                                                                                            </li>
+                                                                                        ))}
+                                                                                    </ul>
+                                                                                </div>
+                                                                            )}
+
+                                                                            {/* Resources */}
                                                                             {topic.resources && topic.resources.length > 0 && (
-                                                                                <div>
-                                                                                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                                                                                        <BookOpenIcon className="w-4 h-4" />
-                                                                                        All Practice Resources
-                                                                                    </h4>
-                                                                                    <div className="flex flex-wrap gap-2">
-                                                                                        {topic.resources.map((resource, resIdx) => (
+                                                                                <div className="text-left">
+                                                                                    <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                                                                                        <BookOpenIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                                                                        Learning Resources
+                                                                                    </h5>
+                                                                                    <div className="space-y-2.5 text-left">
+                                                                                        {topic.resources.map((resource, i) => (
                                                                                             <a
-                                                                                                key={resIdx}
+                                                                                                key={i}
                                                                                                 href={resource.url}
                                                                                                 target="_blank"
                                                                                                 rel="noopener noreferrer"
-                                                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium hover:shadow-md transition-all"
+                                                                                                className="group/link flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 transition-all shadow-sm hover:shadow-md text-left"
+                                                                                                onClick={(e) => e.stopPropagation()}
                                                                                             >
-                                                                                                <span>{resource.name}</span>
-                                                                                                <ArrowTopRightOnSquareIcon className="h-3 w-3" />
+                                                                                                {resource.type === 'video' && <VideoCameraIcon className="w-5 h-5 text-red-500 flex-shrink-0" />}
+                                                                                                {resource.type === 'article' && <BookOpenIcon className="w-5 h-5 text-blue-500 flex-shrink-0" />}
+                                                                                                <span className="flex-1 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 font-medium text-left">
+                                                                                                    {resource.title}
+                                                                                                </span>
+                                                                                                <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50 group-hover/link:opacity-100 flex-shrink-0" />
                                                                                             </a>
                                                                                         ))}
                                                                                     </div>
                                                                                 </div>
                                                                             )}
+                                                                        </div>
 
-                                                                            {/* Notes Editor */}
-                                                                            <div>
-                                                                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                                                                                    <PencilSquareIcon className="w-4 h-4" />
+                                                                        {/* Notes Section - Full Width - Only for Members */}
+                                                                        {isMember && (
+                                                                            <div className="text-left">
+                                                                                <label className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-2.5 flex items-center gap-2">
+                                                                                    <PencilSquareIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                                                     Personal Notes
                                                                                 </label>
                                                                                 <textarea
-                                                                                    value={getTopicNote(category.category, topic.name)}
-                                                                                    onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)}
-                                                                                    placeholder="Add your notes, key points, or reminders here..."
-                                                                                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-                                                                                    rows="4"
+                                                                                    value={pythonTopicNotes[topicKey] || ''}
+                                                                                    onChange={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setPythonTopicNotes(prev => ({
+                                                                                            ...prev,
+                                                                                            [topicKey]: e.target.value
+                                                                                        }));
+                                                                                    }}
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                    placeholder="Add your notes, code snippets, or key takeaways..."
+                                                                                    className="w-full px-4 py-3 text-sm border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-slate-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-all leading-relaxed text-left"
+                                                                                    rows={4}
                                                                                 />
                                                                             </div>
-                                                                        </div>
+                                                                        )}
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* Footer CTA */}
-                        <div className="mt-6">
-                            <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-xl p-6 border border-white/20 shadow-xl text-center">
-                                <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                                    <AcademicCapIcon className="h-6 w-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                                    Ready to Master DSA?
-                                </h3>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
-                                    Subscribe for in-depth tutorials and live workshops
-                                </p>
-                                <a
-                                    href="https://www.youtube.com/@techelevategh/videos"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm"
-                                >
-                                    <PlayCircleIcon className="h-4 w-4" />
-                                    <span>Subscribe on YouTube</span>
-                                    <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
-                                </a>
-                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
-                </div>
+                )}
+
+                {/* System Design Tab Content */}
+                {activeTab === 'system-design' && (
+                    <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-3xl border border-white/20 shadow-xl p-16 text-center">
+                        <AcademicCapIcon className="h-20 w-20 text-purple-500 dark:text-purple-400 mx-auto mb-4" />
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">System Design</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">Coming soon! Learn how to design scalable systems and ace system design interviews.</p>
+                        <a
+                            href="https://www.youtube.com/@techelevategh/videos"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-xl hover:scale-105 transition-all text-sm"
+                        >
+                            <PlayCircleIcon className="h-4 w-4" />
+                            <span>Watch System Design Videos on YouTube</span>
+                            <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                        </a>
+                    </div>
+                )}
             </div>
 
             {/* Admin FAB */}

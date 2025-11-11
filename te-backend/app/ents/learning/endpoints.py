@@ -25,6 +25,9 @@ router = APIRouter(prefix="/learning")
 )
 def get_lessons(
     db: Database = Depends(session.get_db),
+    current_user: Optional[user_models.MemberUser] = Depends(
+        user_dependencies.get_learning_content_access
+    ),
     skip: int = 0,
     limit: int = 100,
     category: Optional[str] = Query(None),
@@ -35,6 +38,7 @@ def get_lessons(
     """
     Retrieve lessons with optional filtering.
     Filters: category, topic, difficulty, is_published
+    Available to everyone except Referrers. Guests can view content.
     """
     lessons = learning_crud.get_all_lessons(
         db,
@@ -78,9 +82,13 @@ def get_lessons(
 def get_lesson(
     lesson_id: str,
     db: Database = Depends(session.get_db),
+    current_user: Optional[user_models.MemberUser] = Depends(
+        user_dependencies.get_learning_content_access
+    ),
 ) -> Any:
     """
     Get a specific lesson by ID.
+    Available to everyone except Referrers. Guests can view content.
     """
     lesson = learning_crud.get_lesson_by_id(db, lesson_id)
 
@@ -117,9 +125,13 @@ def get_lessons_for_topic(
     category: str,
     topic: str,
     db: Database = Depends(session.get_db),
+    current_user: Optional[user_models.MemberUser] = Depends(
+        user_dependencies.get_learning_content_access
+    ),
 ) -> Any:
     """
     Get all lessons for a specific category and topic.
+    Available to everyone except Referrers. Guests can view content.
     """
     lessons = learning_crud.get_lessons_by_category_and_topic(db, category, topic)
 
@@ -156,10 +168,12 @@ def create_lesson(
     db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonCreate,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
 ) -> Any:
     """
-    Create a new lesson. Requires lead permissions (user type >= 2).
+    Create a new lesson. Requires Volunteer permissions or above (role >= 3).
     """
     lesson = learning_crud.create_lesson(db, data=data, user_id=current_user.id)
 
@@ -194,10 +208,12 @@ def update_lesson(
     db: Database = Depends(session.get_db),
     *,
     data: learning_schema.LessonUpdate,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
 ) -> Any:
     """
-    Update an existing lesson. Requires lead permissions (user type >= 2).
+    Update an existing lesson. Requires Volunteer permissions or above (role >= 3).
     """
     lesson = learning_crud.update_lesson(db, lesson_id, data)
 
@@ -233,10 +249,12 @@ def update_lesson(
 def delete_lesson(
     lesson_id: str,
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
 ) -> Any:
     """
-    Delete a lesson. Requires lead permissions (user type >= 2).
+    Delete a lesson. Requires Volunteer permissions or above (role >= 3).
     """
     success = learning_crud.delete_lesson(db, lesson_id)
 
@@ -272,10 +290,13 @@ def lesson_file_upload(
 )
 def get_user_progress(
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ) -> Any:
     """
     Get current user's learning progress.
+    Only available for Members (role=1).
     """
     progress = learning_crud.get_user_progress(db, current_user.id)
 
@@ -285,7 +306,14 @@ def get_user_progress(
             db, current_user.id, learning_schema.ProgressCreate()
         )
 
-    return progress
+    return {
+        "user_id": str(progress.user_id),
+        "completed_topics": progress.completed_topics,
+        "bookmarked_topics": progress.bookmarked_topics,
+        "topic_notes": progress.topic_notes,
+        "last_updated": progress.last_updated,
+        "created_at": progress.created_at,
+    }
 
 
 @router.post(
@@ -296,10 +324,13 @@ def update_progress(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.ProgressUpdate,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ) -> Any:
     """
     Update user's learning progress.
+    Only available for Members (role=1).
     """
     progress = learning_crud.get_user_progress(db, current_user.id)
 
@@ -315,7 +346,15 @@ def update_progress(
         # Update existing progress
         progress = learning_crud.update_user_progress(db, current_user.id, data)
 
-    return progress
+    # Convert to dict and ensure user_id is a string
+    return {
+        "user_id": str(progress.user_id),
+        "completed_topics": progress.completed_topics,
+        "bookmarked_topics": progress.bookmarked_topics,
+        "topic_notes": progress.topic_notes,
+        "last_updated": progress.last_updated,
+        "created_at": progress.created_at,
+    }
 
 
 @router.patch(
@@ -326,13 +365,24 @@ def toggle_complete_topic(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicToggle,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ) -> Any:
     """
     Toggle completion status for a topic.
+    Only available for Members (role=1).
     """
     progress = learning_crud.toggle_completed_topic(db, current_user.id, data.topic_key)
-    return progress
+
+    return {
+        "user_id": str(progress.user_id),
+        "completed_topics": progress.completed_topics,
+        "bookmarked_topics": progress.bookmarked_topics,
+        "topic_notes": progress.topic_notes,
+        "last_updated": progress.last_updated,
+        "created_at": progress.created_at,
+    }
 
 
 @router.patch(
@@ -343,15 +393,26 @@ def toggle_bookmark_topic(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicToggle,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ) -> Any:
     """
     Toggle bookmark status for a topic.
+    Only available for Members (role=1).
     """
     progress = learning_crud.toggle_bookmarked_topic(
         db, current_user.id, data.topic_key
     )
-    return progress
+
+    return {
+        "user_id": str(progress.user_id),
+        "completed_topics": progress.completed_topics,
+        "bookmarked_topics": progress.bookmarked_topics,
+        "topic_notes": progress.topic_notes,
+        "last_updated": progress.last_updated,
+        "created_at": progress.created_at,
+    }
 
 
 @router.post(
@@ -362,12 +423,58 @@ def update_note(
     *,
     db: Database = Depends(session.get_db),
     data: learning_schema.TopicNote,
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
 ) -> Any:
     """
     Update or create a note for a topic.
+    Only available for Members (role=1).
     """
     progress = learning_crud.update_topic_note(
         db, current_user.id, data.topic_key, data.note
     )
-    return progress
+
+    return {
+        "user_id": str(progress.user_id),
+        "completed_topics": progress.completed_topics,
+        "bookmarked_topics": progress.bookmarked_topics,
+        "topic_notes": progress.topic_notes,
+        "last_updated": progress.last_updated,
+        "created_at": progress.created_at,
+    }
+
+
+# ============================================
+# ADMIN/LEAD STATISTICS ENDPOINTS
+# ============================================
+
+
+@router.get(
+    "/admin/all-progress",
+)
+def get_all_progress(
+    db: Database = Depends(session.get_db),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+) -> Any:
+    """
+    Get learning progress for all members.
+    Only available for Lead/Admin (role >= 4).
+    """
+    all_progress = learning_crud.get_all_members_progress(db)
+    return {"members": all_progress, "total": len(all_progress)}
+
+
+@router.get(
+    "/admin/statistics",
+)
+def get_statistics(
+    db: Database = Depends(session.get_db),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+) -> Any:
+    """
+    Get overall learning statistics and analytics.
+    Only available for Lead/Admin (role >= 4).
+    """
+    stats = learning_crud.get_learning_statistics(db)
+    return stats

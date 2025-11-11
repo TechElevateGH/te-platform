@@ -97,7 +97,7 @@ class ProgressUpdate(BaseModel):
 class ProgressRead(ProgressBase):
     """Schema for reading user progress"""
 
-    user_id: int
+    user_id: str  # MongoDB ObjectId as string
     last_updated: datetime
     created_at: datetime
 

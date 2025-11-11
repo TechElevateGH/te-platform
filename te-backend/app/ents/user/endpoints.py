@@ -168,8 +168,12 @@ def update_essay(
     *,
     user_id: str,
     data: user_schema.Essay,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ):
+    """
+    Update essay for user.
+    Only available for Members (role=1).
+    """
     essay = user_crud.add_user_essay(db, user_id=user_id, data=data)
     return user_schema.Essay(essay=essay)
 
@@ -191,8 +195,12 @@ def update_cover_letter(
     *,
     user_id: str,
     data: user_schema.CoverLetter,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ):
+    """
+    Update cover letter for user.
+    Only available for Members (role=1).
+    """
     cover_letter = user_crud.add_user_cover_letter(db, user_id=user_id, data=data)
     return user_schema.CoverLetter(cover_letter=cover_letter)
 

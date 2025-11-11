@@ -16,7 +16,7 @@ import {
     EyeIcon
 } from '@heroicons/react/24/outline';
 
-const AdminApplications = () => {
+const ApplicationManagement = () => {
     const { accessToken } = useAuth();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -738,4 +738,4 @@ const AdminApplications = () => {
     );
 };
 
-export default AdminApplications;
+export default ApplicationManagement;

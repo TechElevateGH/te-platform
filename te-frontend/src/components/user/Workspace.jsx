@@ -16,10 +16,11 @@ import Referrals from '../../pages/Referrals'
 import Opportunities from '../../pages/Opportunities'
 import Learning from '../../pages/Learning'
 import Practice from '../../pages/Practice'
-import AdminApplications from '../../pages/AdminApplications'
-import AdminReferrals from '../../pages/AdminReferrals'
-import AdminFiles from '../../pages/AdminFiles'
+import ApplicationManagement from '../../pages/ApplicationManagement'
+import ReferralsManagement from '../../pages/ReferralsManagement'
+import FilesManagement from '../../pages/FilesManagement'
 import UserAccountManagement from '../../pages/UserAccountManagement'
+import LearningAnalytics from '../../pages/LearningAnalytics'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
@@ -62,16 +63,22 @@ const Workspace = ({ setLogin }) => {
             { name: 'Practice', type: "learn", icon: CodeBracketIcon },
         ];
 
-        // Admin gets additional Account Management section
-        if (isAdmin) {
-            return [
-                ...baseNavigation,
-                { name: 'Account Management', type: "accounts", icon: UserGroupIcon },
+        // Lead/Admin gets additional admin sections
+        if (isLeadOrAdmin) {
+            const adminSections = [
+                { name: 'Learning Analytics', type: "analytics", icon: BookOpenIcon },
             ];
+            
+            // Admin also gets Account Management
+            if (isAdmin) {
+                adminSections.push({ name: 'Account Management', type: "accounts", icon: UserGroupIcon });
+            }
+            
+            return [...baseNavigation, ...adminSections];
         }
 
         return baseNavigation;
-    }, [isAdmin, isReferrer]);
+    }, [isAdmin, isReferrer, isLeadOrAdmin]);
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {
@@ -123,6 +130,9 @@ const Workspace = ({ setLogin }) => {
         } else if (location.pathname === '/workspace/account-management') {
             setContent('Account Management');
             sessionStorage.setItem('content', 'Account Management');
+        } else if (location.pathname === '/workspace/admin-analytics') {
+            setContent('Learning Analytics');
+            sessionStorage.setItem('content', 'Learning Analytics');
         }
     }, [location]);
 
@@ -214,19 +224,20 @@ const Workspace = ({ setLogin }) => {
                     <main className="min-h-screen bg-[#fafafa] dark:bg-gray-950 pt-20 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :
+                                content === "Learning Analytics" ? <LearningAnalytics /> :
                                 content === "Profile" ? <Profile /> :
                                     content === "Applications" ? (
-                                        isLeadOrAdmin ? <AdminApplications /> : <Applications />
+                                        isLeadOrAdmin ? <ApplicationManagement /> : <Applications />
                                     ) :
                                         content === "Resume and Essays" ? (
-                                            isLeadOrAdmin ? <AdminFiles /> : <FilesAndEssay />
+                                            isLeadOrAdmin ? <FilesManagement /> : <FilesAndEssay />
                                         ) :
                                             content === "Referrals" ? (
-                                                (isLeadOrAdmin || isReferrer) ? <AdminReferrals /> : <Referrals />
+                                                (isLeadOrAdmin || isReferrer) ? <ReferralsManagement /> : <Referrals />
                                             ) :
                                                 content === "Opportunities" ? <Opportunities /> :
                                                     content === "Practice" ? <Practice /> :
-                                                        <Learning />
+                                                        <Learning setContent={setContentHandler} />
                         }
                     </main>
                 </div>

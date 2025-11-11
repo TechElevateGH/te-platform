@@ -18,7 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ClipboardDocumentIcon } from '@heroicons/react/20/solid';
 
-const AdminReferrals = () => {
+const ReferralsManagement = () => {
     const { accessToken } = useAuth();
     const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -975,4 +975,4 @@ const AdminReferrals = () => {
     );
 };
 
-export default AdminReferrals;
+export default ReferralsManagement;

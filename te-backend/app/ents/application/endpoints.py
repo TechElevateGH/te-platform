@@ -26,10 +26,11 @@ def create_application(
     *,
     db: Database = Depends(session.get_db),
     data: application_schema.ApplicationCreate,
-    user=Depends(user_dependencies.get_current_user),
+    user=Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
     Create an application for `user`.
+    Only available for Members (role=1).
     """
     application = application_crud.create_application(db, data=data, user_id=user.id)
     return {"application": application_dependencies.parse_application(application)}
@@ -218,11 +219,12 @@ def add_file(
     file: UploadFile = File(...),
     role: str = Form(default=""),
     notes: str = Form(default=""),
-    _=Depends(user_dependencies.get_current_user),
+    _=Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
     Upload resume for user `user_id` with role and notes.
     Only PDF files are accepted for resumes.
+    Only available for Members (role=1).
     """
     # Validate file type - only accept PDFs for resumes
     if kind == application_schema.FileType.resume:

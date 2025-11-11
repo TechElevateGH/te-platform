@@ -16,7 +16,7 @@ import {
     ClockIcon
 } from '@heroicons/react/24/outline';
 
-const AdminFiles = () => {
+const FilesManagement = () => {
     const { accessToken, userRole } = useAuth();
     const [users, setUsers] = useState([]);
     const [resumeReviews, setResumeReviews] = useState([]);
@@ -765,4 +765,4 @@ const AdminFiles = () => {
     );
 };
 
-export default AdminFiles;
+export default FilesManagement;

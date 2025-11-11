@@ -23,17 +23,14 @@ def add_company(
     db: Database = Depends(session.get_db),
     *,
     data: referralcompany_schema.AdminCompanyCreate,
-    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
 ) -> Any:
     """
     Add a new referral company to the system.
-    Requires role: Referrer (2), Volunteer (3), Lead (4), or Admin (5).
+    Requires role: Volunteer (3), Lead (4), or Admin (5).
     """
-    from app.core.permissions import require_referrer
-
-    # Require at least Referrer level to add companies
-    require_referrer(user)
-
     company = referralcompany_crud.create_admin_company(db, data=data)
     return {"company": referralcompany_dependencies.parse_company_basic(company)}
 
@@ -68,10 +65,11 @@ def request_referral(
     db: Database = Depends(session.get_db),
     *,
     data: referralcompany_schema.ReferralRequest,
-    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Request a referral for `user`
+    Request a referral for `user`.
+    Only available for Members (role=1).
     """
     referral = referralcompany_crud.request_referral(
         db,

@@ -138,7 +138,7 @@ def get_user_progress(
     db: Database, user_id: int
 ) -> Optional[learning_models.UserProgress]:
     """Get user's learning progress by user_id"""
-    progress = db["user_progress"].find_one({"user_id": user_id})
+    progress = db["user_progress"].find_one({"user_id": ObjectId(user_id)})
     if progress:
         return learning_models.UserProgress(**progress)
     return None
@@ -149,7 +149,7 @@ def create_user_progress(
 ) -> learning_models.UserProgress:
     """Create new user progress record"""
     progress_data = data.dict()
-    progress_data["user_id"] = user_id
+    progress_data["user_id"] = ObjectId(user_id)
     progress_data["last_updated"] = datetime.utcnow()
     progress_data["created_at"] = datetime.utcnow()
 
@@ -169,7 +169,7 @@ def update_user_progress(
     update_data["last_updated"] = datetime.utcnow()
 
     result = db["user_progress"].find_one_and_update(
-        {"user_id": user_id}, {"$set": update_data}, return_document=True
+        {"user_id": ObjectId(user_id)}, {"$set": update_data}, return_document=True
     )
 
     if result:
@@ -197,7 +197,7 @@ def toggle_completed_topic(
             completed.append(topic_key)
 
         db["user_progress"].update_one(
-            {"user_id": user_id},
+            {"user_id": ObjectId(user_id)},
             {
                 "$set": {
                     "completed_topics": completed,
@@ -231,7 +231,7 @@ def toggle_bookmarked_topic(
             bookmarked.append(topic_key)
 
         db["user_progress"].update_one(
-            {"user_id": user_id},
+            {"user_id": ObjectId(user_id)},
             {
                 "$set": {
                     "bookmarked_topics": bookmarked,
@@ -265,10 +265,79 @@ def update_topic_note(
             notes.pop(topic_key, None)
 
         db["user_progress"].update_one(
-            {"user_id": user_id},
+            {"user_id": ObjectId(user_id)},
             {"$set": {"topic_notes": notes, "last_updated": datetime.utcnow()}},
         )
         progress.topic_notes = notes
         progress.last_updated = datetime.utcnow()
 
     return progress
+
+
+# Admin Statistics Functions
+def get_all_members_progress(db: Database) -> List[dict]:
+    """Get learning progress for all members (Admin/Lead only)"""
+    all_progress = list(db["user_progress"].find())
+
+    result = []
+    for progress in all_progress:
+        # Get user details from member_users collection
+        user_data = db.member_users.find_one({"_id": progress["user_id"]})
+        if user_data:
+            result.append(
+                {
+                    "user_id": str(progress["user_id"]),
+                    "full_name": user_data.get("full_name", "Unknown"),
+                    "email": user_data.get("email", ""),
+                    "completed_count": len(progress.get("completed_topics", [])),
+                    "bookmarked_count": len(progress.get("bookmarked_topics", [])),
+                    "notes_count": len(progress.get("topic_notes", {})),
+                    "last_updated": progress.get("last_updated"),
+                    "created_at": progress.get("created_at"),
+                }
+            )
+
+    return result
+
+
+def get_learning_statistics(db: Database) -> dict:
+    """Get overall learning statistics (Admin/Lead only)"""
+    total_members = db.member_users.count_documents({"is_active": True})
+    members_with_progress = db["user_progress"].count_documents({})
+
+    # Get all progress records
+    all_progress = list(db["user_progress"].find())
+
+    total_completions = sum(len(p.get("completed_topics", [])) for p in all_progress)
+    total_bookmarks = sum(len(p.get("bookmarked_topics", [])) for p in all_progress)
+    total_notes = sum(len(p.get("topic_notes", {})) for p in all_progress)
+
+    # Topic completion frequency
+    topic_completions = {}
+    for progress in all_progress:
+        for topic in progress.get("completed_topics", []):
+            topic_completions[topic] = topic_completions.get(topic, 0) + 1
+
+    # Sort topics by completion count
+    most_completed_topics = sorted(
+        topic_completions.items(), key=lambda x: x[1], reverse=True
+    )[:10]
+
+    return {
+        "total_members": total_members,
+        "members_with_progress": members_with_progress,
+        "engagement_rate": round((members_with_progress / total_members * 100), 2)
+        if total_members > 0
+        else 0,
+        "total_completions": total_completions,
+        "total_bookmarks": total_bookmarks,
+        "total_notes": total_notes,
+        "avg_completions_per_member": round(
+            total_completions / members_with_progress, 2
+        )
+        if members_with_progress > 0
+        else 0,
+        "most_completed_topics": [
+            {"topic": topic, "count": count} for topic, count in most_completed_topics
+        ],
+    }

@@ -88,7 +88,7 @@ class UserProgress(BaseModel):
     """MongoDB UserProgress document model for tracking learning progress"""
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    user_id: int  # Reference to user ID
+    user_id: PyObjectId  # Reference to user ID (MongoDB ObjectId)
     completed_topics: List[str] = Field(
         default_factory=list
     )  # List of "category::topic" strings
