@@ -24,6 +24,7 @@ class ResumeRead(ResumeBase):
 
 class ResumesRead(BaseModel):
     """Response containing all resumes for a member"""
+
     resumes: list[ResumeRead]
 
 

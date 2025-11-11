@@ -108,6 +108,7 @@ def read_user_application(
 
 # ============= Resume CRUD Operations (Multiple allowed per member) =============
 
+
 def read_resumes(db: Database, *, user_id: str) -> list[application_models.Resume]:
     """Read all resumes for a user from MongoDB"""
     from bson import ObjectId

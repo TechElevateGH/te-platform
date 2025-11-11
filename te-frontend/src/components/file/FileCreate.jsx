@@ -115,11 +115,10 @@ const FileCreate = ({ setFileUpload }) => {
                                                     key={type}
                                                     type="button"
                                                     onClick={() => handleInputChange({ field: 'document_type', value: type })}
-                                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                                                        fileData.document_type === type
+                                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${fileData.document_type === type
                                                             ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
                                                             : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {type}
                                                 </button>

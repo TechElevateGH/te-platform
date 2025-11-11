@@ -179,9 +179,8 @@ def delete_user_application(
     return {"data": OperationCompleted()}
 
 
-
-
 # ============= Resume Endpoints (Multiple resumes allowed per member) =============
+
 
 @resumes_router.get("", response_model=Dict[str, application_schema.ResumesRead])
 def get_resumes(
@@ -268,4 +267,3 @@ def delete_resume(
         )
 
     return {"message": "Resume deleted successfully"}
-
