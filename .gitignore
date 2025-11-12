@@ -3,7 +3,9 @@ __pycache__
 .ruff_cache
 
 # All .env files
+.env
 .env*
 
 # venv files
 venv/
+

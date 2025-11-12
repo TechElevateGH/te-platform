@@ -296,7 +296,7 @@ const Profile = () => {
             setShowVerificationModal(false);
             setVerificationCode(['', '', '', '', '', '']);
             setPendingEmailChange(null);
-            
+
             setNotification({
                 type: 'success',
                 message: 'Email updated successfully!'
@@ -324,7 +324,7 @@ const Profile = () => {
                 new_email: pendingEmailChange,
                 password: storedPassword
             });
-            
+
             setNotification({
                 type: 'success',
                 message: 'Verification code sent! Please check your email.'
