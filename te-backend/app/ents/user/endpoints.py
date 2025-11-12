@@ -19,10 +19,11 @@ def list_privileged_users(
     _: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
-    List all privileged users (Lead and above).
+    List all privileged users (Volunteers and Leads) for assignment purposes.
 
-    Returns all users with role >= 2 (Leads, Admins, Referrers, etc.)
-    Filtered to show only Volunteers (role=3) and Leads (role=4) for assignment purposes.
+    Returns all active users with role 3 (Volunteer) or role 4 (Lead).
+    These users can be assigned resume review requests.
+    Includes full_name and email for display purposes.
 
     **Requires**: Lead (role=4) or Admin (role=5) access
     """
@@ -240,6 +241,57 @@ def update_member_profile(
 
     updated_user = user_crud.update_user_profile(db, user_id=user_id, data=data)
     return {"user": user_schema.MemberUserRead(**vars(updated_user))}
+
+
+# ============= Resume Management =============
+
+
+@router.get("/{user_id}/resumes", response_model=Dict[str, Any])
+def get_user_resumes(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Retrieve user's resumes.
+
+    - **user_id**: User's ID
+    - Returns: List of user's resumes
+
+    **Authorization**:
+    - Members (role=1): Can only view their own resumes
+    - Leads/Admins: Can view any user's resumes
+    """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only view your own resumes",
+        )
+
+    user = user_crud.read_user_by_id(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    # Format resumes to match expected frontend structure
+    resumes = [
+        {
+            "id": r.get("id", ""),  # UUID
+            "file_id": r.get("file_id", ""),
+            "name": r.get("name", ""),
+            "link": r.get("link", ""),  # Frontend expects 'link' not 'url'
+            "date": r.get("date", ""),
+            "role": r.get("role", ""),
+            "notes": r.get("notes", ""),
+        }
+        for r in (user.resumes or [])
+    ]
+
+    return {"resumes": resumes}
 
 
 # ============= Essay Management (Text stored in user document) =============

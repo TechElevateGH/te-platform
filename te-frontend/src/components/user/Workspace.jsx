@@ -89,9 +89,10 @@ const Workspace = ({ setLogin }) => {
                 setUserInfo(response.data.user)
             })
             .catch((error) => {
-                if (error.response.status === 401) {
+                if (error.response?.status === 401) {
                     logout();
                 }
+                console.error('Error fetching user info:', error);
             })
     }, [accessToken, logout, setUserInfo, userId]);
 

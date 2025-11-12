@@ -694,7 +694,7 @@ const ResumeReviews = () => {
                 {isVolunteerOrAbove && (
                     <>
                         {/* Search and Sort Bar */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
                             <div className="flex items-center gap-3">
                                 {/* Global Search */}
                                 <div className="flex-1 relative">

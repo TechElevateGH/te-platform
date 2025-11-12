@@ -87,14 +87,17 @@ const ApplicationManagement = () => {
     const fetchAllApplications = useCallback(async () => {
         setLoading(true);
         try {
+            console.log('Fetching applications from /applications...');
             const response = await axiosInstance.get('/applications', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
+            console.log('Applications response:', response.data);
             setApplications(response.data.applications || []);
         } catch (error) {
             console.error('Error fetching applications:', error);
+            console.error('Error details:', error.response?.data || error.message);
         } finally {
             setLoading(false);
         }
@@ -564,14 +567,14 @@ const ApplicationManagement = () => {
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-                                    {visibleColumns.member && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Member
-                                        </th>
-                                    )}
                                     {visibleColumns.company && (
                                         <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Company
+                                        </th>
+                                    )}
+                                    {visibleColumns.member && (
+                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Member
                                         </th>
                                     )}
                                     {visibleColumns.position && (
@@ -630,16 +633,8 @@ const ApplicationManagement = () => {
                                             key={app.id}
                                             className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                         >
-                                            {visibleColumns.member && (
-                                                <td className="px-3 py-2">
-                                                    <div>
-                                                        <div className="font-semibold text-gray-900 dark:text-white text-xs">{app.user_name}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
-                                                    </div>
-                                                </td>
-                                            )}
                                             {visibleColumns.company && (
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 text-left">
                                                     <div className="flex items-center gap-2">
                                                         <div className="relative h-5 w-5 flex-shrink-0">
                                                             <img
@@ -659,18 +654,26 @@ const ApplicationManagement = () => {
                                                     </div>
                                                 </td>
                                             )}
+                                            {visibleColumns.member && (
+                                                <td className="px-3 py-2 text-left">
+                                                    <div>
+                                                        <div className="font-semibold text-gray-900 dark:text-white text-xs">{app.user_name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
+                                                    </div>
+                                                </td>
+                                            )}
                                             {visibleColumns.position && (
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 text-left">
                                                     <span className="text-xs text-gray-700 dark:text-gray-300">{app.title}</span>
                                                 </td>
                                             )}
                                             {visibleColumns.level && (
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 text-left">
                                                     <span className="text-xs text-gray-600 dark:text-gray-400">{app.role}</span>
                                                 </td>
                                             )}
                                             {visibleColumns.location && (
-                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                <td className="px-3 py-2 whitespace-nowrap text-left">
                                                     <p className="text-xs text-gray-700 dark:text-gray-300">
                                                         {app.location?.city && app.location?.country
                                                             ? `${app.location.city}, ${app.location.country}`
@@ -679,7 +682,7 @@ const ApplicationManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.referred && (
-                                                <td className="px-3 py-2 whitespace-nowrap text-center">
+                                                <td className="px-3 py-2 whitespace-nowrap text-left">
                                                     {app.referred ? (
                                                         <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
                                                             Yes
@@ -690,7 +693,7 @@ const ApplicationManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.recruiter && (
-                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                <td className="px-3 py-2 whitespace-nowrap text-left">
                                                     {app.recruiter_name ? (
                                                         <div className="min-w-0">
                                                             <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
@@ -708,14 +711,14 @@ const ApplicationManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.status && (
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 text-left">
                                                     <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full border ${getStatusColor(app.status)}`}>
                                                         {app.status}
                                                     </span>
                                                 </td>
                                             )}
                                             {visibleColumns.applied && (
-                                                <td className="px-3 py-2">
+                                                <td className="px-3 py-2 text-left">
                                                     <span className="text-xs text-gray-600 dark:text-gray-400">{app.date}</span>
                                                 </td>
                                             )}
