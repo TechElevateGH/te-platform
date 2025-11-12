@@ -218,6 +218,12 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         if (!accessToken) return;
 
+        // Don't fetch notifications on OAuth callback page to prevent race conditions
+        if (window.location.pathname === '/auth/callback') {
+            console.log('Skipping notification fetch on OAuth callback page');
+            return;
+        }
+
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 30000);
 

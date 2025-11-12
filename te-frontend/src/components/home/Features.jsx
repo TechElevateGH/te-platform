@@ -128,7 +128,7 @@ const Features = () => {
                 {/* Bottom CTA */}
                 <div className="mt-20 text-center">
                     <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
-                        <button 
+                        <button
                             onClick={handleExploreFeatures}
                             className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
                             <span className="flex items-center gap-2">

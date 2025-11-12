@@ -18,10 +18,20 @@ This module provides three distinct authentication flows:
    - Requires: token ONLY (no username)
    - Returns: Access token + user info + company info
    - Note: Referrers are assigned to a specific company
+
+4. **Google OAuth Login** (GET /auth/google/login)
+   - Initiates Google OAuth flow
+   - Redirects to Google for authentication
+
+5. **Google OAuth Callback** (GET /auth/google/callback)
+   - Handles callback from Google
+   - Creates or authenticates user
+   - Returns: Access token
 """
 
 from datetime import timedelta
 from typing import Any
+import secrets
 import logging
 
 import app.core.security as security
@@ -31,7 +41,11 @@ import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from app.core.settings import settings
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from pymongo.database import Database
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from urllib.parse import urlencode
 
 # Professional auth router without prefix - will be mounted at /auth
 auth_router = APIRouter(tags=["Authentication"])
@@ -253,6 +267,203 @@ def referrer_login_access_token(
 #     if not email:
 #         raise HTTPException(status_code=400, detail="Invalid token")
 #     user = user.crud.read_user_by_email(db, email=email)
+
+
+@auth_router.get("/google/login")
+def google_login() -> Any:
+    """
+    Initiate Google OAuth login flow.
+
+    Redirects user to Google's OAuth consent screen.
+    """
+    if not settings.GOOGLE_OAUTH_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google OAuth is not configured",
+        )
+
+    # Build Google OAuth authorization URL
+    # Generate anti-CSRF state token
+    state = secrets.token_urlsafe(24)
+    params = {
+        "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+        "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "consent",
+        "state": state,
+    }
+
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+    # Set secure cookie with state for verification in callback (5 min expiry)
+    response = RedirectResponse(url=auth_url)
+    response.set_cookie(
+        key="oauth_state",
+        value=state,
+        max_age=300,
+        httponly=True,
+        secure=False,  # Set True in production with HTTPS
+        samesite="lax",
+    )
+    return response
+
+
+@auth_router.get("/google/callback")
+async def google_callback(code: str, db: Database = Depends(session.get_db)) -> Any:
+    """
+    Handle Google OAuth callback.
+
+    Exchanges authorization code for user info and creates/authenticates user.
+    """
+    if not settings.GOOGLE_OAUTH_CLIENT_ID or not settings.GOOGLE_OAUTH_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google OAuth is not configured",
+        )
+
+    try:
+        # Exchange authorization code for tokens
+        import requests
+
+        token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "code": code,
+            "client_id": settings.GOOGLE_OAUTH_CLIENT_ID,
+            "client_secret": settings.GOOGLE_OAUTH_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_OAUTH_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        }
+
+        logger.info("Exchanging authorization code for tokens...")
+        token_response = requests.post(token_url, data=token_data)
+
+        if token_response.status_code != 200:
+            logger.error(
+                f"Google token exchange failed: {token_response.status_code} - {token_response.text}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to exchange authorization code: {token_response.text}",
+            )
+
+        tokens = token_response.json()
+        logger.info("Successfully received tokens from Google")
+
+        # Verify ID token and extract user info
+        logger.info("Verifying ID token...")
+        idinfo = id_token.verify_oauth2_token(
+            tokens["id_token"],
+            google_requests.Request(),
+            settings.GOOGLE_OAUTH_CLIENT_ID,
+        )
+
+        # Extract user information
+        google_user_id = idinfo["sub"]
+        email = idinfo.get("email")
+        first_name = idinfo.get("given_name", "")
+        last_name = idinfo.get("family_name", "")
+        picture = idinfo.get("picture", "")
+
+        logger.info(f"Google user authenticated: {email}")
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email not provided by Google",
+            )
+
+        # Check if user exists with this Google ID in member_users collection
+        existing_user = db.member_users.find_one({"google_id": google_user_id})
+
+        if not existing_user:
+            # Check if user exists with this email (legacy google users may be in member_users)
+            existing_user = db.member_users.find_one({"email": email})
+
+            if existing_user:
+                # Link Google account to existing user
+                db.member_users.update_one(
+                    {"_id": existing_user["_id"]},
+                    {
+                        "$set": {
+                            "google_id": google_user_id,
+                            "oauth_provider": "google",
+                            "email_verified": True,  # Google verified the email
+                            "image": picture
+                            if not existing_user.get("image")
+                            else existing_user.get("image"),
+                        }
+                    },
+                )
+                user = user_models.MemberUser(**existing_user)
+            else:
+                # Create new user
+                new_user_data = {
+                    "email": email,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "full_name": f"{first_name} {last_name}".strip(),
+                    "image": picture,
+                    "google_id": google_user_id,
+                    "oauth_provider": "google",
+                    "email_verified": True,  # Google verified the email
+                    "is_active": True,
+                    "role": 1,  # Member role
+                    "password": None,  # No password for OAuth users
+                    "middle_name": "",
+                    "contact": "",
+                    "address": "",
+                    "date_of_birth": "",
+                    "university": "",
+                    "start_date": "",
+                    "end_date": "",
+                    "referral_essay": "",
+                    "cover_letter": "",
+                    "resumes": [],
+                    "applications": [],
+                    "mentor_id": None,
+                }
+
+                result = db.member_users.insert_one(new_user_data)
+                new_user_data["_id"] = result.inserted_id
+                user = user_models.MemberUser(**new_user_data)
+        else:
+            # Update existing OAuth user
+            db.member_users.update_one(
+                {"_id": existing_user["_id"]},
+                {
+                    "$set": {
+                        "image": picture,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "full_name": f"{first_name} {last_name}".strip(),
+                    }
+                },
+            )
+            user = user_models.MemberUser(**existing_user)
+
+        # Generate access token
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        user_id_str = str(user.id)
+        access_token = security.create_access_token(
+            user_id_str, expires_delta=access_token_expires
+        )
+
+        # Redirect to frontend with token
+        frontend_url = settings.DOMAIN
+        redirect_url = f"{frontend_url}/auth/callback?token={access_token}&user_id={user_id_str}&role={user.role}"
+
+        logger.info(f"Redirecting to: {redirect_url}")
+        return RedirectResponse(url=redirect_url)
+
+    except Exception as e:
+        logger.error(f"Google OAuth error: {str(e)}")
+        # Redirect to frontend with error
+        frontend_url = settings.DOMAIN
+        error_url = f"{frontend_url}/login?error=oauth_failed"
+        return RedirectResponse(url=error_url)
+
+
 #     if not user:
 #         raise HTTPException(
 #             status_code=404,

@@ -50,7 +50,8 @@ class MemberUser(BaseModel):
     image: str = ""
     contact: str = ""
     address: str = ""
-    password: str  # Hashed password
+    password: Optional[str] = None  # Hashed password (optional for OAuth users)
+    date_of_birth: str = ""
     university: str = ""
     start_date: str = ""
     end_date: str = ""
@@ -62,6 +63,8 @@ class MemberUser(BaseModel):
     resumes: list = []  # List of embedded Resume objects
     applications: list = []  # List of embedded Application objects
     mentor_id: Optional[PyObjectId] = None
+    google_id: Optional[str] = None  # Google OAuth user ID
+    oauth_provider: Optional[str] = None  # OAuth provider (e.g., "google")
 
     class Config:
         populate_by_name = True

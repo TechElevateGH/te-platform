@@ -29,7 +29,15 @@ const Register = () => {
     });
 
     const handleOAuthRegister = (provider) => {
-        setError(`${provider} authentication will be implemented soon!`);
+        if (provider === 'Google') {
+            // Redirect to backend Google OAuth endpoint
+            const backendUrl = axiosInstance.defaults.baseURL;
+            // Remove trailing slash if present to avoid double slashes
+            const cleanUrl = backendUrl.endsWith('/') ? backendUrl.slice(0, -1) : backendUrl;
+            window.location.href = `${cleanUrl}/auth/google/login`;
+        } else {
+            setError(`${provider} authentication will be implemented soon!`);
+        }
     };
 
     const handleInputChange = (field, value) => {

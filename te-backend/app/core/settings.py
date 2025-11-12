@@ -82,5 +82,10 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_X509_CERT_URL: Optional[str] = None
     GOOGLE_UNIVERSE_DOMAIN: str = "googleapis.com"
 
+    # Google OAuth 2.0 for User Authentication
+    GOOGLE_OAUTH_CLIENT_ID: Optional[str] = None
+    GOOGLE_OAUTH_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_OAUTH_REDIRECT_URI: Optional[str] = None
+
 
 settings = Settings()
