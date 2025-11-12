@@ -53,25 +53,25 @@ const Hero = () => {
         </div>
       ))}
 
-      <div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-32 lg:py-40'>
+      <div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-32 lg:py-40'>
         <div className="text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-blue-100 dark:border-gray-700 mb-8 animate-fade-in-down">
-            <SparklesIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-blue-100 dark:border-gray-700 mb-6 sm:mb-8 animate-fade-in-down">
+            <SparklesIcon className="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400" />
+            <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Empowering the Next Generation
             </span>
           </div>
 
           {/* Main heading */}
-          <h1 className="mx-auto max-w-5xl font-display text-5xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-7xl lg:text-8xl animate-fade-in-up">
+          <h1 className="mx-auto max-w-5xl font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-gray-900 dark:text-white animate-fade-in-up">
             Unlock Your{' '}
             <span className="relative inline-block">
               <span className="relative z-10 bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
                 Tech Potential
               </span>
               <svg
-                className="absolute left-0 top-full w-full h-3 -mt-2"
+                className="absolute left-0 top-full w-full h-2 sm:h-3 -mt-1 sm:-mt-2"
                 viewBox="0 0 300 12"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +95,7 @@ const Hero = () => {
           </h1>
 
           {/* Subheading */}
-          <p className="mx-auto mt-8 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-600 dark:text-gray-300 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="mx-auto mt-6 sm:mt-8 max-w-3xl text-base sm:text-lg md:text-xl leading-relaxed text-gray-600 dark:text-gray-300 animate-fade-in px-4" style={{ animationDelay: '0.2s' }}>
             Breaking barriers and building bridges to tech excellence. We connect aspiring developers from
             <span className="font-semibold text-gray-900 dark:text-white"> Africa and beyond</span> with world-class
             <span className="font-semibold text-gray-900 dark:text-white"> mentorship</span>,
@@ -104,27 +104,27 @@ const Hero = () => {
           </p>
 
           {/* CTA / Auth-aware Buttons */}
-          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 animate-fade-in px-4" style={{ animationDelay: '0.4s' }}>
             {!isAuthenticated && (
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="group px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
+                  className="w-full sm:w-auto group px-6 sm:px-8 py-3 sm:py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
                 >
-                  <span className="flex items-center gap-2">
-                    Already a Member?
-                    <svg className="h-5 w-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-sm sm:text-base">Already a Member?</span>
+                    <svg className="h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </span>
                 </button>
                 <button
                   onClick={() => navigate('/register')}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                  className="w-full sm:w-auto group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Get Started Free
-                    <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-sm sm:text-base">Get Started Free</span>
+                    <RocketLaunchIcon className="h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
@@ -134,21 +134,21 @@ const Hero = () => {
               <>
                 <button
                   onClick={() => navigate('/workspace')}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-emerald-500/90 to-blue-500/90 backdrop-blur-md text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden border border-white/20"
+                  className="w-full sm:w-auto group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-500/90 to-blue-500/90 backdrop-blur-md text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden border border-white/20"
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Go to Workspace
-                    <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-sm sm:text-base">Go to Workspace</span>
+                    <RocketLaunchIcon className="h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/90 to-blue-600/90 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
                 <button
                   onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group px-8 py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
+                  className="w-full sm:w-auto group px-6 sm:px-8 py-3 sm:py-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 font-semibold rounded-full shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 transform hover:scale-105 transition-all duration-300"
                 >
-                  <span className="flex items-center gap-2">
-                    Explore Features
-                    <svg className="h-5 w-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-sm sm:text-base">Explore Features</span>
+                    <svg className="h-4 sm:h-5 w-4 sm:w-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </span>
@@ -158,7 +158,7 @@ const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="mt-20 grid grid-cols-2 gap-8 sm:grid-cols-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="mt-16 sm:mt-20 grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 animate-fade-in px-4" style={{ animationDelay: '0.6s' }}>
             {[
               { label: 'Active Mentees', value: '500+' },
               { label: 'Success Stories', value: '250+' },
@@ -166,10 +166,10 @@ const Hero = () => {
               { label: 'Countries Reached', value: '30+' },
             ].map((stat, idx) => (
               <div key={idx} className="group">
-                <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
+                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
+                <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>

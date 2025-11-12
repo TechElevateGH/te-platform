@@ -21,7 +21,19 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const location = useLocation();
-    const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout, userRole } = useAuth();
+
+    // Define role labels and styling
+    const getRoleInfo = (role) => {
+        const roleNum = parseInt(role);
+        if (roleNum >= 5) return { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
+        if (roleNum >= 4) return { label: 'Mentor', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+        if (roleNum >= 3) return { label: 'Lead', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
+        if (roleNum >= 2) return { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
+        return null;
+    };
+
+    const roleInfo = userRole ? getRoleInfo(userRole) : null;
 
     const handleLogoutClick = () => {
         setShowLogoutConfirm(true);
@@ -130,6 +142,15 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
                         {/* Notification Bell - Show only when authenticated */}
                         {isAuthenticated && <NotificationBell />}
+
+                        {/* Role Badge - Show for privileged users */}
+                        {isAuthenticated && roleInfo && (
+                            <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
+                                <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                    {roleInfo.label}
+                                </span>
+                            </div>
+                        )}
 
                         {/* Dark Mode Toggle */}
                         <button
@@ -251,6 +272,17 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                                 <MoonIcon className="h-5 w-5 text-indigo-600" />
                                             )}
                                         </button>
+
+                                        {/* Role Badge - Mobile */}
+                                        {isAuthenticated && roleInfo && (
+                                            <div className="-mx-3 px-3 py-2.5">
+                                                <div className={`inline-flex ${roleInfo.bgColor} px-4 py-2 rounded-full border border-current/20`}>
+                                                    <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                                        {roleInfo.label}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {!isAuthenticated ? (
                                             <>
