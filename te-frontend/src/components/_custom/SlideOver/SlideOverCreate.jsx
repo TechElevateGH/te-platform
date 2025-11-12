@@ -1,10 +1,17 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-
-
-const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButtonText = "Create Application", shouldReload = true }) => {
+const SlideOverForm = ({
+    title,
+    setHandler,
+    requestHandler,
+    children,
+    submitButtonText = "Create Application",
+    shouldReload = true,
+    isSubmitting = false,
+}) => {
     const [open, setOpen] = useState(false);
+    const formRef = useRef(null);
 
     useEffect(() => {
         // Delay opening to allow smooth entrance
@@ -32,10 +39,23 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
 
     const submitFormHandler = async (e) => {
         e.preventDefault();
-        await requestHandler();
-        document.getElementById('createForm').reset();
-        if (shouldReload) {
-            window.location.reload();
+        let wasSuccessful = false;
+
+        try {
+            const result = await requestHandler();
+            wasSuccessful = result === true;
+        } catch (error) {
+            console.error('SlideOver submit failed:', error);
+        }
+
+        if (wasSuccessful) {
+            if (formRef.current) {
+                formRef.current.reset();
+            }
+
+            if (shouldReload) {
+                window.location.reload();
+            }
         }
     };
 
@@ -69,7 +89,7 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
                         >
                             <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all w-full max-w-2xl">
                                 <form
-                                    id="createForm"
+                                    ref={formRef}
                                     className="flex flex-col"
                                     onKeyDown={handleKeyDown}
                                     onSubmit={submitFormHandler}
@@ -107,7 +127,11 @@ const SlideOverForm = ({ title, setHandler, requestHandler, children, submitButt
                                         </button>
                                         <button
                                             type="submit"
-                                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-blue-600/25"
+                                            className={`px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-600/25 ${isSubmitting
+                                                ? 'bg-blue-600/60 text-white cursor-not-allowed'
+                                                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 active:scale-[0.98]'
+                                            }`}
+                                            disabled={isSubmitting}
                                         >
                                             {submitButtonText}
                                         </button>

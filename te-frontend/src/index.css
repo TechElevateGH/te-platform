@@ -14,6 +14,44 @@ body {
   scroll-behavior: smooth;
 }
 
+/* Theme variables */
+:root {
+  --te-bg: #ffffff;
+  --te-surface: #f8fafc; /* light slate-50 */
+  --te-surface-alt: #f1f5f9; /* slate-100 */
+  --te-border: #e2e8f0; /* slate-200 */
+  --te-text: #1e293b; /* slate-800 */
+  --te-text-dim: #475569; /* slate-600 */
+  --te-gradient: linear-gradient(90deg,#2563eb 0%,#06b6d4 50%,#7c3aed 100%);
+}
+
+.dark {
+  --te-bg: #0f172a; /* slate-900 */
+  --te-surface: #1e293b; /* slate-800 */
+  --te-surface-alt: #24344d; /* custom hover */
+  --te-border: #334155; /* slate-700 */
+  --te-text: #f1f5f9; /* slate-100 */
+  --te-text-dim: #94a3b8; /* slate-400 */
+  --te-gradient: linear-gradient(90deg,#2563eb 0%,#06b6d4 45%,#7c3aed 90%);
+}
+
+/* Utility classes that map to variables */
+.bg-theme { background: var(--te-bg); }
+.bg-surface { background: var(--te-surface); }
+.bg-surface-alt { background: var(--te-surface-alt); }
+.border-theme { border-color: var(--te-border); }
+.text-theme { color: var(--te-text); }
+.text-theme-dim { color: var(--te-text-dim); }
+.bg-te-gradient { background-image: var(--te-gradient); }
+
+/* Gradient text utility */
+.text-te-gradient {
+  background: var(--te-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -216,8 +254,11 @@ code {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 
-  /* Gradient text */
+  /* Gradient text without @apply (tool complaining) */
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent;
+    background: linear-gradient(90deg,#2563eb 0%,#06b6d4 50%,#7c3aed 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

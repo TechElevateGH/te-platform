@@ -17,7 +17,7 @@ const FileCreate = ({ setFileUpload }) => {
     const { accessToken, userId } = useAuth();
     const { setFetchFiles } = useData();
 
-    const [status, setStatus] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
     const [fileData, setFileData] = useState({
         role: "",
@@ -30,18 +30,18 @@ const FileCreate = ({ setFileUpload }) => {
     const uploadFileRequest = async () => {
         if (!fileData.file) {
             setToast({ message: "Please select a file to upload", type: "error" });
-            return;
+            return false;
         }
         if (!fileData.role) {
             setToast({ message: "Please specify the target role", type: "error" });
-            return;
+            return false;
         }
 
         // Validate file is PDF
         const fileName = fileData.file.name.toLowerCase();
         if (!fileName.endsWith('.pdf')) {
             setToast({ message: "Only PDF files are allowed. Please upload a PDF resume.", type: "error" });
-            return;
+            return false;
         }
 
         const data = new FormData();
@@ -50,7 +50,7 @@ const FileCreate = ({ setFileUpload }) => {
         data.append('document_type', fileData.document_type);
         data.append('file', fileData.file);
 
-        setStatus("Loading...")
+        setIsSubmitting(true);
 
         try {
             await axiosInstance.post(`/users/${userId}/resumes`, data, {
@@ -60,16 +60,18 @@ const FileCreate = ({ setFileUpload }) => {
                 },
             });
             setShowSuccessFeedback(true);
-            setStatus(null);
             setFetchFiles(true);
             // Close modal after a brief delay to show success message
             setTimeout(() => {
                 setFileUpload(false);
             }, 1500);
+            return true;
         } catch (error) {
             console.error("Upload error:", error);
             setToast({ message: `Failed to upload resume: ${error.response?.data?.detail || error.message}`, type: "error" });
-            setStatus(null);
+            return false;
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -79,7 +81,7 @@ const FileCreate = ({ setFileUpload }) => {
         );
     };
 
-    const handleFileUploadChange = async (event) => {
+    const handleFileUploadChange = (event) => {
         handleInputChange({ field: "file", value: event.target.files[0] });
     };
 
@@ -91,6 +93,7 @@ const FileCreate = ({ setFileUpload }) => {
                 requestHandler={uploadFileRequest}
                 submitButtonText="Upload File"
                 shouldReload={false}
+                isSubmitting={isSubmitting}
                 children={
                     <div className="px-6 py-6 space-y-6">
 
@@ -104,7 +107,7 @@ const FileCreate = ({ setFileUpload }) => {
                         }
 
                         {
-                            status === "Loading..." ? <Loading /> :
+                            isSubmitting ? <Loading /> :
                                 <>
                                     {/* File Upload */}
                                     <div className="space-y-4">
@@ -112,6 +115,8 @@ const FileCreate = ({ setFileUpload }) => {
                                             {fileData.document_type} File
                                         </h3>
                                         <FileUpload
+                                            field="resume-upload"
+                                            name="resume"
                                             handleFileUploadChange={handleFileUploadChange}
                                             required={true}
                                             accept=".pdf"
@@ -154,7 +159,7 @@ const FileCreate = ({ setFileUpload }) => {
                                                 onChange={(e) => handleInputChange({ field: 'notes', value: e.target.value })}
                                                 placeholder="Add any notes about this resume version..."
                                                 rows={4}
-                                                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium resize-none"
+                                                className="w-full px-4 py-2.5 bg-surface dark:bg-surface border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-te-cyan focus:border-transparent transition-all text-sm font-medium resize-none"
                                             />
                                             <p className="mt-1.5 text-xs text-gray-500 font-medium">
                                                 Example: Updated for tech companies, emphasized ML projects

@@ -180,16 +180,33 @@ export const FormTextArea = ({ label, field, handleInputChange, required }) => {
     )
 }
 
-export const FileUpload = ({ label, field, handleFileUploadChange, uploadFileRequest, required }) => {
+export const FileUpload = ({
+    label,
+    field,
+    handleFileUploadChange,
+    uploadFileRequest,
+    required,
+    accept = '.pdf',
+    name,
+}) => {
+    const inputId = field || 'file-upload-input';
+
     return (
         <div className="">
-            <p className="text-sm leading-6 text-gray-600 dark:text-gray-300 transition-colors">{label}</p>
+            {label && (
+                <label
+                    htmlFor={inputId}
+                    className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 transition-colors"
+                >
+                    {label} {required && <span className="text-red-500">*</span>}
+                </label>
+            )}
             <div className="mt-6 flex rounded-lg border border-dashed border-gray-900/25 dark:border-gray-700/50 px-3 py-3 bg-white dark:bg-gray-700/50 transition-colors">
                 <input
                     type="file"
-                    id={field}
-                    name="filename"
-                    accept=".pdf"
+                    id={inputId}
+                    name={name || inputId}
+                    accept={accept}
                     className='w-2/3 font-serif text-gray-900 dark:text-white transition-colors'
                     onChange={handleFileUploadChange}
                     required={required}
@@ -208,11 +225,19 @@ export const FileUpload = ({ label, field, handleFileUploadChange, uploadFileReq
     )
 }
 
-export const FormCheckBox = ({ label, field, handleInputChange }) => {
+export const FormCheckBox = ({ label, field, handleInputChange, checked = false }) => {
+    const checkboxId = field.replace(/\./g, '-');
+
     return (
         <div className="block text-sm leading-6 text-black dark:text-white font-semibold transition-colors">
-            <label htmlFor={field} className='mr-2'>{label}</label>
-            <input id={field} type="checkbox" onChange={handleInputChange} className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors" />
+            <label htmlFor={checkboxId} className='mr-2'>{label}</label>
+            <input
+                id={checkboxId}
+                type="checkbox"
+                checked={checked}
+                onChange={(event) => handleInputChange({ field, value: event.target.checked })}
+                className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors"
+            />
         </div>
     )
 }

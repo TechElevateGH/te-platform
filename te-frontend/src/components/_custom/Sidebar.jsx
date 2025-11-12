@@ -90,7 +90,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                 onClick={() => navigate('/')}
                                                 className="flex items-center gap-3 group"
                                             >
-                                                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                                                <div className="h-11 w-11 rounded-xl bg-te-gradient flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
                                                     <RocketLaunchIcon className="h-6 w-6 text-white" />
                                                 </div>
                                                 <div>

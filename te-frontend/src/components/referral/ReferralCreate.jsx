@@ -105,13 +105,17 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                 setFetchReferralCompanies(true);
                 // Close modal
                 setReferralCompanyId(null);
+
+                return true;
             }
         } catch (error) {
             console.error("Error creating referral:", error);
             setSubmitError(error.response?.data?.detail || "Failed to submit referral request. Please try again.");
+            return false;
         } finally {
             setIsSubmitting(false);
         }
+        return false;
     }
 
     const handleInputChange = ({ field, value }) => {

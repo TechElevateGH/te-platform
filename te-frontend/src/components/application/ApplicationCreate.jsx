@@ -25,6 +25,8 @@ const ApplicationCreate = ({ setAddApplication }) => {
     const { setFetchApplications, companies } = useData();
 
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState("");
 
     const [appData, setAppData] = useState({
         company: "",
@@ -42,26 +44,34 @@ const ApplicationCreate = ({ setAddApplication }) => {
         }
     })
 
-    const createUserApplicationRequest = () => {
-        axiosInstance.post(`/users/${userId}/applications`,
-            appData,
-            {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            })
-            .then((_) => {
-                setShowSuccessFeedback(true);
-                // Close modal and trigger refetch after showing success message
-                setTimeout(() => {
-                    setFetchApplications(true);
-                    setAddApplication(null);
-                }, 1500);
-            })
-            .catch((error) => {
-                console.error('Error creating application:', error);
-            });
+    const createUserApplicationRequest = async () => {
+        setSubmitError("");
+        setShowSuccessFeedback(false);
+        setIsSubmitting(true);
 
+        try {
+            await axiosInstance.post(`/users/${userId}/applications`,
+                appData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+            setShowSuccessFeedback(true);
+            setTimeout(() => {
+                setFetchApplications(true);
+                setAddApplication(null);
+            }, 1500);
+
+            return true;
+        } catch (error) {
+            console.error('Error creating application:', error);
+            setSubmitError(error.response?.data?.detail || 'Failed to create application. Please try again.');
+            return false;
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const handleInputChange = ({ field, value }) => {
@@ -77,6 +87,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
             title={"New Application"}
             setHandler={setAddApplication}
             requestHandler={createUserApplicationRequest}
+            isSubmitting={isSubmitting}
             children={
                 <div className="px-6 py-6 space-y-6">
                     {showSuccessFeedback && (
@@ -85,6 +96,12 @@ const ApplicationCreate = ({ setAddApplication }) => {
                                 message={"Application successfully added."}
                                 setShowSuccessFeedback={setShowSuccessFeedback}
                             />
+                        </div>
+                    )}
+
+                    {submitError && (
+                        <div className="rounded-xl border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm font-semibold text-red-900 dark:text-red-200">
+                            {submitError}
                         </div>
                     )}
 
