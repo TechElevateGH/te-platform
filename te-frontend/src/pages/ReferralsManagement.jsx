@@ -591,12 +591,12 @@ const ReferralsManagement = () => {
                                         </th>
                                     )}
                                     {visibleColumns.resume && (
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Resume
                                         </th>
                                     )}
                                     {visibleColumns.essay && (
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Essay
                                         </th>
                                     )}
@@ -744,7 +744,7 @@ const ReferralsManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.resume && (
-                                                <td className="px-4 py-3 text-center">
+                                                <td className="px-4 py-3">
                                                     {ref.has_resume ? (
                                                         <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
                                                             Yes
@@ -757,7 +757,7 @@ const ReferralsManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.essay && (
-                                                <td className="px-4 py-3 text-center">
+                                                <td className="px-4 py-3">
                                                     {ref.has_essay ? (
                                                         <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
                                                             Yes

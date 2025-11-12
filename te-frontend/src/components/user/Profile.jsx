@@ -816,7 +816,7 @@ const Profile = () => {
 
                         {/* 6-Digit Code Input */}
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                                 Enter Verification Code
                             </label>
                             <div className="flex gap-2 justify-center">
@@ -834,7 +834,7 @@ const Profile = () => {
                                     />
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
                                 Code expires in 15 minutes
                             </p>
                         </div>

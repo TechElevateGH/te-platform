@@ -198,9 +198,9 @@ export default function AdminAnalytics() {
                                     <thead className={darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}>
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
-                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Completed</th>
-                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Bookmarked</th>
-                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Notes</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Completed</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Bookmarked</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Notes</th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Last Active</th>
                                         </tr>
                                     </thead>
@@ -214,19 +214,19 @@ export default function AdminAnalytics() {
                                                             <p className="text-xs text-gray-500 dark:text-gray-400">{member.email}</p>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
+                                                    <td className="px-6 py-4">
                                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-md text-xs font-medium">
                                                             <CheckCircleSolidIcon className="w-3 h-3" />
                                                             {member.completed_count}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
+                                                    <td className="px-6 py-4">
                                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-md text-xs font-medium">
                                                             <BookmarkSolidIcon className="w-3 h-3" />
                                                             {member.bookmarked_count}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4 text-center">
+                                                    <td className="px-6 py-4">
                                                         <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{member.notes_count}</span>
                                                     </td>
                                                     <td className="px-6 py-4">

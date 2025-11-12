@@ -119,28 +119,6 @@ const Members = () => {
             </button>
           </div>
         )}
-
-        {/* Join team CTA */}
-        <div className="mt-20 mx-auto max-w-3xl">
-          <div className="relative rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-8 sm:p-12 shadow-2xl overflow-hidden">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
-
-            <div className="relative text-center">
-              <SparklesIcon className="h-12 w-12 text-white/80 mx-auto mb-4" />
-              <h3 className="text-3xl font-bold text-white mb-4">
-                Want to Join Our Team?
-              </h3>
-              <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-                We're always looking for passionate individuals who want to make a difference in tech education and mentorship.
-              </p>
-              <button className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 hover:bg-gray-50">
-                Get Involved
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

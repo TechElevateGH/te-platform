@@ -191,7 +191,7 @@ const EmailVerification = () => {
                     <form onSubmit={handleVerify}>
                         {/* Code input */}
                         <div className="mb-8">
-                            <label className="block text-sm font-semibold text-gray-700 mb-4 text-center">
+                            <label className="block text-sm font-semibold text-gray-700 mb-4">
                                 Enter Verification Code
                             </label>
                             <div className="flex justify-center gap-2">
@@ -209,7 +209,7 @@ const EmailVerification = () => {
                                     />
                                 ))}
                             </div>
-                            <p className="mt-3 text-xs text-center text-gray-500">
+                            <p className="mt-3 text-xs text-gray-500">
                                 Code expires in 15 minutes
                             </p>
                         </div>

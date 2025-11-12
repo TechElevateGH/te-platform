@@ -363,9 +363,9 @@ export default function LearningAnalytics() {
                                             <thead className={darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}>
                                                 <tr>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Member</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300">Completed</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300">Notes</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Completed</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Notes</th>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Last Active</th>
                                                 </tr>
                                             </thead>
@@ -386,19 +386,19 @@ export default function LearningAnalytics() {
                                                                     <p className="text-xs text-gray-500 dark:text-gray-400">{member.email}</p>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-4 py-2.5 text-center">
+                                                            <td className="px-4 py-2.5">
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded text-xs font-medium">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {member.completed_count}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-2.5 text-center">
+                                                            <td className="px-4 py-2.5">
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-xs font-medium">
                                                                     <BookmarkSolidIcon className="w-3 h-3" />
                                                                     {member.bookmarked_count}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-2.5 text-center">
+                                                            <td className="px-4 py-2.5">
                                                                 <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{member.notes_count}</span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
@@ -424,8 +424,8 @@ export default function LearningAnalytics() {
                                                 <tr>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Topic</th>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Category</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300">Completed By</th>
-                                                    <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked By</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Completed By</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked By</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -448,13 +448,13 @@ export default function LearningAnalytics() {
                                                                     {topic.category}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-2.5 text-center">
+                                                            <td className="px-4 py-2.5">
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded text-xs font-medium">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {topic.completed.length}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-2.5 text-center">
+                                                            <td className="px-4 py-2.5">
                                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-xs font-medium">
                                                                     <BookmarkSolidIcon className="w-3 h-3" />
                                                                     {topic.bookmarked.length}
