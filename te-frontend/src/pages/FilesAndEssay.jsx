@@ -9,6 +9,7 @@ import FileCreate from "../components/file/FileCreate";
 import EmptyResumes from "../components/_custom/Alert/EmptyResumes";
 import SignInPrompt from "../components/_custom/Alert/SignInPrompt";
 import ConfirmDialog from "../components/_custom/Alert/ConfirmDialog";
+import Toast from "../components/_custom/Toast";
 import axiosInstance from "../axiosConfig";
 import { trackEvent } from "../analytics/events";
 
@@ -27,6 +28,7 @@ const Files = () => {
     const [deletingFileId, setDeletingFileId] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, fileId: null, fileName: '' });
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
+    const [toast, setToast] = useState(null);
 
     // Resume Review Form Data
     const [reviewFormData, setReviewFormData] = useState({
@@ -62,7 +64,7 @@ const Files = () => {
             setFetchFiles(true);
         } catch (error) {
             console.error("Delete error:", error);
-            alert(`Failed to delete file: ${error.response?.data?.detail || error.message}`);
+            setToast({ message: `Failed to delete file: ${error.response?.data?.detail || error.message}`, type: "error" });
         } finally {
             setDeletingFileId(null);
         }
@@ -83,7 +85,7 @@ const Files = () => {
                 resume_link: reviewFormData.resume_link,
             });
 
-            alert('Resume review request submitted successfully!');
+            setToast({ message: 'Resume review request submitted successfully!', type: 'success' });
             setReviewFormData({
                 resume_link: '',
                 job_title: '',
@@ -93,7 +95,7 @@ const Files = () => {
             setShowReviewModal(false);
         } catch (error) {
             console.error('Error submitting request:', error);
-            alert('Failed to submit request. Please try again.');
+            setToast({ message: 'Failed to submit request. Please try again.', type: 'error' });
         }
     };
 
@@ -401,6 +403,14 @@ const Files = () => {
                 </div>
             )}
 
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     )
 }

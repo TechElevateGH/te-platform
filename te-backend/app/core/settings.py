@@ -4,31 +4,40 @@ from pydantic import (
     AnyHttpUrl,
     EmailStr,
     field_validator,
-    ValidationError,
 )
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=True, env_file_encoding="utf-8"
+    )
+
     API_STR: str
     PROJECT_NAME: str
     SERVER_HOST: str
     DOMAIN: str
+    PORT: int = 8000
 
     SECRET_KEY: str
     AUTHJWT_SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = [
-        "http://localhost:3000",
-    ]
+    BACKEND_CORS_ORIGINS: Union[str, list[AnyHttpUrl]] = "http://localhost:3000"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> Union[list[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, list]) -> Union[list[str], list]:
+        if isinstance(v, str):
+            if not v or v.strip() == "":
+                # Return default if empty
+                return ["http://localhost:3000"]
+            if not v.startswith("["):
+                # Split by comma and filter out empty strings
+                return [i.strip() for i in v.split(",") if i.strip()]
+        if isinstance(v, list):
             return v
+        return [v]
 
     # Email Configuration
     EMAILS_ENABLED: bool = False
@@ -60,12 +69,5 @@ class Settings(BaseSettings):
     GDRIVE_OTHER_FILES: str
     GDRIVE_LESSONS: str
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
-
-try:
-    settings = Settings()
-except ValidationError as err:
-    print(err.json(indent=4))
+settings = Settings()

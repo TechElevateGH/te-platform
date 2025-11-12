@@ -60,6 +60,26 @@ def get_referral_companies(
     }
 
 
+@referral_company_router.get(
+    "/my-referrals",
+    response_model=Dict[str, list[referral_company_schema.ReferralRead]],
+)
+def get_my_referrals(
+    db: Database = Depends(session.get_db),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Get all referrals for the current user.
+    """
+    referrals = referral_company_crud.read_user_referrals(db, user_id=str(user.id))
+    return {
+        "referrals": [
+            referral_company_dependencies.parse_referral(referral)
+            for referral in referrals
+        ]
+    }
+
+
 @referral_router.post(
     "",
     response_model=Dict[str, referral_company_schema.ReferralRead],

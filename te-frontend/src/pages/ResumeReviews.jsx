@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import Toast from '../components/_custom/Toast';
+import ConfirmDialog from '../components/_custom/Alert/ConfirmDialog';
+import InputDialog from '../components/_custom/Alert/InputDialog';
 import {
     DocumentTextIcon,
     PlusIcon,
@@ -54,6 +56,10 @@ const ResumeReviews = () => {
     const [selectedAssignee, setSelectedAssignee] = useState('');
     const [myAssignedReviews, setMyAssignedReviews] = useState([]);
     const [allAssignments, setAllAssignments] = useState([]);
+
+    // Dialog states
+    const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, onConfirm: null, title: '', message: '' });
+    const [inputDialog, setInputDialog] = useState({ isOpen: false, onSubmit: null, title: '', message: '', required: false, isTextArea: false });
 
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
@@ -269,20 +275,24 @@ const ResumeReviews = () => {
             return;
         }
 
-        if (!window.confirm(`Are you sure you want to cancel the resume review request for "${jobTitle}"?\n\nYou can submit a new request anytime.`)) {
-            return;
-        }
-
-        try {
-            await axiosInstance.patch(`/resume-reviews/${reviewId}/cancel`, {}, {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            });
-            setToast({ message: 'Review request cancelled', type: 'success' });
-            fetchData();
-        } catch (error) {
-            console.error('Error cancelling review:', error);
-            setToast({ message: error.response?.data?.detail || 'Failed to cancel', type: 'error' });
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Cancel Review Request',
+            message: `Are you sure you want to cancel the resume review request for "${jobTitle}"?\n\nYou can submit a new request anytime.`,
+            type: 'warning',
+            onConfirm: async () => {
+                try {
+                    await axiosInstance.patch(`/resume-reviews/${reviewId}/cancel`, {}, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    });
+                    setToast({ message: 'Review request cancelled', type: 'success' });
+                    fetchData();
+                } catch (error) {
+                    console.error('Error cancelling review:', error);
+                    setToast({ message: error.response?.data?.detail || 'Failed to cancel', type: 'error' });
+                }
+            }
+        });
     };
 
     // Assignment functions
@@ -999,10 +1009,16 @@ const ResumeReviews = () => {
                                                             {review.status === 'Pending' && (
                                                                 <button
                                                                     onClick={() => {
-                                                                        const feedback = prompt('Enter your feedback (optional):');
-                                                                        if (feedback !== null) {
-                                                                            handleUpdateStatus(review.id, 'In Review', feedback);
-                                                                        }
+                                                                        setInputDialog({
+                                                                            isOpen: true,
+                                                                            title: 'Start Review',
+                                                                            message: 'Enter your feedback (optional):',
+                                                                            required: false,
+                                                                            isTextArea: true,
+                                                                            onSubmit: (feedback) => {
+                                                                                handleUpdateStatus(review.id, 'In Review', feedback);
+                                                                            }
+                                                                        });
                                                                     }}
                                                                     className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors"
                                                                 >
@@ -1012,10 +1028,16 @@ const ResumeReviews = () => {
                                                             {review.status === 'In Review' && (
                                                                 <button
                                                                     onClick={() => {
-                                                                        const feedback = prompt('Enter your final feedback:');
-                                                                        if (feedback) {
-                                                                            handleUpdateStatus(review.id, 'Completed', feedback);
-                                                                        }
+                                                                        setInputDialog({
+                                                                            isOpen: true,
+                                                                            title: 'Complete Review',
+                                                                            message: 'Enter your final feedback:',
+                                                                            required: true,
+                                                                            isTextArea: true,
+                                                                            onSubmit: (feedback) => {
+                                                                                handleUpdateStatus(review.id, 'Completed', feedback);
+                                                                            }
+                                                                        });
                                                                     }}
                                                                     className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
                                                                 >
@@ -1091,10 +1113,16 @@ const ResumeReviews = () => {
                                                         {review.status === 'In Review' && (
                                                             <button
                                                                 onClick={() => {
-                                                                    const feedback = prompt('Enter your final feedback:');
-                                                                    if (feedback) {
-                                                                        handleUpdateStatus(review.id, 'Completed', feedback);
-                                                                    }
+                                                                    setInputDialog({
+                                                                        isOpen: true,
+                                                                        title: 'Complete Review',
+                                                                        message: 'Enter your final feedback:',
+                                                                        required: true,
+                                                                        isTextArea: true,
+                                                                        onSubmit: (feedback) => {
+                                                                            handleUpdateStatus(review.id, 'Completed', feedback);
+                                                                        }
+                                                                    });
                                                                 }}
                                                                 className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
                                                             >
@@ -1466,6 +1494,31 @@ const ResumeReviews = () => {
                     onClose={() => setToast(null)}
                 />
             )}
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={confirmDialog.onConfirm}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                type={confirmDialog.type}
+                confirmText="Confirm"
+                cancelText="Cancel"
+            />
+
+            {/* Input Dialog */}
+            <InputDialog
+                isOpen={inputDialog.isOpen}
+                onClose={() => setInputDialog(prev => ({ ...prev, isOpen: false }))}
+                onSubmit={inputDialog.onSubmit}
+                title={inputDialog.title}
+                message={inputDialog.message}
+                required={inputDialog.required}
+                isTextArea={inputDialog.isTextArea}
+                submitText="Submit"
+                cancelText="Cancel"
+            />
         </div>
     );
 };

@@ -10,6 +10,7 @@ import SuccessFeedback from "../_custom/Alert/SuccessFeedback";
 import { Loading } from "../_custom/Loading";
 import SelectCombobox from "../_custom/SelectCombobox";
 import { jobTitles } from "../../data/data";
+import Toast from "../_custom/Toast";
 
 
 const FileCreate = ({ setFileUpload }) => {
@@ -17,6 +18,7 @@ const FileCreate = ({ setFileUpload }) => {
     const { setFetchFiles } = useData();
 
     const [status, setStatus] = useState(null);
+    const [toast, setToast] = useState(null);
     const [fileData, setFileData] = useState({
         role: "",
         notes: "",
@@ -27,18 +29,18 @@ const FileCreate = ({ setFileUpload }) => {
 
     const uploadFileRequest = async () => {
         if (!fileData.file) {
-            alert("Please select a file to upload");
+            setToast({ message: "Please select a file to upload", type: "error" });
             return;
         }
         if (!fileData.role) {
-            alert("Please specify the target role");
+            setToast({ message: "Please specify the target role", type: "error" });
             return;
         }
 
         // Validate file is PDF
         const fileName = fileData.file.name.toLowerCase();
         if (!fileName.endsWith('.pdf')) {
-            alert("Only PDF files are allowed. Please upload a PDF resume.");
+            setToast({ message: "Only PDF files are allowed. Please upload a PDF resume.", type: "error" });
             return;
         }
 
@@ -66,7 +68,7 @@ const FileCreate = ({ setFileUpload }) => {
             }, 1500);
         } catch (error) {
             console.error("Upload error:", error);
-            alert(`Failed to upload resume: ${error.response?.data?.detail || error.message}`);
+            setToast({ message: `Failed to upload resume: ${error.response?.data?.detail || error.message}`, type: "error" });
             setStatus(null);
         }
     }
@@ -104,28 +106,6 @@ const FileCreate = ({ setFileUpload }) => {
                         {
                             status === "Loading..." ? <Loading /> :
                                 <>
-                                    {/* Document Type Selection */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Document Type
-                                        </h3>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            {['Resume', 'Referral Essay', 'Cover Letter'].map((type) => (
-                                                <button
-                                                    key={type}
-                                                    type="button"
-                                                    onClick={() => handleInputChange({ field: 'document_type', value: type })}
-                                                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${fileData.document_type === type
-                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
-                                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
-                                                        }`}
-                                                >
-                                                    {type}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
                                     {/* File Upload */}
                                     <div className="space-y-4">
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -186,6 +166,15 @@ const FileCreate = ({ setFileUpload }) => {
                     </div>
                 }
             />
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </>
     )
 }

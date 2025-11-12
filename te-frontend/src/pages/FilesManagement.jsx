@@ -31,6 +31,7 @@ const FilesManagement = () => {
     // Check user role first to set default tab
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const isAdmin = userRoleInt === 5;
+    const isLeadOrAbove = userRoleInt >= 4; // Lead or Admin
     const isVolunteerOrAbove = userRoleInt >= 3; // Volunteer, Lead, or Admin
 
     // Default tab: Resumes for Lead+, Reviews for Volunteer
@@ -164,13 +165,16 @@ const FilesManagement = () => {
     // Fetch privileged users for assignment
     const fetchPrivilegedUsers = useCallback(async () => {
         try {
+            console.log('Fetching privileged users...');
             const response = await axiosInstance.get('/users/privileged', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+            console.log('Privileged users response:', response.data);
             // Backend already filters for Volunteers (role=3) and Leads (role=4)
             setPrivilegedUsers(response.data || []);
         } catch (error) {
             console.error('Error fetching privileged users:', error);
+            console.error('Error details:', error.response?.data);
         }
     }, [accessToken]);
 
@@ -204,6 +208,8 @@ const FilesManagement = () => {
 
     useEffect(() => {
         if (accessToken) {
+            console.log('FilesManagement mounted, fetching data...');
+            console.log('User role:', userRoleInt, 'isLeadOrAbove:', isLeadOrAbove);
             fetchAllUsersFiles();
             fetchResumeReviews();
             fetchPrivilegedUsers();
@@ -212,7 +218,14 @@ const FilesManagement = () => {
                 fetchAllAssignments();
             }
         }
-    }, [accessToken, fetchAllUsersFiles, fetchResumeReviews, fetchPrivilegedUsers, fetchMyAssignedReviews, fetchAllAssignments, isAdmin]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accessToken]);
+
+    // Debug: Log when privilegedUsers changes
+    useEffect(() => {
+        console.log('Privileged users state updated:', privilegedUsers);
+        console.log('Privileged users count:', privilegedUsers.length);
+    }, [privilegedUsers]);
 
     // Assign review to a reviewer
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
@@ -1307,7 +1320,7 @@ const FilesManagement = () => {
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Status</th>
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Submitted</th>
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Reviewer</th>
-                                            {isAdmin && (
+                                            {isLeadOrAbove && (
                                                 <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Actions</th>
                                             )}
                                         </tr>
@@ -1315,7 +1328,7 @@ const FilesManagement = () => {
                                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                         {filteredResumeReviews.length === 0 ? (
                                             <tr>
-                                                <td colSpan={isAdmin ? "7" : "6"} className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                <td colSpan={isLeadOrAbove ? "7" : "6"} className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
                                                     No resume review requests found
                                                 </td>
                                             </tr>
@@ -1358,7 +1371,7 @@ const FilesManagement = () => {
                                                             {review.reviewer_name || 'Unassigned'}
                                                         </span>
                                                     </td>
-                                                    {isAdmin && (
+                                                    {isLeadOrAbove && (
                                                         <td className="px-4 py-3 text-left">
                                                             <div className="flex items-center justify-end gap-2">
                                                                 <button
@@ -2328,8 +2341,8 @@ const FilesManagement = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-12">
-                                    <UserCircleIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                                <div className="py-12">
+                                    <UserCircleIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" />
                                     <p className="text-sm font-medium text-gray-900 dark:text-white">No reviewers available</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                         There are no volunteers or leads available for assignment
