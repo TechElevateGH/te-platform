@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/v1/',
+  baseURL: process.env.BACKEND_API_URL || 'http://localhost:8000/v1/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -42,12 +42,12 @@ axiosInstance.interceptors.response.use(
       if (!isAlreadyOnLogin) {
         // Store the attempted URL to redirect back after login
         sessionStorage.setItem('redirectAfterLogin', currentPath);
+        sessionStorage.setItem('sessionExpired', 'true');
         
         // Determine which login page to use based on previous role
         const wasPrivileged = sessionStorage.getItem('wasPrivilegedUser') === 'true';
         const loginPath = wasPrivileged ? '/lead-login' : '/login';
         
-        alert('Your session has expired. Please log in again.');
         window.location.href = loginPath;
       }
     }

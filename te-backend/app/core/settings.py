@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import (
     AnyHttpUrl,
@@ -30,25 +30,23 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
 
-    # SENTRY_DSN: Optional[HttpUrl] = ""
-
-    # @field_validator("SENTRY_DSN")
-    # def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
-    #     if len(v) == 0:
-    #         return None
-    #     return v
-
-    # SMTP_USER: str
-    # SMTP_HOST: str
-    # SMTP_PORT: str
-    # SMTP_TLS: str
-    # SMTP_PASSWORD: str
+    # Email Configuration
+    EMAILS_ENABLED: bool = False
     EMAILS_FROM_NAME: str
     EMAILS_FROM_EMAIL: str
+    EMAIL_TEMPLATES_DIR: str = "app/email-templates"
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+
+    # SMTP Configuration (optional)
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: Optional[int] = None
+    SMTP_TLS: Optional[bool] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
 
     # MongoDB Configuration
     MONGODB_URI: str
-    MONGODB_DB_NAME: str = "te_platform"
+    MONGODB_DB_NAME: str
 
     # Superuser
     FIRST_SUPERUSER_EMAIL: EmailStr
