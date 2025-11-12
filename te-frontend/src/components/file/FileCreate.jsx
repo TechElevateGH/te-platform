@@ -13,19 +13,22 @@ import { jobTitles } from "../../data/data";
 import Toast from "../_custom/Toast";
 
 
+const INITIAL_FILE_DATA = {
+    role: "",
+    notes: "",
+    document_type: "Resume", // Default document type
+    file: null,
+};
+
 const FileCreate = ({ setFileUpload }) => {
     const { accessToken, userId } = useAuth();
     const { setFetchFiles } = useData();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
-    const [fileData, setFileData] = useState({
-        role: "",
-        notes: "",
-        document_type: "Resume", // Default document type
-        file: null
-    })
+    const [fileData, setFileData] = useState(() => ({ ...INITIAL_FILE_DATA }));
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
+    const [continueUploading, setContinueUploading] = useState(false);
 
     const uploadFileRequest = async () => {
         if (!fileData.file) {
@@ -61,10 +64,16 @@ const FileCreate = ({ setFileUpload }) => {
             });
             setShowSuccessFeedback(true);
             setFetchFiles(true);
-            // Close modal after a brief delay to show success message
-            setTimeout(() => {
-                setFileUpload(false);
-            }, 1500);
+            setToast({ message: `${fileData.document_type} successfully uploaded.`, type: "success" });
+
+            if (continueUploading) {
+                setFileData(() => ({ ...INITIAL_FILE_DATA }));
+            } else {
+                // Close modal after a brief delay to show success message
+                setTimeout(() => {
+                    setFileUpload(false);
+                }, 1500);
+            }
             return true;
         } catch (error) {
             console.error("Upload error:", error);
@@ -105,6 +114,27 @@ const FileCreate = ({ setFileUpload }) => {
                                 />
                             </div>
                         }
+
+                        {/* Continuous Upload Toggle */}
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-sm font-semibold text-gray-900 dark:text-white">Keep uploader open</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Stay on this form after a successful upload so you can immediately add another file.</p>
+                            </div>
+                            <label className="inline-flex items-center cursor-pointer select-none">
+                                <span className="sr-only">Toggle continuous uploads</span>
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={continueUploading}
+                                    onChange={(event) => setContinueUploading(event.target.checked)}
+                                    disabled={isSubmitting}
+                                />
+                                <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${continueUploading ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'} ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ${continueUploading ? 'translate-x-5' : 'translate-x-1'}`} />
+                                </span>
+                            </label>
+                        </div>
 
                         {
                             isSubmitting ? <Loading /> :

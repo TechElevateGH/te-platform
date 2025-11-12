@@ -8,7 +8,6 @@ import {
     BuildingOfficeIcon,
     ClockIcon,
     CheckCircleIcon,
-    XCircleIcon,
     PaperAirplaneIcon,
     EyeIcon,
     XMarkIcon,
@@ -132,7 +131,7 @@ const ReferralsManagement = () => {
     const handleAddCompany = async (e) => {
         e.preventDefault();
         try {
-            await axiosInstance.post('/companies', companyForm, {
+            await axiosInstance.post('/referrals/companies', companyForm, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },

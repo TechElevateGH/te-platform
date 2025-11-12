@@ -10,6 +10,7 @@ class ResumeBase(BaseModel):
     date: str
     role: str = ""  # Target role for this resume
     notes: str = ""
+    archived: bool = False
 
 
 class Resume(ResumeBase):
@@ -26,6 +27,13 @@ class ResumesRead(BaseModel):
     """Response containing all resumes for a member"""
 
     resumes: list[ResumeRead]
+
+
+class ResumeUpdate(BaseModel):
+    name: str | None = None
+    role: str | None = None
+    notes: str | None = None
+    archived: bool | None = None
 
 
 # File Upload Response

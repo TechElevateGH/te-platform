@@ -69,6 +69,7 @@ class Resume(BaseModel):
     name: str
     role: str = ""  # Target role for this resume
     notes: str = ""  # Additional notes about this resume
+    archived: bool = False
 
     class Config:
         arbitrary_types_allowed = True

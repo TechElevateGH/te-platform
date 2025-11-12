@@ -100,7 +100,7 @@ export const NotificationProvider = ({ children }) => {
                 });
 
                 // For members: check referral request updates
-                const referralsResponse = await axiosInstance.get('/referralcompanies/my-referrals', {
+                const referralsResponse = await axiosInstance.get('/referrals/mine', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 

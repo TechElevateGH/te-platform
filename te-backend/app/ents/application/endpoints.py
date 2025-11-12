@@ -343,6 +343,47 @@ def upload_user_resume(
     return {"resume": resume_to_read(uploaded_resume)}
 
 
+@user_resumes_router.patch("/{resume_id}", response_model=Dict[str, application_schema.ResumeRead])
+def update_user_resume(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    resume_id: str,
+    data: application_schema.ResumeUpdate,
+    current_user=Depends(user_dependencies.get_current_user),
+) -> Any:
+    """Update resume metadata such as display name, notes, role, or archived status."""
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Member (1), Lead (4), or Admin (5) can update resumes
+    if user_role not in [1, 4, 5]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to update resumes",
+        )
+
+    # Members can only update their own resumes
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only update your own resumes",
+        )
+
+    updated_resume = application_crud.update_resume(
+        db, resume_id=resume_id, user_id=user_id, data=data
+    )
+
+    if not updated_resume:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found or no changes made",
+        )
+
+    return {"resume": resume_to_read(updated_resume)}
+
+
 @user_resumes_router.delete("/{resume_id}", status_code=status.HTTP_200_OK)
 def delete_user_resume(
     db: Database = Depends(session.get_db),

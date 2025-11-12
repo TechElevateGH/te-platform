@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import ReferralEssay from "../components/file/ReferralEssay";
 import ResumeReviews from "./ResumeReviews";
-import { PlusIcon, PaperClipIcon } from '@heroicons/react/20/solid'
-import { TrashIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { TrashIcon, DocumentTextIcon, PencilSquareIcon, ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
 import FileCreate from "../components/file/FileCreate";
@@ -29,6 +29,10 @@ const Files = () => {
     const [confirmDelete, setConfirmDelete] = useState({ isOpen: false, fileId: null, fileName: '' });
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
     const [toast, setToast] = useState(null);
+    const [resumeView, setResumeView] = useState('active');
+    const [editingResumeId, setEditingResumeId] = useState(null);
+    const [editedResumeName, setEditedResumeName] = useState('');
+    const [updatingResumeId, setUpdatingResumeId] = useState(null);
 
     // Resume Review Form Data
     const [reviewFormData, setReviewFormData] = useState({
@@ -98,6 +102,88 @@ const Files = () => {
             setToast({ message: 'Failed to submit request. Please try again.', type: 'error' });
         }
     };
+
+    const displayedResumes = (resumes || []).filter((resume) =>
+        resumeView === 'archived' ? resume.archived : !resume.archived
+    );
+
+    const activeResumesCount = (resumes || []).filter((resume) => !resume.archived).length;
+    const archivedResumesCount = (resumes || []).filter((resume) => resume.archived).length;
+    const hasActiveResumes = activeResumesCount > 0;
+    const hasArchivedResumes = archivedResumesCount > 0;
+
+    const handleRenameClick = (resume) => {
+        setEditingResumeId(resume.id);
+        setEditedResumeName(resume.name || '');
+    };
+
+    const handleRenameCancel = () => {
+        setEditingResumeId(null);
+        setEditedResumeName('');
+    };
+
+    const handleRenameSubmit = async (resume) => {
+        const trimmedName = editedResumeName.trim();
+        if (!trimmedName) {
+            setToast({ message: 'Resume name cannot be empty.', type: 'error' });
+            return;
+        }
+
+        if (trimmedName === (resume.name || '')) {
+            handleRenameCancel();
+            return;
+        }
+
+        setUpdatingResumeId(resume.id);
+        try {
+            await axiosInstance.patch(`/users/${userId}/resumes/${resume.id}`,
+                { name: trimmedName },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            setToast({ message: 'Resume name updated.', type: 'success' });
+            setFetchFiles(true);
+            setEditingResumeId(null);
+            setEditedResumeName('');
+        } catch (error) {
+            console.error('Rename error:', error);
+            setToast({ message: `Failed to rename resume: ${error.response?.data?.detail || error.message}`, type: 'error' });
+        } finally {
+            setUpdatingResumeId(null);
+        }
+    };
+
+    const handleArchiveToggle = async (resume) => {
+        setUpdatingResumeId(resume.id);
+        try {
+            await axiosInstance.patch(`/users/${userId}/resumes/${resume.id}`,
+                { archived: !resume.archived },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            setFetchFiles(true);
+            setToast({
+                message: resume.archived ? 'Resume restored.' : 'Resume archived.',
+                type: 'success',
+            });
+            handleRenameCancel();
+        } catch (error) {
+            console.error('Archive error:', error);
+            setToast({ message: `Unable to update resume status: ${error.response?.data?.detail || error.message}`, type: 'error' });
+        } finally {
+            setUpdatingResumeId(null);
+        }
+    };
+
+    useEffect(() => {
+        handleRenameCancel();
+    }, [resumeView]);
 
 
 
@@ -182,8 +268,65 @@ const Files = () => {
 
                                 {/* Resumes List */}
                                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
-                                    {resumes.length === 0 ? (
-                                        <EmptyResumes onUploadClick={() => setAddFile(true)} />
+                                    <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-gray-100/40 dark:from-gray-800 dark:to-gray-900/30">
+                                        <div className="inline-flex items-center gap-2 rounded-xl bg-gray-100 dark:bg-gray-800/80 p-1 border border-gray-200/70 dark:border-gray-700/70">
+                                            <button
+                                                type="button"
+                                                onClick={() => setResumeView('active')}
+                                                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'active'
+                                                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-300 shadow-sm'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                                    }`}
+                                            >
+                                                Active
+                                                <span className="rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-0.5 text-[11px] font-bold">
+                                                    {activeResumesCount}
+                                                </span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setResumeView('archived')}
+                                                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'archived'
+                                                    ? 'bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-200 shadow-sm'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                                    }`}
+                                                title={!hasArchivedResumes ? 'No archived resumes yet' : undefined}
+                                            >
+                                                Archived
+                                                <span className="rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-0.5 text-[11px] font-bold">
+                                                    {archivedResumesCount}
+                                                </span>
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 max-w-md">
+                                            Keep your workspace tidy by archiving older versions. You can restore them anytime from the archived view.
+                                        </p>
+                                    </div>
+
+                                    {displayedResumes.length === 0 ? (
+                                        resumeView === 'active' ? (
+                                            hasActiveResumes || resumes.length === 0 ? (
+                                                <EmptyResumes onUploadClick={() => setAddFile(true)} />
+                                            ) : (
+                                                <div className="px-6 py-10 text-center text-sm text-gray-600 dark:text-gray-400 space-y-3">
+                                                    <p>All of your resumes are currently archived.</p>
+                                                    {isMember && (
+                                                        <button
+                                                            type="button"
+                                                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow hover:from-blue-700 hover:to-cyan-700 transition-all"
+                                                            onClick={() => setAddFile(true)}
+                                                        >
+                                                            <PlusIcon className="h-4 w-4" />
+                                                            Upload New Resume
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )
+                                        ) : (
+                                            <div className="px-6 py-10 text-center text-sm text-gray-600 dark:text-gray-400">
+                                                <p>No archived resumes yet. Archive a resume to keep it accessible without cluttering your active list.</p>
+                                            </div>
+                                        )
                                     ) : (
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
@@ -192,7 +335,7 @@ const Files = () => {
                                                         <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                                                             <div className="flex items-center gap-2">
                                                                 <DocumentTextIcon className="h-4 w-4" />
-                                                                Resume Name
+                                                                Resume Details
                                                             </div>
                                                         </th>
                                                         <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
@@ -201,51 +344,153 @@ const Files = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                                    {resumes.map((file) => (
-                                                        <tr
-                                                            key={file.id}
-                                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group"
-                                                        >
-                                                            <td className="px-6 py-4">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                                                        <PaperClipIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                    {displayedResumes.map((file) => {
+                                                        const isEditing = editingResumeId === file.id;
+                                                        const isUpdating = updatingResumeId === file.id;
+                                                        const isDeleting = deletingFileId === file.id;
+                                                        const disableOtherActions = Boolean(editingResumeId) && !isEditing;
+
+                                                        return (
+                                                            <tr
+                                                                key={file.id}
+                                                                className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group"
+                                                            >
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex items-start gap-3">
+                                                                        <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                                                                            <PaperClipIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                                        </div>
+                                                                        <div className="flex-1 space-y-2">
+                                                                            {isEditing ? (
+                                                                                <>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                                        value={editedResumeName}
+                                                                                        onChange={(event) => setEditedResumeName(event.target.value)}
+                                                                                        autoFocus
+                                                                                    />
+                                                                                    <div className="flex flex-wrap items-center gap-2">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => handleRenameSubmit(file)}
+                                                                                            disabled={isUpdating}
+                                                                                            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                                        >
+                                                                                            {isUpdating ? (
+                                                                                                <>
+                                                                                                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                                                                                    Saving...
+                                                                                                </>
+                                                                                            ) : (
+                                                                                                <>
+                                                                                                    <CheckIcon className="h-4 w-4" />
+                                                                                                    Save
+                                                                                                </>
+                                                                                            )}
+                                                                                        </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={handleRenameCancel}
+                                                                                            disabled={isUpdating}
+                                                                                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                                        >
+                                                                                            <XMarkIcon className="h-4 w-4" />
+                                                                                            Cancel
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                                        <a
+                                                                                            href={file.link}
+                                                                                            target="_blank"
+                                                                                            rel="noopener noreferrer"
+                                                                                            className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                                                                        >
+                                                                                            {file.name}
+                                                                                        </a>
+                                                                                        {file.archived && (
+                                                                                            <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-0.5 text-[11px] font-semibold">
+                                                                                                Archived
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                                                                        <span>Uploaded {file.date || '—'}</span>
+                                                                                        {file.role && <span>Target role: {file.role}</span>}
+                                                                                        {file.notes && <span className="truncate max-w-[220px] sm:max-w-none">Notes: {file.notes}</span>}
+                                                                                    </div>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
-                                                                    <div>
-                                                                        <a
-                                                                            href={file.link}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                                                        >
-                                                                            {file.name}
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                {canDelete && (
-                                                                    <button
-                                                                        onClick={() => handleDeleteClick(file.id, file.name)}
-                                                                        disabled={deletingFileId === file.id}
-                                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/50 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    >
-                                                                        {deletingFileId === file.id ? (
-                                                                            <>
-                                                                                <div className="animate-spin h-3 w-3 border-2 border-red-700 dark:border-red-400 border-t-transparent rounded-full" />
-                                                                                Deleting...
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                <TrashIcon className="h-4 w-4" />
-                                                                                Delete
-                                                                            </>
-                                                                        )}
-                                                                    </button>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    {canDelete && (
+                                                                        <div className="flex flex-wrap items-center gap-2">
+                                                                            {!isEditing && (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleRenameClick(file)}
+                                                                                    disabled={disableOtherActions || isUpdating || isDeleting}
+                                                                                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                                >
+                                                                                    <PencilSquareIcon className="h-4 w-4" />
+                                                                                    Rename
+                                                                                </button>
+                                                                            )}
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleArchiveToggle(file)}
+                                                                                disabled={isUpdating || isDeleting}
+                                                                                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow transition-all disabled:opacity-60 disabled:cursor-not-allowed ${file.archived
+                                                                                    ? 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40'
+                                                                                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30'}
+                                                                                `}
+                                                                            >
+                                                                                {isUpdating ? (
+                                                                                    <>
+                                                                                        <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                                                                        Updating...
+                                                                                    </>
+                                                                                ) : file.archived ? (
+                                                                                    <>
+                                                                                        <ArrowUturnLeftIcon className="h-4 w-4" />
+                                                                                        Restore
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <ArchiveBoxIcon className="h-4 w-4" />
+                                                                                        Archive
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleDeleteClick(file.id, file.name)}
+                                                                                disabled={isDeleting || isUpdating}
+                                                                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                            >
+                                                                                {isDeleting ? (
+                                                                                    <>
+                                                                                        <div className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                                        Deleting...
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <TrashIcon className="h-4 w-4" />
+                                                                                        Delete
+                                                                                    </>
+                                                                                )}
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>

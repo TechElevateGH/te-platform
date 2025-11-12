@@ -20,10 +20,8 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const { accessToken } = useAuth();
     const { userInfo, resumes: contextResumes, setFetchReferralCompanies } = useData();
 
-    // Check if user has REAL uploaded resumes from backend (contextResumes from DataContext)
-    // DataContext initializes resumes as empty array, so if it has items, they're real
-    const hasResume = contextResumes && contextResumes.length > 0;
-    const availableResumes = hasResume ? contextResumes : [];
+    const availableResumes = (contextResumes || []).filter((resume) => !resume.archived);
+    const hasResume = availableResumes.length > 0;
 
     // Check user's available materials
     const hasReferralEssay = userInfo?.essay && userInfo.essay.trim() !== '';

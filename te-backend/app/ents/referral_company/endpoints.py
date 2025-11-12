@@ -15,27 +15,6 @@ referral_company_router = APIRouter(prefix="/companies")
 referral_router = APIRouter(prefix="/referrals")
 
 
-@referral_company_router.post(
-    "",
-    response_model=Dict[str, referral_company_schema.CompanyReadBase],
-    status_code=status.HTTP_201_CREATED,
-)
-def add_referral_company(
-    db: Database = Depends(session.get_db),
-    *,
-    data: referral_company_schema.ReferralCompanyCreate,
-    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
-        user_dependencies.get_current_volunteer_or_above
-    ),
-) -> Any:
-    """
-    Add a new referral company to the system.
-    Requires role: Volunteer (3), Lead (4), or Admin (5).
-    """
-    company = referral_company_crud.create_referral_company(db, data=data)
-    return {"company": referral_company_dependencies.parse_company_basic(company)}
-
-
 @referral_company_router.get(
     "/referrals",
     response_model=Dict[str, list[referral_company_schema.CompanyReadForReferrals]],
@@ -60,17 +39,15 @@ def get_referral_companies(
     }
 
 
-@referral_company_router.get(
-    "/my-referrals",
+@referral_router.get(
+    "/mine",
     response_model=Dict[str, list[referral_company_schema.ReferralRead]],
 )
 def get_my_referrals(
     db: Database = Depends(session.get_db),
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
-    """
-    Get all referrals for the current user.
-    """
+    """Retrieve all referral requests belonging to the authenticated member."""
     referrals = referral_company_crud.read_user_referrals(db, user_id=str(user.id))
     return {
         "referrals": [
@@ -78,6 +55,24 @@ def get_my_referrals(
             for referral in referrals
         ]
     }
+
+
+@referral_router.post(
+    "/companies",
+    response_model=Dict[str, referral_company_schema.CompanyReadBase],
+    status_code=status.HTTP_201_CREATED,
+)
+def add_referral_company(
+    db: Database = Depends(session.get_db),
+    *,
+    data: referral_company_schema.ReferralCompanyCreate,
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
+) -> Any:
+    """Create a referral company (Volunteer+ required)."""
+    company = referral_company_crud.create_referral_company(db, data=data)
+    return {"company": referral_company_dependencies.parse_company_basic(company)}
 
 
 @referral_router.post(

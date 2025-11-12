@@ -244,6 +244,7 @@ def create_resume(
         "date": date.today().strftime("%Y-%m-%d"),
         "role": role,
         "notes": notes,
+        "archived": False,
     }
 
     # Add to user's resumes array using $push
@@ -264,6 +265,50 @@ def delete_resume(db: Database, *, resume_id: str, user_id: str) -> bool:
     )
 
     return result.modified_count > 0
+
+
+def update_resume(
+    db: Database,
+    *,
+    resume_id: str,
+    user_id: str,
+    data: application_schema.ResumeUpdate,
+) -> application_models.Resume | None:
+    """Update resume metadata such as name, role, notes, or archived flag"""
+    from bson import ObjectId
+
+    update_fields: dict[str, object] = {}
+
+    if data.name is not None:
+        update_fields["resumes.$[res].name"] = data.name
+    if data.role is not None:
+        update_fields["resumes.$[res].role"] = data.role
+    if data.notes is not None:
+        update_fields["resumes.$[res].notes"] = data.notes
+    if data.archived is not None:
+        update_fields["resumes.$[res].archived"] = data.archived
+
+    if not update_fields:
+        return None
+
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields},
+        array_filters=[{"res.id": resume_id}],
+    )
+
+    if result.modified_count == 0:
+        return None
+
+    updated_user = db.member_users.find_one(
+        {"_id": ObjectId(user_id)},
+        {"resumes": {"$elemMatch": {"id": resume_id}}},
+    )
+
+    if not updated_user or "resumes" not in updated_user or not updated_user["resumes"]:
+        return None
+
+    return application_models.Resume(**updated_user["resumes"][0])
 
 
 # ============= Helper Functions =============

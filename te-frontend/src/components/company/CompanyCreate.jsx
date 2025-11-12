@@ -76,7 +76,7 @@ const CompanyCreate = ({ setCreateCompany }) => {
         }
 
         try {
-            await axiosInstance.post('/companies', payload, {
+            await axiosInstance.post('/referrals/companies', payload, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },

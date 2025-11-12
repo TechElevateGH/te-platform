@@ -130,7 +130,7 @@ const SlideOverForm = ({
                                             className={`px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-600/25 ${isSubmitting
                                                 ? 'bg-blue-600/60 text-white cursor-not-allowed'
                                                 : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 active:scale-[0.98]'
-                                            }`}
+                                                }`}
                                             disabled={isSubmitting}
                                         >
                                             {submitButtonText}

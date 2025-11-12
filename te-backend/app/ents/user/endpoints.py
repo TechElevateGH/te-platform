@@ -316,6 +316,7 @@ def get_user_resumes(
             "date": r.get("date", ""),
             "role": r.get("role", ""),
             "notes": r.get("notes", ""),
+            "archived": r.get("archived", False),
         }
         for r in (user.resumes or [])
     ]
