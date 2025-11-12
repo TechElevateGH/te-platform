@@ -45,12 +45,14 @@ def login_access_token(
 ) -> Any:
     """
     Member user login with email and password.
-    
+
     OAuth2 compatible token login for regular members.
-    
+
     - **username**: Member's email address
     - **password**: Member's password
     - Returns: Access token for authenticated requests
+
+    Note: Users must verify their email before they can log in.
     """
     logger.info(f"Login attempt for user: {data.username}")
 
@@ -58,13 +60,20 @@ def login_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect email or password"
+            detail="Incorrect email or password",
         )
     elif not user_crud.is_user_active(db, user=user):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
+
+    # Check if email is verified
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before logging in. Check your inbox for the verification code.",
+        )
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     # Convert ObjectId to string for JSON serialization
@@ -87,9 +96,9 @@ def lead_login_access_token(
 ) -> Any:
     """
     Lead/Admin login with username and token.
-    
+
     For Lead (role=4) and Admin (role=5) users only.
-    
+
     - **username**: Lead/Admin username
     - **token**: Secure token provided during account creation
     - Returns: Access token and user information
@@ -100,8 +109,7 @@ def lead_login_access_token(
     user_data = db.privileged_users.find_one({"username": data.username})
     if not user_data:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid username or token"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
         )
 
     user = user_models.PrivilegedUser(**user_data)
@@ -110,21 +118,19 @@ def lead_login_access_token(
     if user.role not in [user_schema.UserRoles.lead, user_schema.UserRoles.admin]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="This endpoint is for Lead/Admin users only. Referrers should use /auth/referrer-login"
+            detail="This endpoint is for Lead/Admin users only. Referrers should use /auth/referrer-login",
         )
 
     # Verify token matches
     if not user.lead_token or user.lead_token != data.token:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid username or token"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
         )
 
     # Check if user is active
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -150,10 +156,10 @@ def referrer_login_access_token(
 ) -> Any:
     """
     Referrer login with token only (no username required).
-    
+
     Referrers authenticate using only their secure token.
     The token uniquely identifies the referrer and their assigned company.
-    
+
     - **token**: Secure token provided during account creation
     - Returns: Access token and user information including assigned company
     """
@@ -163,8 +169,7 @@ def referrer_login_access_token(
     user_data = db.privileged_users.find_one({"lead_token": data.token})
     if not user_data:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid token"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
         )
 
     user = user_models.PrivilegedUser(**user_data)
@@ -173,14 +178,13 @@ def referrer_login_access_token(
     if user.role != user_schema.UserRoles.referrer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="This endpoint is for Referrer users only. Lead/Admin should use /auth/lead-login"
+            detail="This endpoint is for Referrer users only. Lead/Admin should use /auth/lead-login",
         )
 
     # Check if user is active
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
 
     # Get company information

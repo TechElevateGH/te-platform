@@ -10,7 +10,9 @@ import {
     XMarkIcon,
     ExclamationCircleIcon,
     CheckCircleIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
+    XCircleIcon,
+    ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -25,6 +27,16 @@ const Profile = () => {
     const [notification, setNotification] = useState(null); // { type: 'success' | 'error', message: string }
     const [errors, setErrors] = useState({});
     const [showEditPrivileged, setShowEditPrivileged] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [pendingEmailChange, setPendingEmailChange] = useState(null);
+    const [storedPassword, setStoredPassword] = useState(''); // Store password for resend
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+    const [verificationError, setVerificationError] = useState('');
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [resendCooldown, setResendCooldown] = useState(0);
 
     // Check user role (Admin=5, Lead=4, Volunteer=3, Referrer=2, Member=1)
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -55,6 +67,14 @@ const Profile = () => {
             });
         }
     }, [userInfo]);
+
+    // Resend cooldown timer
+    useEffect(() => {
+        if (resendCooldown > 0) {
+            const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [resendCooldown]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -92,32 +112,50 @@ const Profile = () => {
         setNotification(null);
 
         try {
-            const response = await axiosInstance.patch(
-                `/users/${userId}`,
-                editedInfo,
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
-            );
+            // Check if email has changed
+            const emailChanged = editedInfo.email !== userInfo.email;
 
-            // Update the context with the new user info
-            setUserInfo(response.data.user);
+            if (emailChanged) {
+                // Store the new email and show password confirmation modal
+                setPendingEmailChange(editedInfo.email);
+                setShowPasswordModal(true);
+                setIsSaving(false);
+                return; // Wait for password confirmation
+            } else {
+                // Normal profile update (no email change)
+                const updateData = { ...editedInfo };
+                delete updateData.email; // Remove email from update
 
-            setIsEditing(false);
-            setNotification({
-                type: 'success',
-                message: 'Profile updated successfully!'
-            });
+                const response = await axiosInstance.patch(
+                    `/users/${userId}`,
+                    updateData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
 
-            // Auto-hide success notification after 3 seconds
-            setTimeout(() => setNotification(null), 3000);
+                // Update the context with the new user info
+                setUserInfo(response.data.user);
+
+                setIsEditing(false);
+                setNotification({
+                    type: 'success',
+                    message: 'Profile updated successfully!'
+                });
+
+                // Auto-hide success notification after 3 seconds
+                setTimeout(() => setNotification(null), 3000);
+            }
         } catch (error) {
             console.error('Error updating profile:', error);
+            const errorMessage = typeof error.response?.data?.detail === 'string'
+                ? error.response.data.detail
+                : 'Failed to update profile. Please try again.';
             setNotification({
                 type: 'error',
-                message: error.response?.data?.detail || 'Failed to update profile. Please try again.'
+                message: errorMessage
             });
         } finally {
             setIsSaving(false);
@@ -155,6 +193,168 @@ const Profile = () => {
                 return newErrors;
             });
         }
+    };
+
+    const handlePasswordConfirm = async () => {
+        if (!password) {
+            setPasswordError('Password is required');
+            return;
+        }
+
+        setPasswordError('');
+        setIsSaving(true);
+
+        try {
+            // Request email change with password
+            await axiosInstance.post('/verification/request-email-change', {
+                new_email: pendingEmailChange,
+                password: password
+            });
+
+            // Close password modal and open verification modal
+            setShowPasswordModal(false);
+            setStoredPassword(password); // Store password for potential resend
+            setPassword('');
+            setShowVerificationModal(true);
+            setResendCooldown(60); // Start 60 second cooldown
+        } catch (error) {
+            console.error('Error requesting email change:', error);
+            const errorMessage = typeof error.response?.data?.detail === 'string'
+                ? error.response.data.detail
+                : 'Failed to request email change. Please try again.';
+            setPasswordError(errorMessage);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handlePasswordModalClose = () => {
+        setShowPasswordModal(false);
+        setPassword('');
+        setPasswordError('');
+        setPendingEmailChange(null);
+        // Reset email to original value
+        setEditedInfo(prev => ({
+            ...prev,
+            email: userInfo.email
+        }));
+    };
+
+    const handleVerificationCodeChange = (index, value) => {
+        // Only allow digits
+        if (value && !/^\d$/.test(value)) return;
+
+        const newCode = [...verificationCode];
+        newCode[index] = value;
+        setVerificationCode(newCode);
+        setVerificationError('');
+
+        // Auto-focus next input
+        if (value && index < 5) {
+            document.getElementById(`verify-code-${index + 1}`)?.focus();
+        }
+    };
+
+    const handleVerificationKeyDown = (index, e) => {
+        // Handle backspace
+        if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+            document.getElementById(`verify-code-${index - 1}`)?.focus();
+        }
+        // Handle paste
+        if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            navigator.clipboard.readText().then(text => {
+                const digits = text.replace(/\D/g, '').slice(0, 6);
+                const newCode = digits.split('').concat(Array(6).fill('')).slice(0, 6);
+                setVerificationCode(newCode);
+                if (digits.length === 6) {
+                    document.getElementById('verify-code-5')?.focus();
+                }
+            });
+        }
+    };
+
+    const handleVerifyEmail = async () => {
+        const code = verificationCode.join('');
+
+        if (code.length !== 6) {
+            setVerificationError('Please enter all 6 digits');
+            return;
+        }
+
+        setIsVerifying(true);
+        setVerificationError('');
+
+        try {
+            await axiosInstance.post('/verification/verify-email-change', {
+                new_email: pendingEmailChange,
+                code: code
+            });
+
+            // Success - update user info and close modal
+            setUserInfo(prev => ({ ...prev, email: pendingEmailChange }));
+            setShowVerificationModal(false);
+            setVerificationCode(['', '', '', '', '', '']);
+            setPendingEmailChange(null);
+            
+            setNotification({
+                type: 'success',
+                message: 'Email updated successfully!'
+            });
+            setTimeout(() => setNotification(null), 3000);
+        } catch (error) {
+            console.error('Error verifying email change:', error);
+            const errorMessage = typeof error.response?.data?.detail === 'string'
+                ? error.response.data.detail
+                : 'Verification failed. Please try again.';
+            setVerificationError(errorMessage);
+            setVerificationCode(['', '', '', '', '', '']);
+            document.getElementById('verify-code-0')?.focus();
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    const handleResendVerificationCode = async () => {
+        setIsVerifying(true);
+        setVerificationError('');
+
+        try {
+            await axiosInstance.post('/verification/request-email-change', {
+                new_email: pendingEmailChange,
+                password: storedPassword
+            });
+            
+            setNotification({
+                type: 'success',
+                message: 'Verification code sent! Please check your email.'
+            });
+            setTimeout(() => setNotification(null), 3000);
+            setResendCooldown(60);
+            setVerificationCode(['', '', '', '', '', '']);
+            document.getElementById('verify-code-0')?.focus();
+        } catch (error) {
+            const errorMessage = typeof error.response?.data?.detail === 'string'
+                ? error.response.data.detail
+                : 'Failed to resend code. Please try again.';
+            setVerificationError(errorMessage);
+        } finally {
+            setIsVerifying(false);
+        }
+    };
+
+    const handleVerificationModalClose = () => {
+        setShowVerificationModal(false);
+        setVerificationCode(['', '', '', '', '', '']);
+        setVerificationError('');
+        setPendingEmailChange(null);
+        setStoredPassword(''); // Clear stored password
+        setResendCooldown(0);
+        // Reset email to original value
+        setEditedInfo(prev => ({
+            ...prev,
+            email: userInfo.email
+        }));
     };
 
     return (
@@ -427,6 +627,14 @@ const Profile = () => {
                                                 {errors.email && (
                                                     <p className="text-red-600 dark:text-red-400 text-xs mt-1">{errors.email}</p>
                                                 )}
+                                                {editedInfo.email !== userInfo?.email && (
+                                                    <div className="mt-2 flex items-start gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                                        <ShieldCheckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                                                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                            Email changes require verification. You'll receive a code at your new email address.
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
                                             <p className="text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2">
@@ -512,6 +720,171 @@ const Profile = () => {
                     </>
                 )}
             </div>
+
+            {/* Password Confirmation Modal for Email Change */}
+            {showPasswordModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8">
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                            Confirm Email Change
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                            You are changing your email to <span className="font-semibold text-blue-600 dark:text-blue-400">{pendingEmailChange}</span>.
+                            Please enter your password to confirm.
+                        </p>
+
+                        {passwordError && (
+                            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/30 p-4 border border-red-200 dark:border-red-800">
+                                <div className="flex items-start">
+                                    <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                    <p className="ml-3 text-sm text-red-800 dark:text-red-300">{passwordError}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                Current Password
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setPasswordError('');
+                                }}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handlePasswordConfirm();
+                                    }
+                                }}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none"
+                                placeholder="Enter your password"
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handlePasswordModalClose}
+                                disabled={isSaving}
+                                className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handlePasswordConfirm}
+                                disabled={isSaving}
+                                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSaving ? 'Confirming...' : 'Confirm'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Email Verification Modal */}
+            {showVerificationModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8">
+                        <div className="text-center mb-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl">
+                                    <EnvelopeIcon className="h-8 w-8 text-white" />
+                                </div>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                Verify Your New Email
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                We sent a 6-digit code to
+                            </p>
+                            <p className="text-blue-600 dark:text-blue-400 font-semibold mt-1">
+                                {pendingEmailChange}
+                            </p>
+                        </div>
+
+                        {verificationError && (
+                            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/30 p-4 border border-red-200 dark:border-red-800">
+                                <div className="flex items-start">
+                                    <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                                    <p className="ml-3 text-sm text-red-800 dark:text-red-300">{verificationError}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 6-Digit Code Input */}
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 text-center">
+                                Enter Verification Code
+                            </label>
+                            <div className="flex gap-2 justify-center">
+                                {verificationCode.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        id={`verify-code-${index}`}
+                                        type="text"
+                                        maxLength="1"
+                                        value={digit}
+                                        onChange={(e) => handleVerificationCodeChange(index, e.target.value)}
+                                        onKeyDown={(e) => handleVerificationKeyDown(index, e)}
+                                        className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none transition-colors"
+                                        autoFocus={index === 0}
+                                    />
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
+                                Code expires in 15 minutes
+                            </p>
+                        </div>
+
+                        {/* Verify Button */}
+                        <button
+                            onClick={handleVerifyEmail}
+                            disabled={isVerifying}
+                            className="w-full mb-4 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isVerifying ? (
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                                    <span>Verifying...</span>
+                                </div>
+                            ) : (
+                                'Verify Email'
+                            )}
+                        </button>
+
+                        {/* Resend Code */}
+                        <div className="text-center mb-4">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                Didn't receive the code?
+                            </p>
+                            <button
+                                onClick={handleResendVerificationCode}
+                                disabled={isVerifying || resendCooldown > 0}
+                                className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ArrowPathIcon className={`h-4 w-4 ${isVerifying ? 'animate-spin' : ''}`} />
+                                {resendCooldown > 0 ? (
+                                    <span>Resend code in {resendCooldown}s</span>
+                                ) : (
+                                    <span>Resend code</span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Cancel Button */}
+                        <button
+                            onClick={handleVerificationModalClose}
+                            disabled={isVerifying}
+                            className="w-full px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Privileged Account Modal (Admin only) */}
             {isAdmin && userInfo && (

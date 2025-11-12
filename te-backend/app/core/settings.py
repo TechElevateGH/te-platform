@@ -40,9 +40,9 @@ class Settings(BaseSettings):
         return [v]
 
     # Email Configuration
-    EMAILS_ENABLED: bool = False
+    EMAILS_ENABLED: bool
     EMAILS_FROM_NAME: str
-    EMAILS_FROM_EMAIL: str
+    EMAILS_FROM_EMAIL: EmailStr
     EMAIL_TEMPLATES_DIR: str = "app/email-templates"
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 

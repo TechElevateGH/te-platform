@@ -47,7 +47,7 @@ class UserRoles(int, Enum):
 class LeadCreate(BaseModel):
     """
     Schema for creating a Lead/Admin account (Admin only).
-    
+
     Leads authenticate with username + token at /auth/lead-login.
     """
 
@@ -59,7 +59,7 @@ class LeadCreate(BaseModel):
 class ReferrerCreate(BaseModel):
     """
     Schema for creating a Referrer account (Admin only).
-    
+
     Referrers authenticate with ONLY token at /auth/referrer-login.
     Username is stored for admin reference only, not used for authentication.
     """
@@ -93,6 +93,7 @@ class MemberUserBase(BaseModel):
     applications: list = []  # List of embedded Application objects
     mentor_id: Optional[int] = None
     is_active: bool = True
+    email_verified: bool = False  # Email verification status
     role: UserRoles = UserRoles.member
     start_date: str = date.today().strftime("%d-%m-%Y")
     end_date: str = ""

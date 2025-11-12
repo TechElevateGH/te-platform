@@ -118,6 +118,7 @@ def create_user(
     user_dict["full_name"] = get_user_full_name(
         data.first_name, data.middle_name, data.last_name
     )
+    user_dict["email_verified"] = False  # Start as unverified
 
     # Insert into MongoDB
     result = db.member_users.insert_one(user_dict)

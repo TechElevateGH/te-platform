@@ -55,6 +55,7 @@ class MemberUser(BaseModel):
     start_date: str = ""
     end_date: str = ""
     is_active: bool = True
+    email_verified: bool = False  # Email verification status
     role: int = 1  # Always Member (1) for this collection
     referral_essay: str = ""  # Referral essay text (stored in MongoDB)
     cover_letter: str = ""  # Cover letter text (stored in MongoDB)

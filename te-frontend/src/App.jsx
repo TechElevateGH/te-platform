@@ -8,6 +8,7 @@ import Home from './components/home/Home';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DataProvider } from './context/DataContext'
 import Register from './components/user/Register';
+import EmailVerification from './components/user/EmailVerification';
 import LeadLogin from './pages/LeadLogin';
 import ReferrerLogin from './pages/ReferrerLogin';
 import UserAccountManagement from './pages/UserAccountManagement';
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/lead-login" element={<LeadLogin />} />
                     <Route path="/referrer-login" element={<ReferrerLogin />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/verify-email" element={<EmailVerification />} />
                   </Routes>
                 </div>
               </DataProvider>

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../axiosConfig';
-import { useAuth } from '../../context/AuthContext';
 import {
     XCircleIcon,
     EnvelopeIcon,
@@ -13,7 +12,6 @@ import {
 
 const Register = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // 1: Choose method, 2: Fill form
@@ -69,14 +67,13 @@ const Register = () => {
                 university: formData.university,
             });
 
-            // Auto-login after successful registration
-            const loginResponse = await axiosInstance.post('auth/login', {
-                username: formData.email,
-                password: formData.password
+            // Redirect to email verification page
+            navigate('/verify-email', {
+                state: {
+                    email: formData.email,
+                    verificationType: 'registration'
+                }
             });
-
-            login(loginResponse.data.access_token, loginResponse.data.sub, loginResponse.data.role);
-            navigate('/workspace');
         } catch (error) {
             setError(error.response?.data?.detail || 'Registration failed. Please try again.');
         } finally {
@@ -260,7 +257,7 @@ const Register = () => {
                         {/* Name fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                     First Name *
                                 </label>
                                 <input
@@ -273,7 +270,7 @@ const Register = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                     Middle Name
                                 </label>
                                 <input
@@ -285,7 +282,7 @@ const Register = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                     Last Name *
                                 </label>
                                 <input
@@ -301,7 +298,7 @@ const Register = () => {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                 Email Address *
                             </label>
                             <div className="relative">
@@ -321,7 +318,7 @@ const Register = () => {
 
                         {/* Phone */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                 Phone Number *
                             </label>
                             <div className="relative">
@@ -341,7 +338,7 @@ const Register = () => {
 
                         {/* University */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                 University *
                             </label>
                             <input
@@ -356,7 +353,7 @@ const Register = () => {
 
                         {/* Address */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                 Address *
                             </label>
                             <input
@@ -372,7 +369,7 @@ const Register = () => {
                         {/* Password fields */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                     Password *
                                 </label>
                                 <div className="relative">
@@ -391,7 +388,7 @@ const Register = () => {
                                 <p className="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2 text-left">
                                     Confirm Password *
                                 </label>
                                 <div className="relative">

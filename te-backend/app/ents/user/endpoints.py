@@ -174,8 +174,27 @@ def create_member_user(
 
     **Note**: This is a public endpoint for member self-registration.
     Password is automatically hashed before storage.
+    A verification email will be sent to the provided email address.
     """
+    import app.ents.verification.crud as verification_crud
+    from app.utilities.email import send_verification_email
+
     new_user = user_crud.create_user(db, data=data)
+
+    # Create and send verification code
+    try:
+        verification = verification_crud.create_verification_code(
+            db,
+            email=new_user.email,
+            verification_type="registration",
+            user_id=str(new_user.id),
+        )
+        send_verification_email(new_user.email, verification.code, "registration")
+    except Exception as e:
+        # Log error but don't fail registration
+        # User can request verification code later
+        print(f"Failed to send verification email: {e}")
+
     return {"user": user_schema.MemberUserRead(**vars(new_user))}
 
 
@@ -227,6 +246,9 @@ def update_member_profile(
     - **data**: Fields to update (name, contact, university, etc.)
     - Returns: Updated user information
 
+    **Note**: Email changes are NOT allowed through this endpoint.
+    To change email, use the /verification/request-email-change endpoint.
+
     **Authorization**:
     - Members (role=1): Can only update their own profile
     - Admins: Can update any member's profile
@@ -237,6 +259,13 @@ def update_member_profile(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Can only update your own profile",
+        )
+
+    # Block email changes through this endpoint
+    if data.email is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email cannot be changed through this endpoint. Please use the email verification process to change your email.",
         )
 
     updated_user = user_crud.update_user_profile(db, user_id=user_id, data=data)

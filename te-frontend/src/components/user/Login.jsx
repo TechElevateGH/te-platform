@@ -38,7 +38,29 @@ const Login = () => {
                 navigate(sessionStorage.getItem("prevPage") || "/workspace");
             }
         } catch (error) {
-            setError(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+            const errorDetail = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+
+            // Check if it's an email verification error
+            if (error.response?.status === 403 && errorDetail.includes('verify your email')) {
+                setError(
+                    <div>
+                        {errorDetail}{' '}
+                        <button
+                            onClick={() => navigate('/verify-email', {
+                                state: {
+                                    email: loginData.username,
+                                    verificationType: 'registration'
+                                }
+                            })}
+                            className="font-semibold text-red-900 dark:text-red-100 underline hover:text-red-700 dark:hover:text-red-300"
+                        >
+                            Verify now
+                        </button>
+                    </div>
+                );
+            } else {
+                setError(errorDetail);
+            }
         } finally {
             setLoading(false);
         }
