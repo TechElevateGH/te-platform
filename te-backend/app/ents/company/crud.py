@@ -216,13 +216,27 @@ def export_referrals_to_google_sheets(
     from google.oauth2 import service_account
     from datetime import datetime
     from bson import ObjectId
+    from app.core.settings import settings
 
-    # Load Google credentials
+    # Load Google credentials from environment variables
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-    SERVICE_ACCOUNT_FILE = "app/core/google_drive_creds.json"
+    
+    credentials_info = {
+        "type": settings.GOOGLE_TYPE,
+        "project_id": settings.GOOGLE_PROJECT_ID,
+        "private_key_id": settings.GOOGLE_PRIVATE_KEY_ID,
+        "private_key": settings.GOOGLE_PRIVATE_KEY.replace('\\n', '\n'),
+        "client_email": settings.GOOGLE_CLIENT_EMAIL,
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "auth_uri": settings.GOOGLE_AUTH_URI,
+        "token_uri": settings.GOOGLE_TOKEN_URI,
+        "auth_provider_x509_cert_url": settings.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+        "client_x509_cert_url": settings.GOOGLE_CLIENT_X509_CERT_URL,
+        "universe_domain": settings.GOOGLE_UNIVERSE_DOMAIN
+    }
 
-    credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    credentials = service_account.Credentials.from_service_account_info(
+        credentials_info, scopes=SCOPES
     )
 
     service = build("sheets", "v4", credentials=credentials)

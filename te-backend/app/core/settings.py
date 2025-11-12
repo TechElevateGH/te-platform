@@ -69,5 +69,18 @@ class Settings(BaseSettings):
     GDRIVE_OTHER_FILES: str
     GDRIVE_LESSONS: str
 
+    # Google Drive Service Account Credentials
+    GOOGLE_TYPE: str = "service_account"
+    GOOGLE_PROJECT_ID: Optional[str] = None
+    GOOGLE_PRIVATE_KEY_ID: Optional[str] = None
+    GOOGLE_PRIVATE_KEY: Optional[str] = None
+    GOOGLE_CLIENT_EMAIL: Optional[str] = None
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_AUTH_URI: str = "https://accounts.google.com/o/oauth2/auth"
+    GOOGLE_TOKEN_URI: str = "https://oauth2.googleapis.com/token"
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL: str = "https://www.googleapis.com/oauth2/v1/certs"
+    GOOGLE_CLIENT_X509_CERT_URL: Optional[str] = None
+    GOOGLE_UNIVERSE_DOMAIN: str = "googleapis.com"
+
 
 settings = Settings()
