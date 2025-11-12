@@ -16,15 +16,15 @@ const EmptyResumes = ({ onUploadClick }) => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                     No Resumes Yet
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     Start building your career toolkit by uploading your first resume.
                 </p>
-                <p className="text-xs text-gray-500 mb-8">
+                <p className="text-xs text-gray-500 dark:text-gray-500 mb-8">
                     Keep multiple versions tailored for different roles and easily manage them all in one place.
                 </p>
 
@@ -39,26 +39,26 @@ const EmptyResumes = ({ onUploadClick }) => {
                 </button>
 
                 {/* Tips */}
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
                         Quick Tips
                     </p>
                     <div className="grid gap-3 text-left">
                         <div className="flex items-start gap-2">
                             <div className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500" />
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                                 <span className="font-semibold">PDF format only</span> - Keep it professional and easy to share
                             </p>
                         </div>
                         <div className="flex items-start gap-2">
                             <div className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-cyan-500" />
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                                 <span className="font-semibold">Target roles</span> - Tag each resume with the job you're targeting
                             </p>
                         </div>
                         <div className="flex items-start gap-2">
                             <div className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-purple-500" />
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                                 <span className="font-semibold">Add notes</span> - Track which companies or roles each version is for
                             </p>
                         </div>

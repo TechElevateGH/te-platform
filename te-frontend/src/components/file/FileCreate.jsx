@@ -51,7 +51,7 @@ const FileCreate = ({ setFileUpload }) => {
         setStatus("Loading...")
 
         try {
-            await axiosInstance.post(`/users/${userId}/member-files`, data, {
+            await axiosInstance.post(`/users/${userId}/resumes`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${accessToken}`,
@@ -116,8 +116,8 @@ const FileCreate = ({ setFileUpload }) => {
                                                     type="button"
                                                     onClick={() => handleInputChange({ field: 'document_type', value: type })}
                                                     className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${fileData.document_type === type
-                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
-                                                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30'
+                                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
                                                         }`}
                                                 >
                                                     {type}

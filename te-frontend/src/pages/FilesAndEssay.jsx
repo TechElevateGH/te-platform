@@ -52,7 +52,7 @@ const Files = () => {
         setDeletingFileId(fileId);
 
         try {
-            await axiosInstance.delete(`/users/${userId}/member-files/${fileId}`, {
+            await axiosInstance.delete(`/users/${userId}/resumes/${fileId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -181,7 +181,7 @@ const Files = () => {
                                 {/* Resumes List */}
                                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
                                     {resumes.length === 0 ? (
-                                        <EmptyResumes />
+                                        <EmptyResumes onUploadClick={() => setAddFile(true)} />
                                     ) : (
                                         <div className="overflow-x-auto">
                                             <table className="w-full">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
@@ -14,7 +14,10 @@ import {
     DocumentTextIcon,
     UserCircleIcon,
     CheckCircleIcon,
-    ClockIcon
+    ClockIcon,
+    AdjustmentsHorizontalIcon,
+    MagnifyingGlassIcon,
+    ChevronUpIcon
 } from '@heroicons/react/24/outline';
 
 const FilesManagement = () => {
@@ -46,15 +49,45 @@ const FilesManagement = () => {
     const [submittingReview, setSubmittingReview] = useState(false);
     const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('active'); // Default to Pending + In Review
     const [toast, setToast] = useState(null);
+    const [myAssignedReviews, setMyAssignedReviews] = useState([]);
+    const [allAssignments, setAllAssignments] = useState([]);
+
+    // My Assignments filters
+    const [showAdvancedMyAssignmentsFilters, setShowAdvancedMyAssignmentsFilters] = useState(false);
+    const [myAssignmentsStatusFilter, setMyAssignmentsStatusFilter] = useState('');
+    const [myAssignmentsLevelFilter, setMyAssignmentsLevelFilter] = useState('');
+    const [myAssignmentsMemberFilter, setMyAssignmentsMemberFilter] = useState('');
+    const [myAssignmentsJobTitleFilter, setMyAssignmentsJobTitleFilter] = useState('');
+    const [myAssignmentsSortBy, setMyAssignmentsSortBy] = useState('date_desc');
+
+    // All Assignments filters
+    const [showAdvancedAssignmentFilters, setShowAdvancedAssignmentFilters] = useState(false);
+    const [assignmentsStatusFilter, setAssignmentsStatusFilter] = useState('');
+    const [assignmentsLevelFilter, setAssignmentsLevelFilter] = useState('');
+    const [assignmentsReviewerFilter, setAssignmentsReviewerFilter] = useState('');
+    const [assignmentsMemberSearch, setAssignmentsMemberSearch] = useState('');
+    const [assignmentsDateRange, setAssignmentsDateRange] = useState({ start: '', end: '' });
+    const [assignmentsSortBy, setAssignmentsSortBy] = useState('date_desc');
+
+    // Resumes tab filters
+    const [showAdvancedResumesFilters, setShowAdvancedResumesFilters] = useState(false);
+
+    // Resume Reviews tab filters
+    const [showAdvancedReviewsFilters, setShowAdvancedReviewsFilters] = useState(false);
+
+    // Essays tab filters
+    const [showAdvancedEssaysFilters, setShowAdvancedEssaysFilters] = useState(false);
+    const [essaysSearch, setEssaysSearch] = useState('');
+    const [essaysSortBy, setEssaysSortBy] = useState('name_asc');
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
         email: true,
         resumes: true,
-        essays: true,
+        essays: false,
         totalFiles: true,
-        actions: true
+        actions: false
     });
 
     const columnConfig = [
@@ -135,13 +168,45 @@ const FilesManagement = () => {
         }
     }, [accessToken]);
 
+    // Fetch my assigned reviews (for Volunteers and Leads)
+    const fetchMyAssignedReviews = useCallback(async () => {
+        if (!isVolunteerOrAbove) return;
+
+        try {
+            const response = await axiosInstance.get('/resume-reviews/my-assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setMyAssignedReviews(response.data?.reviews || []);
+        } catch (error) {
+            console.error('Error fetching my assigned reviews:', error);
+        }
+    }, [accessToken, isVolunteerOrAbove]);
+
+    // Fetch all assignments (for Admin)
+    const fetchAllAssignments = useCallback(async () => {
+        if (!isAdmin) return;
+
+        try {
+            const response = await axiosInstance.get('/resume-reviews/assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setAllAssignments(response.data?.assignments || []);
+        } catch (error) {
+            console.error('Error fetching all assignments:', error);
+        }
+    }, [accessToken, isAdmin]);
+
     useEffect(() => {
         if (accessToken) {
             fetchAllUsersFiles();
             fetchResumeReviews();
             fetchPrivilegedUsers();
+            fetchMyAssignedReviews();
+            if (isAdmin) {
+                fetchAllAssignments();
+            }
         }
-    }, [accessToken, fetchAllUsersFiles, fetchResumeReviews, fetchPrivilegedUsers]);
+    }, [accessToken, fetchAllUsersFiles, fetchResumeReviews, fetchPrivilegedUsers, fetchMyAssignedReviews, fetchAllAssignments, isAdmin]);
 
     // Assign review to a reviewer
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
@@ -272,6 +337,261 @@ const FilesManagement = () => {
 
         return statusMatch && searchMatch && levelMatch;
     });
+
+    // Get unique reviewers from all assignments
+    const uniqueReviewers = useMemo(() => {
+        const reviewerSet = new Set();
+        allAssignments.forEach(assignment => {
+            if (assignment.reviewer_name) {
+                reviewerSet.add(assignment.reviewer_name);
+            }
+        });
+        return Array.from(reviewerSet).sort();
+    }, [allAssignments]);
+
+    // Filter and sort All Assignments
+    const filteredAndSortedAssignments = useMemo(() => {
+        let filtered = [...allAssignments];
+
+        // Status filter
+        if (assignmentsStatusFilter) {
+            filtered = filtered.filter(a => a.status === assignmentsStatusFilter);
+        }
+
+        // Level filter
+        if (assignmentsLevelFilter) {
+            filtered = filtered.filter(a => a.level === assignmentsLevelFilter);
+        }
+
+        // Reviewer filter
+        if (assignmentsReviewerFilter) {
+            filtered = filtered.filter(a => a.reviewer_name === assignmentsReviewerFilter);
+        }
+
+        // Member search (name or email)
+        if (assignmentsMemberSearch.trim()) {
+            const search = assignmentsMemberSearch.toLowerCase().trim();
+            filtered = filtered.filter(a =>
+                a.user_name?.toLowerCase().includes(search) ||
+                a.user_email?.toLowerCase().includes(search) ||
+                a.job_title?.toLowerCase().includes(search)
+            );
+        }
+
+        // Date range filter
+        if (assignmentsDateRange.start) {
+            const startDate = new Date(assignmentsDateRange.start);
+            filtered = filtered.filter(a => {
+                const assignedDate = new Date(a.assigned_date);
+                return assignedDate >= startDate;
+            });
+        }
+        if (assignmentsDateRange.end) {
+            const endDate = new Date(assignmentsDateRange.end);
+            endDate.setHours(23, 59, 59); // Include the entire end date
+            filtered = filtered.filter(a => {
+                const assignedDate = new Date(a.assigned_date);
+                return assignedDate <= endDate;
+            });
+        }
+
+        // Sort
+        filtered.sort((a, b) => {
+            switch (assignmentsSortBy) {
+                case 'date_asc':
+                    return new Date(a.assigned_date) - new Date(b.assigned_date);
+                case 'date_desc':
+                    return new Date(b.assigned_date) - new Date(a.assigned_date);
+                case 'member_asc':
+                    return (a.user_name || '').localeCompare(b.user_name || '');
+                case 'member_desc':
+                    return (b.user_name || '').localeCompare(a.user_name || '');
+                case 'status_asc':
+                    return (a.status || '').localeCompare(b.status || '');
+                case 'status_desc':
+                    return (b.status || '').localeCompare(a.status || '');
+                default:
+                    return new Date(b.assigned_date) - new Date(a.assigned_date);
+            }
+        });
+
+        return filtered;
+    }, [allAssignments, assignmentsStatusFilter, assignmentsLevelFilter, assignmentsReviewerFilter,
+        assignmentsMemberSearch, assignmentsDateRange, assignmentsSortBy]);
+
+    // Analytics for All Assignments
+    const assignmentsAnalytics = useMemo(() => {
+        const analytics = {
+            total: filteredAndSortedAssignments.length,
+            byStatus: {},
+            byLevel: {},
+            byReviewer: {},
+            avgCompletionTime: null,
+            completedCount: 0
+        };
+
+        filteredAndSortedAssignments.forEach(assignment => {
+            // Count by status
+            analytics.byStatus[assignment.status] = (analytics.byStatus[assignment.status] || 0) + 1;
+
+            // Count by level
+            analytics.byLevel[assignment.level] = (analytics.byLevel[assignment.level] || 0) + 1;
+
+            // Count by reviewer
+            if (assignment.reviewer_name) {
+                analytics.byReviewer[assignment.reviewer_name] =
+                    (analytics.byReviewer[assignment.reviewer_name] || 0) + 1;
+            }
+
+            // Track completed for completion time calculation
+            if (assignment.status === 'Completed' && assignment.completed_date && assignment.assigned_date) {
+                analytics.completedCount++;
+                // Could calculate avg completion time here if we have completed_date
+            }
+        });
+
+        return analytics;
+    }, [filteredAndSortedAssignments]);
+
+    // Filtered and sorted My Assignments
+    const filteredMyAssignments = useMemo(() => {
+        let filtered = myAssignedReviews.filter(review => {
+            // Filter by status
+            if (myAssignmentsStatusFilter && review.status !== myAssignmentsStatusFilter) {
+                return false;
+            }
+
+            // Filter by level
+            if (myAssignmentsLevelFilter && review.level !== myAssignmentsLevelFilter) {
+                return false;
+            }
+
+            // Filter by member name or email
+            if (myAssignmentsMemberFilter) {
+                const searchLower = myAssignmentsMemberFilter.toLowerCase();
+                const matchesName = review.user_name?.toLowerCase().includes(searchLower);
+                const matchesEmail = review.user_email?.toLowerCase().includes(searchLower);
+                if (!matchesName && !matchesEmail) {
+                    return false;
+                }
+            }
+
+            // Filter by job title
+            if (myAssignmentsJobTitleFilter) {
+                const searchLower = myAssignmentsJobTitleFilter.toLowerCase();
+                if (!review.job_title?.toLowerCase().includes(searchLower)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        // Sort
+        filtered.sort((a, b) => {
+            switch (myAssignmentsSortBy) {
+                case 'date_asc':
+                    return new Date(a.assigned_date) - new Date(b.assigned_date);
+                case 'date_desc':
+                    return new Date(b.assigned_date) - new Date(a.assigned_date);
+                case 'name_asc':
+                    return (a.user_name || '').localeCompare(b.user_name || '');
+                case 'name_desc':
+                    return (b.user_name || '').localeCompare(a.user_name || '');
+                case 'status_asc':
+                    return (a.status || '').localeCompare(b.status || '');
+                case 'status_desc':
+                    return (b.status || '').localeCompare(a.status || '');
+                default:
+                    return new Date(b.assigned_date) - new Date(a.assigned_date);
+            }
+        });
+
+        return filtered;
+    }, [myAssignedReviews, myAssignmentsStatusFilter, myAssignmentsLevelFilter, myAssignmentsMemberFilter, myAssignmentsJobTitleFilter, myAssignmentsSortBy]);
+
+    // Clear My Assignments filters
+    const clearMyAssignmentsFilters = () => {
+        setMyAssignmentsStatusFilter('');
+        setMyAssignmentsLevelFilter('');
+        setMyAssignmentsMemberFilter('');
+        setMyAssignmentsJobTitleFilter('');
+    };
+
+    const hasActiveMyAssignmentsFilters = myAssignmentsStatusFilter || myAssignmentsLevelFilter || myAssignmentsMemberFilter || myAssignmentsJobTitleFilter;
+
+    // Filtered and sorted Essays
+    const filteredEssays = useMemo(() => {
+        // Get users with essays
+        let usersWithEssays = users.filter(u => u.referral_essay || u.cover_letter);
+
+        // Apply search filter (name or email)
+        if (essaysSearch) {
+            const searchLower = essaysSearch.toLowerCase();
+            usersWithEssays = usersWithEssays.filter(u =>
+                u.full_name?.toLowerCase().includes(searchLower) ||
+                u.email?.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // Sort
+        usersWithEssays.sort((a, b) => {
+            switch (essaysSortBy) {
+                case 'name_asc':
+                    return (a.full_name || '').localeCompare(b.full_name || '');
+                case 'name_desc':
+                    return (b.full_name || '').localeCompare(a.full_name || '');
+                case 'email_asc':
+                    return (a.email || '').localeCompare(b.email || '');
+                case 'email_desc':
+                    return (b.email || '').localeCompare(a.email || '');
+                default:
+                    return (a.full_name || '').localeCompare(b.full_name || '');
+            }
+        });
+
+        return usersWithEssays;
+    }, [users, essaysSearch, essaysSortBy]);
+
+    // Clear Essays filters
+    const clearEssaysFilters = () => {
+        setEssaysSearch('');
+    };
+
+    // Clear all assignment filters
+    const clearAssignmentFilters = () => {
+        setAssignmentsStatusFilter('');
+        setAssignmentsLevelFilter('');
+        setAssignmentsReviewerFilter('');
+        setAssignmentsMemberSearch('');
+        setAssignmentsDateRange({ start: '', end: '' });
+    };
+
+    const hasActiveAssignmentFilters =
+        assignmentsStatusFilter || assignmentsLevelFilter || assignmentsReviewerFilter ||
+        assignmentsMemberSearch || assignmentsDateRange.start || assignmentsDateRange.end;
+
+    // Export assignments to CSV
+    const exportAssignmentsToCSV = () => {
+        const headers = ['Member Name', 'Email', 'Job Title', 'Level', 'Assigned To', 'Status', 'Assigned Date'];
+        const csvData = filteredAndSortedAssignments.map(a => [
+            a.user_name || '',
+            a.user_email || '',
+            a.job_title || '',
+            a.level || '',
+            a.reviewer_name || '',
+            a.status || '',
+            a.assigned_date || ''
+        ]);
+
+        const csv = [headers, ...csvData].map(row => row.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `assignments_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+    };
 
     // Export to CSV
     const exportToCSV = () => {
@@ -465,6 +785,48 @@ const FilesManagement = () => {
                                 </div>
                             </button>
                         )}
+
+                        {/* My Assignments Tab - Volunteer+ */}
+                        {userRoleInt >= 3 && (
+                            <button
+                                onClick={() => setActiveTab('myAssignments')}
+                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'myAssignments'
+                                    ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <UserCircleIcon className="h-4 w-4" />
+                                    My Assignments
+                                    {myAssignedReviews.length > 0 && (
+                                        <span className="px-2 py-0.5 text-xs font-bold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
+                                            {myAssignedReviews.length}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        )}
+
+                        {/* All Assignments Tab - Admin only */}
+                        {isAdmin && (
+                            <button
+                                onClick={() => setActiveTab('allAssignments')}
+                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'allAssignments'
+                                    ? 'border-pink-600 text-pink-600 dark:text-pink-400'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <UserGroupIcon className="h-4 w-4" />
+                                    All Assignments
+                                    {allAssignments.length > 0 && (
+                                        <span className="px-2 py-0.5 text-xs font-bold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full">
+                                            {allAssignments.length}
+                                        </span>
+                                    )}
+                                </div>
+                            </button>
+                        )}
                     </nav>
                 </div>
             </div>
@@ -473,10 +835,10 @@ const FilesManagement = () => {
 
                 {activeTab === 'resumes' && (
                     <>
-                        {/* Combined Stats & Filters Bar for Resumes */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
-                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                {/* Stats */}
+                        {/* Compact Stats Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-1 mb-3 transition-colors">
+                            <div className="flex items-center justify-between">
+                                {/* Compact Stats */}
                                 <div className="flex items-center gap-6 flex-wrap text-xs">
                                     <div className="flex items-center gap-2">
                                         <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -489,88 +851,164 @@ const FilesManagement = () => {
                                         <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
                                     </div>
                                 </div>
+                                <button
+                                    onClick={() => setShowAdvancedResumesFilters(!showAdvancedResumesFilters)}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedResumesFilters
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                        }`}
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Advanced Filters
+                                    {(memberFilter || fileTypeFilter) && (
+                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                            {[memberFilter, fileTypeFilter].filter(Boolean).length}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
 
-                                {/* Filters */}
-                                <div className="flex flex-wrap items-end gap-3">
-                                    {/* Member Filter */}
-                                    <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                            Member Name or Email
-                                        </label>
+
+                        </div>
+
+                        {/* Search and Sort Bar - Only show when Advanced Filters is closed */}
+                        {!showAdvancedResumesFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-1 mb-3 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    {/* Global Search */}
+                                    <div className="flex-1 relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                         <input
                                             type="text"
-                                            placeholder="Filter by member name or email..."
-                                            value={memberFilter}
-                                            onChange={(e) => setMemberFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            placeholder="Search members (name or email)..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         />
                                     </div>
 
-                                    {/* File Type Filter */}
-                                    <div className="w-[140px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                            File Type
-                                        </label>
-                                        <select
-                                            value={fileTypeFilter}
-                                            onChange={(e) => setFileTypeFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        >
-                                            <option value="">All Types</option>
-                                            <option value="resume">Resumes Only</option>
-                                            <option value="essay">Essays Only</option>
-                                        </select>
-                                    </div>
-
                                     {/* Sort Dropdown */}
-                                    <div className="w-[160px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                            Sort by
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                            Sort by:
                                         </label>
                                         <select
                                             value={sortBy}
                                             onChange={(e) => setSortBy(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                         >
                                             <option value="name_asc">Name (A-Z)</option>
                                             <option value="name_desc">Name (Z-A)</option>
                                             <option value="email_asc">Email (A-Z)</option>
                                             <option value="email_desc">Email (Z-A)</option>
-                                            <option value="files_desc">Most Files</option>
-                                            <option value="files_asc">Least Files</option>
+                                            <option value="files_desc">Files (Most)</option>
+                                            <option value="files_asc">Files (Least)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Results Count */}
+                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                        {sortedUsers.length} of {users.length}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Advanced Filters Panel */}
+                        {showAdvancedResumesFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {/* Sort Dropdown */}
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                                Sort by:
+                                            </label>
+                                            <select
+                                                value={sortBy}
+                                                onChange={(e) => setSortBy(e.target.value)}
+                                                className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            >
+                                                <option value="name_asc">Name (A-Z)</option>
+                                                <option value="name_desc">Name (Z-A)</option>
+                                                <option value="email_asc">Email (A-Z)</option>
+                                                <option value="email_desc">Email (Z-A)</option>
+                                                <option value="files_desc">Files (Most)</option>
+                                                <option value="files_asc">Files (Least)</option>
+                                            </select>
+                                        </div>
+                                        {/* Results Count */}
+                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            {sortedUsers.length} of {users.length}
+                                        </div>
+                                        {hasActiveFilters && (
+                                            <button
+                                                onClick={clearAllFilters}
+                                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            >
+                                                <XMarkIcon className="h-3.5 w-3.5" />
+                                                Clear All
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Search Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Search Members
+                                        </label>
+                                        <div className="relative">
+                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search by name or email..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Member Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Filter by Member
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="Name or email..."
+                                            value={memberFilter}
+                                            onChange={(e) => setMemberFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+
+                                    {/* File Type Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            File Type
+                                        </label>
+                                        <select
+                                            value={fileTypeFilter}
+                                            onChange={(e) => setFileTypeFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Files</option>
+                                            <option value="resume">Resumes Only</option>
+                                            <option value="essay">Essays Only</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            {/* Active Filters & Clear */}
-                            {hasActiveFilters && (
-                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        {memberFilter && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                                Member: {memberFilter}
-                                            </span>
-                                        )}
-                                        {fileTypeFilter && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                                Type: {fileTypeFilter === 'resume' ? 'Resumes' : 'Essays'}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <button
-                                        onClick={clearAllFilters}
-                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                    >
-                                        <XMarkIcon className="h-3.5 w-3.5" />
-                                        Clear All
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Files Table */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
@@ -696,10 +1134,10 @@ const FilesManagement = () => {
                 {/* Resume Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <>
-                        {/* Combined Stats & Filters Bar for Resume Reviews */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
-                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                {/* Stats */}
+                        {/* Compact Stats Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-1 mb-3 transition-colors">
+                            <div className="flex items-center justify-between">
+                                {/* Compact Stats */}
                                 <div className="flex items-center gap-6 flex-wrap text-xs">
                                     <div className="flex items-center gap-2">
                                         <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -722,18 +1160,106 @@ const FilesManagement = () => {
                                         <span className="font-bold text-green-700 dark:text-green-400">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
                                     </div>
                                 </div>
+                                <button
+                                    onClick={() => setShowAdvancedReviewsFilters(!showAdvancedReviewsFilters)}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedReviewsFilters
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                        }`}
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Advanced Filters
+                                    {(levelFilter || resumeReviewStatusFilter !== 'active') && (
+                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                            {[levelFilter, resumeReviewStatusFilter !== 'active' ? resumeReviewStatusFilter : ''].filter(Boolean).length}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
 
-                                {/* Filters */}
-                                <div className="flex flex-wrap items-end gap-3">
+
+                        </div>
+
+                        {/* Search and Sort Bar - Only show when Advanced Filters is closed */}
+                        {!showAdvancedReviewsFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-1 mb-3 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    {/* Global Search */}
+                                    <div className="flex-1 relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search resume reviews (member, email, job title)..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        />
+                                    </div>
+
+                                    {/* Results Count */}
+                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                        {filteredResumeReviews.length} of {resumeReviews.length}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Advanced Filters Panel */}
+                        {showAdvancedReviewsFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {/* Results Count */}
+                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            {filteredResumeReviews.length} of {resumeReviews.length}
+                                        </div>
+                                        {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
+                                            <button
+                                                onClick={() => {
+                                                    setSearchQuery('');
+                                                    setLevelFilter('');
+                                                    setResumeReviewStatusFilter('active');
+                                                }}
+                                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            >
+                                                <XMarkIcon className="h-3.5 w-3.5" />
+                                                Clear All
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Search Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Search Reviews
+                                        </label>
+                                        <div className="relative">
+                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search by member, email, or job title..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
                                     {/* Status Filter */}
-                                    <div className="w-[180px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Status Filter
                                         </label>
                                         <select
                                             value={resumeReviewStatusFilter}
                                             onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                         >
                                             <option value="active">Active (Pending + In Review)</option>
                                             <option value="">All Statuses</option>
@@ -744,29 +1270,15 @@ const FilesManagement = () => {
                                         </select>
                                     </div>
 
-                                    {/* Search Filter */}
-                                    <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                            Search Member or Job Title
-                                        </label>
-                                        <input
-                                            type="text"
-                                            placeholder="Filter by member name, email, or job title..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                        />
-                                    </div>
-
                                     {/* Level Filter */}
-                                    <div className="w-[120px]">
-                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Level
                                         </label>
                                         <select
                                             value={levelFilter}
                                             onChange={(e) => setLevelFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                         >
                                             <option value="">All Levels</option>
                                             <option value="Intern">Intern</option>
@@ -775,24 +1287,9 @@ const FilesManagement = () => {
                                             <option value="Senior">Senior</option>
                                         </select>
                                     </div>
-
-                                    {/* Clear Filters */}
-                                    {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
-                                        <button
-                                            onClick={() => {
-                                                setSearchQuery('');
-                                                setLevelFilter('');
-                                                setResumeReviewStatusFilter('active');
-                                            }}
-                                            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-1.5"
-                                        >
-                                            <XMarkIcon className="h-4 w-4" />
-                                            Clear
-                                        </button>
-                                    )}
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                             <div className="overflow-x-auto">
@@ -917,22 +1414,86 @@ const FilesManagement = () => {
                 {/* Essays Tab */}
                 {activeTab === 'essays' && (
                     <>
-                        {/* Combined Stats Bar for Essays */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-4 mb-3 transition-colors">
-                            <div className="flex items-center gap-6 flex-wrap text-xs">
-                                <div className="flex items-center gap-2">
-                                    <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members with Essays:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.essays && u.essays.length > 0).length}</span>
+                        {/* Search and Filters Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="flex items-center gap-3">
+                                {/* Search Bar - Only show when Advanced Filters is closed */}
+                                {!showAdvancedEssaysFilters && (
+                                    <div className="flex-1 relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={essaysSearch}
+                                            onChange={(e) => setEssaysSearch(e.target.value)}
+                                            placeholder="Search by name or email..."
+                                            className="w-full pl-9 pr-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Sort Dropdown */}
+                                <div className="flex-shrink-0">
+                                    <select
+                                        value={essaysSortBy}
+                                        onChange={(e) => setEssaysSortBy(e.target.value)}
+                                        className="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                    >
+                                        <option value="name_asc">Name (A-Z)</option>
+                                        <option value="name_desc">Name (Z-A)</option>
+                                        <option value="email_asc">Email (A-Z)</option>
+                                        <option value="email_desc">Email (Z-A)</option>
+                                    </select>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-emerald-500" />
-                                    <span className="font-medium text-emerald-600 dark:text-emerald-400">Total Essays:</span>
-                                    <span className="font-bold text-emerald-700 dark:text-emerald-400">{stats.totalEssays}</span>
+
+                                {/* Advanced Filters Button */}
+                                <button
+                                    onClick={() => setShowAdvancedEssaysFilters(!showAdvancedEssaysFilters)}
+                                    className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Advanced Filters
+                                </button>
+
+                                {/* Results Count */}
+                                <div className="flex-shrink-0">
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                        <span className="font-semibold text-gray-900 dark:text-white">{filteredEssays.length}</span> members
+                                    </span>
                                 </div>
                             </div>
+
+                            {/* Advanced Filters Panel */}
+                            {showAdvancedEssaysFilters && (
+                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Search Filters</h4>
+                                        {essaysSearch && (
+                                            <button
+                                                onClick={clearEssaysFilters}
+                                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            >
+                                                <XMarkIcon className="h-3.5 w-3.5" />
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Advanced Search */}
+                                    <div className="relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={essaysSearch}
+                                            onChange={(e) => setEssaysSearch(e.target.value)}
+                                            placeholder="Search by member name or email..."
+                                            className="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
+                        {/* Table */}
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
@@ -945,26 +1506,32 @@ const FilesManagement = () => {
                                                 Email
                                             </th>
                                             <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Essays
+                                                Referral Essay
                                             </th>
                                             <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Actions
+                                                Cover Letter
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                        {users.filter(u => u.essays && u.essays.length > 0).length === 0 ? (
+                                        {filteredEssays.length === 0 ? (
                                             <tr>
                                                 <td colSpan="4" className="px-3 py-6 text-center">
                                                     <DocumentIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No essays found</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {users.filter(u => u.referral_essay || u.cover_letter).length === 0
+                                                            ? 'No essays found'
+                                                            : 'No members match your search'}
+                                                    </p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        No members have uploaded essays yet
+                                                        {users.filter(u => u.referral_essay || u.cover_letter).length === 0
+                                                            ? 'No members have submitted essays yet'
+                                                            : 'Try adjusting your search terms'}
                                                     </p>
                                                 </td>
                                             </tr>
                                         ) : (
-                                            users.filter(u => u.essays && u.essays.length > 0).map((user) => (
+                                            filteredEssays.map((user) => (
                                                 <tr
                                                     key={user.id}
                                                     className="hover:bg-gradient-to-r hover:from-green-50/30 hover:to-emerald-50/30 dark:hover:from-green-900/20 dark:hover:to-emerald-900/20 transition-all"
@@ -980,23 +1547,580 @@ const FilesManagement = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-3 py-2">
-                                                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                            {user.essays?.length || 0}
-                                                        </span>
+                                                        {user.referral_essay ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                                    <DocumentTextIcon className="h-3.5 w-3.5 mr-1" />
+                                                                    Submitted
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                                                —
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="px-3 py-2">
-                                                        <div className="flex items-center gap-2">
-                                                            {user.essays && user.essays.length > 0 && (
-                                                                <a
-                                                                    href={user.essays[0].url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors"
-                                                                >
-                                                                    <EyeIcon className="h-3.5 w-3.5" />
-                                                                    View
-                                                                </a>
-                                                            )}
+                                                        {user.cover_letter ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                                                                    <DocumentTextIcon className="h-3.5 w-3.5 mr-1" />
+                                                                    Submitted
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                                                —
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* My Assignments Tab */}
+                {activeTab === 'myAssignments' && (
+                    <>
+                        {/* Sort and Filters Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2.5 mb-3 transition-colors">
+                            <div className="flex items-center justify-between gap-3">
+                                {/* Sort Dropdown */}
+                                <div className="flex-shrink-0">
+                                    <select
+                                        value={myAssignmentsSortBy}
+                                        onChange={(e) => setMyAssignmentsSortBy(e.target.value)}
+                                        className="px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                    >
+                                        <option value="date_desc">Newest First</option>
+                                        <option value="date_asc">Oldest First</option>
+                                        <option value="name_asc">Name (A-Z)</option>
+                                        <option value="name_desc">Name (Z-A)</option>
+                                        <option value="status_asc">Status (A-Z)</option>
+                                        <option value="status_desc">Status (Z-A)</option>
+                                    </select>
+                                </div>
+
+                                {/* Advanced Filters Button */}
+                                <button
+                                    onClick={() => setShowAdvancedMyAssignmentsFilters(!showAdvancedMyAssignmentsFilters)}
+                                    className="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-3.5 w-3.5" />
+                                    Filters
+                                    {hasActiveMyAssignmentsFilters && (
+                                        <span className="inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-blue-600 rounded-full">
+                                            {[myAssignmentsStatusFilter, myAssignmentsLevelFilter, myAssignmentsMemberFilter, myAssignmentsJobTitleFilter].filter(Boolean).length}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Results Count */}
+                                <div className="flex-1 text-right">
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                        <span className="font-semibold text-gray-900 dark:text-white">{filteredMyAssignments.length}</span> of{' '}
+                                        <span className="font-semibold text-gray-900 dark:text-white">{myAssignedReviews.length}</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Advanced Filters Panel */}
+                            {showAdvancedMyAssignmentsFilters && (
+                                <div className="mt-2.5 pt-2.5 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">Filters</h4>
+                                            {hasActiveMyAssignmentsFilters && (
+                                                <button
+                                                    onClick={clearMyAssignmentsFilters}
+                                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                                >
+                                                    <XMarkIcon className="h-3 w-3" />
+                                                    Clear
+                                                </button>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => setShowAdvancedMyAssignmentsFilters(false)}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                        >
+                                            <ChevronUpIcon className="h-3.5 w-3.5" />
+                                            Collapse
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        {/* Member Filter */}
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Member</label>
+                                            <input
+                                                type="text"
+                                                value={myAssignmentsMemberFilter}
+                                                onChange={(e) => setMyAssignmentsMemberFilter(e.target.value)}
+                                                placeholder="Name or email..."
+                                                className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                            />
+                                        </div>
+
+                                        {/* Job Title Filter */}
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Job Title</label>
+                                            <input
+                                                type="text"
+                                                value={myAssignmentsJobTitleFilter}
+                                                onChange={(e) => setMyAssignmentsJobTitleFilter(e.target.value)}
+                                                placeholder="Job title..."
+                                                className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                            />
+                                        </div>
+
+                                        {/* Status Filter */}
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Status</label>
+                                            <select
+                                                value={myAssignmentsStatusFilter}
+                                                onChange={(e) => setMyAssignmentsStatusFilter(e.target.value)}
+                                                className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                            >
+                                                <option value="">All Statuses</option>
+                                                <option value="Pending">Pending</option>
+                                                <option value="In Review">In Review</option>
+                                                <option value="Completed">Completed</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Level Filter */}
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Level</label>
+                                            <select
+                                                value={myAssignmentsLevelFilter}
+                                                onChange={(e) => setMyAssignmentsLevelFilter(e.target.value)}
+                                                className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors"
+                                            >
+                                                <option value="">All Levels</option>
+                                                <option value="New Grad">New Grad</option>
+                                                <option value="Intern">Intern</option>
+                                                <option value="Mid-Level">Mid-Level</option>
+                                                <option value="Senior">Senior</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Table */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
+                                            <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {filteredMyAssignments.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="6" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                    {myAssignedReviews.length === 0 ? 'No reviews assigned to you yet' : 'No assignments match your filters'}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredMyAssignments.map((review) => (
+                                                <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                    <td className="px-4 py-3">
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                            {review.level}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                                            review.status === 'In Review' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                                                review.status === 'Completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                                                                    'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                            }`}>
+                                                            {review.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <a
+                                                                href={review.resume_link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors"
+                                                            >
+                                                                View Resume
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* All Assignments Tab (Admin only) */}
+                {activeTab === 'allAssignments' && isAdmin && (
+                    <>
+                        {/* Compact Stats Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="flex items-center justify-between mb-1">
+                                {/* Compact Stats */}
+                                <div className="flex items-center gap-6 flex-wrap text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                        <span className="font-medium text-gray-600 dark:text-gray-400">Total:</span>
+                                        <span className="font-bold text-gray-900 dark:text-white">{assignmentsAnalytics.total}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ClockIcon className="h-4 w-4 text-amber-500" />
+                                        <span className="font-medium text-amber-600 dark:text-amber-400">Pending:</span>
+                                        <span className="font-bold text-amber-700 dark:text-amber-400">{assignmentsAnalytics.byStatus['Pending'] || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <EyeIcon className="h-4 w-4 text-purple-500" />
+                                        <span className="font-medium text-purple-600 dark:text-purple-400">In Review:</span>
+                                        <span className="font-bold text-purple-700 dark:text-purple-400">{assignmentsAnalytics.byStatus['In Review'] || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                                        <span className="font-medium text-green-600 dark:text-green-400">Completed:</span>
+                                        <span className="font-bold text-green-700 dark:text-green-400">{assignmentsAnalytics.byStatus['Completed'] || 0}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={exportAssignmentsToCSV}
+                                        disabled={filteredAndSortedAssignments.length === 0}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <ArrowDownTrayIcon className="h-4 w-4" />
+                                        Export CSV
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAdvancedAssignmentFilters(!showAdvancedAssignmentFilters)}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedAssignmentFilters
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                            : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                        Advanced Filters
+                                        {hasActiveAssignmentFilters && (
+                                            <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                                {[assignmentsStatusFilter, assignmentsLevelFilter, assignmentsReviewerFilter, assignmentsDateRange.start, assignmentsDateRange.end].filter(Boolean).length}
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                        {/* Search and Sort Bar - Only show when Advanced Filters is closed */}
+                        {!showAdvancedAssignmentFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    {/* Global Search */}
+                                    <div className="flex-1 relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search assignments (member, email, job title)..."
+                                            value={assignmentsMemberSearch}
+                                            onChange={(e) => setAssignmentsMemberSearch(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
+
+                                    {/* Sort Dropdown */}
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                            Sort by:
+                                        </label>
+                                        <select
+                                            value={assignmentsSortBy}
+                                            onChange={(e) => setAssignmentsSortBy(e.target.value)}
+                                            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        >
+                                            <option value="date_desc">Newest First</option>
+                                            <option value="date_asc">Oldest First</option>
+                                            <option value="member_asc">Member (A-Z)</option>
+                                            <option value="member_desc">Member (Z-A)</option>
+                                            <option value="status_asc">Status (A-Z)</option>
+                                            <option value="status_desc">Status (Z-A)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Results Count */}
+                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                        {filteredAndSortedAssignments.length} of {allAssignments.length}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Advanced Filters Panel */}
+                        {showAdvancedAssignmentFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2.5 mb-3 transition-colors">
+                                <div className="flex items-center justify-between mb-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-500" />
+                                        <h3 className="text-xs font-semibold text-gray-900 dark:text-white">Advanced Filters</h3>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        {/* Sort Dropdown */}
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                                Sort:
+                                            </label>
+                                            <select
+                                                value={assignmentsSortBy}
+                                                onChange={(e) => setAssignmentsSortBy(e.target.value)}
+                                                className="px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            >
+                                                <option value="date_desc">Newest First</option>
+                                                <option value="date_asc">Oldest First</option>
+                                                <option value="member_asc">Member (A-Z)</option>
+                                                <option value="member_desc">Member (Z-A)</option>
+                                                <option value="status_asc">Status (A-Z)</option>
+                                                <option value="status_desc">Status (Z-A)</option>
+                                            </select>
+                                        </div>
+                                        {/* Results Count */}
+                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            {filteredAndSortedAssignments.length} of {allAssignments.length}
+                                        </div>
+                                        {hasActiveAssignmentFilters && (
+                                            <button
+                                                onClick={clearAssignmentFilters}
+                                                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            >
+                                                <XMarkIcon className="h-3 w-3" />
+                                                Clear
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => setShowAdvancedAssignmentFilters(false)}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                        >
+                                            <ChevronUpIcon className="h-3.5 w-3.5" />
+                                            Collapse
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                                    {/* Search Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                            Search Assignments
+                                        </label>
+                                        <div className="relative">
+                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search by member, email, or job title..."
+                                                value={assignmentsMemberSearch}
+                                                onChange={(e) => setAssignmentsMemberSearch(e.target.value)}
+                                                className="w-full pl-9 pr-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Status Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={assignmentsStatusFilter}
+                                            onChange={(e) => setAssignmentsStatusFilter(e.target.value)}
+                                            className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Statuses</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="In Review">In Review</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Level Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                            Level
+                                        </label>
+                                        <select
+                                            value={assignmentsLevelFilter}
+                                            onChange={(e) => setAssignmentsLevelFilter(e.target.value)}
+                                            className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Levels</option>
+                                            <option value="Intern">Intern</option>
+                                            <option value="Entry">Entry</option>
+                                            <option value="Mid">Mid</option>
+                                            <option value="Senior">Senior</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Reviewer Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                            Assigned To
+                                        </label>
+                                        <select
+                                            value={assignmentsReviewerFilter}
+                                            onChange={(e) => setAssignmentsReviewerFilter(e.target.value)}
+                                            className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Reviewers</option>
+                                            {uniqueReviewers.map(reviewer => (
+                                                <option key={reviewer} value={reviewer}>{reviewer}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* Date Range Start */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            From Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={assignmentsDateRange.start}
+                                            onChange={(e) => setAssignmentsDateRange(prev => ({ ...prev, start: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+
+                                    {/* Date Range End */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            To Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={assignmentsDateRange.end}
+                                            onChange={(e) => setAssignmentsDateRange(prev => ({ ...prev, end: e.target.value }))}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Reviewer Workload Breakdown - Compact */}
+                        {Object.keys(assignmentsAnalytics.byReviewer).length > 0 && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                    <UserGroupIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                    Reviewer Workload
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.entries(assignmentsAnalytics.byReviewer)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .map(([reviewer, count]) => (
+                                            <div key={reviewer} className="inline-flex items-center gap-2 px-2.5 py-1.5 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded text-xs">
+                                                <span className="font-medium text-purple-700 dark:text-purple-300">
+                                                    {reviewer}
+                                                </span>
+                                                <span className="px-1.5 py-0.5 font-bold bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 rounded">
+                                                    {count}
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Table */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned To</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
+                                            <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                        {filteredAndSortedAssignments.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="7" className="px-4 py-12 text-center">
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                        {hasActiveAssignmentFilters ? 'No assignments match your filters' : 'No assignments yet'}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredAndSortedAssignments.map((review) => (
+                                                <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                    <td className="px-4 py-3">
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                            {review.level}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                                            {review.reviewer_name}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                                                            review.status === 'In Review' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                                                                review.status === 'Completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                                                                    'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                            }`}>
+                                                            {review.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <a
+                                                                href={review.resume_link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors"
+                                                            >
+                                                                View Resume
+                                                            </a>
                                                         </div>
                                                     </td>
                                                 </tr>

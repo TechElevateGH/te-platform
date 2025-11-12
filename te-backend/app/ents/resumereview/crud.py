@@ -185,3 +185,161 @@ def delete_review_request(db: Database, *, review_id: str) -> bool:
             detail="Resume review request not found",
         )
     return True
+
+
+def get_review_by_id(db: Database, *, review_id: str) -> review_models.ResumeReview:
+    """Get a single resume review by ID"""
+    review_data = db.resume_reviews.find_one({"_id": ObjectId(review_id)})
+    if not review_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume review request not found",
+        )
+    return review_models.ResumeReview(**review_data)
+
+
+def assign_review_to_reviewer(
+    db: Database,
+    *,
+    review_id: str,
+    reviewer_id: str,
+    reviewer_name: str,
+) -> dict:
+    """Assign a resume review to a specific reviewer"""
+    # Check if review exists
+    review = db.resume_reviews.find_one({"_id": ObjectId(review_id)})
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume review request not found",
+        )
+
+    # Prepare assignment data
+    assignment_data = {
+        "reviewed_by": ObjectId(reviewer_id),
+        "reviewer_name": reviewer_name,
+        "assigned_date": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "In Review",  # Automatically set status to In Review when assigned
+        "updated_at": datetime.utcnow().isoformat(),
+    }
+
+    # Update the review
+    result = db.resume_reviews.update_one(
+        {"_id": ObjectId(review_id)}, {"$set": assignment_data}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume review request not found",
+        )
+
+    # Return updated review
+    updated_review = db.resume_reviews.find_one({"_id": ObjectId(review_id)})
+    return {
+        "id": str(updated_review["_id"]),
+        "_id": str(updated_review["_id"]),
+        "user_id": str(updated_review["user_id"]),
+        "user_name": updated_review.get("user_name"),
+        "user_email": updated_review.get("user_email"),
+        "resume_link": updated_review.get("resume_link"),
+        "job_title": updated_review.get("job_title"),
+        "level": updated_review.get("level"),
+        "status": updated_review.get("status"),
+        "submitted_date": updated_review.get("submitted_date"),
+        "reviewed_by": str(updated_review["reviewed_by"])
+        if updated_review.get("reviewed_by")
+        else None,
+        "reviewer_name": updated_review.get("reviewer_name"),
+        "assigned_date": updated_review.get("assigned_date"),
+        "review_date": updated_review.get("review_date"),
+        "feedback": updated_review.get("feedback", ""),
+        "notes": updated_review.get("notes", ""),
+        "updated_at": updated_review.get("updated_at"),
+    }
+
+
+def bulk_assign_reviews_to_reviewer(
+    db: Database,
+    *,
+    review_ids: list[str],
+    reviewer_id: str,
+    reviewer_name: str,
+) -> dict:
+    """Bulk assign multiple resume reviews to a specific reviewer"""
+    # Convert review IDs to ObjectId
+    object_ids = [ObjectId(rid) for rid in review_ids]
+
+    # Prepare assignment data
+    assignment_data = {
+        "reviewed_by": ObjectId(reviewer_id),
+        "reviewer_name": reviewer_name,
+        "assigned_date": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "In Review",  # Automatically set status to In Review when assigned
+        "updated_at": datetime.utcnow().isoformat(),
+    }
+
+    # Bulk update
+    result = db.resume_reviews.update_many(
+        {"_id": {"$in": object_ids}}, {"$set": assignment_data}
+    )
+
+    return {
+        "message": f"Successfully assigned {result.modified_count} resume review(s)",
+        "assigned_count": result.modified_count,
+        "total_requested": len(review_ids),
+    }
+
+
+def get_reviews_assigned_to_user(db: Database, *, user_id: str) -> list[dict]:
+    """Get all resume reviews assigned to a specific user"""
+    reviews_data = db.resume_reviews.find({"reviewed_by": ObjectId(user_id)})
+    result = []
+    for review in reviews_data:
+        result.append(
+            {
+                "id": str(review["_id"]),
+                "user_id": str(review.get("user_id")),
+                "user_name": review.get("user_name"),
+                "user_email": review.get("user_email"),
+                "resume_link": review.get("resume_link"),
+                "job_title": review.get("job_title"),
+                "level": review.get("level"),
+                "notes": review.get("notes"),
+                "status": review.get("status"),
+                "feedback": review.get("feedback"),
+                "submitted_date": review.get("submitted_date"),
+                "reviewed_by": str(review.get("reviewed_by"))
+                if review.get("reviewed_by")
+                else None,
+                "reviewer_name": review.get("reviewer_name"),
+                "assigned_date": review.get("assigned_date"),
+            }
+        )
+    return result
+
+
+def get_all_assigned_reviews(db: Database) -> list[dict]:
+    """Get all resume reviews that have been assigned (Admin only)"""
+    # Find all reviews where reviewed_by is not null
+    reviews_data = db.resume_reviews.find({"reviewed_by": {"$ne": None}})
+    result = []
+    for review in reviews_data:
+        result.append(
+            {
+                "id": str(review["_id"]),
+                "user_id": str(review.get("user_id")),
+                "user_name": review.get("user_name"),
+                "user_email": review.get("user_email"),
+                "resume_link": review.get("resume_link"),
+                "job_title": review.get("job_title"),
+                "level": review.get("level"),
+                "status": review.get("status"),
+                "feedback": review.get("feedback"),
+                "submitted_date": review.get("submitted_date"),
+                "reviewed_by": str(review.get("reviewed_by")),
+                "reviewer_name": review.get("reviewer_name"),
+                "assigned_date": review.get("assigned_date"),
+            }
+        )
+    return result

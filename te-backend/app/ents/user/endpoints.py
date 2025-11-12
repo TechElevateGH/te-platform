@@ -16,14 +16,15 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/privileged", response_model=list[Dict[str, Any]])
 def list_privileged_users(
     db: Database = Depends(session.get_db),
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
-    List all privileged users (Admin only).
+    List all privileged users (Lead and above).
 
     Returns all users with role >= 2 (Leads, Admins, Referrers, etc.)
+    Filtered to show only Volunteers (role=3) and Leads (role=4) for assignment purposes.
 
-    **Requires**: Admin (role=5) access
+    **Requires**: Lead (role=4) or Admin (role=5) access
     """
     users = user_crud.read_all_privileged_users(db)
     return users
@@ -44,7 +45,7 @@ def create_lead_account(
     Create a new Lead account (Admin only).
 
     Leads authenticate using their username and token.
-    
+
     - **username**: Lead's username for login
     - **token**: Secure token for authentication
     - **role**: Lead (4) or Admin (5)
@@ -80,7 +81,7 @@ def create_referrer_account(
 
     Referrers authenticate using ONLY their token (no username required).
     The username is stored for admin reference only.
-    
+
     - **username**: Internal identifier for admin reference (not used for login)
     - **token**: Secure token for authentication (referrers log in with this only)
     - **company_id**: Assigned company that the referrer manages
@@ -98,6 +99,8 @@ def create_referrer_account(
         "referrer": result,
         "message": "Referrer account created successfully. Please share the token securely with the user.",
     }
+
+
 @router.patch("/privileged/{user_id}", response_model=Dict[str, Any])
 def update_privileged_user(
     *,

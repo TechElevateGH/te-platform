@@ -19,6 +19,21 @@ class ResumeReviewUpdate(BaseModel):
     notes: Optional[str] = None
 
 
+class ResumeReviewAssign(BaseModel):
+    """Schema for assigning a resume review to a reviewer"""
+
+    reviewer_id: str
+    reviewer_name: str
+
+
+class BulkResumeReviewAssign(BaseModel):
+    """Schema for bulk assigning resume reviews"""
+
+    review_ids: list[str]
+    reviewer_id: str
+    reviewer_name: str
+
+
 class ResumeReviewRead(BaseModel):
     """Schema for reading resume review data"""
 

@@ -87,7 +87,7 @@ const ApplicationManagement = () => {
     const fetchAllApplications = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axiosInstance.get('/applications/all', {
+            const response = await axiosInstance.get('/applications', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },

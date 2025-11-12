@@ -165,3 +165,120 @@ def delete_resume_review_request(
 
     review_crud.delete_review_request(db, review_id=review_id)
     return {"message": "Resume review request permanently deleted successfully"}
+
+
+@router.post("/{review_id}/assign", response_model=Dict[str, Any])
+def assign_resume_review(
+    *,
+    db: Database = Depends(session.get_db),
+    review_id: str,
+    data: review_schema.ResumeReviewAssign,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Assign a resume review to a specific reviewer (Lead and above only)
+    Automatically sets status to "In Review" and records assignment date/time
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Lead (4) and above can assign reviews
+    if user_role < 4:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Leads and Admins can assign resume reviews",
+        )
+
+    assigned_review = review_crud.assign_review_to_reviewer(
+        db,
+        review_id=review_id,
+        reviewer_id=data.reviewer_id,
+        reviewer_name=data.reviewer_name,
+    )
+
+    return {
+        "message": "Resume review assigned successfully",
+        "review": assigned_review,
+    }
+
+
+@router.post("/bulk-assign", response_model=Dict[str, Any])
+def bulk_assign_resume_reviews(
+    *,
+    db: Database = Depends(session.get_db),
+    data: review_schema.BulkResumeReviewAssign,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Bulk assign multiple resume reviews to a specific reviewer (Lead and above only)
+    Automatically sets status to "In Review" and records assignment date/time for all
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Lead (4) and above can assign reviews
+    if user_role < 4:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Leads and Admins can assign resume reviews",
+        )
+
+    result = review_crud.bulk_assign_reviews_to_reviewer(
+        db,
+        review_ids=data.review_ids,
+        reviewer_id=data.reviewer_id,
+        reviewer_name=data.reviewer_name,
+    )
+
+    return result
+
+
+@router.get("/my-assignments", response_model=Dict[str, Any])
+def get_my_assigned_reviews(
+    *,
+    db: Database = Depends(session.get_db),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Get all resume reviews assigned to the current user (Volunteers and above)
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Volunteer (3) and above can access assignments
+    if user_role < 3:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Volunteers and above only",
+        )
+
+    reviews = review_crud.get_reviews_assigned_to_user(db, user_id=str(current_user.id))
+    return {"reviews": reviews}
+
+
+@router.get("/assignments", response_model=Dict[str, Any])
+def get_all_assignments(
+    *,
+    db: Database = Depends(session.get_db),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Get all assignment records (Admin only)
+    Shows which reviews were assigned to which volunteers/leads
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Admin (5) can see all assignments
+    if user_role < 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+
+    assignments = review_crud.get_all_assigned_reviews(db)
+    return {"assignments": assignments}

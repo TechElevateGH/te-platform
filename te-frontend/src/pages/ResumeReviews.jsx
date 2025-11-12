@@ -15,7 +15,9 @@ import {
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
     SparklesIcon,
-    XCircleIcon
+    XCircleIcon,
+    UserGroupIcon,
+    MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { trackEvent } from '../analytics/events';
 
@@ -27,16 +29,31 @@ const ResumeReviews = () => {
     const [toast, setToast] = useState(null);
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [myRequestsStatusFilter, setMyRequestsStatusFilter] = useState('active'); // 'active' means Pending + In Review
     const [levelFilter, setLevelFilter] = useState('');
     const [sortBy, setSortBy] = useState('date_desc');
     const [selectedReview, setSelectedReview] = useState(null);
     const [seenReviewFeedback, setSeenReviewFeedback] = useState(new Set());
+    const [activeTab, setActiveTab] = useState('all'); // 'all', 'myAssignments', or 'assignments'
 
     // Check if user is volunteer or above (role >= 3)
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const isVolunteerOrAbove = userRoleInt >= 3;
+    const isLeadOrAbove = userRoleInt >= 4;
+    const isAdmin = userRoleInt >= 5;
+
+    // Assignment state
+    const [selectedReviewIds, setSelectedReviewIds] = useState(new Set());
+    const [assignableUsers, setAssignableUsers] = useState([]);
+    const [showAssignModal, setShowAssignModal] = useState(false);
+    const [assignMode, setAssignMode] = useState('single'); // 'single' or 'bulk'
+    const [reviewToAssign, setReviewToAssign] = useState(null);
+    const [selectedAssignee, setSelectedAssignee] = useState('');
+    const [myAssignedReviews, setMyAssignedReviews] = useState([]);
+    const [allAssignments, setAllAssignments] = useState([]);
 
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
@@ -134,6 +151,71 @@ const ResumeReviews = () => {
         }
     }, [accessToken, fetchData]);
 
+    // Fetch assignable users (volunteers and leads)
+    const fetchAssignableUsers = useCallback(async () => {
+        if (!isLeadOrAbove) return;
+
+        try {
+            const response = await axiosInstance.get('/users/privileged', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            // Filter for volunteers (3) and leads (4)
+            const assignable = (response.data || [])
+                .filter(user => user.role >= 3 && user.role <= 4)
+                .map(user => ({
+                    id: user.id,
+                    name: user.username, // Use username as display name
+                    role: user.role
+                }));
+            setAssignableUsers(assignable);
+        } catch (error) {
+            console.error('Error fetching assignable users:', error);
+        }
+    }, [accessToken, isLeadOrAbove]);
+
+    useEffect(() => {
+        if (accessToken && isLeadOrAbove) {
+            fetchAssignableUsers();
+        }
+    }, [accessToken, isLeadOrAbove, fetchAssignableUsers]);
+
+    // Fetch my assigned reviews (for Volunteers and Leads)
+    const fetchMyAssignedReviews = useCallback(async () => {
+        if (!isVolunteerOrAbove) return;
+
+        try {
+            const response = await axiosInstance.get('/resume-reviews/my-assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setMyAssignedReviews(response.data?.reviews || []);
+        } catch (error) {
+            console.error('Error fetching my assigned reviews:', error);
+        }
+    }, [accessToken, isVolunteerOrAbove]);
+
+    // Fetch all assignments (for Admin)
+    const fetchAllAssignments = useCallback(async () => {
+        if (!isAdmin) return;
+
+        try {
+            const response = await axiosInstance.get('/resume-reviews/assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setAllAssignments(response.data?.assignments || []);
+        } catch (error) {
+            console.error('Error fetching all assignments:', error);
+        }
+    }, [accessToken, isAdmin]);
+
+    useEffect(() => {
+        if (accessToken && isVolunteerOrAbove) {
+            fetchMyAssignedReviews();
+        }
+        if (accessToken && isAdmin) {
+            fetchAllAssignments();
+        }
+    }, [accessToken, isVolunteerOrAbove, isAdmin, fetchMyAssignedReviews, fetchAllAssignments]);
+
     const handleSubmitRequest = async (e) => {
         e.preventDefault();
         try {
@@ -203,6 +285,79 @@ const ResumeReviews = () => {
         }
     };
 
+    // Assignment functions
+    const handleOpenAssignModal = (mode, review = null) => {
+        setAssignMode(mode);
+        setReviewToAssign(review);
+        setSelectedAssignee('');
+        setShowAssignModal(true);
+    };
+
+    const handleAssignSubmit = async () => {
+        if (!selectedAssignee) {
+            setToast({ message: 'Please select an assignee', type: 'error' });
+            return;
+        }
+
+        const assignee = assignableUsers.find(u => u.id === selectedAssignee);
+        if (!assignee) {
+            setToast({ message: 'Invalid assignee selected', type: 'error' });
+            return;
+        }
+
+        try {
+            if (assignMode === 'single') {
+                await axiosInstance.post(`/resume-reviews/${reviewToAssign.id}/assign`, {
+                    reviewer_id: assignee.id,
+                    reviewer_name: assignee.name
+                }, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                setToast({ message: `Assigned to ${assignee.name}`, type: 'success' });
+            } else {
+                // Bulk assign
+                const reviewIds = Array.from(selectedReviewIds);
+                await axiosInstance.post('/resume-reviews/bulk-assign', {
+                    review_ids: reviewIds,
+                    reviewer_id: assignee.id,
+                    reviewer_name: assignee.name
+                }, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                setToast({ message: `Assigned ${reviewIds.length} reviews to ${assignee.name}`, type: 'success' });
+                setSelectedReviewIds(new Set()); // Clear selection
+            }
+
+            setShowAssignModal(false);
+            fetchData();
+            fetchMyAssignedReviews();
+            if (isAdmin) {
+                fetchAllAssignments();
+            }
+        } catch (error) {
+            console.error('Error assigning review:', error);
+            setToast({ message: error.response?.data?.detail || 'Failed to assign', type: 'error' });
+        }
+    };
+
+    const toggleReviewSelection = (reviewId) => {
+        const newSelection = new Set(selectedReviewIds);
+        if (newSelection.has(reviewId)) {
+            newSelection.delete(reviewId);
+        } else {
+            newSelection.add(reviewId);
+        }
+        setSelectedReviewIds(newSelection);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedReviewIds.size === sortedReviews.length) {
+            setSelectedReviewIds(new Set());
+        } else {
+            setSelectedReviewIds(new Set(sortedReviews.map(r => r.id)));
+        }
+    };
+
     const getStatusColor = (status) => {
         const colors = {
             'Pending': 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800',
@@ -215,9 +370,13 @@ const ResumeReviews = () => {
     };
 
     const filteredReviews = reviews.filter(review => {
+        const matchesSearch = !searchQuery ||
+            review.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            review.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            review.job_title?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = !statusFilter || review.status === statusFilter;
         const matchesLevel = !levelFilter || review.level === levelFilter;
-        return matchesStatus && matchesLevel;
+        return matchesSearch && matchesStatus && matchesLevel;
     });
 
     const sortedReviews = [...filteredReviews].sort((a, b) => {
@@ -268,6 +427,7 @@ const ResumeReviews = () => {
     };
 
     const clearAllFilters = () => {
+        setSearchQuery('');
         setStatusFilter('');
         setLevelFilter('');
     };
@@ -361,7 +521,7 @@ const ResumeReviews = () => {
 
                     {/* Stats Bar */}
                     {isVolunteerOrAbove && (
-                        <div className="flex items-center gap-6 py-2.5 text-sm">
+                        <div className="flex items-center gap-6 py-2 text-sm">
                             <div className="flex items-center gap-2">
                                 <ChartBarIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="text-gray-500 dark:text-gray-400">Total:</span>
@@ -389,6 +549,55 @@ const ResumeReviews = () => {
                     )}
                 </div>
             </header>
+
+            {/* Tabs (for Volunteers and above) */}
+            {isVolunteerOrAbove && (
+                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <nav className="flex space-x-8" aria-label="Tabs">
+                            <button
+                                onClick={() => setActiveTab('all')}
+                                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'all'
+                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                All Requests
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('myAssignments')}
+                                className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'myAssignments'
+                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                    }`}
+                            >
+                                My Assignments
+                                {myAssignedReviews.length > 0 && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                        {myAssignedReviews.length}
+                                    </span>
+                                )}
+                            </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setActiveTab('assignments')}
+                                    className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assignments'
+                                        ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        }`}
+                                >
+                                    All Assignments
+                                    {allAssignments.length > 0 && (
+                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                            {allAssignments.length}
+                                        </span>
+                                    )}
+                                </button>
+                            )}
+                        </nav>
+                    </div>
+                </div>
+            )}
 
             <div className="max-w-7xl mx-auto px-4 py-3">
                 {/* My Requests Section */}
@@ -483,105 +692,161 @@ const ResumeReviews = () => {
 
                 {/* Filters (for Volunteers and above) */}
                 {isVolunteerOrAbove && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-                            {/* Status Filter */}
-                            <div className="md:col-span-3">
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                    Status
-                                </label>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 transition-colors"
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Review">In Review</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Declined">Declined</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
+                    <>
+                        {/* Search and Sort Bar */}
+                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="flex items-center gap-3">
+                                {/* Global Search */}
+                                <div className="flex-1 relative">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search reviews (member, email, job title)..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    />
+                                </div>
 
-                            {/* Level Filter */}
-                            <div className="md:col-span-3">
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                    Level
-                                </label>
-                                <select
-                                    value={levelFilter}
-                                    onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 transition-colors"
-                                >
-                                    <option value="">All Levels</option>
-                                    <option value="Intern">Intern</option>
-                                    <option value="Entry Level">Entry Level</option>
-                                    <option value="Mid Level">Mid Level</option>
-                                    <option value="Senior Level">Senior Level</option>
-                                    <option value="Lead/Principal">Lead/Principal</option>
-                                </select>
-                            </div>
+                                {/* Sort Dropdown */}
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                        Sort by:
+                                    </label>
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    >
+                                        <option value="date_desc">Newest First</option>
+                                        <option value="date_asc">Oldest First</option>
+                                        <option value="member_asc">Member (A-Z)</option>
+                                        <option value="member_desc">Member (Z-A)</option>
+                                        <option value="status_asc">Status (A-Z)</option>
+                                        <option value="status_desc">Status (Z-A)</option>
+                                    </select>
+                                </div>
 
-                            {/* Sort */}
-                            <div className="md:col-span-4">
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
-                                    Sort by
-                                </label>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 transition-colors"
+                                {/* Advanced Filters Button */}
+                                <button
+                                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
+                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                        }`}
                                 >
-                                    <option value="date_desc">Date (Newest)</option>
-                                    <option value="date_asc">Date (Oldest)</option>
-                                    <option value="member_asc">Member (A-Z)</option>
-                                    <option value="member_desc">Member (Z-A)</option>
-                                    <option value="status_asc">Status (A-Z)</option>
-                                    <option value="status_desc">Status (Z-A)</option>
-                                </select>
-                            </div>
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Filters
+                                    {(statusFilter || levelFilter) && (
+                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                            {[statusFilter, levelFilter].filter(Boolean).length}
+                                        </span>
+                                    )}
+                                </button>
 
-                            {/* Results Count */}
-                            <div className="md:col-span-2 text-xs font-medium text-gray-500 dark:text-gray-400 text-right">
-                                {sortedReviews.length} of {reviews.length}
+                                {/* Results Count */}
+                                <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                    {sortedReviews.length} of {reviews.length}
+                                </div>
                             </div>
                         </div>
 
-                        {/* Active Filters */}
-                        {(statusFilter || levelFilter) && (
-                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    {statusFilter && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-                                            Status: {statusFilter}
-                                        </span>
-                                    )}
-                                    {levelFilter && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-                                            Level: {levelFilter}
-                                        </span>
+                        {/* Advanced Filters Panel */}
+                        {showAdvancedFilters && (
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-purple-600 dark:text-purple-500" />
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
+                                    </div>
+                                    {(statusFilter || levelFilter) && (
+                                        <button
+                                            onClick={clearAllFilters}
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                        >
+                                            <XMarkIcon className="h-3.5 w-3.5" />
+                                            Clear All
+                                        </button>
                                     )}
                                 </div>
-                                <button
-                                    onClick={clearAllFilters}
-                                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                >
-                                    <XMarkIcon className="h-3.5 w-3.5" />
-                                    Clear All
-                                </button>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Status Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Statuses</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="In Review">In Review</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Declined">Declined</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Level Filter */}
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Level
+                                        </label>
+                                        <select
+                                            value={levelFilter}
+                                            onChange={(e) => setLevelFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        >
+                                            <option value="">All Levels</option>
+                                            <option value="Intern">Intern</option>
+                                            <option value="Entry Level">Entry Level</option>
+                                            <option value="Mid Level">Mid Level</option>
+                                            <option value="Senior Level">Senior Level</option>
+                                            <option value="Lead/Principal">Lead/Principal</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
 
                 {/* All Requests Table (for Volunteers and above) */}
-                {isVolunteerOrAbove && (
+                {isVolunteerOrAbove && activeTab === 'all' && (
                     <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        {/* Bulk Actions Bar */}
+                        {isLeadOrAbove && selectedReviewIds.size > 0 && (
+                            <div className="px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-200 dark:border-purple-800 flex items-center justify-between">
+                                <span className="text-sm font-medium text-purple-900 dark:text-purple-300">
+                                    {selectedReviewIds.size} review{selectedReviewIds.size !== 1 ? 's' : ''} selected
+                                </span>
+                                <button
+                                    onClick={() => handleOpenAssignModal('bulk')}
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded transition-colors"
+                                >
+                                    <UserGroupIcon className="h-4 w-4" />
+                                    Assign Selected
+                                </button>
+                            </div>
+                        )}
+
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                        {isLeadOrAbove && (
+                                            <th className="px-4 py-3 text-left w-12">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedReviewIds.size === sortedReviews.length && sortedReviews.length > 0}
+                                                    onChange={toggleSelectAll}
+                                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                />
+                                            </th>
+                                        )}
                                         {visibleColumns.member && (
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                 Member
@@ -637,6 +902,16 @@ const ResumeReviews = () => {
                                                 key={review.id}
                                                 className="hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all"
                                             >
+                                                {isLeadOrAbove && (
+                                                    <td className="px-4 py-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedReviewIds.has(review.id)}
+                                                            onChange={() => toggleReviewSelection(review.id)}
+                                                            className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                        />
+                                                    </td>
+                                                )}
                                                 {visibleColumns.member && (
                                                     <td className="px-4 py-3">
                                                         <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -681,9 +956,20 @@ const ResumeReviews = () => {
                                                 )}
                                                 {visibleColumns.reviewer && (
                                                     <td className="px-4 py-3">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
-                                                            {review.reviewer_name || 'N/A'}
-                                                        </span>
+                                                        {review.reviewer_name ? (
+                                                            <div className="text-xs">
+                                                                <div className="font-medium text-gray-900 dark:text-white">
+                                                                    {review.reviewer_name}
+                                                                </div>
+                                                                {review.assigned_date && (
+                                                                    <div className="text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                        {review.assigned_date}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">Unassigned</span>
+                                                        )}
                                                     </td>
                                                 )}
                                                 {visibleColumns.actions && (
@@ -698,6 +984,18 @@ const ResumeReviews = () => {
                                                                 <EyeIcon className="h-3.5 w-3.5" />
                                                                 View
                                                             </a>
+
+                                                            {/* Assign button for Lead+ on Pending reviews */}
+                                                            {isLeadOrAbove && review.status === 'Pending' && !review.reviewer_name && (
+                                                                <button
+                                                                    onClick={() => handleOpenAssignModal('single', review)}
+                                                                    className="px-2.5 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700 transition-colors flex items-center gap-1"
+                                                                >
+                                                                    <UserGroupIcon className="h-3.5 w-3.5" />
+                                                                    Assign
+                                                                </button>
+                                                            )}
+
                                                             {review.status === 'Pending' && (
                                                                 <button
                                                                     onClick={() => {
@@ -727,6 +1025,161 @@ const ResumeReviews = () => {
                                                         </div>
                                                     </td>
                                                 )}
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* My Assignments Tab (for Volunteers and Leads) */}
+                {isVolunteerOrAbove && activeTab === 'myAssignments' && (
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {myAssignedReviews.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                No reviews assigned to you yet
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        myAssignedReviews.map((review) => (
+                                            <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                        {review.level}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(review.status)}`}>
+                                                        {review.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <a
+                                                            href={review.resume_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                        >
+                                                            <EyeIcon className="h-3.5 w-3.5" />
+                                                            View
+                                                        </a>
+                                                        {review.status === 'In Review' && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    const feedback = prompt('Enter your final feedback:');
+                                                                    if (feedback) {
+                                                                        handleUpdateStatus(review.id, 'Completed', feedback);
+                                                                    }
+                                                                }}
+                                                                className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
+                                                            >
+                                                                Complete
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* All Assignments Tab (for Admin only) */}
+                {isAdmin && activeTab === 'assignments' && (
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">All Assignments</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Overview of all resume review assignments
+                            </p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned To</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {allAssignments.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                No assignments yet
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        allAssignments.map((review) => (
+                                            <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                        {review.level}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                                        {review.reviewer_name}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(review.status)}`}>
+                                                        {review.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <a
+                                                            href={review.resume_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                        >
+                                                            <EyeIcon className="h-3.5 w-3.5" />
+                                                            View
+                                                        </a>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     )}
@@ -835,6 +1288,73 @@ const ResumeReviews = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Assignment Modal */}
+            {showAssignModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full">
+                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-2xl">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                    <UserGroupIcon className="h-6 w-6" />
+                                    Assign Review{assignMode === 'bulk' ? 's' : ''}
+                                </h2>
+                                <button
+                                    onClick={() => setShowAssignModal(false)}
+                                    className="text-white hover:bg-white/20 rounded p-1"
+                                >
+                                    <XMarkIcon className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                    {assignMode === 'bulk'
+                                        ? `Assign ${selectedReviewIds.size} review${selectedReviewIds.size !== 1 ? 's' : ''} to:`
+                                        : `Assign "${reviewToAssign?.job_title}" review to:`
+                                    }
+                                </p>
+
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                    Select Reviewer
+                                </label>
+                                <select
+                                    value={selectedAssignee}
+                                    onChange={(e) => setSelectedAssignee(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                >
+                                    <option value="">-- Select a volunteer or lead --</option>
+                                    {assignableUsers.map(user => (
+                                        <option key={user.id} value={user.id}>
+                                            {user.name} ({user.role === 3 ? 'Volunteer' : 'Lead'})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAssignModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleAssignSubmit}
+                                    disabled={!selectedAssignee}
+                                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Assign
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

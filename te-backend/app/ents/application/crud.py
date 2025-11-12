@@ -93,7 +93,9 @@ def read_all_applications(db: Database) -> list[dict]:
         {"$unwind": {"path": "$applications", "preserveNullAndEmptyArrays": False}},
         {
             "$project": {
-                "user_id": "$_id",
+                "_id": 0,  # Exclude the _id field to avoid ObjectId serialization issues
+                "id": "$applications.id",  # Application UUID
+                "user_id": {"$toString": "$_id"},  # Convert ObjectId to string
                 "user_name": "$full_name",
                 "user_email": "$email",
                 "company": "$applications.company",

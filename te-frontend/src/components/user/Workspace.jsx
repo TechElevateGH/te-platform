@@ -96,23 +96,54 @@ const Workspace = ({ setLogin }) => {
     }, [accessToken, logout, setUserInfo, userId]);
 
     const getUserFilesRequest = useCallback(async () => {
-        axiosInstance.get(`/users/${userId}/member-files`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        })
-            .then((response) => {
-                setResumes(response.data.files.resumes);
-                setOtherFiles([
-                    ...(response.data.files.referral_essays || []),
-                    ...(response.data.files.cover_letters || [])
-                ]);
-            })
-            .catch((error) => {
-                if (error.response.status === 401) {
-                    logout();
-                }
-            })
+        try {
+            // Fetch resumes
+            const resumesResponse = await axiosInstance.get(`/users/${userId}/resumes`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            // Fetch essays and cover letters
+            const essayResponse = await axiosInstance.get(`/users/${userId}/essay`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            const coverLetterResponse = await axiosInstance.get(`/users/${userId}/cover-letter`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            setResumes(resumesResponse.data?.resumes || []);
+
+            const otherFilesList = [];
+            if (essayResponse.data?.essay) {
+                otherFilesList.push({
+                    id: 'essay',
+                    name: 'Referral Essay',
+                    type: 'essay',
+                    content: essayResponse.data.essay
+                });
+            }
+            if (coverLetterResponse.data?.cover_letter) {
+                otherFilesList.push({
+                    id: 'cover-letter',
+                    name: 'Cover Letter',
+                    type: 'cover_letter',
+                    content: coverLetterResponse.data.cover_letter
+                });
+            }
+
+            setOtherFiles(otherFilesList);
+        } catch (error) {
+            if (error.response?.status === 401) {
+                logout();
+            }
+            console.error('Error fetching user files:', error);
+        }
     }, [accessToken, logout, setOtherFiles, setResumes, userId]);
 
 
