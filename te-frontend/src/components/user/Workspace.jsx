@@ -3,6 +3,7 @@ import {
     FolderIcon,
     XMarkIcon,
     UserGroupIcon,
+    UserCircleIcon,
 
 } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
@@ -46,10 +47,11 @@ const Workspace = ({ setLogin }) => {
 
     // Dynamic navigation based on role
     const navigation = useMemo(() => {
-        // Referrers only see Referrals
+        // Referrers only see Referrals and Profile
         if (isReferrer) {
             return [
                 { name: 'Referrals', type: "app", icon: FolderIcon },
+                { name: 'Profile', type: "app", icon: UserCircleIcon },
             ];
         }
 
@@ -60,6 +62,7 @@ const Workspace = ({ setLogin }) => {
             { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
             { name: 'Learning', type: "learn", icon: BookOpenIcon },
             { name: 'Practice', type: "learn", icon: CodeBracketIcon },
+            { name: 'Profile', type: "app", icon: UserCircleIcon },
         ];
 
         // Lead/Admin gets additional admin sections
@@ -153,14 +156,11 @@ const Workspace = ({ setLogin }) => {
         if (prevContent) {
             setContent(prevContent);
         }
-    }, [content]);
+    }, [location.pathname]);
 
-    // Handle URL-based navigation (e.g., /workspace/profile, /workspace/account-management)
+    // Handle URL-based navigation (e.g., /workspace/account-management)
     useEffect(() => {
-        if (location.pathname === '/workspace/profile') {
-            setContent('Profile');
-            sessionStorage.setItem('content', 'Profile');
-        } else if (location.pathname === '/workspace/account-management') {
+        if (location.pathname === '/workspace/account-management') {
             setContent('Account Management');
             sessionStorage.setItem('content', 'Account Management');
         } else if (location.pathname === '/workspace/admin-analytics') {
@@ -168,6 +168,19 @@ const Workspace = ({ setLogin }) => {
             sessionStorage.setItem('content', 'Learning Analytics');
         }
     }, [location]);
+
+    // Listen for custom workspace content change events (e.g., from Navbar)
+    useEffect(() => {
+        const handleContentChange = (event) => {
+            if (event.detail) {
+                setContent(event.detail);
+                sessionStorage.setItem('content', event.detail);
+            }
+        };
+
+        window.addEventListener('workspaceContentChange', handleContentChange);
+        return () => window.removeEventListener('workspaceContentChange', handleContentChange);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {

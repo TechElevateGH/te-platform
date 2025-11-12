@@ -45,7 +45,6 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
-                    <Route path="/workspace/profile" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
                     <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
                     <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
                     <Route path="/login" element={<Login />} />

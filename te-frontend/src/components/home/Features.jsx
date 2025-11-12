@@ -8,6 +8,8 @@ import {
     SparklesIcon,
     RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const features = [
     {
@@ -55,6 +57,17 @@ const features = [
 ];
 
 const Features = () => {
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+
+    const handleExploreFeatures = () => {
+        if (isAuthenticated) {
+            navigate('/workspace');
+        } else {
+            navigate('/login');
+        }
+    };
+
     return (
         <div id="features" className="relative py-24 sm:py-32 bg-white dark:bg-gray-900 overflow-hidden transition-colors">
             {/* Background decoration */}
@@ -115,7 +128,9 @@ const Features = () => {
                 {/* Bottom CTA */}
                 <div className="mt-20 text-center">
                     <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
-                        <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+                        <button 
+                            onClick={handleExploreFeatures}
+                            className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
                             <span className="flex items-center gap-2">
                                 Explore All Features
                                 <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />

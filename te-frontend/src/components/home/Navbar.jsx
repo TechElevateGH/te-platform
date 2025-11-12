@@ -191,7 +191,15 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                                 {/* Profile icon */}
                                 <button
-                                    onClick={() => navigate('/workspace/profile')}
+                                    onClick={() => {
+                                        sessionStorage.setItem('content', 'Profile');
+                                        if (location.pathname === '/workspace') {
+                                            // If already on workspace, dispatch a custom event to trigger content change
+                                            window.dispatchEvent(new CustomEvent('workspaceContentChange', { detail: 'Profile' }));
+                                        } else {
+                                            navigate('/workspace');
+                                        }
+                                    }}
                                     className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
                                     title="Profile"
                                 >
