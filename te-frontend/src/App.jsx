@@ -16,9 +16,6 @@ import ResumeReviews from './pages/ResumeReviews';
 import PostHogProvider from './providers/PostHogProvider';
 import OAuthCallback from './components/user/OAuthCallback';
 import Documentation from './pages/Documentation';
-import { useState, useEffect } from 'react';
-import ColdStartIndicator from './components/_custom/ColdStartIndicator';
-import { setColdStartHandlers } from './axiosConfig';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -38,35 +35,8 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-  const [showColdStart, setShowColdStart] = useState(false);
-  const [activeRequests, setActiveRequests] = useState(new Set());
 
-  useEffect(() => {
-    // Set up global handlers for cold start detection
-    setColdStartHandlers({
-      onSlowRequest: (requestId) => {
-        setActiveRequests(prev => new Set([...prev, requestId]));
-        setShowColdStart(true);
-      },
-      onRequestComplete: (requestId) => {
-        setActiveRequests(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(requestId);
-          return newSet;
-        });
-        
-        // Hide cold start indicator after a brief delay if no more active requests
-        setTimeout(() => {
-          setActiveRequests(current => {
-            if (current.size === 0) {
-              setShowColdStart(false);
-            }
-            return current;
-          });
-        }, 500);
-      }
-    });
-  }, []);
+
 
   return (
     <BrowserRouter>
@@ -76,10 +46,6 @@ function App() {
             <NotificationProvider>
               <DataProvider>
                 <div className="App gentium-book">
-                  <ColdStartIndicator 
-                    isLoading={activeRequests.size > 0} 
-                    timeoutReached={showColdStart} 
-                  />
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />

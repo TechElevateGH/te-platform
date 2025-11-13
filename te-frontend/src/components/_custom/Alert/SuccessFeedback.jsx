@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { XMarkIcon, CheckCircleIcon } from '@heroicons/react/20/solid'
 
 const SuccessFeedback = ({ setShowSuccessFeedback, message }) => {

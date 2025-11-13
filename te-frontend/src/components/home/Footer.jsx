@@ -4,35 +4,35 @@ import { faLinkedin, faGithub, faTwitter, faFacebook, faInstagram } from '@forta
 const navigation = {
     platform: [
         { name: 'Features', href: '#features' },
-        { name: 'How It Works', href: '#' },
+        { name: 'How It Works', href: '/how-it-works' },
         { name: 'Success Stories', href: '#testimonials' },
-        { name: 'Pricing', href: '#' },
+        { name: 'Pricing', href: '/pricing' },
     ],
     company: [
         { name: 'About Us', href: '#team' },
         { name: 'Our Team', href: '#team' },
-        { name: 'Careers', href: '#' },
-        { name: 'Contact', href: '#' },
+        { name: 'Careers', href: '/careers' },
+        { name: 'Contact', href: '/contact' },
     ],
     resources: [
-        { name: 'Learning Hub', href: '#' },
-        { name: 'Blog', href: '#' },
-        { name: 'Help Center', href: '#' },
-        { name: 'Community', href: '#' },
+        { name: 'Learning Hub', href: '/learning' },
+        { name: 'Blog', href: '/blog' },
+        { name: 'Help Center', href: '/help' },
+        { name: 'Community', href: '/community' },
     ],
     legal: [
-        { name: 'Privacy Policy', href: '#' },
-        { name: 'Terms of Service', href: '#' },
-        { name: 'Cookie Policy', href: '#' },
+        { name: 'Privacy Policy', href: '/privacy' },
+        { name: 'Terms of Service', href: '/terms' },
+        { name: 'Cookie Policy', href: '/cookies' },
     ],
 };
 
 const socialLinks = [
-    { name: 'LinkedIn', icon: faLinkedin, href: '#', color: 'hover:text-blue-500' },
-    { name: 'GitHub', icon: faGithub, href: '#', color: 'hover:text-gray-900' },
-    { name: 'Twitter', icon: faTwitter, href: '#', color: 'hover:text-blue-400' },
-    { name: 'Facebook', icon: faFacebook, href: '#', color: 'hover:text-blue-600' },
-    { name: 'Instagram', icon: faInstagram, href: '#', color: 'hover:text-pink-600' },
+    { name: 'LinkedIn', icon: faLinkedin, href: 'https://linkedin.com', color: 'hover:text-blue-500' },
+    { name: 'GitHub', icon: faGithub, href: 'https://github.com/TechElevateGH', color: 'hover:text-gray-900' },
+    { name: 'Twitter', icon: faTwitter, href: 'https://twitter.com', color: 'hover:text-blue-400' },
+    { name: 'Facebook', icon: faFacebook, href: 'https://facebook.com', color: 'hover:text-blue-600' },
+    { name: 'Instagram', icon: faInstagram, href: 'https://instagram.com', color: 'hover:text-pink-600' },
 ];
 
 const Footer = () => {
@@ -75,7 +75,7 @@ const Footer = () => {
                         <div className="md:grid md:grid-cols-2 md:gap-8">
                             <div>
                                 <h3 className="text-sm font-semibold leading-6 text-white">Platform</h3>
-                                <ul role="list" className="mt-6 space-y-4">
+                                <ul className="mt-6 space-y-4">
                                     {navigation.platform.map((item) => (
                                         <li key={item.name}>
                                             <a
@@ -90,7 +90,7 @@ const Footer = () => {
                             </div>
                             <div className="mt-10 md:mt-0">
                                 <h3 className="text-sm font-semibold leading-6 text-white">Company</h3>
-                                <ul role="list" className="mt-6 space-y-4">
+                                <ul className="mt-6 space-y-4">
                                     {navigation.company.map((item) => (
                                         <li key={item.name}>
                                             <a
@@ -107,7 +107,7 @@ const Footer = () => {
                         <div className="md:grid md:grid-cols-2 md:gap-8">
                             <div>
                                 <h3 className="text-sm font-semibold leading-6 text-white">Resources</h3>
-                                <ul role="list" className="mt-6 space-y-4">
+                                <ul className="mt-6 space-y-4">
                                     {navigation.resources.map((item) => (
                                         <li key={item.name}>
                                             <a
@@ -122,7 +122,7 @@ const Footer = () => {
                             </div>
                             <div className="mt-10 md:mt-0">
                                 <h3 className="text-sm font-semibold leading-6 text-white">Legal</h3>
-                                <ul role="list" className="mt-6 space-y-4">
+                                <ul className="mt-6 space-y-4">
                                     {navigation.legal.map((item) => (
                                         <li key={item.name}>
                                             <a
@@ -181,9 +181,9 @@ const Footer = () => {
                         &copy; {new Date().getFullYear()} TechElevate. All rights reserved. Built with ❤️ for marginalized talent worldwide.
                     </p>
                     <div className="mt-4 flex space-x-6 md:mt-0">
-                        <a href="#" className="text-xs text-gray-400 hover:text-white transition-colors">
-                            Made by TechElevateGH
-                        </a>
+                        <span className="text-xs text-gray-400">
+                            Made by TechElevate
+                        </span>
                     </div>
                 </div>
             </div>
