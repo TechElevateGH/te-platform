@@ -72,11 +72,13 @@ enable_cors(app)
 # Enable gzip compression for large HTML (documentation) to speed up mobile loads
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
+
 # Perform a MongoDB connectivity check on startup for observability
 @app.on_event("startup")
 async def verify_mongodb_connection():
     try:
         from app.database.session import client  # reuse existing client
+
         client.admin.command("ping")
         logger.info("MongoDB ping successful on startup")
     except Exception as e:

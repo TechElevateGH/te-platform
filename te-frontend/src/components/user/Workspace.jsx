@@ -35,7 +35,8 @@ const Workspace = ({ setLogin }) => {
     const navigate = useNavigate();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const [showGuestAlert, setShowGuestAlert] = useState(true)
+    // Show compact guest banner only once per guest session
+    const [showGuestAlert, setShowGuestAlert] = useState(false)
 
     // Set default content based on role - Guests and Referrers have special defaults
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -202,6 +203,20 @@ const Workspace = ({ setLogin }) => {
         }
     }, [accessToken, getUserInfoRequest, isGuest])
 
+    // One-time guest banner display logic
+    useEffect(() => {
+        if (isGuest) {
+            const shown = localStorage.getItem('guestWelcomeShown') === 'true';
+            if (!shown) {
+                setShowGuestAlert(true);
+                localStorage.setItem('guestWelcomeShown', 'true');
+            }
+        } else {
+            // Reset flag when not in guest mode so future guest sessions see it again
+            localStorage.removeItem('guestWelcomeShown');
+        }
+    }, [isGuest]);
+
     useEffect(() => {
         const fetchData = async () => {
             await getUserFilesRequest();
@@ -238,69 +253,34 @@ const Workspace = ({ setLogin }) => {
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
                 <div className="md:pl-28">
-                    {/* Guest Mode Alert */}
+                    {/* Compact one-time Guest Banner */}
                     {isGuest && showGuestAlert && (
-                        <div className="fixed top-20 left-0 right-0 z-40 px-4 md:pl-28">
-                            <div className="max-w-4xl mx-auto mt-4 animate-fade-in">
-                                <div className="relative bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-2xl shadow-lg backdrop-blur-sm overflow-hidden">
-                                    {/* Decorative sparkle icon */}
-                                    <div className="absolute top-0 right-0 -mt-2 -mr-2 opacity-20">
-                                        <SparklesIcon className="h-24 w-24 text-blue-500" />
+                        <div className="fixed top-16 left-0 right-0 z-40 px-4 md:pl-28">
+                            <div className="max-w-3xl mx-auto mt-2 animate-fade-in">
+                                <div className="flex items-center gap-3 rounded-xl border border-blue-200 dark:border-blue-700 bg-white/90 dark:bg-blue-900/40 backdrop-blur px-4 py-2 shadow">
+                                    <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
+                                        <SparklesIcon className="h-5 w-5" />
                                     </div>
-
-                                    <div className="relative p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex-shrink-0">
-                                                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                                                    <SparklesIcon className="h-6 w-6 text-white" />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                    Welcome, Guest! 👋
-                                                </h3>
-                                                <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                                                    You're exploring in <span className="font-semibold text-blue-600 dark:text-blue-400">Guest Mode</span>.
-                                                    Sign in to unlock the full power of TechElevate:
-                                                </p>
-                                                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-4">
-                                                    <li className="flex items-center gap-2">
-                                                        <span className="text-blue-500">✓</span>
-                                                        Track job applications and referrals
-                                                    </li>
-                                                    <li className="flex items-center gap-2">
-                                                        <span className="text-blue-500">✓</span>
-                                                        Upload and manage resumes
-                                                    </li>
-                                                    <li className="flex items-center gap-2">
-                                                        <span className="text-blue-500">✓</span>
-                                                        Access exclusive opportunities
-                                                    </li>
-                                                </ul>
-                                                <button
-                                                    onClick={() => {
-                                                        logout();
-                                                        navigate('/login');
-                                                    }}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                                                >
-                                                    <span>Sign In Now</span>
-                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-
-                                            <button
-                                                onClick={() => setShowGuestAlert(false)}
-                                                className="flex-shrink-0 p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors"
-                                                aria-label="Close alert"
-                                            >
-                                                <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-100 flex-1">
+                                        Guest Mode: limited features. Sign in to track applications & resumes.
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setShowGuestAlert(false);
+                                            logout();
+                                            navigate('/login');
+                                        }}
+                                        className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                                    >
+                                        Sign In
+                                    </button>
+                                    <button
+                                        onClick={() => setShowGuestAlert(false)}
+                                        aria-label="Dismiss guest banner"
+                                        className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800/50"
+                                    >
+                                        <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
