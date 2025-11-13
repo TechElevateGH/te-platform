@@ -238,7 +238,61 @@ const Applications = () => {
             {/* Premium Header */}
             <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-                    <div className="flex items-center justify-between">
+                    {/* Mobile Layout */}
+                    <div className="md:hidden space-y-3">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Applications</h1>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Track your applications</p>
+                            </div>
+                            {!fetchApplications && isMember && (
+                                <button
+                                    onClick={() => setAddApplication(true)}
+                                    className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md text-sm active:scale-95"
+                                >
+                                    <PlusIcon className="h-5 w-5" />
+                                    <span>New</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Mobile Statistics Grid */}
+                        {!fetchApplications && applications.length > 0 && (
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                    <BriefcaseIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-gray-600 dark:text-gray-400">Total</p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{stats.total}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                                    <CheckCircleIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-500 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-emerald-600 dark:text-emerald-500">Offers</p>
+                                        <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">{stats.offers}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                    <ClockIcon className="h-4 w-4 text-blue-600 dark:text-blue-500 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-blue-600 dark:text-blue-500">Interview</p>
+                                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-400">{stats.interviewing}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                                    <ClockIcon className="h-4 w-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                                    <div className="min-w-0">
+                                        <p className="text-xs text-amber-600 dark:text-amber-500">Pending</p>
+                                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-400">{stats.pending}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden md:flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             <div>
                                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Applications</h1>
@@ -299,9 +353,76 @@ const Applications = () => {
             {/* Main Content - Always Show */}
             {!fetchApplications && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-                    {/* Compact Search and Filter Bar */}
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-3 mb-3">
-                        <div className="flex items-center gap-2">
+                    {/* Responsive Search and Filter Bar */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-3 sm:p-4 mb-3">
+                        {/* Mobile: Stack vertically */}
+                        <div className="flex flex-col gap-3 md:hidden">
+                            {/* Search */}
+                            <div className="relative">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    placeholder="Search applications..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                                />
+                            </div>
+
+                            {/* Filters Grid */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                >
+                                    <option value="All">All Status</option>
+                                    <option value="Submitted">Submitted</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Phone interview">Phone</option>
+                                    <option value="OA">OA</option>
+                                    <option value="Final interview">Final</option>
+                                    <option value="Offer">Offer</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+
+                                <select
+                                    value={levelFilter}
+                                    onChange={(e) => setLevelFilter(e.target.value)}
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                >
+                                    {uniqueLevels.map(level => (
+                                        <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    value={locationFilter}
+                                    onChange={(e) => setLocationFilter(e.target.value)}
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                >
+                                    {uniqueLocations.map(location => (
+                                        <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
+                                    ))}
+                                </select>
+
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setStatusFilter('All');
+                                        setLevelFilter('All');
+                                        setLocationFilter('All');
+                                    }}
+                                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-600 transition-all text-sm active:scale-95"
+                                >
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    <span>Clear</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Desktop: Horizontal layout */}
+                        <div className="hidden md:flex items-center gap-2">
                             {/* Search */}
                             <div className="relative flex-1">
                                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
@@ -368,24 +489,24 @@ const Applications = () => {
                     {/* Bulk Actions Bar */}
                     {applications.length > 0 && (
                         <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 mb-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                 <div className="flex items-center gap-2">
                                     <BriefcaseIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
                                         Bulk Actions ({applications.length} total)
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
                                     <button
                                         onClick={handleArchiveAll}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all text-xs"
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all text-xs active:scale-95"
                                     >
                                         <ArchiveBoxIcon className="h-3.5 w-3.5" />
                                         <span>Archive All</span>
                                     </button>
                                     <button
                                         onClick={handleDeleteAll}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg font-medium hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all text-xs"
+                                        className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg font-medium hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all text-xs active:scale-95"
                                     >
                                         <TrashIcon className="h-3.5 w-3.5" />
                                         <span>Delete All</span>
@@ -420,170 +541,294 @@ const Applications = () => {
                             )}
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 overflow-hidden">
-                            {/* Table */}
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-                                            <th
-                                                onClick={() => handleSort('company')}
-                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <BuildingOfficeIcon className="h-4 w-4" />
-                                                    Company
-                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <>
+                            {/* Mobile: Card Layout */}
+                            <div className="md:hidden space-y-3">
+                                {paginatedApplications.map((app) => (
+                                    <div
+                                        key={app.id}
+                                        onClick={() => isMember && openApplicationModal(app)}
+                                        className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-4 ${isMember
+                                                ? 'cursor-pointer active:scale-[0.98] transition-transform'
+                                                : 'cursor-not-allowed opacity-60'
+                                            }`}
+                                        title={!isMember ? "Only Members can edit applications" : ""}
+                                    >
+                                        {/* Header with Company Logo and Name */}
+                                        <div className="flex items-start gap-3 mb-3">
+                                            <div className="relative h-12 w-12 flex-shrink-0">
+                                                <img
+                                                    src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                    alt={app.company}
+                                                    className="h-12 w-12 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                                <div className="hidden h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm">
+                                                    <BuildingOfficeIcon className="h-6 w-6 text-white" />
                                                 </div>
-                                            </th>
-                                            <th
-                                                onClick={() => handleSort('title')}
-                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <BriefcaseIcon className="h-4 w-4" />
-                                                    Position
-                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                </div>
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Level
-                                            </th>
-                                            <th
-                                                onClick={() => handleSort('status')}
-                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    Status
-                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                </div>
-                                            </th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                <div className="flex items-center gap-2">
-                                                    <MapPinIcon className="h-4 w-4" />
-                                                    Location
-                                                </div>
-                                            </th>
-                                            <th
-                                                onClick={() => handleSort('date')}
-                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <CalendarIcon className="h-4 w-4" />
-                                                    Date
-                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {paginatedApplications.map((app, idx) => (
-                                            <tr
-                                                key={app.id}
-                                                onClick={() => isMember && openApplicationModal(app)}
-                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
-                                                title={!isMember ? "Only Members can edit applications" : ""}
-                                            >
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="relative h-10 w-10 flex-shrink-0">
-                                                            <img
-                                                                src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
-                                                                alt={app.company}
-                                                                className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow bg-white"
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                    e.target.nextSibling.style.display = 'flex';
-                                                                }}
-                                                            />
-                                                            <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                                                                <BuildingOfficeIcon className="h-5 w-5 text-white" />
-                                                            </div>
-                                                        </div>
-                                                        <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xs">
-                                                            {app.company}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-xs font-medium text-gray-900 dark:text-white">{app.title}</div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                                        {app.role}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
-                                                        {app.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                                        <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
-                                                        <span>
-                                                            {app.location?.city
-                                                                ? `${app.location.city}, ${app.location.country}`
-                                                                : app.location?.country || 'Unknown'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                                        {new Date(app.date).toLocaleDateString('en-US', {
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                            year: 'numeric'
-                                                        })}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                                                    {app.company}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                                    {app.title}
+                                                </p>
+                                            </div>
+                                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border flex-shrink-0 ${getStatusBadge(app.status)}`}>
+                                                {app.status}
+                                            </span>
+                                        </div>
+
+                                        {/* Details Grid */}
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <BriefcaseIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                                <span className="text-gray-700 dark:text-gray-300 truncate">{app.role}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                                <span className="text-gray-700 dark:text-gray-300 truncate">
+                                                    {app.location?.city
+                                                        ? `${app.location.city}, ${app.location.country}`
+                                                        : app.location?.country || 'Unknown'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <CalendarIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                                <span className="text-gray-700 dark:text-gray-300">
+                                                    {new Date(app.date).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Pagination */}
+                            {/* Desktop: Table Layout */}
+                            <div className="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                                <th
+                                                    onClick={() => handleSort('company')}
+                                                    className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <BuildingOfficeIcon className="h-4 w-4" />
+                                                        Company
+                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                    </div>
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('title')}
+                                                    className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <BriefcaseIcon className="h-4 w-4" />
+                                                        Position
+                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                    </div>
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Level
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('status')}
+                                                    className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Status
+                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                    </div>
+                                                </th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPinIcon className="h-4 w-4" />
+                                                        Location
+                                                    </div>
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('date')}
+                                                    className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <CalendarIcon className="h-4 w-4" />
+                                                        Date
+                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {paginatedApplications.map((app, idx) => (
+                                                <tr
+                                                    key={app.id}
+                                                    onClick={() => isMember && openApplicationModal(app)}
+                                                    className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                    title={!isMember ? "Only Members can edit applications" : ""}
+                                                >
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="relative h-10 w-10 flex-shrink-0">
+                                                                <img
+                                                                    src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                    alt={app.company}
+                                                                    className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow bg-white"
+                                                                    onError={(e) => {
+                                                                        e.target.style.display = 'none';
+                                                                        e.target.nextSibling.style.display = 'flex';
+                                                                    }}
+                                                                />
+                                                                <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                                                    <BuildingOfficeIcon className="h-5 w-5 text-white" />
+                                                                </div>
+                                                            </div>
+                                                            <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xs">
+                                                                {app.company}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-xs font-medium text-gray-900 dark:text-white">{app.title}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                            {app.role}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
+                                                            {app.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                            <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                                                            <span>
+                                                                {app.location?.city
+                                                                    ? `${app.location.city}, ${app.location.country}`
+                                                                    : app.location?.country || 'Unknown'}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                            {new Date(app.date).toLocaleDateString('en-US', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric'
+                                                            })}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Desktop Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                        <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                            Showing <span className="font-semibold text-gray-900 dark:text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
+                                            <span className="font-semibold text-gray-900 dark:text-white">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
+                                            <span className="font-semibold text-gray-900 dark:text-white">{sortedApplications.length}</span> applications
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                disabled={currentPage === 1}
+                                                className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            >
+                                                <ChevronLeftIcon className="h-4 w-4" />
+                                            </button>
+                                            <div className="flex items-center gap-1">
+                                                {[...Array(totalPages)].map((_, i) => (
+                                                    <button
+                                                        key={i + 1}
+                                                        onClick={() => setCurrentPage(i + 1)}
+                                                        className={`px-2.5 py-1 rounded-lg font-medium text-xs transition-all ${currentPage === i + 1
+                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                                            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                            }`}
+                                                    >
+                                                        {i + 1}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <button
+                                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            >
+                                                <ChevronRightIcon className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Mobile Pagination */}
                             {totalPages > 1 && (
-                                <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                        Showing <span className="font-semibold text-gray-900 dark:text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
-                                        <span className="font-semibold text-gray-900 dark:text-white">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
-                                        <span className="font-semibold text-gray-900 dark:text-white">{sortedApplications.length}</span> applications
+                                <div className="md:hidden flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-4">
+                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium text-center sm:text-left">
+                                        <span className="font-semibold text-gray-900 dark:text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> - <span className="font-semibold text-gray-900 dark:text-white">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
+                                        <span className="font-semibold text-gray-900 dark:text-white">{sortedApplications.length}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                             disabled={currentPage === 1}
-                                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                                         >
-                                            <ChevronLeftIcon className="h-4 w-4" />
+                                            <ChevronLeftIcon className="h-5 w-5" />
                                         </button>
                                         <div className="flex items-center gap-1">
-                                            {[...Array(totalPages)].map((_, i) => (
-                                                <button
-                                                    key={i + 1}
-                                                    onClick={() => setCurrentPage(i + 1)}
-                                                    className={`px-2.5 py-1 rounded-lg font-medium text-xs transition-all ${currentPage === i + 1
-                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                                                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                                        }`}
-                                                >
-                                                    {i + 1}
-                                                </button>
-                                            ))}
+                                            {[...Array(Math.min(totalPages, 5))].map((_, i) => {
+                                                let pageNum;
+                                                if (totalPages <= 5) {
+                                                    pageNum = i + 1;
+                                                } else if (currentPage <= 3) {
+                                                    pageNum = i + 1;
+                                                } else if (currentPage >= totalPages - 2) {
+                                                    pageNum = totalPages - 4 + i;
+                                                } else {
+                                                    pageNum = currentPage - 2 + i;
+                                                }
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => setCurrentPage(pageNum)}
+                                                        className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all active:scale-95 ${currentPage === pageNum
+                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                                            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
+                                                            }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                         <button
                                             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                             disabled={currentPage === totalPages}
-                                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                            className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                                         >
-                                            <ChevronRightIcon className="h-4 w-4" />
+                                            <ChevronRightIcon className="h-5 w-5" />
                                         </button>
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </>
                     )}
                 </div>
             )}
