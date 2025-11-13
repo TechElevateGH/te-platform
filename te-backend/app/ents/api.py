@@ -5,6 +5,7 @@ from app.ents.application.endpoints import (
 )
 from app.ents.referral_company.endpoints import referral_company_router, referral_router
 from app.ents.home.endpoints import home_router
+from app.ents.documentation.endpoints import documentation_router
 from app.ents.learning.endpoints import router as learning_router
 from app.ents.problem.endpoints import router as problem_router
 from app.ents.user.auth import auth_router
@@ -17,6 +18,7 @@ api_router = APIRouter()
 
 # Public endpoints
 api_router.include_router(home_router, tags=["Home"])
+api_router.include_router(documentation_router)
 
 # Authentication
 api_router.include_router(auth_router, prefix="/auth")  # Has its own tags

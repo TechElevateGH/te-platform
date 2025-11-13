@@ -343,7 +343,9 @@ def upload_user_resume(
     return {"resume": resume_to_read(uploaded_resume)}
 
 
-@user_resumes_router.patch("/{resume_id}", response_model=Dict[str, application_schema.ResumeRead])
+@user_resumes_router.patch(
+    "/{resume_id}", response_model=Dict[str, application_schema.ResumeRead]
+)
 def update_user_resume(
     db: Database = Depends(session.get_db),
     *,

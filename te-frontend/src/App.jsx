@@ -15,6 +15,7 @@ import UserAccountManagement from './pages/UserAccountManagement';
 import ResumeReviews from './pages/ResumeReviews';
 import PostHogProvider from './providers/PostHogProvider';
 import OAuthCallback from './components/user/OAuthCallback';
+import Documentation from './pages/Documentation';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,6 +55,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/verify-email" element={<EmailVerification />} />
                     <Route path="/auth/callback" element={<OAuthCallback />} />
+                    <Route path="/documentation" element={<Documentation />} />
                   </Routes>
                 </div>
               </DataProvider>

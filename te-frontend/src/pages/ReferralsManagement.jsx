@@ -32,7 +32,7 @@ const ReferralsManagement = () => {
     // Check if user is a referrer (role = 2) - use sessionStorage as fallback for immediate availability
     const storedRole = sessionStorage.getItem('userRole');
     const isReferrer = userRole === 2 || parseInt(storedRole) === 2;
-    
+
     // Company filter - only initialize for non-referrers
     const [companyFilter, setCompanyFilter] = useState('');
 

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TechElevate Platform Documentation</title>
+    <style>
+      :root {
+        --color-bg: #23272f;
+        --color-bg-secondary: #1c1e24;
+        --color-surface: #2d333b;
+        --color-border: rgba(255, 255, 255, 0.1);
+        --color-text: #f7f7f7;
+        --color-text-secondary: #b4b9c1;
+        --color-heading: #ffffff;
+        --color-accent: #087ea4;
+        --color-accent-hover: #149eca;
+        --color-link: #58b1d4;
+        --color-code-bg: rgba(255, 255, 255, 0.06);
+        --color-code-text: #ebecf0;
+        --color-highlight: #343941;
+        --color-sidebar-bg: #23272f;
+        --gradient-hero: linear-gradient(135deg, #087ea4, #149eca);
+      }
+      body.light-mode {
+        --color-bg: #ffffff;
+        --color-bg-secondary: #f6f7f9;
+        --color-surface: #ffffff;
+        --color-border: rgba(0, 0, 0, 0.08);
+        --color-text: #23272f;
+        --color-text-secondary: #5e6871;
+        --color-heading: #23272f;
+        --color-accent: #087ea4;
+        --color-accent-hover: #149eca;
+        --color-link: #087ea4;
+        --color-code-bg: rgba(0, 0, 0, 0.04);
+        --color-code-text: #23272f;
+        --color-highlight: #f6f7f9;
+        --color-sidebar-bg: #f6f7f9;
+        --gradient-hero: linear-gradient(135deg, #087ea4, #149eca);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 17px;
+        line-height: 1.6;
+        background: var(--color-bg);
+        color: var(--color-text);
+        scroll-behavior: smooth;
+        transition: background 0.2s ease, color 0.2s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      a {
+        color: var(--color-link);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      a:hover {
+        color: var(--color-accent-hover);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--color-bg);
+        border-bottom: 1px solid var(--color-border);
+        backdrop-filter: blur(8px);
+        transition: background 0.2s ease;
+      }
+      .header-inner {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+      }
+      .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--color-heading);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--gradient-hero);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+      .hero {
+        background: var(--gradient-hero);
+        color: white;
+        padding: 4rem 1.5rem 5rem;
+        text-align: center;
+      }
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .hero h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+      }
+      .hero p {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+      }
+      .container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      .content-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 0;
+      }
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-text);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .theme-toggle:hover {
+        background: var(--color-highlight);
+        border-color: var(--color-accent);
+      }
+      .theme-toggle .toggle-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        border: none;
+        cursor: pointer;
+      }
+      .button-primary {
+        background: white;
+        color: var(--color-accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .button-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: var(--color-accent);
+      }
+      .button-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .button-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+
+      main {
+        padding: 3rem 1.5rem 5rem;
+      }
+      section {
+        margin-bottom: 3.5rem;
+        padding: 2.75rem;
+        background: var(--section-bg);
+        border: 2px solid var(--section-border);
+        border-radius: 24px;
+        box-shadow: var(--section-shadow), 0 4px 12px -6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        transition: all 0.3s ease;
+      }
+      section:hover {
+        border-color: color-mix(in srgb, var(--section-border) 70%, var(--accent) 30%);
+        box-shadow: var(--section-shadow), 0 8px 24px -8px rgba(56, 189, 248, 0.2);
+        transform: translateY(-2px);
+      }
+      section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background: linear-gradient(
+          120deg,
+          rgba(56, 189, 248, 0.08),
+          rgba(30, 64, 175, 0.06) 45%,
+          rgba(15, 23, 42, 0.35) 80%
+        );
+        opacity: 0.7;
+        z-index: -1;
+      }
+      section::after {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        border: 1px solid var(--section-border-inner);
+        opacity: 0.6;
+        z-index: -1;
+      }
+      section h2 {
+        margin-top: 0;
+        font-size: 1.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        color: var(--text-primary);
+        position: relative;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      section h2::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+        border-radius: 999px;
+      }
+      h3 {
+        font-size: 1.35rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+      }
+      p {
+        line-height: 1.75;
+        margin: 0.7rem 0;
+        color: var(--text-body);
+      }
+      ul,
+      ol {
+        margin: 0.75rem 0 1.25rem;
+        padding-left: 1.4rem;
+        line-height: 1.75;
+        color: var(--text-body);
+      }
+      li {
+        position: relative;
+        padding-left: 0.4rem;
+      }
+      li + li {
+        margin-top: 0.5rem;
+      }
+      li strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+      ul li::marker {
+        color: var(--accent);
+      }
+      ol li::marker {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+      }
+      .card {
+        padding: 1.5rem;
+        border-radius: 18px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-body);
+        transition: transform 0.3s ease, box-shadow 0.3s ease,
+          border-color 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 55px -30px rgba(56, 189, 248, 0.5);
+        border-color: var(--accent);
+      }
+      .card h3 {
+        margin-top: 0;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .card h3::before {
+        content: "▸";
+        color: var(--accent);
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 25px 65px -40px rgba(56, 189, 248, 0.7);
+      }
+      th,
+      td {
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid var(--section-border);
+        text-align: left;
+        background: var(--table-cell-bg);
+        color: var(--text-body);
+      }
+      th {
+        background: var(--table-head-bg);
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+      tbody tr:nth-child(even) td {
+        background: color-mix(
+          in srgb,
+          var(--table-cell-bg) 90%,
+          rgba(56, 189, 248, 0.08) 10%
+        );
+      }
+      tbody tr {
+        transition: background 0.2s ease;
+      }
+      tbody tr:hover td {
+        background: color-mix(
+          in srgb,
+          var(--table-cell-bg) 85%,
+          var(--accent) 15%
+        );
+      }
+      code {
+        font-family: "Fira Code", "SFMono-Regular", Consolas, "Liberation Mono",
+          Menlo, monospace;
+        background: var(--code-bg);
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        border: 1px solid var(--section-border);
+        font-weight: 500;
+      }
+      pre {
+        background: var(--pre-bg);
+        padding: 1rem 1.25rem;
+        border-radius: 14px;
+        overflow: auto;
+        border: 1px solid var(--section-border);
+        font-size: 0.95rem;
+        color: var(--text-body);
+      }
+      .toc {
+        background: var(--toc-bg);
+        border-radius: 20px;
+        padding: 2.5rem;
+        border: 1px solid var(--section-border);
+        box-shadow: 0 40px 110px -65px rgba(56, 189, 248, 0.9);
+        position: relative;
+        overflow: hidden;
+      }
+      .toc::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -30%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          circle,
+          rgba(56, 189, 248, 0.15),
+          transparent
+        );
+        filter: blur(60px);
+        pointer-events: none;
+      }
+      .toc h2 {
+        position: relative;
+        z-index: 1;
+      }
+      .toc ol {
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0.75rem;
+        position: relative;
+        z-index: 1;
+      }
+      .toc a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.65rem;
+        border-radius: 12px;
+        background: var(--toc-link-bg);
+        border: 1px solid var(--section-border);
+        color: var(--text-body);
+        transition: transform 0.22s ease, background 0.22s ease,
+          border-color 0.22s ease;
+      }
+      .toc a::before {
+        content: "→";
+        font-size: 0.85rem;
+        color: var(--accent);
+        opacity: 0.8;
+      }
+      .toc a:hover {
+        transform: translateX(4px);
+        background: color-mix(
+          in srgb,
+          var(--toc-link-bg) 80%,
+          var(--accent) 20%
+        );
+        border-color: var(--accent);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        color: var(--chip-text);
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid color-mix(in srgb, var(--chip-text) 30%, transparent);
+        box-shadow: 0 4px 12px -8px rgba(56, 189, 248, 0.4);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .badge:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px -10px rgba(56, 189, 248, 0.6);
+      }
+      .badge + .badge {
+        margin-left: 0.4rem;
+      }
+      .highlight {
+        background: linear-gradient(
+          120deg,
+          color-mix(in srgb, var(--accent) 18%, transparent),
+          color-mix(in srgb, var(--accent-strong) 18%, transparent)
+        );
+        border-left: 4px solid var(--accent);
+        padding: 1.2rem 1.5rem;
+        border-radius: 14px;
+        margin: 1.25rem 0;
+        color: var(--text-body);
+        box-shadow: 0 8px 30px -20px rgba(56, 189, 248, 0.4);
+        position: relative;
+      }
+      .highlight::before {
+        content: "💡";
+        position: absolute;
+        left: 1.5rem;
+        top: -0.6rem;
+        font-size: 1.3rem;
+        background: var(--section-bg);
+        padding: 0.2rem 0.5rem;
+        border-radius: 8px;
+      }
+      .highlight strong {
+        color: var(--accent-strong);
+        display: block;
+        margin-top: 0.8rem;
+        margin-bottom: 0.3rem;
+      }
+      footer {
+        text-align: center;
+        padding: 3rem 1.5rem 3.5rem;
+        color: var(--footer-text);
+        font-size: 0.9rem;
+        border-top: 1px solid var(--section-border);
+        background: var(--section-bg);
+      }
+      footer code {
+        font-size: 0.85rem;
+        background: var(--code-bg);
+        padding: 0.2rem 0.5rem;
+      }
+      .back-to-top {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-top: 2.5rem;
+        padding: 0.75rem 1.1rem;
+        border-radius: 999px;
+        border: 1px solid var(--section-border);
+        background: var(--toc-link-bg);
+        color: var(--text-body);
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.25s ease, background 0.25s ease,
+          border-color 0.25s ease;
+      }
+      .back-to-top:hover {
+        transform: translateY(-2px);
+        background: color-mix(
+          in srgb,
+          var(--toc-link-bg) 75%,
+          var(--accent) 25%
+        );
+        border-color: var(--accent);
+      }
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-strong), #a855f7);
+        z-index: 9999;
+        transition: width 0.15s ease-out;
+        box-shadow: 0 0 20px var(--accent), 0 0 40px rgba(56, 189, 248, 0.3);
+      }
+      @media (max-width: 768px) {
+        header {
+          padding: 3.5rem 1.25rem 2.75rem;
+        }
+        section {
+          padding: 1.75rem;
+        }
+        table,
+        th,
+        td {
+          font-size: 0.9rem;
+          padding: 0.75rem 0.9rem;
+        }
+        .hero-actions {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .theme-toggle {
+          order: -1;
+        }
+        .card-grid {
+          grid-template-columns: 1fr;
+        }
+        .hero-metrics {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body id="top">
+    <div class="scroll-progress" id="scroll-progress"></div>
+    <header>
+      <div class="wrapper headline">
+        <div class="headline-bar">
+          <div class="badge-row">
+            <span class="badge">TechElevate Platform</span>
+            <span class="badge">Internal</span>
+          </div>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Toggle theme"
+            aria-pressed="false"
+          >
+            <span class="toggle-icon" aria-hidden="true">🌙</span>
+            <span class="toggle-label">Dark</span>
+          </button>
+        </div>
+        <h1>Blueprint & Operations Guide</h1>
+        <p class="subtitle">
+          A comprehensive, end-to-end handbook for understanding, operating, and
+          extending the TechElevate platform. From architecture and
+          infrastructure to day-to-day workflows, use this guide as the
+          definitive reference for engineers, product owners, and contributors.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#architecture"
+            >Explore Architecture</a
+          >
+          <a class="button ghost" href="#api">Jump to API Map</a>
+          <a class="button ghost" href="#development">Developer Workflow</a>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric">
+            <span class="metric-label">Active Modules</span>
+            <span class="metric-value">12</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Primary Roles</span>
+            <span class="metric-value">4</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Key Integrations</span>
+            <span class="metric-value">5</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Release Cadence</span>
+            <span class="metric-value">Biweekly</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <div class="wrapper">
+        <section class="toc" id="table-of-contents">
+          <h2>Table of Contents</h2>
+          <ol>
+            <li><a href="#overview">Platform Overview</a></li>
+            <li><a href="#architecture">System Architecture</a></li>
+            <li><a href="#domains">Domain Model & Key Entities</a></li>
+            <li><a href="#journeys">Primary User Journeys</a></li>
+            <li><a href="#api">API & Integration Map</a></li>
+            <li><a href="#frontend">Frontend Experience & Modules</a></li>
+            <li><a href="#data">Data Stores & External Services</a></li>
+            <li><a href="#configuration">Environment & Configuration</a></li>
+            <li><a href="#development">Local Development Workflow</a></li>
+            <li><a href="#quality">Quality & Testing Strategy</a></li>
+            <li><a href="#security">Security & Compliance Checklist</a></li>
+            <li><a href="#roadmap">Enhancement Backlog (Suggested)</a></li>
+            <li><a href="#glossary">Glossary & Roles</a></li>
+          </ol>
+        </section>
+
+        <section id="overview">
+          <h2>1. Platform Overview</h2>
+          <p>
+            TechElevate is a talent enablement platform designed to help members
+            curate job-hunting assets, request internal referrals, review
+            learning content, and collaborate with the TechElevate operations
+            team. The platform is delivered as a React single-page application
+            backed by a FastAPI microservice and MongoDB datastore.
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Mission</h3>
+              <p>
+                Create a centralized operating system for apprenticeships and
+                job placement. Members can manage resumes, applications, and
+                referrals; staff can curate companies, respond to requests, and
+                track pipeline health.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Key Personas</h3>
+              <ul>
+                <li>
+                  <strong>Member (Role 1)</strong>: Manages resumes,
+                  applications, and referral requests.
+                </li>
+                <li>
+                  <strong>Referrer (Role 2)</strong>: Reviews and fulfills
+                  referral requests tied to their company.
+                </li>
+                <li>
+                  <strong>Volunteer / Lead (Role ≥3)</strong>: Curates company
+                  data, triages referrals, oversees learning.
+                </li>
+                <li>
+                  <strong>Admin (Role 5)</strong>: Full platform governance;
+                  manages users and operations.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Capabilities</h3>
+              <ul>
+                <li>Resume upload & management with Google Drive storage.</li>
+                <li>Job applications tracking and status workflows.</li>
+                <li>
+                  Referral company directory, request submission, and feedback
+                  loop.
+                </li>
+                <li>Learning modules, lessons, and practice materials.</li>
+                <li>Admin dashboards for pipeline visibility and analytics.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="architecture">
+          <h2>2. System Architecture</h2>
+          <p>
+            The solution follows a modular three-tier architecture focused on
+            agility, rapid iteration, and compatibility with low-friction cloud
+            tooling.
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Frontend (te-frontend)</h3>
+              <ul>
+                <li>React 18 SPA bootstrapped with Vite.</li>
+                <li>
+                  UI kit built with Tailwind utility classes and HeadlessUI
+                  primitives.
+                </li>
+                <li>
+                  Context providers (<code>AuthContext</code>,
+                  <code>DataContext</code>, <code>NotificationContext</code>)
+                  manage auth, caching, notifications.
+                </li>
+                <li>
+                  Axios instance centralizes API communication and auth header
+                  injection.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Backend (te-backend)</h3>
+              <ul>
+                <li>
+                  FastAPI application with modular routers under
+                  <code>app/ents</code>.
+                </li>
+                <li>
+                  MongoDB Atlas stores users, referrals, applications, and
+                  embedded collections.
+                </li>
+                <li>
+                  Google Drive used for binary storage of resumes and other
+                  documents.
+                </li>
+                <li>
+                  Authentication via JWT (AuthJWT) with role-based guards.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Integration & Telemetry</h3>
+              <ul>
+                <li>
+                  Google Drive API for file uploads
+                  (<code>application.crud.upload_file</code>).
+                </li>
+                <li>
+                  Analytics triggers in frontend (PostHog skeleton) for
+                  behavioral tracking.
+                </li>
+                <li>
+                  Structured logging middleware for request tracing and error
+                  handling.
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="highlight">
+            <strong>Request Lifecycle (Example: Resume Upload)</strong><br />
+            Client submits form → Axios sends
+            <code>POST /v1/users/{userId}/resumes</code> with PDF → FastAPI
+            validates role, streams file to Google Drive, stores metadata in
+            <code>member_users.resumes</code> array → DataContext triggers a
+            refetch → UI lists updated resume entry.
+          </div>
+        </section>
+
+        <section id="domains">
+          <h2>3. Domain Model & Key Entities</h2>
+          <p>
+            The table below condenses the primary resources managed by the
+            platform.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Stored In</th>
+                <th>Fields (Highlights)</th>
+                <th>Primary Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>User</strong></td>
+                <td>MongoDB <code>member_users</code></td>
+                <td>
+                  name, email, role, auth profile, embedded
+                  resumes/applications/referrals
+                </td>
+                <td>
+                  Registration, authentication, profile updates, role gating
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Resume</strong></td>
+                <td>Embedded JSON on user doc, files on Google Drive</td>
+                <td>id, file_id, link, role, notes, archived flag</td>
+                <td>Upload, rename, archive/restore, delete</td>
+              </tr>
+              <tr>
+                <td><strong>Referral Company</strong></td>
+                <td>MongoDB <code>companies</code></td>
+                <td>name, industries, contact, referral_materials, perks</td>
+                <td>CRUD by volunteers/admins, listing, filters</td>
+              </tr>
+              <tr>
+                <td><strong>Referral Request</strong></td>
+                <td>MongoDB <code>referrals</code></td>
+                <td>
+                  job_title, resume link, status, review note, reviewer metadata
+                </td>
+                <td>Member submit, referrer triage, Admin oversight</td>
+              </tr>
+              <tr>
+                <td><strong>Application</strong></td>
+                <td>Embedded on user doc</td>
+                <td>company, role, status, recruiter info, location</td>
+                <td>Create, update, archive, analytics for pipeline</td>
+              </tr>
+              <tr>
+                <td><strong>Lesson / Practice</strong></td>
+                <td>
+                  MongoDB <code>lessons</code>, <code>practice_lessons</code>
+                </td>
+                <td>title, content, tags, delivery mode</td>
+                <td>CRUD for learning team, listing for members</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="journeys">
+          <h2>4. Primary User Journeys</h2>
+          <div class="card-grid">
+            <div class="card">
+              <h3>J1. Member Onboarding</h3>
+              <ol>
+                <li>Invite email or self-registration (pending automation).</li>
+                <li>Complete profile with contact + essay (for referrals).</li>
+                <li>Upload role-specific resumes via Workspace &gt; Files.</li>
+                <li>Explore learning modules and track progress.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>J2. Requesting a Referral</h3>
+              <ol>
+                <li>
+                  Browse referral-ready companies (Referrals &gt; Companies).
+                </li>
+                <li>
+                  Confirm prerequisites (resume, essay, contact) flagged in UI.
+                </li>
+                <li>
+                  Submit referral request with job specifics and optional note.
+                </li>
+                <li>Receive notifications on status changes or feedback.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>J3. Referrer Fulfillment</h3>
+              <ol>
+                <li>
+                  Referrer dashboard surfaces requests for assigned company.
+                </li>
+                <li>
+                  Review candidate materials, provide notes, mark as
+                  completed/declined.
+                </li>
+                <li>System triggers notifications and analytics updates.</li>
+              </ol>
+            </div>
+            <div class="card">
+              <h3>J4. Admin Operations</h3>
+              <ul>
+                <li>
+                  Curate company directory and maintain referral requirements.
+                </li>
+                <li>
+                  Monitor pipeline via Admin dashboard (files, resumes, essays).
+                </li>
+                <li>
+                  Adjust user roles, investigate issues, seed learning content.
+                </li>
+                <li>Export data snapshots for board reporting.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="api">
+          <h2>5. API & Integration Map</h2>
+          <p>
+            Full OpenAPI schema at <code>/v1/docs</code>. Highlighted endpoints:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Method & Path</th>
+                <th>Description</th>
+                <th>Auth</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Authentication</td>
+                <td><code>POST /v1/auth/login</code></td>
+                <td>JWT login with email + password</td>
+                <td>Public</td>
+              </tr>
+              <tr>
+                <td>Resumes</td>
+                <td><code>POST /v1/users/{userId}/resumes</code></td>
+                <td>Upload resume PDF (Google Drive)</td>
+                <td>Member (self)</td>
+              </tr>
+              <tr>
+                <td>Resumes</td>
+                <td>
+                  <code>PATCH /v1/users/{userId}/resumes/{resumeId}</code>
+                </td>
+                <td>Rename, update notes, archive/restore</td>
+                <td>Member/Lead/Admin</td>
+              </tr>
+              <tr>
+                <td>Referrals</td>
+                <td><code>POST /v1/referrals</code></td>
+                <td>Submit referral request</td>
+                <td>Member</td>
+              </tr>
+              <tr>
+                <td>Referrals</td>
+                <td><code>GET /v1/referrals/mine</code></td>
+                <td>List current member's referrals</td>
+                <td>Authenticated</td>
+              </tr>
+              <tr>
+                <td>Referrals</td>
+                <td><code>POST /v1/referrals/companies</code></td>
+                <td>Create referral company entry</td>
+                <td>Volunteer+</td>
+              </tr>
+              <tr>
+                <td>Applications</td>
+                <td><code>GET /v1/users/{userId}/applications</code></td>
+                <td>List active job applications</td>
+                <td>Member (self) / Lead+</td>
+              </tr>
+              <tr>
+                <td>Learning</td>
+                <td><code>GET /v1/learning/lessons</code></td>
+                <td>Retrieve curriculum modules</td>
+                <td>Authenticated</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            The backend follows a “router-per-domain” convention. Explore
+            <code>app/ents/&lt;domain&gt;/endpoints.py</code> for exact
+            definitions and business rules.
+          </p>
+        </section>
+
+        <section id="frontend">
+          <h2>6. Frontend Experience & Modules</h2>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Layout & Navigation</h3>
+              <ul>
+                <li>
+                  <code>src/App.jsx</code> wires high-level routes (Workspace,
+                  Referrals, Admin).
+                </li>
+                <li>Sidebar & topbar adapt to role-based permissions.</li>
+                <li>
+                  Theme + dark mode toggled via <code>DarkModeContext</code>.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>State Management</h3>
+              <ul>
+                <li>
+                  <code>AuthContext</code> stores JWT token, user id, role,
+                  logout handler.
+                </li>
+                <li>
+                  <code>DataContext</code> caches resumes, companies, lessons
+                  with refetch flags.
+                </li>
+                <li>
+                  <code>NotificationContext</code> polls API for referral +
+                  review updates.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Reusable UI Components</h3>
+              <ul>
+                <li>
+                  SlideOvers for creation flows
+                  (<code>components/_custom/SlideOver</code>).
+                </li>
+                <li>
+                  Form inputs (<code>components/_custom/FormInputs.jsx</code>)
+                  unify styling and validation.
+                </li>
+                <li>
+                  Toast + SuccessFeedback deliver consistent feedback loops.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Key Screens</h3>
+              <ul>
+                <li>
+                  <strong>Workspace</strong>: aggregate dashboard, files, resume
+                  reviews.
+                </li>
+                <li>
+                  <strong>Referrals</strong>: company browser, my requests,
+                  admin oversight.
+                </li>
+                <li>
+                  <strong>Admin Files</strong>: pipeline stats, exports,
+                  filtering for staff.
+                </li>
+                <li>
+                  <strong>Learning</strong>: curated lessons, practice sets
+                  (scaffolding for expansions).
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="data">
+          <h2>7. Data Stores & External Services</h2>
+          <ul>
+            <li>
+              <strong>MongoDB Atlas</strong> — Primary data layer. Connection
+              via <code>app/database/session.py</code>.
+            </li>
+            <li>
+              <strong>Google Drive API</strong> — Resume/essay storage. Service
+              account configured via env vars
+              (<code>GOOGLE_PRIVATE_KEY*</code>).
+            </li>
+            <li>
+              <strong>Google OAuth</strong> — Optional user auth integration
+              (config present, extendable).
+            </li>
+            <li>
+              <strong>PostHog (planned)</strong> — Analytics provider referenced
+              in <code>src/hooks/usePostHog.js</code>.
+            </li>
+          </ul>
+          <div class="highlight">
+            <strong>File Upload Safety Nets</strong><br />
+            PDF-only validation enforced client-side and server-side. Google
+            Drive links normalized to view URLs. Metadata (role, notes, archived
+            flag) stored alongside file_id for quick filtering.
+          </div>
+        </section>
+
+        <section id="configuration">
+          <h2>8. Environment & Configuration</h2>
+          <p>
+            Critical environment variables from <code>te-backend/.env</code>:
+          </p>
+          <div class="card-grid">
+            <div class="card">
+              <h3>Core Settings</h3>
+              <ul>
+                <li>
+                  <code>PROJECT_NAME</code>, <code>API_STR</code>,
+                  <code>PORT</code>
+                </li>
+                <li>
+                  <code>SECRET_KEY</code>, <code>AUTHJWT_SECRET_KEY</code>
+                </li>
+                <li><code>BACKEND_CORS_ORIGINS</code> (comma-delimited)</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Data Sources</h3>
+              <ul>
+                <li><code>MONGODB_URI</code>, <code>MONGODB_DB_NAME</code></li>
+                <li><code>GDRIVE_RESUMES</code>, other folder IDs</li>
+                <li>
+                  Service account secrets (<code>GOOGLE_PRIVATE_KEY</code> etc.)
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Bootstrap Accounts</h3>
+              <ul>
+                <li>
+                  <code>FIRST_SUPERUSER_EMAIL</code>,
+                  <code>FIRST_SUPERUSER_PASSWORD</code>
+                </li>
+                <li>Seeded during app startup if missing.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="development">
+          <h2>9. Local Development Workflow</h2>
+          <h3>Backend</h3>
+          <pre><code># Install dependencies
+pip install -r requirements.txt
+
+# Run prestart checks (DB connectivity, seed admin)
+./prestart.sh
+
+# Start dev server with hot reload
+uvicorn app.main:app --reload --port 8000
+</code></pre>
+          <h3>Frontend</h3>
+          <pre><code># Install and run
+cd te-frontend
+npm install
+npm run dev  # launches on http://localhost:5173
+</code></pre>
+          <p>
+            Use the shared axios configuration in
+            <code>src/axiosConfig.js</code> to align API base URLs between
+            environments. For cross-origin testing, ensure
+            <code>BACKEND_CORS_ORIGINS</code> includes the frontend dev host.
+          </p>
+        </section>
+
+        <section id="quality">
+          <h2>10. Quality & Testing Strategy</h2>
+          <ul>
+            <li>
+              <strong>Unit & Integration Tests</strong>: Add to
+              <code>tests/</code> (backend) and
+              <code>src/__tests__/</code> (frontend). Use Pytest and Vitest/Jest
+              respectively.
+            </li>
+            <li>
+              <strong>API Schema Validation</strong>: Expand Pydantic models
+              with stricter field types and
+              <code>field_validator</code> annotations.
+            </li>
+            <li>
+              <strong>Manual Verification</strong>: Regression pass should cover
+              resume upload, referral submission, notification polling, and
+              admin exports.
+            </li>
+            <li>
+              <strong>Static Analysis</strong>: Integrate <code>ruff</code> or
+              <code>flake8</code>, plus TypeScript migration for high-safety
+              front-end modules (optional roadmap).
+            </li>
+          </ul>
+        </section>
+
+        <section id="security">
+          <h2>11. Security & Compliance Checklist</h2>
+          <ul>
+            <li>
+              Rotate service account keys periodically; store secrets in a vault
+              (1Password, GCP Secret Manager).
+            </li>
+            <li>
+              Enforce HTTPS in production via proxy (e.g., Cloudflare, AWS ALB).
+            </li>
+            <li>Restrict MongoDB Atlas IP access to trusted origins.</li>
+            <li>
+              Audit role-based guards in routers
+              (<code>get_current_member_only</code>, <code>require_lead</code>)
+              when adding new endpoints.
+            </li>
+            <li>
+              Enable JWT refresh tokens and session revocation (roadmap item).
+            </li>
+            <li>
+              Document data retention policies for resumes and referral
+              feedback.
+            </li>
+          </ul>
+        </section>
+
+        <section id="roadmap">
+          <h2>12. Enhancement Backlog (Suggested)</h2>
+          <ul>
+            <li>
+              <strong>Bulk Resume Upload & Versioning</strong> — Extend uploader
+              with multi-file queue and diffing.
+            </li>
+            <li>
+              <strong>Referral Analytics</strong> — Time-to-fill dashboards,
+              conversion stages, referrer load balancing.
+            </li>
+            <li>
+              <strong>Learning Paths</strong> — Sequence lessons into trackable
+              cohorts with progress bars.
+            </li>
+            <li>
+              <strong>Notification Channels</strong> — Optional Slack/Email
+              dispatch for critical events.
+            </li>
+            <li>
+              <strong>Infrastructure as Code</strong> — Terraform modules for
+              MongoDB + compute + DNS.
+            </li>
+            <li>
+              <strong>Automated Data Backups</strong> — Scheduled exports of key
+              collections to secure storage.
+            </li>
+          </ul>
+        </section>
+
+        <section id="glossary">
+          <h2>13. Glossary & Roles</h2>
+          <ul>
+            <li>
+              <strong>Member</strong>: Core user seeking job placement support.
+            </li>
+            <li>
+              <strong>Referrer</strong>: Internal champion with limited access
+              to referral queue for a single company.
+            </li>
+            <li>
+              <strong>Volunteer</strong>: Operational staff; can add companies,
+              review content.
+            </li>
+            <li>
+              <strong>Lead</strong>: Senior staff; broad visibility including
+              analytics and user data.
+            </li>
+            <li>
+              <strong>Admin</strong>: Full permissions, responsible for platform
+              governance.
+            </li>
+            <li>
+              <strong>Resume Review</strong>: Separate workflow where members
+              request feedback on documents (handled in
+              <code>resume_reviews</code> router).
+            </li>
+            <li>
+              <strong>Workspace</strong>: Member dashboard that aggregates
+              files, reviews, and quick actions.
+            </li>
+          </ul>
+        </section>
+        <a class="back-to-top" href="#top">⬆ Back to top</a>
+      </div>
+    </main>
+    <footer>
+      <p>
+        Built with care by the <strong>TechElevate</strong> engineering team.
+      </p>
+      <p style="margin-top: 0.5rem">
+        For API specifics, visit <code>/v1/docs</code> • Last updated: November
+        2025
+      </p>
+    </footer>
+    <script>
+      // Theme toggle functionality
+      const STORAGE_KEY = "te-doc-theme";
+      const toggle = document.getElementById("theme-toggle");
+      const icon = toggle ? toggle.querySelector(".toggle-icon") : null;
+      const label = toggle ? toggle.querySelector(".toggle-label") : null;
+
+      function applyTheme(theme) {
+        if (theme === "light") {
+          document.body.classList.add("light-mode");
+          if (icon) icon.textContent = "☀️";
+          if (label) label.textContent = "Light";
+          if (toggle) toggle.setAttribute("aria-pressed", "true");
+        } else {
+          document.body.classList.remove("light-mode");
+          if (icon) icon.textContent = "🌙";
+          if (label) label.textContent = "Dark";
+          if (toggle) toggle.setAttribute("aria-pressed", "false");
+        }
+        try {
+          localStorage.setItem(STORAGE_KEY, theme);
+        } catch (e) {
+          console.warn("Cannot save theme preference", e);
+        }
+      }
+
+      // Initialize theme
+      let savedTheme = null;
+      try {
+        savedTheme = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {
+        console.warn("Cannot read theme preference", e);
+      }
+
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+      applyTheme(initialTheme);
+
+      // Toggle on click
+      if (toggle) {
+        toggle.addEventListener("click", function() {
+          const currentTheme = document.body.classList.contains("light-mode") ? "light" : "dark";
+          const newTheme = currentTheme === "light" ? "dark" : "light";
+          applyTheme(newTheme);
+        });
+      }
+
+      // Scroll progress indicator
+      (function () {
+        const progressBar = document.getElementById("scroll-progress");
+        if (!progressBar) return;
+
+        const updateProgress = () => {
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          const scrollHeight =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+          const progress = (scrollTop / scrollHeight) * 100;
+          progressBar.style.width = progress + "%";
+        };
+
+        window.addEventListener("scroll", updateProgress, { passive: true });
+        updateProgress();
+      })();
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href === "#" || href === "#top") {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            const target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

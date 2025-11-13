@@ -143,6 +143,13 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         {/* Notification Bell - Show only when authenticated */}
                         {isAuthenticated && <NotificationBell />}
 
+                        <button
+                            onClick={() => navigate('/documentation')}
+                            className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                        >
+                            Docs
+                        </button>
+
                         {/* Role Badge - Show for privileged users */}
                         {isAuthenticated && roleInfo && (
                             <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
@@ -266,6 +273,15 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                                 {item.name}
                                             </button>
                                         ))}
+                                        <button
+                                            onClick={() => {
+                                                navigate('/documentation');
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-blue-600 hover:bg-blue-50"
+                                        >
+                                            Docs
+                                        </button>
                                     </div>
                                     <div className="py-6 space-y-2">
                                         {/* Dark Mode Toggle - Mobile */}
