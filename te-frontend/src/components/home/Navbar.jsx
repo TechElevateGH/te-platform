@@ -288,7 +288,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                             <button
                                                 key={item.name}
                                                 onClick={() => scrollToSection(item.href)}
-                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                                             >
                                                 {item.name}
                                             </button>
@@ -298,7 +298,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                                 navigate('/documentation');
                                                 setMobileMenuOpen(false);
                                             }}
-                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-blue-600 hover:bg-blue-50"
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                                         >
                                             Docs
                                         </button>
@@ -332,7 +332,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                             <>
                                                 <button
                                                     onClick={() => navigate('/login')}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                                                 >
                                                     Log in
                                                 </button>
@@ -347,13 +347,13 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                             <>
                                                 <button
                                                     onClick={() => navigate('/workspace')}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                                                 >
                                                     Workspace
                                                 </button>
                                                 <button
                                                     onClick={handleLogoutClick}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 hover:bg-red-50"
+                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                                 >
                                                     Logout
                                                 </button>

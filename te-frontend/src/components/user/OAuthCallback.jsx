@@ -7,35 +7,39 @@ const OAuthCallback = () => {
     const navigate = useNavigate();
     const [status, setStatus] = useState('processing'); // processing, success, error
     const [hasProcessed, setHasProcessed] = useState(false);
+    const [isStaleCallback, setIsStaleCallback] = useState(false);
 
     console.log('OAuthCallback component loaded!');
     console.log('Current URL:', window.location.href);
 
-    // IMMEDIATE CHECK: If no params at all, redirect before any processing
+    // Check for stale callback immediately on mount
     useEffect(() => {
         const token = searchParams.get('token');
         const userId = searchParams.get('user_id');
         const role = searchParams.get('role');
         const error = searchParams.get('error');
-
-        // Quick check for completely empty callback (browser restore)
+        
+        // If no parameters at all, this is a stale browser restore
         if (!token && !userId && !role && !error) {
-            console.warn('[OAuthCallback] IMMEDIATE CHECK: No parameters detected - stale URL from browser restore');
+            console.warn('[OAuthCallback] Stale callback detected (Chrome session restore) - redirecting immediately');
+            setIsStaleCallback(true);
             const existingToken = localStorage.getItem('accessToken');
-
+            
+            // Replace history state BEFORE redirecting to prevent Chrome from caching this URL
+            const targetPath = existingToken ? '/workspace' : '/login';
+            window.history.replaceState(null, '', targetPath);
+            
             if (existingToken) {
-                console.log('[OAuthCallback] Token found, redirecting to workspace NOW');
-                window.location.href = '/workspace';
+                window.location.replace('/workspace');
             } else {
-                console.log('[OAuthCallback] No token, redirecting to login NOW');
-                window.location.href = '/login';
+                window.location.replace('/login');
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Run once on mount - intentionally not depending on searchParams for immediate redirect
+    }, []);
 
     useEffect(() => {
-        if (hasProcessed) return; // Prevent double processing
+        if (hasProcessed || isStaleCallback) return; // Prevent double processing or processing stale callback
 
         const handleOAuthCallback = () => {
             setHasProcessed(true);
@@ -61,8 +65,12 @@ const OAuthCallback = () => {
             // If no parameters at all, user might have reopened an old callback URL
             // Check if already authenticated and redirect accordingly
             if (!token && !userId && !role && !error) {
-                console.warn('OAuth callback accessed without parameters - this is likely a stale browser restore');
+                console.warn('OAuth callback accessed without parameters - this is likely a Chrome session restore');
                 const existingToken = localStorage.getItem('accessToken');
+
+                // Replace history state BEFORE redirecting to prevent Chrome from caching this URL
+                const targetPath = existingToken ? '/workspace' : '/login';
+                window.history.replaceState(null, '', targetPath);
 
                 if (existingToken) {
                     console.log('User already authenticated, redirecting to workspace immediately...');
@@ -123,14 +131,15 @@ const OAuthCallback = () => {
                 console.log('Verification - Token in localStorage:', savedToken ? 'YES (' + savedToken.substring(0, 20) + '...)' : 'NO');
 
                 setStatus('success');
-                console.log('OAuth Login successful! Redirecting in 800ms...');
+                console.log('OAuth Login successful! Redirecting in 300ms...');
 
                 // Use window.location.replace to avoid keeping the callback URL in history
+                // Reduced delay for faster mobile experience
                 setTimeout(() => {
                     console.log('=== REDIRECTING NOW ===');
                     console.log('Final localStorage check - accessToken:', localStorage.getItem('accessToken') ? 'present' : 'MISSING');
                     window.location.replace('/workspace');
-                }, 800);
+                }, 300);
             } else {
                 console.error('Missing required OAuth parameters');
                 console.error('Received - token:', !!token, 'userId:', !!userId, 'role:', !!role);
@@ -144,6 +153,18 @@ const OAuthCallback = () => {
         handleOAuthCallback();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]); // Only depend on searchParams to prevent re-runs
+
+    // Show minimal loading UI for stale callback while redirect happens
+    if (isStaleCallback) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-slate-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Redirecting...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center py-12 px-4 transition-colors">
