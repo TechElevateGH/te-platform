@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
@@ -6,39 +6,72 @@ const Documentation = () => {
     const [htmlContent, setHtmlContent] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [attempts, setAttempts] = useState(0);
+    const abortRef = useRef(null);
     const navigate = useNavigate();
 
     const fetchDocumentation = useCallback(async () => {
         setIsLoading(true);
         setError(null);
 
+        // Abort any in-flight request
+        if (abortRef.current) {
+            abortRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         try {
-            const response = await axiosInstance.get('documentation', {
-                responseType: 'text',
-                transformResponse: [(data) => data],
-                headers: {
-                    Accept: 'text/html',
-                },
+            // Mobile detection (coarse pointer or small width)
+            const isMobile = window.matchMedia('(max-width: 640px)').matches ||
+                (navigator?.userAgent || '').toLowerCase().includes('mobile');
+
+            // For mobile, use a shorter timeout to fail fast & retry
+            const timeoutMs = isMobile ? 15000 : 30000; // 15s mobile, 30s desktop
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
             });
 
-            console.log('Documentation response:', response);
-            console.log('Response data type:', typeof response.data);
-            console.log('Response data length:', response.data?.length);
+            const requestPromise = axiosInstance.get('documentation', {
+                responseType: 'text',
+                transformResponse: [(data) => data],
+                headers: { Accept: 'text/html' },
+                signal: controller.signal,
+            });
+
+            const response = await Promise.race([requestPromise, timeoutPromise]);
+
+            // Defensive checks
+            if (!response || typeof response.data !== 'string' || response.data.length < 50) {
+                throw new Error('Unexpected documentation payload');
+            }
 
             setHtmlContent(response.data);
         } catch (err) {
             console.error('Documentation error:', err);
-            console.error('Error response:', err?.response);
 
-            // Provide helpful error message for timeouts
             let errorMessage = 'Unable to load documentation.';
-            if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-                errorMessage = 'The backend is warming up (cold start). Please try again in a moment.';
+            const message = err?.message || '';
+            if (message.includes('timeout')) {
+                errorMessage = 'Server is waking up (cold start). Retrying…';
+            } else if (message === 'Network Error') {
+                errorMessage = 'Network error. Check your connection and retry.';
+            } else if (message.includes('Unexpected documentation payload')) {
+                errorMessage = 'Received incomplete documentation data. Retrying…';
             } else {
-                errorMessage = err?.response?.data?.detail || err?.message || errorMessage;
+                errorMessage = err?.response?.data?.detail || message || errorMessage;
             }
 
             setError(errorMessage);
+
+            // Auto single retry for first failure
+            setAttempts(prev => {
+                const next = prev + 1;
+                if (next === 1) {
+                    setTimeout(() => fetchDocumentation(), 2000);
+                }
+                return next;
+            });
         } finally {
             setIsLoading(false);
         }
@@ -74,24 +107,41 @@ const Documentation = () => {
 
             <main className="flex-1" style={{ minHeight: 'calc(100vh - 73px)' }}>
                 {isLoading ? (
-                    <div className="flex h-full items-center justify-center">
-                        <div className="flex flex-col items-center gap-3 text-center">
-                            <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
-                            <p className="text-sm text-slate-400">Loading documentation…</p>
+                    <div className="flex h-full items-center justify-center px-4">
+                        <div className="w-full max-w-md space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+                                <p className="text-sm text-slate-400">Loading documentation…</p>
+                            </div>
+                            {/* Skeleton blocks */}
+                            <div className="space-y-2">
+                                <div className="h-4 w-5/6 bg-slate-800/60 rounded" />
+                                <div className="h-4 w-4/6 bg-slate-800/50 rounded" />
+                                <div className="h-4 w-3/5 bg-slate-800/40 rounded" />
+                            </div>
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="flex h-full items-center justify-center">
-                        <div className="rounded-xl border border-slate-800 bg-slate-900 px-6 py-8 text-center shadow">
-                            <h2 className="text-lg font-semibold text-white">We hit a snag</h2>
-                            <p className="mt-2 text-sm text-slate-400">{error}</p>
-                            <button
-                                type="button"
-                                onClick={fetchDocumentation}
-                                className="mt-4 rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-sky-400"
-                            >
-                                Try again
-                            </button>
+                    <div className="flex h-full items-center justify-center px-4">
+                        <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 backdrop-blur px-6 py-6 text-center shadow max-w-md w-full">
+                            <h2 className="text-base font-semibold text-white">{attempts > 0 ? 'Retrying…' : 'Load issue'}</h2>
+                            <p className="mt-2 text-xs sm:text-sm text-slate-400">{error}</p>
+                            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                                <button
+                                    type="button"
+                                    onClick={fetchDocumentation}
+                                    className="rounded-lg bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-900 hover:bg-sky-400"
+                                >
+                                    Retry now
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/')}
+                                    className="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800"
+                                >
+                                    Back home
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ) : (
