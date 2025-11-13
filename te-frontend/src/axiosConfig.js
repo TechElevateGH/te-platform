@@ -11,8 +11,8 @@ const axiosInstance = axios.create({
 // Add request interceptor to include auth token
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Use sessionStorage for tab-independent auth
-    const token = sessionStorage.getItem('accessToken');
+    // Use localStorage for cross-tab auth persistence
+    const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -27,10 +27,10 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Use sessionStorage for tab-independent auth (allows multiple accounts in different tabs)
-    const accessToken = sessionStorage.getItem('accessToken');
-    const userId = sessionStorage.getItem('userId');
-    const userRole = sessionStorage.getItem('userRole');
+    // Use localStorage for persistent auth across tabs
+    const accessToken = localStorage.getItem('accessToken');
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
 
     if (accessToken) {
       dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
@@ -39,14 +39,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (accessToken, userId, userRole) => {
-    // Use sessionStorage for tab-independent auth
-    sessionStorage.setItem('accessToken', accessToken);
-    sessionStorage.setItem('userId', userId);
-    sessionStorage.setItem('userRole', userRole);
+    // Use localStorage for persistent auth across tabs
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('userId', userId);
+    localStorage.setItem('userRole', userRole);
 
     // Track if this is a privileged user (role >= 2) for redirect after session expiry
     const isPrivileged = parseInt(userRole) >= 2;
-    sessionStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
+    localStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
 
     dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
 
@@ -58,10 +58,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('userId');
-    sessionStorage.removeItem('userRole');
-    sessionStorage.removeItem('wasPrivilegedUser');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('wasPrivilegedUser');
     dispatch({ type: 'logout' });
 
     // Reset PostHog user
