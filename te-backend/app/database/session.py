@@ -3,9 +3,15 @@ from typing import Generator
 from app.core.settings import settings
 from pymongo import MongoClient
 from pymongo.database import Database
+import certifi
 
-# MongoDB client
-client = MongoClient(settings.MONGODB_URI)
+# MongoDB client with SSL certificate
+client = MongoClient(
+    settings.MONGODB_URI,
+    tlsCAFile=certifi.where(),
+    serverSelectionTimeoutMS=5000,
+    connectTimeoutMS=10000,
+)
 mongodb = client[settings.MONGODB_DB_NAME]
 
 
