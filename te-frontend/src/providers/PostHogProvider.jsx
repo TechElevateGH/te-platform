@@ -7,8 +7,8 @@ export function PostHogProvider({ children }) {
 
     useEffect(() => {
         // Initialize PostHog
-        const posthogKey = process.env.REACT_APP_POSTHOG_KEY;
-        const posthogHost = process.env.REACT_APP_POSTHOG_HOST;
+        const posthogKey = process.env.POSTHOG_KEY;
+        const posthogHost = process.env.POSTHOG_HOST;
 
         if (posthogKey && posthogHost) {
             posthog.init(posthogKey, {
