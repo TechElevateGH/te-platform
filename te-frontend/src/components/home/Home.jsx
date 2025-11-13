@@ -3,7 +3,6 @@ import Hero from "./Hero";
 import Features from "./Features";
 import ImpactStats from "./ImpactStats";
 import Testimonials from "./Testimonials";
-import CTASection from "./CTASection";
 import Footer from "./Footer";
 import { useAuth } from '../../context/AuthContext';
 import { useMemo } from 'react';
@@ -151,7 +150,6 @@ const Home = () => {
             <Features />
             <ImpactStats />
             <Testimonials />
-            <CTASection />
             <Footer />
         </div>
     );

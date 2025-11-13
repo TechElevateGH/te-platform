@@ -11,16 +11,7 @@ import { ChartBarIcon } from '@heroicons/react/24/solid';
 
 const stats = [
     {
-        id: 1,
-        name: 'Active Mentees',
-        value: 100,
-        suffix: '+',
-        icon: UserGroupIcon,
-        color: 'from-blue-500 to-cyan-500',
-        description: 'Students and professionals in our program',
-    },
-    {
-        id: 2,
+        id: 0,
         name: 'Success Stories',
         value: 50,
         suffix: '+',
@@ -29,25 +20,16 @@ const stats = [
         description: 'Mentees who landed their dream jobs',
     },
     {
-        id: 3,
-        name: 'Countries Reached',
-        value: 30,
+        id: 1,
+        name: 'Nationalities',
+        value: 5,
         suffix: '+',
         icon: GlobeAltIcon,
         color: 'from-orange-500 to-red-500',
         description: 'Global presence across continents',
     },
     {
-        id: 4,
-        name: 'Learning Resources',
-        value: 15,
-        suffix: '+',
-        icon: AcademicCapIcon,
-        color: 'from-cyan-500 to-blue-500',
-        description: 'Workshops, courses, and tutorials',
-    },
-    {
-        id: 5,
+        id: 2,
         name: 'Community Members',
         value: 100,
         suffix: '+',
