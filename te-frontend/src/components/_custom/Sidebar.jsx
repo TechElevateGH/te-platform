@@ -14,9 +14,8 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-const Sidebar = ({ navigation, content, setContent, setLogin }) => {
+const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
-    const [sidebarOpen, setSidebarOpen] = useState(false)
     const [isExpanded, setIsExpanded] = useState(false)
     const [showScrollIndicator, setShowScrollIndicator] = useState(false)
     const sidebarContentRef = useRef(null)

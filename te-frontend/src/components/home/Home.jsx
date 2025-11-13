@@ -1,7 +1,6 @@
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import Features from "./Features";
-import Members from "./Members";
 import ImpactStats from "./ImpactStats";
 import Testimonials from "./Testimonials";
 import CTASection from "./CTASection";
@@ -151,7 +150,6 @@ const Home = () => {
             )}
             <Features />
             <ImpactStats />
-            <Members />
             <Testimonials />
             <CTASection />
             <Footer />

@@ -86,9 +86,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
     const handleMobileMenuToggle = () => {
         if (onMobileMenuOpen) {
+            // For workspace, use the callback
             onMobileMenuOpen();
         } else {
-            setMobileMenuOpen(true);
+            // For home page, toggle local state
+            setMobileMenuOpen(!mobileMenuOpen);
         }
     };
 
@@ -233,22 +235,10 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
                             <div className="flex items-center justify-between">
                                 <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                                    <img
-                                        src="/logo.png"
-                                        alt="TechElevate"
-                                        className="h-10 w-10 rounded-xl shadow-lg"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'flex';
-                                        }}
-                                    />
-                                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-blue-500 hidden items-center justify-center shadow-lg">
-                                        <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18.5c-3.86-.96-6.5-4.58-6.5-8.5V8.42l6.5-3.25 6.5 3.25V12c0 3.92-2.64 7.54-6.5 8.5z" />
-                                            <path d="M10.5 14.5l-2-2-1.5 1.5 3.5 3.5 6-6-1.5-1.5z" />
-                                        </svg>
+                                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                        <RocketLaunchIcon className="h-6 w-6 text-white" />
                                     </div>
-                                    <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                                    <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
                                         TechElevate
                                     </span>
                                 </a>
