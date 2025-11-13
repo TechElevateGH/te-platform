@@ -153,21 +153,21 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                         </span>
                                     </div>
                                 )}
-
-                                {/* Dark Mode Toggle - Mobile */}
-                                <button
-                                    onClick={toggleDarkMode}
-                                    className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                                    title={darkMode ? 'Light Mode' : 'Dark Mode'}
-                                >
-                                    {darkMode ? (
-                                        <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                                    ) : (
-                                        <MoonIcon className="h-5 w-5 text-gray-600" />
-                                    )}
-                                </button>
                             </>
                         )}
+
+                        {/* Dark Mode Toggle - Mobile (for all pages) */}
+                        <button
+                            onClick={toggleDarkMode}
+                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                            title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                        >
+                            {darkMode ? (
+                                <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            ) : (
+                                <MoonIcon className="h-5 w-5 text-gray-600" />
+                            )}
+                        </button>
 
                         {/* Desktop controls */}
                         <div className="hidden lg:flex lg:items-center lg:gap-x-3">
@@ -274,7 +274,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                 </a>
                                 <button
                                     type="button"
-                                    className="-m-2.5 rounded-lg p-2.5 text-gray-700 hover:bg-gray-100"
+                                    className="-m-2.5 rounded-lg p-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     <span className="sr-only">Close menu</span>

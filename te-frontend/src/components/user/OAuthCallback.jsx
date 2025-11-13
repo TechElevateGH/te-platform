@@ -18,17 +18,17 @@ const OAuthCallback = () => {
         const userId = searchParams.get('user_id');
         const role = searchParams.get('role');
         const error = searchParams.get('error');
-        
+
         // If no parameters at all, this is a stale browser restore
         if (!token && !userId && !role && !error) {
             console.warn('[OAuthCallback] Stale callback detected (Chrome session restore) - redirecting immediately');
             setIsStaleCallback(true);
             const existingToken = localStorage.getItem('accessToken');
-            
+
             // Replace history state BEFORE redirecting to prevent Chrome from caching this URL
             const targetPath = existingToken ? '/workspace' : '/login';
             window.history.replaceState(null, '', targetPath);
-            
+
             if (existingToken) {
                 window.location.replace('/workspace');
             } else {
