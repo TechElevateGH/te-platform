@@ -21,6 +21,8 @@ const UserAccountManagement = () => {
     const [selectedAccount, setSelectedAccount] = useState(null);
     const [showEditPrivileged, setShowEditPrivileged] = useState(false);
     const [showCreateLeadAdmin, setShowCreateLeadAdmin] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [showMemberModal, setShowMemberModal] = useState(false);
 
     // Role mapping
     const getRoleName = (role) => {
@@ -110,6 +112,12 @@ const UserAccountManagement = () => {
             is_active: user.is_active,
         });
         setShowEditPrivileged(true);
+    };
+
+    // View member details
+    const handleViewMember = (user) => {
+        setSelectedMember(user);
+        setShowMemberModal(true);
     };
 
     // Filter users based on search
@@ -230,7 +238,11 @@ const UserAccountManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredPrivilegedUsers.map((user) => (
-                                                <tr key={user._id || user.id} className="hover:bg-gray-50 transition-colors">
+                                                <tr 
+                                                    key={user._id || user.id} 
+                                                    onClick={() => handleEditPrivileged(user)}
+                                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                                >
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
@@ -263,7 +275,7 @@ const UserAccountManagement = () => {
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex items-center justify-end gap-1 sm:gap-2">
                                                             <button
                                                                 onClick={() => handleEditPrivileged(user)}
@@ -329,7 +341,11 @@ const UserAccountManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredMemberUsers.map((user) => (
-                                                <tr key={user._id || user.id} className="hover:bg-gray-50 transition-colors">
+                                                <tr 
+                                                    key={user._id || user.id} 
+                                                    onClick={() => handleViewMember(user)}
+                                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                                >
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -359,7 +375,7 @@ const UserAccountManagement = () => {
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button
                                                                 onClick={() =>
@@ -403,6 +419,124 @@ const UserAccountManagement = () => {
                             setSelectedAccount(null);
                         }}
                     />
+                )}
+
+                {/* Member Details Modal */}
+                {selectedMember && showMemberModal && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowMemberModal(false)}>
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                            {/* Header */}
+                            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                                            <UserCircleIcon className="h-7 w-7" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold">{selectedMember.full_name}</h2>
+                                            <p className="text-sm text-blue-100">Member Details</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowMemberModal(false)}
+                                        className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                                    >
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 space-y-6">
+                                {/* Contact Information */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        Contact Information
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white break-all">{selectedMember.email}</p>
+                                        </div>
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Phone</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedMember.phone || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Education */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                        </svg>
+                                        Education
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">University</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedMember.university || 'Not provided'}</p>
+                                        </div>
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Graduation Year</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedMember.year || 'Not provided'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Account Status */}
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Account Status
+                                    </h3>
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</span>
+                                            {selectedMember.is_active ? (
+                                                <span className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                                                    <CheckCircleIcon className="h-5 w-5" />
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
+                                                    <XCircleIcon className="h-5 w-5" />
+                                                    Inactive
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action Button */}
+                                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleUserStatus(selectedMember._id || selectedMember.id, selectedMember.is_active, false);
+                                            setShowMemberModal(false);
+                                        }}
+                                        className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${
+                                            selectedMember.is_active
+                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                        }`}
+                                    >
+                                        {selectedMember.is_active ? 'Deactivate Account' : 'Activate Account'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

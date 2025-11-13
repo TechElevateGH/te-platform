@@ -499,7 +499,13 @@ const Referrals = () => {
                                                 {filteredCompanies.map((company, index) => (
                                                     <tr
                                                         key={company.id}
-                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group"
+                                                        onClick={() => {
+                                                            if (!isMember) return;
+                                                            setSelectedCompany(company);
+                                                            setReferralCompanyId(company.id);
+                                                        }}
+                                                        className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                        title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
                                                     >
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <div className="flex items-center gap-3">
@@ -547,7 +553,7 @@ const Referrals = () => {
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                        <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                                                             <button
                                                                 onClick={() => {
                                                                     if (!isMember) return;
