@@ -1,0 +1,70 @@
+# Netlify Configuration for TechElevate Platform Frontend
+
+[build]
+  # Directory where the build command runs
+  base = "te-frontend/"
+  
+  # The command to build the app (CI=false treats warnings as warnings, not errors)
+  command = "CI=false npm run build"
+  
+  # The directory with the production build
+  publish = "build/"
+
+[build.environment]
+  # Node version
+  NODE_VERSION = "18"
+  
+  # PostHog Analytics (with REACT_APP_ prefix required by Create React App)
+  REACT_APP_POSTHOG_KEY = "phc_DyZs1fd1LJjtRU8Lv3srORCDWcVyk7s0XFMmNEmz77D"
+  REACT_APP_POSTHOG_HOST = "https://us.i.posthog.com"
+  
+  # Backend API URL - Production (with REACT_APP_ prefix required by Create React App)
+  REACT_APP_API_URL = "https://te-platform.onrender.com/v1/"
+
+# Redirect all requests to index.html for client-side routing (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# Cache static assets
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache images
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
