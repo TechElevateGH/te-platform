@@ -516,11 +516,11 @@ const Files = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <ChevronDownIcon 
+                                <ChevronDownIcon
                                     className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedCoverLetter ? 'rotate-180' : ''}`}
                                 />
                             </button>
-                            
+
                             {expandedCoverLetter && (
                                 <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
                                     <div className="pt-4">
@@ -590,11 +590,11 @@ const Files = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <ChevronDownIcon 
+                                <ChevronDownIcon
                                     className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedReferralEssay ? 'rotate-180' : ''}`}
                                 />
                             </button>
-                            
+
                             {expandedReferralEssay && (
                                 <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
                                     <div className="pt-4">

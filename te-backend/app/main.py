@@ -58,14 +58,35 @@ def enable_cors(app):
             CORSMiddleware,
             allow_origins=allow_origins,
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            allow_methods=["*"],  # Allow all methods including OPTIONS
             allow_headers=["*"],
             expose_headers=["*"],
+            max_age=3600,  # Cache preflight response for 1 hour
         )
 
 
 app = create_app()
 enable_cors(app)
+
+
+# Middleware to handle OPTIONS requests before they hit authentication
+@app.middleware("http")
+async def options_handler(request: Request, call_next):
+    """Handle OPTIONS preflight requests directly to avoid authentication issues."""
+    if request.method == "OPTIONS":
+        return JSONResponse(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
+            },
+        )
+    return await call_next(request)
+
+
 app.include_router(api_router, prefix=settings.API_STR)
 
 
