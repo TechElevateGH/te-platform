@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import ReferralEssay from "../components/file/ReferralEssay";
 import ResumeReviews from "./ResumeReviews";
-import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon, ChevronDownIcon, ClipboardIcon, UserIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, DocumentTextIcon, PencilSquareIcon, ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +14,7 @@ import { trackEvent } from "../analytics/events";
 
 const Files = () => {
     const { userId, accessToken, userRole } = useAuth();
-    const { resumes, setFetchFiles } = useData();
+    const { resumes, setFetchFiles, userInfo } = useData();
 
     // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -33,6 +32,10 @@ const Files = () => {
     const [editingResumeId, setEditingResumeId] = useState(null);
     const [editedResumeName, setEditedResumeName] = useState('');
     const [updatingResumeId, setUpdatingResumeId] = useState(null);
+
+    // Essay expansion state
+    const [expandedCoverLetter, setExpandedCoverLetter] = useState(false);
+    const [expandedReferralEssay, setExpandedReferralEssay] = useState(false);
 
     // Resume Review Form Data
     const [reviewFormData, setReviewFormData] = useState({
@@ -227,15 +230,8 @@ const Files = () => {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                 <div className="lg:grid lg:grid-cols-12 lg:gap-6">
-                    {/* Referral Essay Section */}
-                    <div className="lg:col-span-5 mb-6 lg:mb-0">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-6 transition-colors">
-                            <ReferralEssay isMember={isMember} />
-                        </div>
-                    </div>
-
-                    {/* Main Content Section with Tabs */}
-                    <div className="lg:col-span-7">
+                    {/* Main Content Section with Tabs - now on the left */}
+                    <div className="lg:col-span-7 mb-6 lg:mb-0">
                         {/* Tab Content */}
                         {activeTab === 'resumes' ? (
                             <div className="space-y-4">
@@ -298,9 +294,6 @@ const Files = () => {
                                                 </span>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 max-w-md">
-                                            Keep your workspace tidy by archiving older versions. You can restore them anytime from the archived view.
-                                        </p>
                                     </div>
 
                                     {displayedResumes.length === 0 ? (
@@ -502,6 +495,157 @@ const Files = () => {
                                 <ResumeReviews />
                             </div>
                         )}
+                    </div>
+
+                    {/* Essays Section - now on the right with compact expandable cards */}
+                    <div className="lg:col-span-5 space-y-4">
+                        {/* Cover Letter Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                            <button
+                                onClick={() => setExpandedCoverLetter(!expandedCoverLetter)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                        <DocumentTextIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cover Letter</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {userInfo?.cover_letter ? 'First person - for job applications' : 'No cover letter added'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronDownIcon 
+                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedCoverLetter ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+                            
+                            {expandedCoverLetter && (
+                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="pt-4">
+                                        {userInfo?.cover_letter && userInfo.cover_letter !== "" ? (
+                                            <div className="space-y-3">
+                                                <div className="max-h-60 overflow-y-auto">
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                                        {userInfo.cover_letter}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2 pt-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(userInfo.cover_letter);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                                                    >
+                                                        <ClipboardIcon className="h-4 w-4" />
+                                                        Copy
+                                                    </button>
+                                                    {isMember && (
+                                                        <button
+                                                            onClick={() => setExpandedCoverLetter(false)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        >
+                                                            <PencilSquareIcon className="h-4 w-4" />
+                                                            Edit
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                    Write in first person (I, me, my)
+                                                </p>
+                                                {isMember && (
+                                                    <button
+                                                        onClick={() => setExpandedCoverLetter(false)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                    >
+                                                        <PencilSquareIcon className="h-4 w-4" />
+                                                        Add Cover Letter
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Referral Essay Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                            <button
+                                onClick={() => setExpandedReferralEssay(!expandedReferralEssay)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                                        <UserIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Referral Essay</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {userInfo?.essay ? 'Third person - used for referral requests' : 'No referral essay added'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronDownIcon 
+                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedReferralEssay ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+                            
+                            {expandedReferralEssay && (
+                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="pt-4">
+                                        {userInfo?.essay && userInfo.essay !== "" ? (
+                                            <div className="space-y-3">
+                                                <div className="max-h-60 overflow-y-auto">
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                                        {userInfo.essay}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2 pt-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(userInfo.essay);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                                                    >
+                                                        <ClipboardIcon className="h-4 w-4" />
+                                                        Copy
+                                                    </button>
+                                                    {isMember && (
+                                                        <button
+                                                            onClick={() => setExpandedReferralEssay(false)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        >
+                                                            <PencilSquareIcon className="h-4 w-4" />
+                                                            Edit
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                    Write in third person (he, she, they)
+                                                </p>
+                                                {isMember && (
+                                                    <button
+                                                        onClick={() => setExpandedReferralEssay(false)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                    >
+                                                        <PencilSquareIcon className="h-4 w-4" />
+                                                        Add Referral Essay
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
