@@ -11,6 +11,29 @@ const OAuthCallback = () => {
     console.log('OAuthCallback component loaded!');
     console.log('Current URL:', window.location.href);
 
+    // IMMEDIATE CHECK: If no params at all, redirect before any processing
+    useEffect(() => {
+        const token = searchParams.get('token');
+        const userId = searchParams.get('user_id');
+        const role = searchParams.get('role');
+        const error = searchParams.get('error');
+
+        // Quick check for completely empty callback (browser restore)
+        if (!token && !userId && !role && !error) {
+            console.warn('[OAuthCallback] IMMEDIATE CHECK: No parameters detected - stale URL from browser restore');
+            const existingToken = localStorage.getItem('accessToken');
+
+            if (existingToken) {
+                console.log('[OAuthCallback] Token found, redirecting to workspace NOW');
+                window.location.href = '/workspace';
+            } else {
+                console.log('[OAuthCallback] No token, redirecting to login NOW');
+                window.location.href = '/login';
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Run once on mount - intentionally not depending on searchParams for immediate redirect
+
     useEffect(() => {
         if (hasProcessed) return; // Prevent double processing
 
@@ -34,6 +57,26 @@ const OAuthCallback = () => {
                 role: role ? 'present' : 'missing',
                 error: error
             });
+
+            // If no parameters at all, user might have reopened an old callback URL
+            // Check if already authenticated and redirect accordingly
+            if (!token && !userId && !role && !error) {
+                console.warn('OAuth callback accessed without parameters - this is likely a stale browser restore');
+                const existingToken = localStorage.getItem('accessToken');
+
+                if (existingToken) {
+                    console.log('User already authenticated, redirecting to workspace immediately...');
+                    // Use replace to avoid adding another history entry
+                    window.location.replace('/workspace');
+                } else {
+                    console.log('No auth found, redirecting to login immediately...');
+                    window.location.replace('/login');
+                }
+                return;
+            }
+
+            // Mark that OAuth is in progress to prevent browser restore issues
+            sessionStorage.setItem('oauthInProgress', 'true');
 
             if (error) {
                 console.error('OAuth error from backend:', error);
@@ -70,6 +113,10 @@ const OAuthCallback = () => {
                 localStorage.removeItem('redirectAfterLogin');
                 localStorage.removeItem('prevPage');
                 localStorage.removeItem('sessionExpired');
+
+                // Mark OAuth as complete
+                sessionStorage.removeItem('oauthInProgress');
+                localStorage.setItem('lastSuccessfulLogin', Date.now().toString());
 
                 // Verify it was saved
                 const savedToken = localStorage.getItem('accessToken');

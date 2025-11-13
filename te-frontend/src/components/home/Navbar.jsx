@@ -140,91 +140,121 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         ))}
                     </div>
 
-                    {/* Right section: Auth Buttons */}
-                    <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
-                        {/* Notification Bell - Show only when authenticated */}
-                        {isAuthenticated && <NotificationBell />}
+                    {/* Right section: Mobile workspace controls + Desktop Auth Buttons */}
+                    <div className="flex items-center gap-x-2 lg:gap-x-3 flex-shrink-0">
+                        {/* Mobile-only controls for workspace */}
+                        {isWorkspace && (
+                            <>
+                                {/* Role Badge - Mobile */}
+                                {roleInfo && (
+                                    <div className={`lg:hidden ${roleInfo.bgColor} px-2 py-1 rounded-full border border-current/20`}>
+                                        <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                            {roleInfo.label}
+                                        </span>
+                                    </div>
+                                )}
 
-                        <button
-                            onClick={() => navigate('/documentation')}
-                            className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                        >
-                            Docs
-                        </button>
-
-                        {/* Role Badge - Show for privileged users */}
-                        {isAuthenticated && roleInfo && (
-                            <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
-                                <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
-                                    {roleInfo.label}
-                                </span>
-                            </div>
+                                {/* Dark Mode Toggle - Mobile */}
+                                <button
+                                    onClick={toggleDarkMode}
+                                    className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                                    title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                                >
+                                    {darkMode ? (
+                                        <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                    ) : (
+                                        <MoonIcon className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </button>
+                            </>
                         )}
 
-                        {/* Dark Mode Toggle */}
-                        <button
-                            onClick={toggleDarkMode}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
-                            title={darkMode ? 'Light Mode' : 'Dark Mode'}
-                        >
-                            {darkMode ? (
-                                <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-amber-500 transition-colors" />
-                            ) : (
-                                <MoonIcon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                        {/* Desktop controls */}
+                        <div className="hidden lg:flex lg:items-center lg:gap-x-3">
+                            {/* Notification Bell - Show only when authenticated */}
+                            {isAuthenticated && <NotificationBell />}
+
+                            <button
+                                onClick={() => navigate('/documentation')}
+                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                            >
+                                Docs
+                            </button>
+
+                            {/* Role Badge - Show for privileged users */}
+                            {isAuthenticated && roleInfo && (
+                                <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
+                                    <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                        {roleInfo.label}
+                                    </span>
+                                </div>
                             )}
-                        </button>
 
-                        {!isAuthenticated ? (
-                            <>
-                                <button
-                                    onClick={() => navigate('/login')}
-                                    className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                                >
-                                    Log in
-                                </button>
-                                <button
-                                    onClick={() => navigate('/register')}
-                                    className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
-                                >
-                                    Get Started
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => navigate('/workspace')}
-                                    className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                                >
-                                    Workspace
-                                </button>
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
+                                title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                            >
+                                {darkMode ? (
+                                    <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-amber-500 transition-colors" />
+                                ) : (
+                                    <MoonIcon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                                )}
+                            </button>
 
-                                {/* Profile icon */}
-                                <button
-                                    onClick={() => {
-                                        sessionStorage.setItem('content', 'Profile');
-                                        if (location.pathname === '/workspace') {
-                                            // If already on workspace, dispatch a custom event to trigger content change
-                                            window.dispatchEvent(new CustomEvent('workspaceContentChange', { detail: 'Profile' }));
-                                        } else {
-                                            navigate('/workspace');
-                                        }
-                                    }}
-                                    className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
-                                    title="Profile"
-                                >
-                                    <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                                </button>
+                            {!isAuthenticated ? (
+                                <>
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                                    >
+                                        Log in
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/register')}
+                                        className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
+                                    >
+                                        Get Started
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => navigate('/workspace')}
+                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                                    >
+                                        Workspace
+                                    </button>
 
-                                {/* Sign out icon */}
-                                <button
-                                    onClick={handleLogoutClick}
-                                    className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
-                                    title="Sign Out"
-                                >
-                                    <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
-                                </button>
-                            </>
-                        )}
+                                    {/* Profile icon */}
+                                    <button
+                                        onClick={() => {
+                                            sessionStorage.setItem('content', 'Profile');
+                                            if (location.pathname === '/workspace') {
+                                                // If already on workspace, dispatch a custom event to trigger content change
+                                                window.dispatchEvent(new CustomEvent('workspaceContentChange', { detail: 'Profile' }));
+                                            } else {
+                                                navigate('/workspace');
+                                            }
+                                        }}
+                                        className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
+                                        title="Profile"
+                                    >
+                                        <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                                    </button>
+
+                                    {/* Sign out icon */}
+                                    <button
+                                        onClick={handleLogoutClick}
+                                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
+                                        title="Sign Out"
+                                    >
+                                        <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </nav>
 

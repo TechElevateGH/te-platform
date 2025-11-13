@@ -104,6 +104,54 @@ async def health_check():
     return {"status": "healthy", "service": "te-backend", "version": "1.0.0"}
 
 
+@app.get("/debug/db", tags=["Health"])
+async def debug_database():
+    """
+    Database diagnostic endpoint - helps debug MongoDB connection issues
+    Returns collection counts and connection status
+    """
+    from app.database.session import mongodb
+
+    try:
+        # Test connection
+        mongodb.command("ping")
+
+        # Get collection counts
+        collections_info = {}
+        for collection_name in [
+            "member_users",
+            "privileged_users",
+            "companies",
+            "applications",
+            "referrals",
+            "referral_companies",
+        ]:
+            try:
+                count = mongodb[collection_name].count_documents({})
+                collections_info[collection_name] = count
+            except Exception as e:
+                collections_info[collection_name] = f"Error: {str(e)}"
+
+        return {
+            "status": "connected",
+            "database_name": mongodb.name,
+            "collections": collections_info,
+            "mongodb_uri_configured": bool(settings.MONGODB_URI),
+            "mongodb_uri_prefix": settings.MONGODB_URI[:20] + "..."
+            if settings.MONGODB_URI
+            else "NOT SET",
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "database_name": settings.MONGODB_DB_NAME
+            if hasattr(settings, "MONGODB_DB_NAME")
+            else "NOT SET",
+            "mongodb_uri_configured": bool(getattr(settings, "MONGODB_URI", None)),
+        }
+
+
 # Error Handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):

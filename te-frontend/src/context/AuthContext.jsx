@@ -27,6 +27,33 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check if we're on the OAuth callback page without params (stale redirect from browser restore)
+    if (window.location.pathname === '/auth/callback') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasParams = urlParams.has('token') || urlParams.has('error') || urlParams.has('user_id');
+
+      if (!hasParams) {
+        // This is a stale OAuth callback URL (browser restore after close)
+        console.warn('[AuthContext] Detected stale OAuth callback - browser was reopened');
+        const accessToken = localStorage.getItem('accessToken');
+        const lastLogin = localStorage.getItem('lastSuccessfulLogin');
+
+        // Check if user was recently logged in (within last 30 days)
+        const recentlyLoggedIn = lastLogin && (Date.now() - parseInt(lastLogin)) < 30 * 24 * 60 * 60 * 1000;
+
+        if (accessToken && recentlyLoggedIn) {
+          // User is authenticated and login is recent, go to workspace
+          console.log('[AuthContext] User authenticated, redirecting to workspace');
+          window.location.replace('/workspace');
+        } else {
+          // Not authenticated or login is stale, go to login
+          console.log('[AuthContext] Not authenticated or stale login, redirecting to login');
+          window.location.replace('/login');
+        }
+        return;
+      }
+    }
+
     // Use localStorage for persistent auth across tabs
     const accessToken = localStorage.getItem('accessToken');
     const userId = localStorage.getItem('userId');
