@@ -69,6 +69,19 @@ enable_cors(app)
 app.include_router(api_router, prefix=settings.API_STR)
 
 
+# Health check endpoint for cold start detection and monitoring
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """
+    Health check endpoint to verify service is running.
+    Useful for:
+    - Cold start warmup
+    - Load balancer health checks
+    - Monitoring and uptime checks
+    """
+    return {"status": "healthy", "service": "te-backend", "version": "1.0.0"}
+
+
 # Error Handlers
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
