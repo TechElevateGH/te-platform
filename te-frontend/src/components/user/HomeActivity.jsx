@@ -26,7 +26,7 @@ const UserActivity = () => {
                     <h2 className="text-base font-semibold leading-7 text-gray-900">Activity feed</h2>
                     <button
                         type="button"
-                        onClick={() => {/* Add view all handler */}}
+                        onClick={() => {/* Add view all handler */ }}
                         className="text-sm font-semibold leading-6 text-indigo-400 hover:text-indigo-300"
                     >
                         View all

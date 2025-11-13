@@ -136,7 +136,7 @@ const Features = () => {
                                 <RocketLaunchIcon className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </span>
                         </button>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Join 500+ aspiring tech professionals</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Join 100+ aspiring tech professionals</span>
                     </div>
                 </div>
             </div>
