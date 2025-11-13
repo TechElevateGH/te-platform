@@ -1,5 +1,17 @@
-venv
 .vscode
 __pycache__
-./.env
 .ruff_cache
+
+# All .env files
+.env
+.env*
+
+# Credentials and secrets
+*_creds.json
+google_drive_creds.json
+*.key
+*.pem
+
+# venv files
+venv/
+

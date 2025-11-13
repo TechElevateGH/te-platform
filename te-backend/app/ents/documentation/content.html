@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TechElevate Platform Documentation</title>
+    <style>
+      :root {
+        --bg: #23272f;
+        --surface: #2d333b;
+        --border: rgba(255, 255, 255, 0.1);
+        --text: #ebecf0;
+        --text-secondary: #99a1b3;
+        --heading: #fff;
+        --accent: #087ea4;
+        --accent-hover: #149eca;
+        --link: #58c4dc;
+        --code-bg: rgba(0, 0, 0, 0.3);
+        --sidebar-width: 280px;
+      }
+      body.light {
+        --bg: #fff;
+        --surface: #f6f7f9;
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #23272f;
+        --text-secondary: #5e687e;
+        --heading: #23272f;
+        --link: #087ea4;
+        --code-bg: rgba(0, 0, 0, 0.05);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif;
+        font-size: 17px;
+        line-height: 1.7;
+        background: var(--bg);
+        color: var(--text);
+        transition: all 0.2s;
+      }
+      a {
+        color: var(--link);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: var(--accent);
+        z-index: 999;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
+      }
+      .header-inner {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--heading);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+      }
+      .theme {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .theme:hover {
+        background: var(--border);
+      }
+      .menu-toggle {
+        display: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        margin-right: 0.5rem;
+      }
+      .menu-toggle:hover {
+        background: var(--border);
+      }
+      .hero {
+        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        color: #fff;
+        padding: 5rem 1.5rem 6rem;
+        text-align: center;
+      }
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .hero h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+      }
+      .hero p {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        margin-bottom: 2.5rem;
+      }
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.8rem 1.8rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.15s;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #fff;
+        color: var(--accent);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+      }
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+        text-decoration: none;
+      }
+      .layout {
+        display: flex;
+        position: relative;
+      }
+      .sidebar {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: var(--sidebar-width);
+        height: calc(100vh - 80px);
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        padding: 2rem 1rem;
+        z-index: 50;
+        transition: transform 0.3s;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .sidebar a {
+        display: block;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        transition: all 0.15s;
+        color: var(--text);
+        font-size: 0.95rem;
+        text-decoration: none;
+      }
+      .sidebar a:hover {
+        background: var(--surface);
+        color: var(--accent);
+        transform: translateX(4px);
+      }
+      .sidebar a.active {
+        background: var(--surface);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .sidebar .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        margin-top: 1.5rem;
+      }
+      .sidebar .section-title:first-child {
+        margin-top: 0;
+      }
+      .content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        padding: 3rem 1.5rem 5rem;
+        max-width: 900px;
+      }
+      section {
+        margin-bottom: 4rem;
+      }
+      h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--heading);
+        margin: 3rem 0 1.5rem;
+        line-height: 1.2;
+      }
+      h2:first-child {
+        margin-top: 0;
+      }
+      h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--heading);
+        margin: 2.5rem 0 1rem;
+        line-height: 1.3;
+      }
+      h4 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: var(--heading);
+        margin: 2rem 0 0.75rem;
+      }
+      p {
+        margin: 1.25rem 0;
+        color: var(--text);
+      }
+      ul,
+      ol {
+        margin: 1.25rem 0;
+        padding-left: 1.75rem;
+      }
+      li {
+        margin: 0.5rem 0;
+        color: var(--text);
+      }
+      li strong {
+        color: var(--heading);
+        font-weight: 600;
+      }
+      code {
+        font-family: "SF Mono", Monaco, Menlo, monospace;
+        font-size: 0.94em;
+        background: var(--code-bg);
+        color: var(--text);
+        padding: 0.2em 0.4em;
+        border-radius: 5px;
+      }
+      pre {
+        background: var(--code-bg);
+        padding: 1.5rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .note {
+        background: rgba(8, 126, 164, 0.1);
+        border-left: 4px solid var(--accent);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+      }
+      .note strong {
+        display: block;
+        color: var(--accent);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .warning {
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid #ffc107;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 2rem 0;
+      }
+      .warning strong {
+        display: block;
+        color: #ffc107;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.15s;
+      }
+      .card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+      .card h3 {
+        margin-top: 0;
+        font-size: 1.4rem;
+        color: var(--accent);
+      }
+      .card h4 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: var(--accent);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 1rem 1.25rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        background: var(--surface);
+        color: var(--heading);
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+      tbody tr:hover {
+        background: var(--surface);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      footer {
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        padding: 3rem 1.5rem;
+        margin-top: 5rem;
+        text-align: center;
+        color: var(--text-secondary);
+        margin-left: var(--sidebar-width);
+      }
+      footer p {
+        margin: 0.5rem 0;
+      }
+      @media (max-width: 1024px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .menu-toggle {
+          display: flex;
+        }
+        .content {
+          margin-left: 0;
+          max-width: 100%;
+        }
+        footer {
+          margin-left: 0;
+        }
+        .hero {
+          padding: 3rem 1.5rem 4rem;
+        }
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+        .hero p {
+          font-size: 1.1rem;
+        }
+        h2 {
+          font-size: 2rem;
+        }
+        h3 {
+          font-size: 1.4rem;
+        }
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body id="top">
+    <div class="progress" id="progress"></div>
+
+    <header>
+      <div class="header-inner">
+        <div class="logo">
+          <button class="menu-toggle" id="menuToggle">☰</button>
+          <div class="logo-icon">T</div>
+          <span>TechElevate Docs</span>
+        </div>
+        <button id="theme" class="theme"><span id="icon">🌙</span></button>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="hero-content">
+        <h1>TechElevate Platform Documentation</h1>
+        <p>
+          Complete technical reference and operational guide for the TechElevate
+          talent enablement platform.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#overview">Get Started</a>
+          <a class="btn btn-secondary" href="#api">API Reference</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <nav>
+          <div class="section-title">Getting Started</div>
+          <a href="#overview">Platform Overview</a>
+          <a href="#mission">Mission & Vision</a>
+          <a href="#personas">User Personas</a>
+
+          <div class="section-title">Architecture</div>
+          <a href="#stack">Technology Stack</a>
+          <a href="#frontend-arch">Frontend Architecture</a>
+          <a href="#backend-arch">Backend Architecture</a>
+          <a href="#database">Database Design</a>
+          <a href="#storage">File Storage</a>
+
+          <div class="section-title">Features</div>
+          <a href="#auth">Authentication & Authorization</a>
+          <a href="#resumes">Resume Management</a>
+          <a href="#applications">Application Tracking</a>
+          <a href="#referrals">Referral System</a>
+          <a href="#companies">Company Database</a>
+          <a href="#learning">Learning Modules</a>
+
+          <div class="section-title">API Reference</div>
+          <a href="#api-overview">API Overview</a>
+          <a href="#api-auth">Authentication APIs</a>
+          <a href="#api-users">User APIs</a>
+          <a href="#api-resumes">Resume APIs</a>
+          <a href="#api-referrals">Referral APIs</a>
+          <a href="#api-companies">Company APIs</a>
+
+          <div class="section-title">Development</div>
+          <a href="#setup">Environment Setup</a>
+          <a href="#backend-dev">Backend Development</a>
+          <a href="#frontend-dev">Frontend Development</a>
+          <a href="#testing">Testing</a>
+          
+          <div class="section-title">Deployment</div>
+          <a href="#free-deployment">💰 Zero-Cost Deployment</a>
+          <a href="#deployment-options">Deployment Options</a>
+          <a href="#production-setup">Production Setup</a>
+
+          <div class="section-title">Operations</div>
+          <a href="#monitoring">Monitoring</a>
+          <a href="#security">Security</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <section id="overview">
+          <h2>Platform Overview</h2>
+          <p>
+            TechElevate is a comprehensive talent enablement platform designed
+            to streamline the job search and placement process. The platform
+            serves as a centralized operating system connecting job seekers
+            (members), company employees who can provide referrals (referrers),
+            and TechElevate staff (leads and admins).
+          </p>
+
+          <p>
+            The platform facilitates the entire job hunting lifecycle - from
+            resume preparation and application tracking to internal referral
+            requests and skill development through curated learning content.
+          </p>
+        </section>
+
+        <section id="mission">
+          <h2>Mission & Vision</h2>
+          <div class="cards">
+            <div class="card">
+              <h4>Mission</h4>
+              <p>
+                Democratize access to tech opportunities by providing members
+                with the tools, resources, and network needed to secure their
+                ideal roles in the technology industry.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Vision</h4>
+              <p>
+                Become the leading platform for tech talent enablement, creating
+                a transparent and efficient marketplace connecting aspiring
+                professionals with opportunities.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Core Values</h4>
+              <ul>
+                <li>Transparency in the job search process</li>
+                <li>Community-driven support</li>
+                <li>Data-driven decision making</li>
+                <li>Continuous learning and growth</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="personas">
+          <h2>User Personas</h2>
+
+          <h3>Member (Job Seeker)</h3>
+          <p>
+            The primary user of the platform. Members are tech professionals or
+            aspiring professionals looking for job opportunities.
+          </p>
+          <div class="note">
+            <strong>Key Capabilities</strong>
+            Members can upload and manage multiple versions of their resume,
+            track job applications, request referrals from company insiders,
+            access learning content, and receive feedback from the TechElevate
+            team.
+          </div>
+
+          <h3>Referrer</h3>
+          <p>
+            Employees at tech companies who are willing to provide internal
+            referrals to qualified members.
+          </p>
+          <ul>
+            <li>Review incoming referral requests</li>
+            <li>Evaluate candidate profiles and resumes</li>
+            <li>Provide or decline referrals</li>
+            <li>Track referral status and outcomes</li>
+          </ul>
+
+          <h3>Lead</h3>
+          <p>
+            TechElevate staff members who manage the platform's content and
+            operations.
+          </p>
+          <ul>
+            <li>Curate and maintain company database</li>
+            <li>Review member applications and resumes</li>
+            <li>Manage learning content</li>
+            <li>Oversee referral workflows</li>
+          </ul>
+
+          <h3>Admin</h3>
+          <p>
+            Platform administrators with full access to all system capabilities.
+          </p>
+          <ul>
+            <li>User management and role assignment</li>
+            <li>System configuration</li>
+            <li>Analytics and reporting</li>
+            <li>Content moderation</li>
+          </ul>
+        </section>
+
+        <section id="stack">
+          <h2>Technology Stack</h2>
+          <p>
+            TechElevate uses a modern, scalable technology stack optimized for
+            rapid development and deployment.
+          </p>
+
+          <div class="cards">
+            <div class="card">
+              <h4>Frontend</h4>
+              <ul>
+                <li><strong>React 18</strong> - UI framework</li>
+                <li><strong>Tailwind CSS</strong> - Utility-first styling</li>
+                <li><strong>HeadlessUI</strong> - Accessible components</li>
+                <li><strong>Axios</strong> - HTTP client</li>
+                <li><strong>React Router</strong> - Client-side routing</li>
+                <li><strong>Context API</strong> - State management</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Backend</h4>
+              <ul>
+                <li><strong>FastAPI</strong> - Python web framework</li>
+                <li><strong>Pydantic</strong> - Data validation</li>
+                <li><strong>Motor</strong> - Async MongoDB driver</li>
+                <li><strong>Python-Jose</strong> - JWT handling</li>
+                <li><strong>Uvicorn</strong> - ASGI server</li>
+                <li><strong>Google API Client</strong> - Drive integration</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Infrastructure</h4>
+              <ul>
+                <li><strong>MongoDB Atlas</strong> - Database</li>
+                <li><strong>Google Drive</strong> - File storage</li>
+                <li><strong>JWT</strong> - Authentication</li>
+                <li><strong>CORS</strong> - Cross-origin requests</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="frontend-arch">
+          <h2>Frontend Architecture</h2>
+          <p>
+            The frontend is a Single Page Application (SPA) built with React,
+            organized around key functional domains.
+          </p>
+
+          <h3>Directory Structure</h3>
+          <pre><code>src/
+├── components/          # Reusable UI components
+│   ├── home/           # Landing & navigation
+│   ├── user/           # User profile components
+│   ├── application/    # Job application UI
+│   ├── referral/       # Referral management
+│   ├── company/        # Company browsing
+│   └── learning/       # Learning content
+├── pages/              # Top-level route components
+├── context/            # React Context providers
+│   ├── AuthContext     # Authentication state
+│   ├── DataContext     # Global data cache
+│   └── NotificationContext  # Toast notifications
+├── hooks/              # Custom React hooks
+└── utils/              # Helper functions</code></pre>
+
+          <h3>State Management</h3>
+          <p>
+            The application uses React Context API for global state management:
+          </p>
+          <ul>
+            <li>
+              <strong>AuthContext</strong>: Manages user authentication, login
+              state, and JWT tokens
+            </li>
+            <li>
+              <strong>DataContext</strong>: Caches frequently accessed data
+              (companies, applications)
+            </li>
+            <li>
+              <strong>NotificationContext</strong>: Handles success/error
+              messages and toast notifications
+            </li>
+            <li>
+              <strong>DarkModeContext</strong>: Controls theme preferences
+            </li>
+          </ul>
+
+          <h3>Routing</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Route</th>
+                <th>Component</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>/</code></td>
+                <td>Landing page</td>
+                <td>Public</td>
+              </tr>
+              <tr>
+                <td><code>/applications</code></td>
+                <td>Application dashboard</td>
+                <td>Member</td>
+              </tr>
+              <tr>
+                <td><code>/opportunities</code></td>
+                <td>Company browser</td>
+                <td>Member</td>
+              </tr>
+              <tr>
+                <td><code>/referrals</code></td>
+                <td>Referral requests</td>
+                <td>Member</td>
+              </tr>
+              <tr>
+                <td><code>/learning</code></td>
+                <td>Learning content</td>
+                <td>Member</td>
+              </tr>
+              <tr>
+                <td><code>/referrer-login</code></td>
+                <td>Referrer portal</td>
+                <td>Referrer</td>
+              </tr>
+              <tr>
+                <td><code>/admin/*</code></td>
+                <td>Admin dashboards</td>
+                <td>Lead/Admin</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="backend-arch">
+          <h2>Backend Architecture</h2>
+          <p>
+            The backend follows a modular architecture organized by domain
+            entities, with clear separation of concerns.
+          </p>
+
+          <h3>Project Structure</h3>
+          <pre><code>app/
+├── main.py             # FastAPI application entry point
+├── core/               # Core functionality
+│   ├── settings.py     # Configuration & env variables
+│   ├── security.py     # JWT & password hashing
+│   ├── permissions.py  # Role-based access control
+│   └── service.py      # Service layer utilities
+├── database/           # Database connectivity
+│   ├── session.py      # MongoDB connection
+│   └── init_db.py      # Database initialization
+├── ents/               # Domain entities (modules)
+│   ├── home/           # Auth & public endpoints
+│   ├── user/           # User management
+│   ├── application/    # Job applications
+│   ├── referral/       # Referral system
+│   ├── company/        # Company data
+│   └── learning/       # Learning content
+└── utilities/          # Shared utilities
+    ├── email.py        # Email sending
+    ├── errors.py       # Custom exceptions
+    └── constants.py    # Constants</code></pre>
+
+          <h3>Domain Module Pattern</h3>
+          <p>Each domain module (entity) follows a consistent structure:</p>
+          <ul>
+            <li>
+              <strong>models.py</strong>: Database models (Pydantic/MongoDB
+              schemas)
+            </li>
+            <li>
+              <strong>schema.py</strong>: Request/response schemas for API
+            </li>
+            <li>
+              <strong>crud.py</strong>: Database operations (Create, Read,
+              Update, Delete)
+            </li>
+            <li><strong>endpoints.py</strong>: FastAPI route handlers</li>
+            <li>
+              <strong>dependencies.py</strong>: Dependency injection functions
+            </li>
+          </ul>
+
+          <div class="note">
+            <strong>Request Flow</strong>
+            HTTP Request → FastAPI Router → Dependencies (auth, validation) →
+            Endpoint Handler → CRUD Layer → Database → Response
+          </div>
+        </section>
+
+        <section id="database">
+          <h2>Database Design</h2>
+          <p>
+            TechElevate uses MongoDB Atlas as its primary data store, leveraging
+            its flexible document model and cloud-native features.
+          </p>
+
+          <h3>Collections</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Collection</th>
+                <th>Description</th>
+                <th>Key Fields</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>member_users</code></td>
+                <td>User accounts & profiles</td>
+                <td>email, hashed_password, role, profile_data</td>
+              </tr>
+              <tr>
+                <td><code>companies</code></td>
+                <td>Company database</td>
+                <td>name, industry, size, locations, job_boards</td>
+              </tr>
+              <tr>
+                <td><code>applications</code></td>
+                <td>Job applications tracking</td>
+                <td>user_id, company_id, status, applied_date</td>
+              </tr>
+              <tr>
+                <td><code>referrals</code></td>
+                <td>Referral requests</td>
+                <td>member_id, referrer_id, company_id, status</td>
+              </tr>
+              <tr>
+                <td><code>referral_companies</code></td>
+                <td>Companies available for referrals</td>
+                <td>name, referrer_id, active</td>
+              </tr>
+              <tr>
+                <td><code>files</code></td>
+                <td>File metadata (resumes, etc.)</td>
+                <td>user_id, drive_id, filename, file_type</td>
+              </tr>
+              <tr>
+                <td><code>learning_modules</code></td>
+                <td>Learning content</td>
+                <td>title, category, content, difficulty</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Data Relationships</h3>
+          <p>MongoDB uses embedded documents and references:</p>
+          <ul>
+            <li>
+              <strong>Embedded</strong>: User profiles embed contact info and
+              preferences
+            </li>
+            <li>
+              <strong>Referenced</strong>: Applications reference user_id and
+              company_id
+            </li>
+            <li>
+              <strong>Denormalized</strong>: Company names cached in
+              applications for performance
+            </li>
+          </ul>
+        </section>
+
+        <section id="storage">
+          <h2>File Storage</h2>
+          <p>
+            Files (resumes, cover letters, essays) are stored in Google Drive
+            using a service account with domain-wide delegation.
+          </p>
+
+          <h3>Storage Architecture</h3>
+          <div class="cards">
+            <div class="card">
+              <h4>Google Drive Integration</h4>
+              <ul>
+                <li>Service account authentication</li>
+                <li>Folder-based organization by user</li>
+                <li>Metadata stored in MongoDB</li>
+                <li>Direct download links</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>File Operations</h4>
+              <ul>
+                <li><strong>Upload</strong>: Multipart upload to Drive</li>
+                <li><strong>Rename</strong>: Update file metadata</li>
+                <li><strong>Archive</strong>: Move to archive folder</li>
+                <li><strong>Delete</strong>: Permanent removal</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Supported Formats</h4>
+              <ul>
+                <li>PDF documents</li>
+                <li>Word documents (.docx)</li>
+                <li>Plain text files</li>
+                <li>Max size: 10MB</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="warning">
+            <strong>Security Note</strong>
+            Service account credentials must be kept secure. Use environment
+            variables and never commit credentials to version control.
+          </div>
+        </section>
+
+        <section id="auth">
+          <h2>Authentication & Authorization</h2>
+          <p>
+            The platform uses JWT (JSON Web Tokens) for stateless authentication
+            with role-based access control.
+          </p>
+
+          <h3>Authentication Flow</h3>
+          <ol>
+            <li>User submits email/password credentials</li>
+            <li>Backend validates credentials against MongoDB</li>
+            <li>If valid, JWT token is generated with user ID and role</li>
+            <li>Frontend stores token in localStorage</li>
+            <li>
+              Token included in Authorization header for subsequent requests
+            </li>
+            <li>Backend validates token and extracts user information</li>
+          </ol>
+
+          <h3>Roles & Permissions</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Permissions</th>
+                <th>Routes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>member</code></td>
+                <td>View own data, submit applications/referrals</td>
+                <td>/applications, /referrals, /learning</td>
+              </tr>
+              <tr>
+                <td><code>referrer</code></td>
+                <td>View referral requests, approve/decline</td>
+                <td>/referrer-portal</td>
+              </tr>
+              <tr>
+                <td><code>lead</code></td>
+                <td>Manage companies, view all member data</td>
+                <td>/admin/companies, /admin/files</td>
+              </tr>
+              <tr>
+                <td><code>admin</code></td>
+                <td>Full system access, user management</td>
+                <td>/admin/*</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Token Structure</h3>
+          <pre><code>{
+  "sub": "user_id_12345",
+  "email": "member@techelevate.org",
+  "role": "member",
+  "exp": 1699824000
+}</code></pre>
+        </section>
+
+        <section id="resumes">
+          <h2>Resume Management</h2>
+          <p>
+            Members can upload, manage, and organize multiple versions of their
+            resume for different job applications.
+          </p>
+
+          <h3>Features</h3>
+          <div class="cards">
+            <div class="card">
+              <h4>Upload</h4>
+              <p>
+                Drag-and-drop or click to upload PDF/DOCX files. Files are
+                automatically uploaded to user's Google Drive folder.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Versioning</h4>
+              <p>
+                Keep multiple resume versions for different roles (e.g.,
+                "Software Engineer Resume", "Data Analyst Resume").
+              </p>
+            </div>
+            <div class="card">
+              <h4>Quick Actions</h4>
+              <ul>
+                <li>Rename files</li>
+                <li>Download originals</li>
+                <li>Archive old versions</li>
+                <li>Delete permanently</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>File Organization</h3>
+          <p>Each user has a dedicated Google Drive folder structure:</p>
+          <pre><code>TechElevate Members/
+└── [user_email]/
+    ├── Resumes/
+    ├── Cover Letters/
+    └── Archive/</code></pre>
+        </section>
+
+        <section id="applications">
+          <h2>Application Tracking</h2>
+          <p>
+            Track all job applications in one place with status updates and
+            timeline tracking.
+          </p>
+
+          <h3>Application Lifecycle</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Next Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>interested</code></td>
+                <td>Saved for later application</td>
+                <td>Move to applied or discard</td>
+              </tr>
+              <tr>
+                <td><code>applied</code></td>
+                <td>Application submitted</td>
+                <td>Wait for response</td>
+              </tr>
+              <tr>
+                <td><code>phone_screen</code></td>
+                <td>Initial recruiter call scheduled</td>
+                <td>Prepare for interview</td>
+              </tr>
+              <tr>
+                <td><code>interview</code></td>
+                <td>In interview process</td>
+                <td>Follow up after each round</td>
+              </tr>
+              <tr>
+                <td><code>offer</code></td>
+                <td>Offer received</td>
+                <td>Accept or decline</td>
+              </tr>
+              <tr>
+                <td><code>rejected</code></td>
+                <td>Application rejected</td>
+                <td>Request feedback</td>
+              </tr>
+              <tr>
+                <td><code>accepted</code></td>
+                <td>Offer accepted</td>
+                <td>Start onboarding</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Application Data</h3>
+          <ul>
+            <li>Company name and position title</li>
+            <li>Application date and deadline</li>
+            <li>Resume version used</li>
+            <li>Referral status (if applicable)</li>
+            <li>Interview dates and notes</li>
+            <li>Compensation details (when offered)</li>
+          </ul>
+        </section>
+
+        <section id="referrals">
+          <h2>Referral System</h2>
+          <p>
+            Connect members with employees at target companies to request
+            internal referrals.
+          </p>
+
+          <h3>How It Works</h3>
+          <div class="note">
+            <strong>For Members</strong>
+            Browse companies where TechElevate has referrer connections. Submit
+            a referral request with your resume and a personalized note. Track
+            the status of your request and receive notifications when reviewed.
+          </div>
+
+          <div class="note">
+            <strong>For Referrers</strong>
+            Review incoming referral requests from qualified members. Download
+            resumes, evaluate fit, and approve or decline with feedback. Track
+            outcomes of referrals provided.
+          </div>
+
+          <h3>Referral Request Flow</h3>
+          <ol>
+            <li>
+              <strong>Member discovers company</strong> with available referrer
+            </li>
+            <li>
+              <strong>Member submits request</strong> with resume and message
+            </li>
+            <li>
+              <strong>Referrer receives notification</strong> and reviews
+              request
+            </li>
+            <li><strong>Referrer makes decision</strong> (approve/decline)</li>
+            <li><strong>Member receives notification</strong> of decision</li>
+            <li>
+              <strong>If approved, referrer submits</strong> internal referral
+            </li>
+            <li><strong>Member applies</strong> to job posting</li>
+          </ol>
+
+          <h3>Referral States</h3>
+          <ul>
+            <li><code>pending</code> - Awaiting referrer review</li>
+            <li><code>approved</code> - Referrer will provide referral</li>
+            <li><code>declined</code> - Referrer declined with reason</li>
+            <li><code>submitted</code> - Referral submitted to company</li>
+            <li><code>hired</code> - Member was hired</li>
+          </ul>
+        </section>
+
+        <section id="companies">
+          <h2>Company Database</h2>
+          <p>
+            Curated database of tech companies with detailed information to help
+            members target their applications.
+          </p>
+
+          <h3>Company Information</h3>
+          <div class="cards">
+            <div class="card">
+              <h4>Basic Info</h4>
+              <ul>
+                <li>Company name and logo</li>
+                <li>Industry and sector</li>
+                <li>Company size</li>
+                <li>Headquarters location</li>
+                <li>Website and careers page</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Job Search</h4>
+              <ul>
+                <li>Careers page links</li>
+                <li>LinkedIn jobs link</li>
+                <li>Application portal</li>
+                <li>Referral availability</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Tech Stack</h4>
+              <ul>
+                <li>Programming languages</li>
+                <li>Frameworks used</li>
+                <li>Cloud platforms</li>
+                <li>Tools and technologies</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Search & Filters</h3>
+          <p>Members can search and filter companies by:</p>
+          <ul>
+            <li>Company name or keyword</li>
+            <li>Industry (e.g., Fintech, Healthcare, E-commerce)</li>
+            <li>Company size (Startup, Mid-size, Enterprise)</li>
+            <li>Location (Remote-friendly, specific cities)</li>
+            <li>Referral availability</li>
+          </ul>
+        </section>
+
+        <section id="learning">
+          <h2>Learning Modules</h2>
+          <p>
+            Curated learning content to help members improve technical skills
+            and interview preparation.
+          </p>
+
+          <h3>Content Categories</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Topics</th>
+                <th>Format</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Data Structures</td>
+                <td>Arrays, Trees, Graphs, Hash Tables</td>
+                <td>Interactive tutorials</td>
+              </tr>
+              <tr>
+                <td>Algorithms</td>
+                <td>Sorting, Searching, DP, Greedy</td>
+                <td>Problem sets</td>
+              </tr>
+              <tr>
+                <td>System Design</td>
+                <td>Scalability, Databases, APIs</td>
+                <td>Case studies</td>
+              </tr>
+              <tr>
+                <td>Behavioral</td>
+                <td>STAR method, Leadership, Conflict</td>
+                <td>Video guides</td>
+              </tr>
+              <tr>
+                <td>Python</td>
+                <td>Language features, Best practices</td>
+                <td>Code examples</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Progress Tracking</h3>
+          <p>Members can track their learning progress with:</p>
+          <ul>
+            <li>Completed modules counter</li>
+            <li>Time spent learning</li>
+            <li>Skill proficiency indicators</li>
+            <li>Recommended next topics</li>
+          </ul>
+        </section>
+
+        <section id="api-overview">
+          <h2>API Overview</h2>
+          <p>
+            The TechElevate API is a RESTful API built with FastAPI. All
+            endpoints return JSON responses and follow standard HTTP
+            conventions.
+          </p>
+
+          <h3>Base URL</h3>
+          <pre><code>Production: https://api.techelevate.org/v1
+Development: http://localhost:8000/v1</code></pre>
+
+          <h3>Authentication</h3>
+          <p>
+            Most endpoints require authentication via JWT token in the
+            Authorization header:
+          </p>
+          <pre><code>Authorization: Bearer &lt;your_jwt_token&gt;</code></pre>
+
+          <h3>Response Format</h3>
+          <p>All responses follow a consistent structure:</p>
+          <pre><code>// Success response
+{
+  "data": { ... },
+  "message": "Operation successful"
+}
+
+// Error response
+{
+  "detail": "Error message",
+  "status_code": 400
+}</code></pre>
+
+          <h3>Interactive Documentation</h3>
+          <p>
+            Full interactive API documentation with request/response schemas is
+            available at:
+          </p>
+          <ul>
+            <li><strong>Swagger UI</strong>: <code>/v1/docs</code></li>
+            <li><strong>ReDoc</strong>: <code>/v1/redoc</code></li>
+          </ul>
+        </section>
+
+        <section id="api-auth">
+          <h2>Authentication APIs</h2>
+
+          <h3>Login</h3>
+          <pre><code>POST /v1/auth/login
+
+Request:
+{
+  "email": "member@example.com",
+  "password": "securepassword123"
+}
+
+Response:
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer",
+  "user": {
+    "id": "user_123",
+    "email": "member@example.com",
+    "role": "member"
+  }
+}</code></pre>
+
+          <h3>Register</h3>
+          <pre><code>POST /v1/auth/register
+
+Request:
+{
+  "email": "newuser@example.com",
+  "password": "securepassword123",
+  "full_name": "John Doe"
+}
+
+Response:
+{
+  "id": "user_456",
+  "email": "newuser@example.com",
+  "message": "Registration successful"
+}</code></pre>
+
+          <h3>Get Current User</h3>
+          <pre><code>GET /v1/auth/me
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "id": "user_123",
+  "email": "member@example.com",
+  "role": "member",
+  "profile": { ... }
+}</code></pre>
+        </section>
+
+        <section id="api-users">
+          <h2>User APIs</h2>
+
+          <h3>Get User Profile</h3>
+          <pre><code>GET /v1/users/{user_id}
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "id": "user_123",
+  "email": "member@example.com",
+  "full_name": "John Doe",
+  "phone": "+1234567890",
+  "profile": {
+    "bio": "Software engineer with 3 years experience",
+    "skills": ["Python", "React", "AWS"],
+    "linkedin": "linkedin.com/in/johndoe"
+  }
+}</code></pre>
+
+          <h3>Update User Profile</h3>
+          <pre><code>PATCH /v1/users/{user_id}
+Headers: Authorization: Bearer &lt;token&gt;
+
+Request:
+{
+  "full_name": "John Smith",
+  "profile": {
+    "bio": "Updated bio",
+    "skills": ["Python", "React", "AWS", "Docker"]
+  }
+}
+
+Response:
+{
+  "message": "Profile updated successfully",
+  "user": { ... }
+}</code></pre>
+        </section>
+
+        <section id="api-resumes">
+          <h2>Resume APIs</h2>
+
+          <h3>Upload Resume</h3>
+          <pre><code>POST /v1/users/{user_id}/resumes
+Headers: 
+  Authorization: Bearer &lt;token&gt;
+  Content-Type: multipart/form-data
+
+Request (form-data):
+  file: [resume.pdf]
+  filename: "Software_Engineer_Resume.pdf"
+
+Response:
+{
+  "id": "file_789",
+  "filename": "Software_Engineer_Resume.pdf",
+  "drive_id": "1abc...xyz",
+  "download_url": "https://drive.google.com/...",
+  "uploaded_at": "2025-11-12T10:30:00Z"
+}</code></pre>
+
+          <h3>List User Resumes</h3>
+          <pre><code>GET /v1/users/{user_id}/resumes
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "resumes": [
+    {
+      "id": "file_789",
+      "filename": "Software_Engineer_Resume.pdf",
+      "uploaded_at": "2025-11-12T10:30:00Z",
+      "download_url": "https://drive.google.com/..."
+    }
+  ]
+}</code></pre>
+
+          <h3>Rename Resume</h3>
+          <pre><code>PATCH /v1/users/{user_id}/resumes/{file_id}
+Headers: Authorization: Bearer &lt;token&gt;
+
+Request:
+{
+  "new_filename": "Senior_SWE_Resume.pdf"
+}
+
+Response:
+{
+  "message": "Resume renamed successfully",
+  "file": { ... }
+}</code></pre>
+
+          <h3>Delete Resume</h3>
+          <pre><code>DELETE /v1/users/{user_id}/resumes/{file_id}
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "message": "Resume deleted successfully"
+}</code></pre>
+        </section>
+
+        <section id="api-referrals">
+          <h2>Referral APIs</h2>
+
+          <h3>Create Referral Request</h3>
+          <pre><code>POST /v1/referrals
+Headers: Authorization: Bearer &lt;token&gt;
+
+Request:
+{
+  "company_id": "company_123",
+  "position_title": "Senior Software Engineer",
+  "resume_id": "file_789",
+  "message": "I'm very interested in this role..."
+}
+
+Response:
+{
+  "id": "referral_456",
+  "status": "pending",
+  "created_at": "2025-11-12T10:30:00Z",
+  "company": { ... }
+}</code></pre>
+
+          <h3>Get My Referrals</h3>
+          <pre><code>GET /v1/referrals/mine
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "referrals": [
+    {
+      "id": "referral_456",
+      "company": "Google",
+      "position": "Senior SWE",
+      "status": "pending",
+      "created_at": "2025-11-12T10:30:00Z"
+    }
+  ]
+}</code></pre>
+
+          <h3>Get Referral Requests (Referrer)</h3>
+          <pre><code>GET /v1/referrals/requests
+Headers: Authorization: Bearer &lt;token&gt;
+Role: referrer
+
+Response:
+{
+  "requests": [
+    {
+      "id": "referral_456",
+      "member": {
+        "name": "John Doe",
+        "email": "john@example.com"
+      },
+      "position": "Senior SWE",
+      "resume_url": "https://...",
+      "message": "I'm very interested...",
+      "status": "pending"
+    }
+  ]
+}</code></pre>
+
+          <h3>Update Referral Status</h3>
+          <pre><code>PATCH /v1/referrals/{referral_id}
+Headers: Authorization: Bearer &lt;token&gt;
+Role: referrer
+
+Request:
+{
+  "status": "approved",
+  "feedback": "Great profile, will submit referral"
+}
+
+Response:
+{
+  "message": "Referral updated successfully",
+  "referral": { ... }
+}</code></pre>
+
+          <h3>Create Referral Company</h3>
+          <pre><code>POST /v1/referrals/companies
+Headers: Authorization: Bearer &lt;token&gt;
+Role: referrer
+
+Request:
+{
+  "name": "Google",
+  "description": "Can provide referrals for SWE roles",
+  "active": true
+}
+
+Response:
+{
+  "id": "refcompany_789",
+  "name": "Google",
+  "referrer_id": "user_123",
+  "active": true
+}</code></pre>
+        </section>
+
+        <section id="api-companies">
+          <h2>Company APIs</h2>
+
+          <h3>List Companies</h3>
+          <pre><code>GET /v1/companies
+Headers: Authorization: Bearer &lt;token&gt;
+
+Query Parameters:
+  - search: string (search by name)
+  - industry: string (filter by industry)
+  - size: string (startup|midsize|enterprise)
+  - page: integer (pagination)
+  - limit: integer (results per page)
+
+Response:
+{
+  "companies": [
+    {
+      "id": "company_123",
+      "name": "Google",
+      "industry": "Technology",
+      "size": "enterprise",
+      "locations": ["Mountain View, CA"],
+      "careers_url": "https://careers.google.com",
+      "has_referrer": true
+    }
+  ],
+  "total": 150,
+  "page": 1,
+  "pages": 15
+}</code></pre>
+
+          <h3>Get Company Details</h3>
+          <pre><code>GET /v1/companies/{company_id}
+Headers: Authorization: Bearer &lt;token&gt;
+
+Response:
+{
+  "id": "company_123",
+  "name": "Google",
+  "industry": "Technology",
+  "size": "enterprise",
+  "founded": 1998,
+  "description": "Leading tech company...",
+  "locations": ["Mountain View, CA", "New York, NY"],
+  "tech_stack": ["Python", "Go", "C++"],
+  "careers_url": "https://careers.google.com",
+  "has_referrer": true
+}</code></pre>
+
+          <h3>Create Company (Lead/Admin)</h3>
+          <pre><code>POST /v1/companies
+Headers: Authorization: Bearer &lt;token&gt;
+Role: lead or admin
+
+Request:
+{
+  "name": "New Startup Inc",
+  "industry": "Fintech",
+  "size": "startup",
+  "locations": ["San Francisco, CA"],
+  "careers_url": "https://newstartup.com/careers"
+}
+
+Response:
+{
+  "id": "company_456",
+  "name": "New Startup Inc",
+  "message": "Company created successfully"
+}</code></pre>
+        </section>
+
+        <section id="setup">
+          <h2>Environment Setup</h2>
+
+          <h3>Prerequisites</h3>
+          <ul>
+            <li><strong>Python 3.9+</strong> - Backend runtime</li>
+            <li><strong>Node.js 16+</strong> - Frontend development</li>
+            <li><strong>MongoDB Atlas</strong> - Database (cloud or local)</li>
+            <li>
+              <strong>Google Cloud Project</strong> - For Drive API access
+            </li>
+            <li><strong>Git</strong> - Version control</li>
+          </ul>
+
+          <h3>Clone Repository</h3>
+          <pre><code>git clone https://github.com/TechElevateGH/te-platform.git
+cd te-platform</code></pre>
+
+          <h3>Environment Variables</h3>
+          <p>
+            Create <code>.env</code> files in both backend and frontend
+            directories:
+          </p>
+
+          <h4>Backend (.env)</h4>
+          <pre><code># Database
+MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/
+DATABASE_NAME=techelevate
+
+# Security
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+# Google Drive
+GOOGLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
+GOOGLE_CLIENT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_FOLDER_ID=your-drive-folder-id
+
+# CORS
+FRONTEND_URL=http://localhost:3000</code></pre>
+
+          <h4>Frontend (.env)</h4>
+          <pre><code>REACT_APP_API_URL=http://localhost:8000/v1
+REACT_APP_ENV=development</code></pre>
+
+          <div class="warning">
+            <strong>Security Warning</strong>
+            Never commit .env files to version control. Add them to .gitignore
+            and use environment-specific configurations for production.
+          </div>
+        </section>
+
+        <section id="backend-dev">
+          <h2>Backend Development</h2>
+
+          <h3>Initial Setup</h3>
+          <pre><code># Navigate to backend directory
+cd te-backend
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate  # On macOS/Linux
+# OR
+venv\Scripts\activate  # On Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run database initialization (creates indexes, etc.)
+python -m app.database.init_db</code></pre>
+
+          <h3>Running the Server</h3>
+          <pre><code># Development mode (auto-reload enabled)
+uvicorn app.main:app --reload --port 8000
+
+# Or use Make
+make backend
+
+# Server will be available at:
+# - API: http://localhost:8000/v1
+# - Docs: http://localhost:8000/v1/docs
+# - ReDoc: http://localhost:8000/v1/redoc</code></pre>
+
+          <h3>Project Structure Best Practices</h3>
+          <ul>
+            <li>
+              <strong>Keep routers thin</strong>: Business logic belongs in CRUD
+              layer or services
+            </li>
+            <li>
+              <strong>Use Pydantic models</strong>: For request/response
+              validation
+            </li>
+            <li>
+              <strong>Dependency injection</strong>: For database sessions and
+              auth
+            </li>
+            <li>
+              <strong>Error handling</strong>: Use custom exceptions from
+              utilities/errors.py
+            </li>
+            <li><strong>Type hints</strong>: Always use type annotations</li>
+          </ul>
+
+          <h3>Adding a New Endpoint</h3>
+          <pre><code># 1. Define schema in ents/[module]/schema.py
+class NewItemCreate(BaseModel):
+    name: str
+    description: str
+
+# 2. Add CRUD operation in ents/[module]/crud.py
+async def create_item(db, item: NewItemCreate):
+    result = await db.items.insert_one(item.dict())
+    return result.inserted_id
+
+# 3. Create endpoint in ents/[module]/endpoints.py
+@router.post("/items")
+async def create_new_item(
+    item: NewItemCreate,
+    db = Depends(get_database),
+    current_user = Depends(get_current_user)
+):
+    item_id = await crud.create_item(db, item)
+    return {"id": str(item_id), "message": "Item created"}
+
+# 4. Register router in ents/api.py
+from .module import endpoints as module_endpoints
+api_router.include_router(module_endpoints.router)</code></pre>
+        </section>
+
+        <section id="frontend-dev">
+          <h2>Frontend Development</h2>
+
+          <h3>Initial Setup</h3>
+          <pre><code># Navigate to frontend directory
+cd te-frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# Or use Make
+make frontend
+
+# App will open at http://localhost:3000</code></pre>
+
+          <h3>Development Guidelines</h3>
+          <ul>
+            <li>
+              <strong>Component structure</strong>: Organize by feature/domain
+            </li>
+            <li><strong>Styling</strong>: Use Tailwind utility classes</li>
+            <li>
+              <strong>State management</strong>: Context API for global state
+            </li>
+            <li><strong>API calls</strong>: Centralized in axiosConfig.js</li>
+            <li>
+              <strong>Error handling</strong>: Toast notifications via
+              NotificationContext
+            </li>
+          </ul>
+
+          <h3>Creating a New Page</h3>
+          <pre><code>// 1. Create page component in src/pages/
+// src/pages/NewFeature.jsx
+import React from 'react';
+import { useAuth } from '../context/AuthContext';
+
+export default function NewFeature() {
+  const { user } = useAuth();
+  
+  return (
+    &lt;div className="container mx-auto p-6"&gt;
+      &lt;h1 className="text-3xl font-bold"&gt;New Feature&lt;/h1&gt;
+      {/* Content */}
+    &lt;/div&gt;
+  );
+}
+
+// 2. Add route in src/App.jsx
+import NewFeature from './pages/NewFeature';
+
+&lt;Route path="/new-feature" element={
+  &lt;ProtectedRoute&gt;
+    &lt;NewFeature /&gt;
+  &lt;/ProtectedRoute&gt;
+} /&gt;
+
+// 3. Add navigation link in src/components/home/Navbar.jsx
+&lt;Link to="/new-feature"&gt;New Feature&lt;/Link&gt;</code></pre>
+
+          <h3>Making API Calls</h3>
+          <pre><code>import api from '../axiosConfig';
+
+// GET request
+const fetchData = async () => {
+  try {
+    const response = await api.get('/endpoint');
+    setData(response.data);
+  } catch (error) {
+    console.error('Error:', error);
+    // Error is automatically shown via interceptor
+  }
+};
+
+// POST request
+const createItem = async (itemData) => {
+  try {
+    const response = await api.post('/items', itemData);
+    showNotification('Item created!', 'success');
+    return response.data;
+  } catch (error) {
+    // Error handled by interceptor
+  }
+};</code></pre>
+        </section>
+
+        <section id="testing">
+          <h2>Testing</h2>
+
+          <h3>Backend Testing</h3>
+          <pre><code># Install test dependencies
+pip install pytest pytest-asyncio httpx
+
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=app tests/
+
+# Test specific module
+pytest tests/test_auth.py</code></pre>
+
+          <h3>Frontend Testing</h3>
+          <pre><code># Run tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- NewFeature.test.js</code></pre>
+
+          <h3>Manual Testing Checklist</h3>
+          <ul>
+            <li>Test all user roles (member, referrer, lead, admin)</li>
+            <li>Verify authentication flows (login, logout, token refresh)</li>
+            <li>Test file upload/download functionality</li>
+            <li>Validate form submissions and error handling</li>
+            <li>Check responsive design on mobile devices</li>
+            <li>Test cross-browser compatibility</li>
+          </ul>
+        </section>
+
+        <section id="deployment">
+          <h2>Deployment</h2>
+
+          <h3>Backend Deployment</h3>
+          <p>The backend can be deployed to various platforms:</p>
+
+          <h4>Heroku</h4>
+          <pre><code># Install Heroku CLI and login
+heroku login
+
+# Create app
+heroku create techelevate-api
+
+# Set environment variables
+heroku config:set MONGODB_URL=...
+heroku config:set SECRET_KEY=...
+# (set all .env variables)
+
+# Deploy
+git push heroku main
+
+# Run migrations if needed
+heroku run python -m app.database.init_db</code></pre>
+
+          <h4>AWS EC2</h4>
+          <pre><code># On EC2 instance
+sudo apt update
+sudo apt install python3.9 python3-pip nginx
+
+# Clone and setup
+git clone repo
+cd te-backend
+pip install -r requirements.txt
+
+# Setup systemd service
+sudo nano /etc/systemd/system/techelevate.service
+
+# Configure nginx reverse proxy
+sudo nano /etc/nginx/sites-available/techelevate
+
+# Start services
+sudo systemctl start techelevate
+sudo systemctl start nginx</code></pre>
+
+          <h3>Frontend Deployment</h3>
+
+          <h4>Vercel (Recommended)</h4>
+          <pre><code># Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+cd te-frontend
+vercel
+
+# Set environment variables in Vercel dashboard
+# REACT_APP_API_URL=https://api.techelevate.org/v1</code></pre>
+
+          <h4>Netlify</h4>
+          <pre><code># Build for production
+npm run build
+
+# Deploy build folder via Netlify UI
+# Or use Netlify CLI
+netlify deploy --prod --dir=build</code></pre>
+
+          <h3>Production Checklist</h3>
+          <ul>
+            <li>✅ Environment variables configured</li>
+            <li>✅ HTTPS enabled with valid SSL certificate</li>
+            <li>✅ CORS configured for production domain</li>
+            <li>✅ Database backups automated</li>
+            <li>✅ Monitoring and logging enabled</li>
+            <li>✅ Rate limiting configured</li>
+            <li>✅ Security headers set</li>
+            <li>✅ Error tracking configured (e.g., Sentry)</li>
+          </ul>
+        </section>
+
+        <section id="monitoring">
+          <h2>Monitoring</h2>
+
+          <h3>Application Monitoring</h3>
+          <p>Monitor application health, performance, and errors:</p>
+          <ul>
+            <li>
+              <strong>Health Check Endpoint</strong>:
+              <code>GET /v1/health</code>
+            </li>
+            <li>
+              <strong>Server Logs</strong>: Uvicorn access logs and application
+              logs
+            </li>
+            <li>
+              <strong>Performance Metrics</strong>: Response times, request
+              volume
+            </li>
+            <li>
+              <strong>Error Tracking</strong>: Use Sentry or similar service
+            </li>
+          </ul>
+
+          <h3>Database Monitoring</h3>
+          <ul>
+            <li>MongoDB Atlas built-in monitoring dashboard</li>
+            <li>Query performance analysis</li>
+            <li>Storage usage and growth trends</li>
+            <li>Connection pool metrics</li>
+          </ul>
+
+          <h3>Key Metrics to Track</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Target</th>
+                <th>Alert Threshold</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>API Response Time</td>
+                <td>&lt; 200ms</td>
+                <td>&gt; 1000ms</td>
+              </tr>
+              <tr>
+                <td>Error Rate</td>
+                <td>&lt; 1%</td>
+                <td>&gt; 5%</td>
+              </tr>
+              <tr>
+                <td>Database Connections</td>
+                <td>&lt; 80% of pool</td>
+                <td>&gt; 90% of pool</td>
+              </tr>
+              <tr>
+                <td>Memory Usage</td>
+                <td>&lt; 70%</td>
+                <td>&gt; 85%</td>
+              </tr>
+              <tr>
+                <td>CPU Usage</td>
+                <td>&lt; 60%</td>
+                <td>&gt; 80%</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="security">
+          <h2>Security</h2>
+
+          <h3>Authentication Security</h3>
+          <ul>
+            <li><strong>Password Hashing</strong>: bcrypt with salt rounds</li>
+            <li>
+              <strong>JWT Tokens</strong>: Short expiration (7 days), secure
+              secret key
+            </li>
+            <li>
+              <strong>Token Storage</strong>: httpOnly cookies or secure
+              localStorage
+            </li>
+            <li>
+              <strong>Session Management</strong>: Automatic logout on token
+              expiration
+            </li>
+          </ul>
+
+          <h3>API Security</h3>
+          <div class="cards">
+            <div class="card">
+              <h4>CORS Configuration</h4>
+              <p>Restrict origins to known domains:</p>
+              <pre><code>ALLOWED_ORIGINS = [
+  "https://techelevate.org",
+  "http://localhost:3000"
+]</code></pre>
+            </div>
+            <div class="card">
+              <h4>Rate Limiting</h4>
+              <p>Prevent abuse with request limits:</p>
+              <ul>
+                <li>100 requests/minute per IP</li>
+                <li>1000 requests/hour per user</li>
+                <li>Stricter limits on auth endpoints</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Input Validation</h4>
+              <p>All inputs validated via Pydantic:</p>
+              <ul>
+                <li>Type checking</li>
+                <li>Length constraints</li>
+                <li>Regex patterns</li>
+                <li>SQL injection prevention</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Data Security</h3>
+          <ul>
+            <li>
+              <strong>Encryption at Rest</strong>: MongoDB Atlas encryption
+              enabled
+            </li>
+            <li>
+              <strong>Encryption in Transit</strong>: TLS/SSL for all
+              connections
+            </li>
+            <li>
+              <strong>Sensitive Data</strong>: Never log passwords or tokens
+            </li>
+            <li>
+              <strong>File Access</strong>: Drive files require authentication
+            </li>
+            <li>
+              <strong>Environment Variables</strong>: Secrets never in code
+            </li>
+          </ul>
+
+          <h3>Security Checklist</h3>
+          <ul>
+            <li>✅ Rotate service account keys every 90 days</li>
+            <li>✅ Enforce HTTPS in production</li>
+            <li>✅ Restrict MongoDB IP access whitelist</li>
+            <li>✅ Audit role-based access controls</li>
+            <li>✅ Enable JWT refresh tokens</li>
+            <li>✅ Regular dependency security updates</li>
+            <li>✅ Penetration testing quarterly</li>
+            <li>✅ Security headers configured</li>
+            <li>✅ Rate limiting enabled</li>
+            <li>✅ Input sanitization on all endpoints</li>
+          </ul>
+
+          <div class="warning">
+            <strong>Incident Response</strong>
+            If a security incident is detected: 1) Immediately revoke
+            compromised credentials, 2) Notify affected users, 3) Review logs
+            for breach extent, 4) Patch vulnerability, 5) Document incident.
+          </div>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>Troubleshooting</h2>
+
+          <h3>Common Issues</h3>
+
+          <h4>Backend Won't Start</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            <code>ModuleNotFoundError</code> or import errors
+          </div>
+          <ul>
+            <li>Verify virtual environment is activated</li>
+            <li>
+              Reinstall dependencies:
+              <code>pip install -r requirements.txt</code>
+            </li>
+            <li>
+              Check Python version: <code>python --version</code> (must be 3.9+)
+            </li>
+          </ul>
+
+          <h4>MongoDB Connection Failed</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            <code>ServerSelectionTimeoutError</code>
+          </div>
+          <ul>
+            <li>Verify MONGODB_URL in .env is correct</li>
+            <li>Check network connectivity to MongoDB Atlas</li>
+            <li>Ensure IP address is whitelisted in Atlas</li>
+            <li>Verify database user credentials</li>
+          </ul>
+
+          <h4>Google Drive Upload Fails</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            <code>403 Forbidden</code> or authentication errors
+          </div>
+          <ul>
+            <li>Verify GOOGLE_PRIVATE_KEY is properly formatted (with \n)</li>
+            <li>Check service account has domain-wide delegation</li>
+            <li>Ensure GOOGLE_FOLDER_ID exists and is accessible</li>
+            <li>Verify Drive API is enabled in Google Cloud Console</li>
+          </ul>
+
+          <h4>JWT Token Errors</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            <code>Could not validate credentials</code>
+          </div>
+          <ul>
+            <li>
+              Check SECRET_KEY matches between token creation and validation
+            </li>
+            <li>Verify token hasn't expired (check exp claim)</li>
+            <li>
+              Ensure Authorization header format:
+              <code>Bearer &lt;token&gt;</code>
+            </li>
+            <li>Clear browser localStorage and re-login</li>
+          </ul>
+
+          <h4>CORS Errors in Frontend</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            <code>Access to XMLHttpRequest blocked by CORS policy</code>
+          </div>
+          <ul>
+            <li>Verify FRONTEND_URL in backend .env matches frontend origin</li>
+            <li>Check CORS middleware configuration in main.py</li>
+            <li>Ensure backend is running on correct port</li>
+            <li>Check browser console for actual error details</li>
+          </ul>
+
+          <h4>Frontend Build Fails</h4>
+          <div class="note">
+            <strong>Problem</strong>
+            npm build errors
+          </div>
+          <ul>
+            <li>Delete node_modules and package-lock.json</li>
+            <li>Run <code>npm install</code> fresh</li>
+            <li>Check for syntax errors in recent changes</li>
+            <li>Verify Node version compatibility</li>
+          </ul>
+
+          <h3>Debug Mode</h3>
+          <p>Enable detailed logging for troubleshooting:</p>
+
+          <h4>Backend Debug</h4>
+          <pre><code># In app/core/settings.py
+DEBUG = True
+LOG_LEVEL = "DEBUG"
+
+# Run with debug output
+uvicorn app.main:app --reload --log-level debug</code></pre>
+
+          <h4>Frontend Debug</h4>
+          <pre><code>// Enable React DevTools in browser
+// Add console logging in components
+console.log('State:', state);
+console.log('API Response:', response.data);
+
+// Check network tab for API calls
+// Verify request/response payloads</code></pre>
+
+          <h3>Getting Help</h3>
+          <ul>
+            <li>
+              <strong>Documentation</strong>: Review this guide and API docs
+            </li>
+            <li><strong>Logs</strong>: Check application and server logs</li>
+            <li>
+              <strong>GitHub Issues</strong>: Search existing issues or create
+              new one
+            </li>
+            <li><strong>Team</strong>: Contact TechElevate engineering team</li>
+          </ul>
+        </section>
+
+        <a
+          href="#top"
+          style="display: inline-block; margin-top: 3rem; font-weight: 600"
+          >↑ Back to top</a
+        >
+      </div>
+    </div>
+
+    <footer>
+      <p><strong>TechElevate Platform Documentation</strong></p>
+      <p>Complete technical reference for developers and operators</p>
+      <p style="margin-top: 1rem">
+        <a href="/v1/docs">Interactive API Docs</a> •
+        <a href="https://github.com/TechElevateGH/te-platform"
+          >GitHub Repository</a
+        >
+      </p>
+      <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.7">
+        Last updated: November 2025
+      </p>
+    </footer>
+
+    <script>
+      const KEY = "te-theme";
+      const btn = document.getElementById("theme");
+      const icon = document.getElementById("icon");
+      const prog = document.getElementById("progress");
+      const menuToggle = document.getElementById("menuToggle");
+      const sidebar = document.getElementById("sidebar");
+
+      // Theme management
+      function set(t) {
+        document.body.classList.toggle("light", t === "light");
+        if (icon) icon.textContent = t === "light" ? "☀️" : "🌙";
+        try {
+          localStorage.setItem(KEY, t);
+        } catch (e) {}
+      }
+
+      let saved = null;
+      try {
+        saved = localStorage.getItem(KEY);
+      } catch (e) {}
+      const dark = window.matchMedia("(prefers-color-scheme:dark)").matches;
+      set(saved || (dark ? "dark" : "light"));
+
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const curr = document.body.classList.contains("light")
+            ? "light"
+            : "dark";
+          set(curr === "light" ? "dark" : "light");
+        });
+      }
+
+      // Sidebar toggle for mobile
+      if (menuToggle && sidebar) {
+        menuToggle.addEventListener("click", () => {
+          sidebar.classList.toggle("open");
+        });
+
+        // Close sidebar when clicking a link on mobile
+        sidebar.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", () => {
+            if (window.innerWidth <= 1024) {
+              sidebar.classList.remove("open");
+            }
+          });
+        });
+      }
+
+      // Scroll progress
+      if (prog) {
+        window.addEventListener(
+          "scroll",
+          () => {
+            const top =
+              window.pageYOffset || document.documentElement.scrollTop;
+            const h =
+              document.documentElement.scrollHeight -
+              document.documentElement.clientHeight;
+            prog.style.width = (top / h) * 100 + "%";
+          },
+          { passive: true }
+        );
+      }
+
+      // Smooth scroll and active link highlighting
+      const sections = document.querySelectorAll("section[id]");
+      const navLinks = document.querySelectorAll(".sidebar a[href^='#']");
+
+      function highlightActiveSection() {
+        const scrollY = window.pageYOffset;
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop - 100;
+          const sectionHeight = section.offsetHeight;
+          const sectionId = section.getAttribute("id");
+          if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            navLinks.forEach((link) => {
+              link.classList.remove("active");
+              if (link.getAttribute("href") === "#" + sectionId) {
+                link.classList.add("active");
+              }
+            });
+          }
+        });
+      }
+
+      window.addEventListener("scroll", highlightActiveSection, {
+        passive: true,
+      });
+
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+          if (href === "#" || href === "#top") {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            const t = document.querySelector(href);
+            if (t) {
+              e.preventDefault();
+              t.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        });
+      });
+
+      // Initial highlight
+      highlightActiveSection();
+    </script>
+  </body>
+</html>

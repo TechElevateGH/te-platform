@@ -11,7 +11,7 @@ export const leadership = [
   },
   {
     name: 'Julian Kodua',
-    role: 'TA @ Princeton University | Uber Intern, 2022',
+    role: "Yale'25",
     image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
   },
   {
@@ -24,29 +24,19 @@ export const leadership = [
     role: 'TA @ Cornell University',
     image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
     },
-  {
-    name: 'Daisy Azagba',
-    role: 'TA @ Yale University | Google Intern, 2023',
-    image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
-    },
     {
     name: 'Afua Ansah',
     role: 'ServiceNow Intern, 2023',
     image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
     },
     {
-    name: 'Samuel Nabare',
+    name: 'Samuel Donkor',
     role: 'Kehillah Global Intern, 2023',
     image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
   },
   {
     name: 'Pascal Nabare',
     role: 'Kehillah Global Intern, 2023',
-    image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
-  },
-  {
-    name: 'Abdul Karim Abdul Rauf',
-    role: 'Salesforce Intern, 2023',
     image: "https://www.corneliusboateng.com/static/media/person.658a95d8f460fea6e0dd.jpg",
   },
 ]

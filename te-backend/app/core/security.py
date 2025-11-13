@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional, Union
 
 import app.ents.user.crud as user_crud
 import app.ents.user.models as user_models
@@ -7,7 +7,7 @@ from app.core.settings import settings
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
 class Token(BaseModel):
@@ -19,11 +19,16 @@ class TokenPayload(BaseModel):
     sub: str = ""
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__default_rounds=12,
+    bcrypt__truncate_error=True,  # Automatically truncate passwords > 72 bytes
+)
 
 
 def create_access_token(
-    subject: str | Any, expires_delta: timedelta | None = None
+    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
     """Returns an access token with `subject` that expires after `expires_delta`."""
 
@@ -64,7 +69,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def verify_password_reset_token(token: str) -> str | None:
+def verify_password_reset_token(token: str) -> Optional[str]:
     try:
         decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         return decoded_token["email"]
@@ -72,7 +77,7 @@ def verify_password_reset_token(token: str) -> str | None:
         return None
 
 
-def authenticate(db: Session, *, email: str, password: str) -> user_models.User:
+def authenticate(db: Database, *, email: str, password: str) -> user_models.MemberUser:
     user = user_crud.read_user_by_email(db, email=email)
     if not user:
         return None
@@ -82,5 +87,4 @@ def authenticate(db: Session, *, email: str, password: str) -> user_models.User:
     return user
 
 
-def is_superuser(user) -> bool:
-    ...
+def is_superuser(user) -> bool: ...

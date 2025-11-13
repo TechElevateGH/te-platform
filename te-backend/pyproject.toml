@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "te-backend"
+version = "0.1.0"
+description = "Backend service for TechElevate-Platform"
+authors = ["CorneliusOsei2 <oseiowusuboatengcornelius6@gmail.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+isort = "^5.13.2"
+pydantic = "^2.7.1"
+python-dotenv = "^1.0.1"
+python-jose = "^3.3.0"
+python-multipart = "^0.0.9"
+requests = "^2.31.0"
+pymongo = "^4.6.1"
+starlette = "^0.37.2"
+tenacity = "^8.3.0"
+typing-extensions = "^4.11.0"
+ujson = "^5.9.0"
+urllib3 = "^2.2.1"
+uvicorn = "^0.29.0"
+watchfiles = "^0.21.0"
+websockets = "^12.0"
+google-auth = "^2.29.0"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.129.0"
+fastapi = "^0.111.0"
+ruff = "^0.4.4"
+pydantic-settings = "^2.2.1"
+passlib = "^1.7.4"
+
+
+[tool.poetry.group.dev.dependencies]
+deptry = "^0.16.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

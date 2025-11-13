@@ -1,6 +1,8 @@
 from datetime import date
 from enum import Enum
 
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -32,46 +34,88 @@ class CompanyCreate(CompanyBase):
     referral_materials: ReferralMaterials = None
 
 
+class AdminCompanyCreate(BaseModel):
+    """Simplified schema for admin to add referral companies"""
+
+    name: str
+    image: str = ""
+    description: str = ""
+    website: str = ""
+    industry: str = ""
+    size: str = ""
+    headquarters: str = ""
+    # Referral requirements
+    requires_resume: bool = True
+    requires_contact: bool = True
+    requires_essay: bool = True
+
+
 class CompanyReadBase(CompanyBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
     domain: str
     can_refer: bool = True
 
 
 class LocationRead(LocationBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
 
 
 class CompanyRead(CompanyReadBase):
     locations: list[LocationRead]
+    referral_materials: ReferralMaterials = None
 
 
 class ReferralRequest(BaseModel):
-    company_id: int
+    company_id: str  # Company name from frontend
     job_title: str
+    job_id: Optional[str] = ""
     role: str
     request_note: str
     resume: str
+    contact: str = ""  # User's contact (phone/email)
+    essay: str = ""  # Referral essay/cover letter URL
     date: str = date.today().strftime("%d-%m-%Y")
 
 
 class ReferralStatuses(Enum):
     completed = "Completed"
-    in_review = "In review"
+    pending = "Pending"
     cancelled = "Cancelled"
+    declined = "Declined"
 
 
 class ReferralReadBase(BaseModel):
-    user_id: int
+    id: str  # MongoDB ObjectId as string
+    user_id: str  # MongoDB ObjectId as string
     job_title: str
+    job_id: Optional[str] = ""
     role: str
-    review_note: str | None = ""
+    request_note: str = ""
+    review_note: Optional[str] = ""
     date: str
     status: ReferralStatuses
+    resume: str = ""
+    contact: str = ""  # User's contact info
+    essay: str = ""  # Referral essay/cover letter URL
 
 
 class ReferralRead(ReferralReadBase):
     company: CompanyBase
+
+
+class ReferralReadWithUser(ReferralReadBase):
+    """Referral with user information for Lead/Admin view"""
+
+    company: CompanyBase
+    user_name: str
+    user_email: str
+
+
+class ReferralUpdateStatus(BaseModel):
+    """Schema for updating referral status"""
+
+    status: ReferralStatuses
+    review_note: Optional[str] = ""
 
 
 class CompanyReadForReferrals(CompanyReadBase):

@@ -1,55 +1,64 @@
-from app.database.base_class import Base
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship
-
-problems_platforms = Table(
-    "problems_platforms",
-    Base.metadata,
-    Column("problem_id", ForeignKey("problems.id", ondelete="CASCADE")),
-    Column("platform_id", ForeignKey("platforms.id", ondelete="CASCADE")),
-)
-
-problems_companies = Table(
-    "problems_companies",
-    Base.metadata,
-    Column("problem_id", ForeignKey("problems.id", ondelete="CASCADE")),
-    Column("company_id", ForeignKey("companies.id", ondelete="CASCADE")),
-)
+from typing import Optional, Any
+from pydantic import BaseModel, EmailStr, Field, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
+from bson import ObjectId
 
 
-class Platform(Base):
-    __tablename__ = "platforms"
-    id = Column(Integer, primary_key=True, index=True)
-    date = Column(String, nullable=False)
-    notes = Column(String, nullable=False)
+# Custom type for MongoDB ObjectId compatible with Pydantic v2
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: Any
+    ) -> core_schema.CoreSchema:
+        return core_schema.union_schema(
+            [
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.chain_schema(
+                    [
+                        core_schema.str_schema(),
+                        core_schema.no_info_plain_validator_function(cls.validate),
+                    ]
+                ),
+            ]
+        )
+
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, ObjectId):
+            return v
+        if isinstance(v, str) and ObjectId.is_valid(v):
+            return ObjectId(v)
+        raise ValueError("Invalid ObjectId")
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        return {"type": "string"}
 
 
-class Problem(Base):
-    __tablename__ = "problems"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=True)
-    question = Column(String, index=True, nullable=False)
-    solution = Column(String, nullable=False)
-    oa = Column(Boolean, nullable=False)
-    platforms = relationship(
-        "Platform",
-        secondary=problems_platforms,
-        cascade="delete, save-update, merge",
-    )
-    companies = relationship(
-        "Platform",
-        secondary=problems_companies,
-        cascade="delete, save-update, merge",
-    )
+class Posting(BaseModel):
+    """MongoDB Posting document model (job posting/problem)"""
 
-    def __init__(
-        self,
-        start_date,
-        end_date,
-        is_active,
-    ) -> None:
-        self.image = image
-        self.university = university
-        self.mentor_id = mentor_id
-        self.start_date = start_date
-        self.end_date = end_date
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    email: EmailStr
+    first_name: str
+    middle_name: str = ""
+    last_name: str
+    full_name: str = ""
+    image: str = ""
+    date_of_birth: Optional[str] = ""
+    contact: str = ""
+    address: str = ""
+    university: str = ""
+    password: str  # Hashed password
+    mentor_id: Optional[PyObjectId] = None
+    is_active: bool = True
+    start_date: str = ""
+    end_date: str = ""
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

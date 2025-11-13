@@ -1,30 +1,46 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
+import { useNavigate } from 'react-router-dom'
 import {
-    Bars3Icon,
     XMarkIcon,
-    PlusIcon
-
+    ChevronRightIcon,
+    ChevronDownIcon
 } from '@heroicons/react/24/outline'
-import { useAuth } from '../../context/AuthContext'
-import { useData } from '../../context/DataContext'
-import CompanyCreate from '../company/CompanyCreate'
+import {
+    RocketLaunchIcon
+} from '@heroicons/react/24/solid'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
 const Sidebar = ({ navigation, content, setContent, setLogin }) => {
-    const { accessToken, logout } = useAuth();
-    const { userInfo } = useData();
+    const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [isExpanded, setIsExpanded] = useState(false)
+    const [showScrollIndicator, setShowScrollIndicator] = useState(false)
+    const sidebarContentRef = useRef(null)
 
-    const [createCompany, setCreateCompany] = useState(false);
+    useEffect(() => {
+        const checkScroll = () => {
+            if (sidebarContentRef.current) {
+                const { scrollTop, scrollHeight, clientHeight } = sidebarContentRef.current
+                setShowScrollIndicator(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10)
+            }
+        }
 
+        const sidebar = sidebarContentRef.current
+        if (sidebar) {
+            checkScroll()
+            sidebar.addEventListener('scroll', checkScroll)
+            return () => sidebar.removeEventListener('scroll', checkScroll)
+        }
+    }, [isExpanded])
 
     return (
         <>
             <div className="">
+                {/* Mobile sidebar */}
                 <Transition.Root show={sidebarOpen} as={Fragment}>
                     <Dialog as="div" className="relative z-50 md:hidden" onClose={setSidebarOpen}>
                         <Transition.Child
@@ -36,10 +52,10 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                         >
-                            <div className="fixed inset-0 bg-gray-900/80" />
+                            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md" />
                         </Transition.Child>
 
-                        <div className="fixed inset-0 flex bg-sky-700">
+                        <div className="fixed inset-0 flex">
                             <Transition.Child
                                 as={Fragment}
                                 enter="transition ease-in-out duration-300 transform"
@@ -60,46 +76,63 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                         leaveTo="opacity-0"
                                     >
                                         <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                                            <button type="button" className="-m-2.5 p-2.5" onClick={() => setSidebarOpen(false)}>
+                                            <button type="button" className="-m-2.5 p-2.5 hover:bg-white/10 rounded-lg transition-all" onClick={() => setSidebarOpen(false)}>
                                                 <span className="sr-only">Close sidebar</span>
-                                                <XMarkIcon className="h-6 w-6 text-slate-50" aria-hidden="true" />
+                                                <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
                                             </button>
                                         </div>
                                     </Transition.Child>
-                                    {/* Sidebar component, swap this element with another sidebar if you like */}
-                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6 pb-2">
-                                        <div className="flex h-16 shrink-0 items-center">
-                                            <img
-                                                className="h-8 w-auto"
-                                                src="https://media.licdn.com/dms/image/C560BAQF-SVzS4qtXJQ/company-logo_100_100/0/1660174624525?e=1707350400&v=beta&t=IFZNDSfFIjzoJ6e657Oh4kEoyKRPvfnigmVojlINTC8"
-                                                alt="Your Company"
-                                            />
+
+                                    {/* Mobile Sidebar Content */}
+                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto scrollbar-hide bg-white dark:bg-gray-800 px-6 pb-4 transition-colors">
+                                        <div className="flex h-20 shrink-0 items-center mt-2 border-b border-gray-100 dark:border-gray-700 pb-4 transition-colors">
+                                            <button
+                                                onClick={() => navigate('/')}
+                                                className="flex items-center gap-3 group"
+                                            >
+                                                <div className="h-11 w-11 rounded-xl bg-te-gradient flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
+                                                </div>
+                                                <div>
+                                                    <h1 className="text-lg font-bold text-gray-900 dark:text-white transition-colors">TechElevate</h1>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">Career Platform</p>
+                                                </div>
+                                            </button>
                                         </div>
-                                        <nav className="flex flex-1 flex-col">
-                                            <ul className="flex flex-1 flex-col gap-y-7">
+
+                                        <nav className="flex flex-1 flex-col mt-2">
+                                            <ul className="flex flex-1 flex-col gap-y-6">
                                                 <li>
-                                                    <ul className="-mx-2 space-y-1">
+                                                    <ul className="space-y-1">
                                                         {navigation.map((item) => (
-                                                            <li key={item.name} className={classNames(
-                                                                (item.name === content)
-                                                                    ? 'bg-gray-50  text-sky-800'
-                                                                    : ' text-slate-50 hover:bg-gray-50',
-                                                                'group flex gap-x-3 rounded-md p-2 leading-6 font-semibold'
-                                                            )} onClick={(e) => { setContent(e.target.innerText); setSidebarOpen(false) }}>
-                                                                <item.icon
+                                                            <li key={item.name}>
+                                                                <button
+                                                                    onClick={() => { setContent(item.name); setSidebarOpen(false) }}
                                                                     className={classNames(
-                                                                        (item.name === content) ? 'text-blue-500' : 'text-gray-50 group-hover:text-blue-500',
-                                                                        'h-6 w-6 shrink-0'
+                                                                        item.name === content
+                                                                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
+                                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                                                        'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all'
                                                                     )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                                {item.name}
+                                                                >
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.name === content ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500',
+                                                                            'h-5 w-5 transition-colors'
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                    <span className="flex-1 text-left">{item.name}</span>
+                                                                    {item.name === content && (
+                                                                        <ChevronRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                                                    )}
+                                                                </button>
                                                             </li>
                                                         ))}
-
-                                                        <hr />
                                                     </ul>
                                                 </li>
+
+
                                             </ul>
                                         </nav>
                                     </div>
@@ -109,176 +142,201 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                     </Dialog>
                 </Transition.Root>
 
-                {/* Static sidebar for desktop */}
-                <div className="hidden md:fixed md:inset-y-0 lg:z-50 md:flex md:w-72 lg:flex-col bg-sky-900">
-                    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200  px-6">
-                        <div className="flex h-16 shrink-0 items-center justify-between">
-                            <img
-                                className="h-8 w-auto"
-                                src="https://media.licdn.com/dms/image/C560BAQF-SVzS4qtXJQ/company-logo_100_100/0/1660174624525?e=1707350400&v=beta&t=IFZNDSfFIjzoJ6e657Oh4kEoyKRPvfnigmVojlINTC8"
-                                alt="Your Company"
-                            />
-                            <button
-                                type="button"
-                                className="mt-1  rounded-full bg-red-400 p-1 text-gray-900 shadow-sm hover:bg-red-600 hover:animate-none"
-                                onClick={() => setCreateCompany(true)}
-                            >
-                                <PlusIcon className="h-5 w-5 " aria-hidden="true" />
-                            </button>
-                        </div>
-                        <nav className="flex flex-1 flex-col">
-                            <ul className="flex flex-1 flex-col gap-y-7">
-                                <li>
-                                    <div className="relative mt-3 mb-3">
-                                        <div className="relative flex justify-start">
-                                            <span className="bg-sky-900 pr-2  text-gray-100">Learn</span>
-                                        </div>
-                                    </div>
-                                    <ul className="-mx-2 space-y-1">
-                                        {navigation.filter((item) => item.type === "learn").map((item) => (
-                                            <li key={item.name} className={classNames(
-                                                (item.name === content)
-                                                    ? 'bg-gray-50 text-sky-900'
-                                                    : 'text-gray-100 hover:text-sky-900 hover:bg-gray-300',
-                                                'group flex gap-x-3 rounded-md p-2  leading-6 font-semibold'
-                                            )}
-                                                onClick={(e) => { setContent(e.target.innerText) }}>
-                                                <item.icon
-                                                    className={classNames(
-                                                        (item.name === content) ? 'text-blue-500' : 'text-gray-100 group-hover:text-blue-500',
-                                                        'h-6 w-6 shrink-0'
-                                                    )}
-                                                    aria-hidden="true"
-                                                />
-                                                {item.name}
-                                            </li>
-                                        ))}
-                                    </ul>
+                {/* Desktop sidebar - Collapsible */}
+                <div
+                    className={classNames(
+                        "hidden md:fixed md:top-20 md:bottom-6 md:left-6 md:z-40 md:flex md:flex-col transition-all duration-300 ease-in-out",
+                        isExpanded ? "md:w-80" : "md:w-20"
+                    )}
+                    onMouseEnter={() => setIsExpanded(true)}
+                    onMouseLeave={() => setIsExpanded(false)}
+                >
+                    <div className={classNames(
+                        "flex grow flex-col gap-y-5 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 dark:from-gray-800/80 dark:via-gray-900/60 dark:to-gray-800/70 backdrop-blur-xl border border-white/60 dark:border-gray-700/60 rounded-2xl px-4 py-6 relative overflow-hidden transition-shadow duration-300",
+                        isExpanded ? "shadow-2xl shadow-blue-500/30 dark:shadow-blue-900/30" : "shadow-2xl dark:shadow-gray-900/50"
+                    )}>
+                        {/* Glassmorphism overlay */}
+                        <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-2xl"></div>
+                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60 dark:opacity-40 rounded-2xl"></div>
 
-                                    <div className="relative mt-3 mb-3">
-                                        <div className="relative flex justify-start">
-                                            <span className="bg-sky-900 pr-2  text-gray-100">Apps</span>
-                                        </div>
-                                    </div>
-
-                                    <ul className="-mx-2 space-y-1">
-                                        {navigation.filter((item) => item.type === "app").map((item) => (
-                                            <li key={item.name} className={classNames(
-                                                (item.name === content)
-                                                    ? 'bg-gray-50 text-sky-900'
-                                                    : 'text-gray-100 hover:text-sky-900 hover:bg-gray-300',
-                                                'group flex gap-x-3 rounded-md p-2  leading-6 font-semibold'
-                                            )}
-                                                onClick={(e) => { setContent(e.target.innerText) }}>
-                                                <item.icon
-                                                    className={classNames(
-                                                        (item.name === content) ? 'text-blue-500' : 'text-gray-100 group-hover:text-blue-500',
-                                                        'h-6 w-6 shrink-0'
-                                                    )}
-                                                    aria-hidden="true"
-                                                />
-                                                {item.name}
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    <div className="relative mt-3 mb-3">
-                                        <div className="relative flex justify-start">
-                                            <span className="bg-sky-900 pr-2  text-gray-100">Files</span>
-                                        </div>
-                                    </div>
-
-                                    <ul className="-mx-2 space-y-1">
-                                        {navigation.filter((item) => item.type === "other").map((item) => (
-                                            <li key={item.name} className={classNames(
-                                                (item.name === content)
-                                                    ? 'bg-gray-50 text-sky-900'
-                                                    : 'text-gray-100 hover:text-sky-900 hover:bg-gray-300',
-                                                'group flex gap-x-3 rounded-md p-2  leading-6 font-semibold'
-                                            )}
-                                                onClick={(e) => { setContent(e.target.innerText) }}>
-                                                <item.icon
-                                                    className={classNames(
-                                                        (item.name === content) ? 'text-blue-500' : 'text-gray-100 group-hover:text-blue-500',
-                                                        'h-6 w-6 shrink-0'
-                                                    )}
-                                                    aria-hidden="true"
-                                                />
-                                                {item.name}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </li>
-
-                                <li className="mt-auto flex"></li>
-
-                                <li className='-mx-6  flex justify-between'>
-                                    <button
-                                        className="flex items-center gap-x-4 py-3  font-semibold leading-6 text-gray-900"
-                                        onClick={() => setContent("Profile")}
-                                    >
-                                        <img
-                                            className="h-8 w-8 rounded-full bg-gray-50"
-                                            src={userInfo.image}
-                                            alt=""
-                                        />
-                                        <span className="sr-only">Your profile</span>
-                                        <span aria-hidden="true" className='text-gray-100'>{(userInfo?.first_name ?? "") + " " + (userInfo?.last_name ?? "")}</span>
-                                    </button>
-
-                                    {!accessToken &&
-                                        <a className=" py-3 flex align-right right-0" href='/login'>
-                                            <span className="text-white mr-1">Login </span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 text-white">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                            </svg>
-                                        </a>}
-
-                                    {accessToken &&
-                                        <button type='submit' className=" py-3 flex align-right right-0" onClick={logout}>
-                                            <span className="text-white mr-1">Logout </span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 text-white">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                            </svg>
-                                        </button>}
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-
-                <div className="sticky top-0  flex items-center gap-x-6 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-                    <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden" onClick={() => setSidebarOpen(true)}>
-                        <span className="sr-only">Open sidebar</span>
-                        <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                    <div className="flex-1 font-semibold leading-6 text-gray-900 justify-between flex-row">
-                        <img
-                            className="h-8 mx-auto"
-                            src="https://media.licdn.com/dms/image/C560BAQF-SVzS4qtXJQ/company-logo_100_100/0/1660174624525?e=1707350400&v=beta&t=IFZNDSfFIjzoJ6e657Oh4kEoyKRPvfnigmVojlINTC8"
-                            alt="Your Company"
-                        />
-                        <button
-                            type="button"
-                            className="mt-1 animate-spin rounded-full bg-red-400 p-1 text-gray-900 shadow-sm hover:bg-red-600 hover:animate-none"
-                            onClick={() => setCreateCompany(true)}
+                        {/* Scrollable content */}
+                        <div
+                            ref={sidebarContentRef}
+                            className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide"
                         >
-                            <PlusIcon className="h-5 w-5 " aria-hidden="true" />
-                        </button>
+                            <nav className="flex flex-1 flex-col">
+                                <ul className="flex flex-1 flex-col gap-y-7">
+                                    <li>
+                                        {isExpanded && (
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
+                                                Workspace
+                                            </div>
+                                        )}
+                                        <ul className="space-y-2">
+                                            {navigation.filter((item) => item.type === "app").map((item, index) => {
+                                                const colors = [
+                                                    { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
+                                                    { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
+                                                    { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
+                                                    { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
+                                                ];
+                                                const color = colors[index % colors.length];
+                                                return (
+                                                    <li key={item.name}>
+                                                        <button
+                                                            onClick={() => setContent(item.name)}
+                                                            className={classNames(
+                                                                item.name === content
+                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                isExpanded ? 'gap-x-3' : 'justify-center'
+                                                            )}
+                                                            title={!isExpanded ? item.name : ''}
+                                                        >
+                                                            <div className={classNames(
+                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                            )}>
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.name === content ? 'text-white' : color.icon,
+                                                                        'h-5 w-5 transition-colors'
+                                                                    )}
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <>
+                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                    {item.name === content && (
+                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        {isExpanded && (
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
+                                                Learning
+                                            </div>
+                                        )}
+                                        <ul className="space-y-2">
+                                            {navigation.filter((item) => item.type === "learn").map((item, index) => {
+                                                const colors = [
+                                                    { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
+                                                    { bg: 'bg-rose-500/10', hoverBg: 'hover:bg-rose-500/20', text: 'text-rose-700', icon: 'text-rose-600', activeBg: 'bg-gradient-to-r from-rose-500 to-pink-500', ring: 'ring-rose-500/20' },
+                                                ];
+                                                const color = colors[index % colors.length];
+                                                return (
+                                                    <li key={item.name}>
+                                                        <button
+                                                            onClick={() => setContent(item.name)}
+                                                            className={classNames(
+                                                                item.name === content
+                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                isExpanded ? 'gap-x-3' : 'justify-center'
+                                                            )}
+                                                            title={!isExpanded ? item.name : ''}
+                                                        >
+                                                            <div className={classNames(
+                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                            )}>
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.name === content ? 'text-white' : color.icon,
+                                                                        'h-5 w-5 transition-colors'
+                                                                    )}
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <>
+                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                    {item.name === content && (
+                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        {isExpanded && (
+                                            <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
+                                                Accounts
+                                            </div>
+                                        )}
+                                        <ul className="space-y-2">
+                                            {navigation.filter((item) => item.type === "accounts").map((item) => {
+                                                const color = { bg: 'bg-indigo-500/10', hoverBg: 'hover:bg-indigo-500/20', text: 'text-indigo-700', icon: 'text-indigo-600', activeBg: 'bg-gradient-to-r from-indigo-500 to-purple-500', ring: 'ring-indigo-500/20' };
+                                                return (
+                                                    <li key={item.name}>
+                                                        <button
+                                                            onClick={() => setContent(item.name)}
+                                                            className={classNames(
+                                                                item.name === content
+                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                isExpanded ? 'gap-x-3' : 'justify-center'
+                                                            )}
+                                                            title={!isExpanded ? item.name : ''}
+                                                        >
+                                                            <div className={classNames(
+                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                            )}>
+                                                                <item.icon
+                                                                    className={classNames(
+                                                                        item.name === content ? 'text-white' : color.icon,
+                                                                        'h-5 w-5 transition-colors'
+                                                                    )}
+                                                                    aria-hidden="true"
+                                                                />
+                                                            </div>
+                                                            {isExpanded && (
+                                                                <>
+                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                    {item.name === content && (
+                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </li>
+
+
+                                </ul>
+                            </nav>
+                        </div>
+
+                        {/* Scroll indicator with blinking down arrow */}
+                        {showScrollIndicator && (
+                            <div className="relative z-20 flex justify-center py-3 pointer-events-none">
+                                <ChevronDownIcon className="h-5 w-5 text-blue-600 animate-bounce opacity-60" />
+                            </div>
+                        )}
                     </div>
-                    <a href="/">
-                        <span className="sr-only">Your profile</span>
-                        <img
-                            className="h-8 w-8 rounded-full bg-white-50"
-                            src=""
-                            alt=""
-                        />
-                    </a>
                 </div>
             </div>
-
-            {createCompany && <CompanyCreate />}
-
         </>
     )
 }

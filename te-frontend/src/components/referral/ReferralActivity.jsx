@@ -16,7 +16,7 @@ const ReferralActivity = () => {
 
             <div className="">
                 {<ul className="divide-y divide-white/5">
-                    {referrals.filter((referral) => referral.status === "In review").map((referral, index) => (
+                    {referrals.filter((referral) => referral && referral.status === "In review").map((referral, index) => (
                         <ReferralActivityItem status={"In review"} referral={referral} index={index} />
                     ))}
                 </ul>}
@@ -43,7 +43,7 @@ const ReferralActivity = () => {
                                         </h3>
                                         <Disclosure.Panel >
                                             <ul className="divide-y divide-white/5">
-                                                {referrals.filter((referral) => referral.status === status).map((referral, index) => (
+                                                {referrals.filter((referral) => referral && referral.status === status).map((referral, index) => (
                                                     <ReferralActivityItem status={status} referral={referral} index={index} />
                                                 ))}
                                             </ul>

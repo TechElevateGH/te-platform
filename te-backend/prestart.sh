@@ -1,12 +1,8 @@
-# Let the DB start
-python ./app/prestart/db_start.py
+#!/bin/bash
+# Start the FastAPI server
+# Database tables will be created automatically on startup (see app/main.py)
 
-alembic revision --autogenerate -m "Tables revision"
+# Use PORT environment variable if set, otherwise default to 8000
+PORT=${PORT:-8000}
 
-# # Run migrations
-alembic upgrade head
-
-# # Create initial data in DB
-python ./app/prestart/initial_data.py
-
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port $PORT --reload

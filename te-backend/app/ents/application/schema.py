@@ -1,38 +1,42 @@
 from enum import Enum
 
-import app.ents.company.schema as company_schema
+import app.ents.referral_company.schema as referral_company_schema
 from pydantic import BaseModel
 
 
-class FileType(str, Enum):
-    resume: str = "Resume"
-    otherFile: str = "Other File"
-
-
-class Essay(BaseModel):
-    essay: str
-
-
-class FileBase(BaseModel):
+# Resume Schemas (Members can have multiple resumes - PDFs in Google Drive)
+class ResumeBase(BaseModel):
     name: str
     date: str
+    role: str = ""  # Target role for this resume
+    notes: str = ""
+    archived: bool = False
 
 
-class File(FileBase):
+class Resume(ResumeBase):
     file_id: str
 
 
-class FileRead(FileBase):
-    id: int
+class ResumeRead(ResumeBase):
+    id: str  # MongoDB ObjectId as string
     file_id: str
     link: str
 
 
-class FilesRead(BaseModel):
-    resumes: list[FileRead]
-    other_files: list[FileRead]
+class ResumesRead(BaseModel):
+    """Response containing all resumes for a member"""
+
+    resumes: list[ResumeRead]
 
 
+class ResumeUpdate(BaseModel):
+    name: str | None = None
+    role: str | None = None
+    notes: str | None = None
+    archived: bool | None = None
+
+
+# File Upload Response
 class FileUpload(BaseModel):
     file_id: str
     name: str
@@ -58,8 +62,6 @@ class ApplicationBase(BaseModel):
     active: bool = True
     archived: bool = False
     date: str = None
-    role: company_schema.JobRoles
-    status: ApplicationStatuses
     role: str
     status: str
     referred: bool = False
@@ -67,21 +69,27 @@ class ApplicationBase(BaseModel):
 
 class ApplicationCreate(ApplicationBase):
     company: str
-    location: company_schema.LocationBase
+    location: referral_company_schema.LocationBase
 
 
 class ApplicationReadBase(ApplicationBase):
-    id: int
+    id: str  # MongoDB ObjectId as string
+    company: str
+    location: dict  # {"country": "...", "city": "..."}
 
 
-class ApplicationRead(ApplicationBase):
-    id: int
-    company: company_schema.CompanyReadBase
-    location: company_schema.LocationRead
+class ApplicationRead(ApplicationReadBase):
+    pass
+
+
+class ApplicationAdminRead(ApplicationReadBase):
+    """Application with user info for admin dashboard"""
+
+    user_name: str = ""
+    user_email: str = ""
 
 
 class ApplicationUpdateBase(BaseModel):
-    id: int
     status: str
     referred: bool
     notes: str
@@ -90,10 +98,4 @@ class ApplicationUpdateBase(BaseModel):
 
 
 class ApplicationUpdate(ApplicationUpdateBase):
-    id: int
-    status: str
-    referred: bool
-    notes: str
-    recruiter_name: str
-    recruiter_email: str
-    location: company_schema.LocationBase
+    location: referral_company_schema.LocationBase

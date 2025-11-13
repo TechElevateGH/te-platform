@@ -1,244 +1,434 @@
-from typing import Any
+from typing import Any, Dict
+import logging
 
 import app.database.session as session
 import app.ents.application.crud as application_crud
 import app.ents.application.dependencies as application_dependencies
 import app.ents.application.schema as application_schema
 import app.ents.user.dependencies as user_dependencies
-from app.utilities.errors import OperationCompleted, UnauthorizedUser
-from fastapi import APIRouter, Depends, Form, UploadFile, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status, HTTPException
+from pymongo.database import Database
 
-app_router = APIRouter(prefix="/applications")
-user_app_router = APIRouter(prefix="/users.{user_id}.applications")
-user_files_router = APIRouter(prefix="/users.{user_id}.files")
-
-
-@user_app_router.post(
-    ".create", response_model=dict[str, application_schema.ApplicationRead]
+# Routers with clear, RESTful naming
+applications_router = APIRouter(prefix="/applications", tags=["Applications"])
+user_applications_router = APIRouter(
+    prefix="/users/{user_id}/applications", tags=["User Applications"]
 )
-def create_application(
+user_resumes_router = APIRouter(
+    prefix="/users/{user_id}/resumes", tags=["User Resumes"]
+)
+
+logger = logging.getLogger(__name__)
+
+
+def resume_to_read(resume):
+    """Convert Resume model to ResumeRead schema"""
+    resume_dict = resume.model_dump()
+    return application_schema.ResumeRead(**resume_dict)
+
+
+# ============= User Applications Endpoints =============
+
+
+@user_applications_router.post(
+    "",
+    response_model=Dict[str, application_schema.ApplicationRead],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_user_application(
     *,
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
+    user_id: str,
     data: application_schema.ApplicationCreate,
-    user=Depends(user_dependencies.get_current_user),
+    current_user=Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Create an application for  `user`.
+    Create a new job application for the authenticated member.
+
+    - **user_id**: Member's user ID (must match authenticated user)
+    - **data**: Application details (company, role, status, etc.)
+    - Returns: Created application with generated UUID
+
+    Only available for Members (role=1).
     """
-    application = application_crud.create_application(db, data=data, user_id=user.id)
+    # Ensure user can only create applications for themselves
+    if str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only create applications for yourself"
+        )
+
+    application = application_crud.create_application(db, data=data, user_id=user_id)
     return {"application": application_dependencies.parse_application(application)}
 
 
-@user_app_router.get(
-    ".list", response_model=dict[str, list[application_schema.ApplicationRead]]
+@user_applications_router.get(
+    "", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )
 def get_user_applications(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
-    user_id: int,
-    user=Depends(user_dependencies.get_current_user),
+    user_id: str,
+    current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve applications of user `user_id`.
+    Retrieve all active applications for a specific user.
+
+    - **user_id**: User's ID
+    - Returns: List of active, non-archived applications
+
+    Members can only view their own applications.
+    Leads/Admins can view any user's applications.
     """
+    # Authorization: Members can only view their own
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only view your own applications"
+        )
+
     applications = application_crud.read_user_applications(db, user_id=user_id)
 
     return {
         "applications": [
-            application_dependencies.parse_application(application)
-            for application in applications
-            if (application.active and not application.archived)
+            application_dependencies.parse_application(app)
+            for app in applications
+            if (app.active and not app.archived)
         ]
     }
 
 
-@app_router.get(
-    ".{application_id}.info",
-    response_model=dict[str, application_schema.ApplicationRead],
+@user_applications_router.get(
+    "/{application_id}", response_model=Dict[str, application_schema.ApplicationRead]
 )
 def get_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
-    application_id: int,
+    user_id: str,
+    application_id: str,
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve application `application_id` of user `user_id`.
+    Retrieve a specific application by UUID.
+
+    - **user_id**: User's ID
+    - **application_id**: Application UUID
+    - Returns: Application details
     """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only view your own applications"
+        )
+
     application = application_crud.read_user_application(
-        db, user_id=current_user.id, application_id=application_id
+        db, user_id=user_id, application_id=application_id
     )
+
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
 
     return {"application": application_dependencies.parse_application(application)}
 
 
-@app_router.put(
-    ".{application_id}.update",
-    response_model=dict[str, application_schema.ApplicationRead],
-)
+@user_applications_router.patch("/{application_id}", response_model=Dict[str, str])
 def update_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
-    application_id: int,
+    user_id: str,
+    application_id: str,
     data: application_schema.ApplicationUpdate,
     current_user=Depends(user_dependencies.get_current_user),
 ):
     """
-    Update user application
-    """
+    Update an existing application.
 
-    application = application_crud.update_application(
-        db, user_id=current_user.id, application_id=application_id, data=data
+    - **user_id**: User's ID
+    - **application_id**: Application UUID
+    - **data**: Fields to update (status, notes, recruiter info, etc.)
+    - Returns: Success message
+
+    Members can only update their own applications.
+    """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only update your own applications"
+        )
+
+    success = application_crud.update_application(
+        db, user_id=user_id, application_id=application_id, data=data
     )
 
-    return {"application": application_dependencies.parse_application(application)}
+    if not success:
+        raise HTTPException(
+            status_code=404, detail="Application not found or no changes made"
+        )
+
+    return {"message": "Application updated successfully"}
 
 
-@app_router.put(".archive", status_code=status.HTTP_202_ACCEPTED)
-def archive_user_application(
-    db: Session = Depends(session.get_db),
-    *,
-    applications: list[int],
-    current_user=Depends(user_dependencies.get_current_user),
-):
-    """
-    Archive user applications
-    """
-    for app_id in applications:
-        if not application_crud.archive_application(
-            db, user_id=current_user.id, application_id=app_id
-        ):
-            return {"error": UnauthorizedUser()}
-
-    return {"data": OperationCompleted()}
-
-
-@app_router.delete(".delete", status_code=status.HTTP_202_ACCEPTED)
+@user_applications_router.delete("/{application_id}", status_code=status.HTTP_200_OK)
 def delete_user_application(
-    db: Session = Depends(session.get_db),
+    db: Database = Depends(session.get_db),
     *,
-    applications: int | list[int],
+    user_id: str,
+    application_id: str,
     current_user=Depends(user_dependencies.get_current_user),
 ):
     """
-    Delete user applications
+    Delete an application permanently.
+
+    - **user_id**: User's ID
+    - **application_id**: Application UUID
+    - Returns: Success message
+
+    Members can only delete their own applications.
     """
-    if isinstance(applications, int):
-        applications = [applications]
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only delete your own applications"
+        )
 
-    for app_id in applications:
-        if not application_crud.delete_application(
-            db, user_id=current_user.id, application_id=app_id
-        ):
-            return {"error": UnauthorizedUser()}
+    success = application_crud.delete_application(
+        db, user_id=user_id, application_id=application_id
+    )
 
-    return {"data": OperationCompleted()}
+    if not success:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    return {"message": "Application deleted successfully"}
 
 
-@user_files_router.get(".list", response_model=dict[str, application_schema.FilesRead])
-def get_user_application_files(
-    db: Session = Depends(session.get_db),
-    *,
-    user_id: int,
-    _=Depends(user_dependencies.get_current_user),
+# ============= Admin/Lead Applications Endpoints =============
+
+
+@applications_router.get("", response_model=Dict[str, list])
+def list_all_applications(
+    db: Database = Depends(session.get_db),
+    current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Retrieve application files (resume and other files)
+    Retrieve all applications across all members (Lead/Admin only).
+
+    Uses MongoDB aggregation pipeline to efficiently fetch applications
+    from embedded documents with user information.
+
+    - Returns: List of all applications with user details
+    - **Requires**: Lead (role >= 4) or Admin (role >= 5) access
     """
-    files = application_crud.read_user_application_files(db, user_id=user_id)
+    # Authorization: Lead or Admin only
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role < 4:
+        raise HTTPException(status_code=403, detail="Lead or Admin access required")
+
+    try:
+        applications = application_crud.read_all_applications(db)
+        return {"applications": applications}
+    except Exception as exc:
+        logger.error(f"Error retrieving all applications: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve applications")
+
+
+@applications_router.patch("/archive", status_code=status.HTTP_200_OK)
+def archive_applications(
+    db: Database = Depends(session.get_db),
+    *,
+    application_ids: list[str],  # List of application UUIDs
+    current_user=Depends(user_dependencies.get_current_member_only),
+):
+    """
+    Archive multiple applications (soft delete).
+
+    - **application_ids**: List of application UUIDs to archive
+    - Returns: Success message
+
+    Archived applications are hidden from default views but not deleted.
+    Members can only archive their own applications.
+    """
+    user_id = str(current_user.id)
+
+    for app_id in application_ids:
+        if not application_crud.archive_application(
+            db, user_id=user_id, application_id=app_id
+        ):
+            raise HTTPException(
+                status_code=404, detail=f"Application {app_id} not found"
+            )
+
+    return {"message": f"Successfully archived {len(application_ids)} application(s)"}
+
+
+# ============= User Resumes Endpoints =============
+
+
+@user_resumes_router.get("", response_model=Dict[str, application_schema.ResumesRead])
+def list_user_resumes(
+    db: Database = Depends(session.get_db),
+    *,
+    user_id: str,
+    current_user=Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Retrieve all resumes for a specific user.
+
+    - **user_id**: User's ID
+    - Returns: List of resume files with metadata
+
+    Members can only view their own resumes.
+    Leads/Admins can view any user's resumes.
+    """
+    # Authorization check
+    user_role = user_dependencies.get_user_role(current_user)
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Can only view your own resumes")
+
+    resumes = application_crud.read_resumes(db, user_id=user_id)
+
     return {
-        "files": application_schema.FilesRead(
-            resumes=[
-                application_schema.FileRead(**vars(file))
-                for file in files
-                if file.type == application_schema.FileType.resume
-            ],
-            other_files=[
-                application_schema.FileRead(**vars(file))
-                for file in files
-                if file.type == application_schema.FileType.resume
-            ],
+        "resumes": application_schema.ResumesRead(
+            resumes=[resume_to_read(resume) for resume in resumes]
         )
     }
 
 
-@user_files_router.post(
-    ".create", response_model=dict[str, application_schema.FileRead]
+@user_resumes_router.post(
+    "",
+    response_model=Dict[str, application_schema.ResumeRead],
+    status_code=status.HTTP_201_CREATED,
 )
-def add_file(
-    db: Session = Depends(session.get_db),
+def upload_user_resume(
+    db: Database = Depends(session.get_db),
     *,
-    user_id: int,
-    kind: application_schema.FileType = Form(),
-    file: UploadFile = Form(),
-    _=Depends(user_dependencies.get_current_user),
+    user_id: str,
+    file: UploadFile = File(...),
+    role: str = Form(default="", description="Target role for this resume"),
+    notes: str = Form(default="", description="Additional notes about this resume"),
+    current_user=Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Upload resume for user `user_id`.
+    Upload a new resume PDF for the authenticated member.
+
+    - **user_id**: Member's user ID (must match authenticated user)
+    - **file**: PDF file to upload
+    - **role**: Target job role/position for this resume (optional)
+    - **notes**: Additional context or notes (optional)
+    - Returns: Created resume with UUID and Google Drive link
+
+    **File Requirements:**
+    - Format: PDF only
+    - Uploaded to Google Drive
+    - Automatically assigned a unique UUID
+
+    Only available for Members (role=1).
     """
-    file = application_crud.create_file(db, kind, file, user_id)
-    return {"file": application_schema.FileRead(**vars(file))}
+    # Ensure user can only upload for themselves
+    if str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=403, detail="Can only upload resumes for yourself"
+        )
+
+    # Validate file type - only accept PDFs
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Only PDF files are accepted. Please upload a PDF file.",
+        )
+
+    uploaded_resume = application_crud.create_resume(db, file, user_id, role, notes)
+
+    return {"resume": resume_to_read(uploaded_resume)}
 
 
-@user_files_router.get(
-    ".resumes.list", response_model=dict[str, list[application_schema.FileRead]]
+@user_resumes_router.patch(
+    "/{resume_id}", response_model=Dict[str, application_schema.ResumeRead]
 )
-def get_user_resumes(
-    db: Session = Depends(session.get_db),
+def update_user_resume(
+    db: Database = Depends(session.get_db),
     *,
-    user_id: int,
-    _=Depends(user_dependencies.get_current_user),
+    user_id: str,
+    resume_id: str,
+    data: application_schema.ResumeUpdate,
+    current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
-    """
-    Get all resumes of user `user_id`
-    """
-    resumes = application_crud.get_user_files(
-        db, user_id, application_schema.FileType.resume
+    """Update resume metadata such as display name, notes, role, or archived status."""
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+
+    # Only Member (1), Lead (4), or Admin (5) can update resumes
+    if user_role not in [1, 4, 5]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to update resumes",
+        )
+
+    # Members can only update their own resumes
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only update your own resumes",
+        )
+
+    updated_resume = application_crud.update_resume(
+        db, resume_id=resume_id, user_id=user_id, data=data
     )
-    return {
-        "resumes": [application_schema.FileRead(**vars(resume)) for resume in resumes]
-    }
+
+    if not updated_resume:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found or no changes made",
+        )
+
+    return {"resume": resume_to_read(updated_resume)}
 
 
-@user_files_router.get(
-    ".resumes.list", response_model=dict[str, list[application_schema.FileRead]]
-)
-def resume_review(
-    db: Session = Depends(session.get_db),
+@user_resumes_router.delete("/{resume_id}", status_code=status.HTTP_200_OK)
+def delete_user_resume(
+    db: Database = Depends(session.get_db),
     *,
-    user_id: int,
-    _=Depends(user_dependencies.get_current_user),
+    user_id: str,
+    resume_id: str,
+    current_user=Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get all resumes of user `user_id`
+    Delete a resume by UUID.
+
+    - **user_id**: User's ID
+    - **resume_id**: Resume UUID
+    - Returns: Success message
+
+    **Permissions:**
+    - Members (role=1): Can only delete their own resumes
+    - Leads (role>=4): Can delete any member's resumes
+    - Admins (role>=5): Can delete any resumes
     """
-    resumes = application_crud.resume_review(db, user_id)
-    return {
-        "resumes": [application_schema.FileRead(**vars(resume)) for resume in resumes]
-    }
+    from app.core.permissions import get_user_role
 
+    user_role = get_user_role(current_user)
 
-# @router.put(".info/{company_id}", response_model=company_schema.CompanyRead)
-# def update_company(
-#     *,
-#     db: Session = Depends(application_dependencies.get_current_user_db),
-#     data: company_schema.CompanyUpdate,
-#     user: models.Company = Depends(application_dependencies.get_current_user),
-# ) -> Any:
-#     """
-#     Update Company.
-#     """
-#     company = company.crud.read_user_by_id(db, id=company.id)
-#     if not company:
-#         raise HTTPException(
-#             status_code=404,
-#             detail={
-#                 "error": {
-#                     "email": company.email,
-#                     "message": "The company with this name does not exist in the system",
-#                 }
-#             },
-#         )
-#     company = crud.company.update(db, db_obj=company, data=data)
-#     return user
+    # Only Member (1), Lead (4), or Admin (5) can delete resumes
+    if user_role not in [1, 4, 5]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to delete resumes",
+        )
+
+    # Members can only delete their own resumes
+    if user_role == 1 and str(current_user.id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can only delete your own resumes",
+        )
+
+    success = application_crud.delete_resume(db, resume_id=resume_id, user_id=user_id)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Resume not found"
+        )
+
+    return {"message": "Resume deleted successfully"}

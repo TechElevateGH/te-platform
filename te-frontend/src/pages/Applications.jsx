@@ -3,89 +3,89 @@ import { HttpStatusCode } from 'axios'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 
-import { sortByField } from '../utils'
 import { Loading } from '../components/_custom/Loading'
-import { PlusIcon, ArchiveBoxIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import SignInPrompt from '../components/_custom/Alert/SignInPrompt'
+import {
+    PlusIcon,
+    MagnifyingGlassIcon,
+    BriefcaseIcon,
+    ClockIcon,
+    CheckCircleIcon,
+    XCircleIcon as XCircleIconSolid,
+    ChevronUpDownIcon,
+    MapPinIcon,
+    CalendarIcon,
+    BuildingOfficeIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    AdjustmentsHorizontalIcon,
+    TrashIcon,
+    ArchiveBoxIcon
+} from '@heroicons/react/20/solid'
+
 
 import axiosInstance from '../axiosConfig'
-import MenuViewOptionsDropdown from '../components/_custom/MenuViewOptionsDropdown'
-import ApplicationItem from '../components/application/ApplicationItem'
 import ApplicationCreate from '../components/application/ApplicationCreate'
 import ApplicationInfo from '../components/application/ApplicationInfo'
-import ApplicationUpdate from '../components/application/ApplicationUpdate'
-import Modal from '../components/_custom/Modal'
 
-const sortOptions = ["Company name", "Date added", "Status"]
+// Start with empty list; will populate from backend
+const initialApplications = [];
 
 const Applications = () => {
-    const { userId, accessToken, logout } = useAuth();
-    const { fetchApplications, setFetchApplications, applications, setApplications } = useData();
+    const { userId, accessToken, logout, userRole } = useAuth();
+    const { fetchApplications, setFetchApplications, applications: contextApplications } = useData();
 
-    const [error, setError] = useState(true);
+    // UserRoles: Guest=0, Member=1, Lead=2, Admin=3
+    const isMember = userRole && parseInt(userRole) === 1; // Only Members can track applications
 
-    const [applicationId, setApplicationId] = useState(null);
+    // Start empty; fetch from backend or context
+    const [applications, setApplications] = useState(initialApplications);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [levelFilter, setLevelFilter] = useState('All');
+    const [locationFilter, setLocationFilter] = useState('All');
+    const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     const [application, setApplication] = useState(null);
+    const [applicationId, setApplicationId] = useState(null);
 
     const [addApplication, setAddApplication] = useState(false);
-    const [updateApplication, setUpdateApplication] = useState(false);
+    const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
-    const [allowSelection, setAllowSelection] = useState(false);
-    const [selectedApplications, setSelectedApplications] = useState({})
-
-    const addSelectedItem = (app) => {
-        setSelectedApplications(
-            { ...selectedApplications, [app.id]: app.id in selectedApplications ? !selectedApplications[app.id] : true }
-        )
-        app.selected = !app.selected;
-    }
-
-    const selectAllApplications = () => {
-        let selected_apps = applications.reduce((app, { id }) => ({ ...app, [id]: true }), {});
-        setSelectedApplications(selected_apps);
-
-        for (let app of applications) {
-            app.selected = true;
+    // Check if user is authenticated
+    useEffect(() => {
+        if (!accessToken) {
+            setShowSignInPrompt(true);
         }
-    }
+    }, [accessToken]);
 
-    const handleApplicationsSortBy = (sortBy) => {
-        let sorted_applications = [];
-        switch (sortBy) {
-            case "Company name":
-                sorted_applications = sortByField(applications, "company.name")
-                break;
-            case "Status":
-                sorted_applications = sortByField(applications, "status")
-                break
-            case "Date added":
-                sorted_applications = sortByField(applications, "date")
-                break
-
-            default:
-                break;
+    // Sync context-provided applications if available
+    useEffect(() => {
+        if (accessToken && contextApplications && contextApplications.length > 0) {
+            setApplications(contextApplications.map(a => ({ ...a, selected: false })));
         }
-        setApplications(sorted_applications);
-    };
+    }, [accessToken, contextApplications]);
 
     const getUserApplicationsRequest = useCallback(async () => {
-        await axiosInstance.get(`/users.${userId}.applications.list`, {
+        await axiosInstance.get(`/users/${userId}/applications`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         }).then((response) => {
             setApplications(response.data.applications.map((application) => ({ ...application, selected: false })));
         }).catch((error) => {
-            if (error.response.status === HttpStatusCode.Unauthorized && userId) {
+            if (error.response?.status === HttpStatusCode.Unauthorized && userId) {
                 logout();
             }
-            else {
-                setError(error.response.data.detail);
-            }
+            console.error('Error fetching applications:', error);
         })
     }, [userId, accessToken, setApplications, logout]);
 
     const archiveUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/users.${userId}.applications.archive`, applicationIds, {
+        axiosInstance.put(`/applications/archive`, applicationIds, {
             headers: { Authorization: `Bearer ${accessToken}` },
         })
             .then(() => {
@@ -93,17 +93,15 @@ const Applications = () => {
                 setApplicationId(null);
             })
             .catch(error => {
-                if (error.response.status === HttpStatusCode.Unauthorized && userId) {
+                if (error.response?.status === HttpStatusCode.Unauthorized && userId) {
                     logout();
                 }
-                else {
-                    setError(error.response.data.detail);
-                }
+                console.error('Error archiving applications:', error);
             });
-    }, [userId, accessToken, setFetchApplications, logout]);
+    }, [userId, accessToken, setApplicationId, setFetchApplications, logout]);
 
     const deleteUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/users.${userId}.applications.delete`, applicationIds, {
+        axiosInstance.put(`/applications/delete`, applicationIds, {
             headers: { Authorization: `Bearer ${accessToken}` },
         })
             .then(() => {
@@ -111,173 +109,508 @@ const Applications = () => {
                 setApplicationId(null);
             })
             .catch(error => {
-                if (error.response.status === HttpStatusCode.Unauthorized && userId) {
+                if (error.response?.status === HttpStatusCode.Unauthorized && userId) {
                     logout();
                 }
-                else {
-                    setError(error.response.data.detail);
-                }
+                console.error('Error deleting applications:', error);
             });
     }, [userId, accessToken, setFetchApplications, logout]);
 
+    useEffect(() => {
+        if (!userId || !accessToken) {
+            if (fetchApplications) setFetchApplications(false);
+            return;
+        }
+        if (fetchApplications || applications.length === 0) {
+            getUserApplicationsRequest().finally(() => setFetchApplications(false));
+        }
+    }, [userId, accessToken, fetchApplications, applications.length, getUserApplicationsRequest, setFetchApplications]);
 
-    const handleUserApplicationsArchive = () => {
-        const applicationsToArchive = Object.entries(selectedApplications)
-            .filter(([_, isSelected]) => isSelected)
-            .map(([id, _]) => id);
+    // Calculate statistics
+    const stats = applications.reduce((acc, app) => {
+        acc.total++;
+        if (app.status === 'Offer') acc.offers++;
+        else if (app.status === 'Rejected') acc.rejected++;
+        else if (['HR', 'Phone interview', 'Final interview', 'OA'].includes(app.status)) acc.interviewing++;
+        else acc.pending++;
+        return acc;
+    }, { total: 0, offers: 0, interviewing: 0, rejected: 0, pending: 0 });
 
-        if (applicationsToArchive.length > 0) {
-            archiveUserApplicationRequest(applicationsToArchive)
+    // Get unique levels and locations for filters
+    const uniqueLevels = ['All', ...new Set(applications.map(app => app.role).filter(Boolean))];
+    const uniqueLocations = ['All', ...new Set(applications.map(app => {
+        if (app.location?.city && app.location?.country) {
+            return `${app.location.city}, ${app.location.country}`;
+        }
+        return null;
+    }).filter(Boolean))];
+
+    // Filter applications
+    const filteredApplications = applications.filter(app => {
+        const matchesSearch = (app.company || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (app.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (app.role || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'All' || app.status === statusFilter;
+        const matchesLevel = levelFilter === 'All' || app.role === levelFilter;
+        const matchesLocation = locationFilter === 'All' ||
+            (app.location?.city ? `${app.location.city}, ${app.location.country}` : app.location?.country) === locationFilter;
+        return matchesSearch && matchesStatus && matchesLevel && matchesLocation;
+    });
+
+    // Sort applications
+    const sortedApplications = [...filteredApplications].sort((a, b) => {
+        let comparison = 0;
+
+        switch (sortBy) {
+            case 'company':
+                comparison = (a.company || '').localeCompare(b.company || '');
+                break;
+            case 'title':
+                comparison = a.title.localeCompare(b.title);
+                break;
+            case 'status':
+                comparison = a.status.localeCompare(b.status);
+                break;
+            case 'date':
+                comparison = new Date(a.date) - new Date(b.date);
+                break;
+            default:
+                comparison = 0;
+        }
+
+        return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    // Pagination
+    const totalPages = Math.ceil(sortedApplications.length / itemsPerPage);
+    const paginatedApplications = sortedApplications.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Handle sort
+    const handleSort = (column) => {
+        if (sortBy === column) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(column);
+            setSortOrder('asc');
         }
     };
 
+    // Open application info modal
+    const openApplicationModal = (app) => {
+        setApplication(app);
+        setApplicationId(app.id);
+    };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (fetchApplications && accessToken) {
-                await getUserApplicationsRequest();
-                setTimeout(() => setFetchApplications(false), 700);
-            }
-        };
-
-        if (fetchApplications) {
-            fetchData();
+    // Bulk action handlers
+    const handleArchiveAll = () => {
+        if (window.confirm('Are you sure you want to archive all applications? This will move them to your archive.')) {
+            const allApplicationIds = applications.map(app => app.id);
+            archiveUserApplicationRequest(allApplicationIds);
         }
-    }, [accessToken, getUserApplicationsRequest, fetchApplications, setFetchApplications]);
+    };
 
+    const handleDeleteAll = () => {
+        if (window.confirm('Are you sure you want to delete ALL applications? This action cannot be undone!')) {
+            const allApplicationIds = applications.map(app => app.id);
+            deleteUserApplicationRequest(allApplicationIds);
+        }
+    };
+
+    // Status badge styling
+    const getStatusBadge = (status) => {
+        const styles = {
+            'Submitted': 'bg-gray-100 text-gray-700 border-gray-200',
+            'HR': 'bg-blue-100 text-blue-700 border-blue-200',
+            'Phone interview': 'bg-cyan-100 text-cyan-700 border-cyan-200',
+            'OA': 'bg-purple-100 text-purple-700 border-purple-200',
+            'Final interview': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+            'Offer': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            'Rejected': 'bg-rose-100 text-rose-700 border-rose-200'
+        };
+        return styles[status] || 'bg-gray-100 text-gray-700 border-gray-200';
+    };
 
     return (
-        <>
-            <div className="lg:pr-36 ">
-                <header className="flex items-center justify-between border-b border-white /5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-                    <h1 className="text-base ml-4  font-semibold leading-7 text-cyan-800">Applications</h1>
-                    {!fetchApplications &&
-                        (accessToken &&
-                            <>
-                                <button
-                                    type="button"
-                                    className="mt-1 animate-bounce rounded-full bg-green-400 p-1 text-gray-900 shadow-sm hover:bg-green-600 hover:animate-none"
-                                    onClick={() => setAddApplication(true)}
-                                >
-                                    <PlusIcon className="h-5 w-5 " aria-hidden="true" />
-                                </button>
-                                <MenuViewOptionsDropdown sortOptions={sortOptions} handler={handleApplicationsSortBy} />
-                            </>)}
-                </header>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
+            {/* Premium Header */}
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                            <div>
+                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Applications</h1>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Track your job applications</p>
+                            </div>
+
+                            {/* Inline Statistics */}
+                            {!fetchApplications && applications.length > 0 && (
+                                <div className="flex items-center gap-3 pl-6 border-l border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-center gap-1.5">
+                                        <BriefcaseIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                                        <span className="text-xs text-gray-600 dark:text-gray-400">Total:</span>
+                                        <span className="text-xs font-semibold text-gray-900 dark:text-white">{stats.total}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" />
+                                        <span className="text-xs text-emerald-600 dark:text-emerald-500">Offers:</span>
+                                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-400">{stats.offers}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <ClockIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-500" />
+                                        <span className="text-xs text-blue-600 dark:text-blue-500">Interviewing:</span>
+                                        <span className="text-xs font-semibold text-blue-900 dark:text-blue-400">{stats.interviewing}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <ClockIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500" />
+                                        <span className="text-xs text-amber-600 dark:text-amber-500">Pending:</span>
+                                        <span className="text-xs font-semibold text-amber-900 dark:text-amber-400">{stats.pending}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <XCircleIconSolid className="h-3.5 w-3.5 text-rose-600 dark:text-rose-500" />
+                                        <span className="text-xs text-rose-600 dark:text-rose-500">Rejected:</span>
+                                        <span className="text-xs font-semibold text-rose-900 dark:text-rose-400">{stats.rejected}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        {!fetchApplications && isMember && (
+                            <button
+                                onClick={() => setAddApplication(true)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs"
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                <span>New Application</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {fetchApplications && <Loading />}
-
-            {
-                (!fetchApplications && !accessToken) &&
-                <div className="flex flex-col  justify-center w-full  h-full overflow-hidden '">
-                    <Modal
-                        content={
-                            <a href='/login' className="mt-3 m-auto sm:ml-4 flex  py-12 justify-center sm:mt-0 sm:text-left">
-                                <button
-                                    type="button"
-                                    className="w-full cursor-pointer text-lg flex justify-between rounded-full bg-sky-600 px-6 py-2  font-semibold text-white hover:animate-none  hover:bg-gray-50 border border-cyan-600 hover:text-sky-600 sm:ml-3 sm:w-auto"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                    </svg>
-                                    <span className='ml-3 text-slate-900'>Log in to view your applications. </span>
-                                    <span className='ml-3 animate-spin hover:animate-none'> 🚀</span>
-                                </button>
-                            </a>
-                        } />
+            {/* Loading State */}
+            {fetchApplications && (
+                <div className="flex justify-center items-center h-64">
+                    <Loading />
                 </div>
-            }
+            )}
 
-            {
-                !fetchApplications &&
-                (<div className="lg:pr-36 ">
-                    <div className="flex w-full justify-between">
-                        <button
-                            type="button"
-                            className="ml-3   justify-between px-3 flex rounded-full py-1 text-sm font-medium ring-1 ring-inset text-sky-600 bg-sky-400/10 ring-sky-400/20 hover:bg-sky-700 hover:text-white"
-                            onClick={() => setAllowSelection(!allowSelection)}
-                        >
-                            {
-                                !fetchApplications &&
-                                (allowSelection ?
-                                    <>Disable Selection <XMarkIcon className="h-5 w-5 ml-3" aria-hidden="true" /></> :
-                                    <>Enable Selection <ArchiveBoxIcon className="h-5 w-5 ml-3" aria-hidden="true" /></>)
-                            }
-                        </button>
-
-                        {allowSelection &&
-                            <>
-                                <button
-                                    type="button"
-                                    className="ml-3  justify-between px-3 flex rounded-full py-1 text-sm font-medium ring-1 ring-inset text-yellow-700 bg-yellow-400/10 ring-yellow-400/20 hover:bg-yellow-700 hover:text-white"
-                                    onClick={selectAllApplications}
-                                >
-                                    Select All
-                                </button>
-                                <div className="flex text-center justify-end  px-6">
-                                    <button
-                                        type="button"
-                                        className="ml-3  justify-between px-3 flex rounded-full py-1 text-sm font-medium ring-1 ring-inset text-gray-500 bg-gray-400/10 ring-gray-400/20 hover:bg-gray-700 hover:text-white"
-                                        onClick={handleUserApplicationsArchive}
-                                    >
-                                        Archive <ArchiveBoxIcon className="h-5 w-5 ml-3" aria-hidden="true" />
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="ml-3  justify-between px-3 flex rounded-full py-1 text-sm font-medium ring-1 ring-inset text-red-500 bg-red-400/10 ring-gray-400/20 hover:bg-red-700 hover:text-white"
-                                    >
-                                        Delete <TrashIcon className="h-5 w-5 ml-3" aria-hidden="true" />
-                                    </button>
-                                </div>
-                            </>
-                        }
-                    </div>
-
-                    <ul className="divide-y divide-white/5 list-none mt-3">
-                        {applications.map((application) => (
-                            <div key={application.id} className="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8  hover:bg-slate-100">
-                                <ApplicationItem
-                                    application={application}
-                                    setApplicationId={setApplicationId}
-                                    allowSelection={allowSelection}
-                                    addSelectedItem={addSelectedItem}
+            {/* Main Content - Always Show */}
+            {!fetchApplications && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+                    {/* Compact Search and Filter Bar */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-3 mb-3">
+                        <div className="flex items-center gap-2">
+                            {/* Search */}
+                            <div className="relative flex-1">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    placeholder="Search applications..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-9 pr-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 />
                             </div>
-                        ))}
-                    </ul>
 
-                    {addApplication &&
-                        <ApplicationCreate
-                            setAddApplication={setAddApplication}
-                        />
-                    }
+                            {/* Filters */}
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                <option value="All">All Status</option>
+                                <option value="Submitted">Submitted</option>
+                                <option value="HR">HR</option>
+                                <option value="Phone interview">Phone Interview</option>
+                                <option value="OA">Online Assessment</option>
+                                <option value="Final interview">Final Interview</option>
+                                <option value="Offer">Offer</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
 
-                    {(applicationId && !updateApplication) &&
-                        <ApplicationInfo
-                            applicationId={applicationId}
-                            setApplicationId={setApplicationId}
-                            application={application}
-                            setApplication={setApplication}
-                            setUpdateApplication={setUpdateApplication}
-                            archiveUserApplicationRequest={archiveUserApplicationRequest}
-                            deleteUserApplicationRequest={deleteUserApplicationRequest}
-                        />}
+                            <select
+                                value={levelFilter}
+                                onChange={(e) => setLevelFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                {uniqueLevels.map(level => (
+                                    <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
+                                ))}
+                            </select>
 
-                    {updateApplication && <ApplicationUpdate
-                        application={application}
-                        setApplication={setApplication}
-                        setUpdateApplication={setUpdateApplication}
-                    />}
-                </div >
-                )
-            }
+                            <select
+                                value={locationFilter}
+                                onChange={(e) => setLocationFilter(e.target.value)}
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                            >
+                                {uniqueLocations.map(location => (
+                                    <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
+                                ))}
+                            </select>
 
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setStatusFilter('All');
+                                    setLevelFilter('All');
+                                    setLocationFilter('All');
+                                }}
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-600 transition-all text-xs"
+                            >
+                                <AdjustmentsHorizontalIcon className="h-3.5 w-3.5" />
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
 
-        </>
+                    {/* Bulk Actions Bar */}
+                    {applications.length > 0 && (
+                        <div className="bg-gradient-to-r from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 mb-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <BriefcaseIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Bulk Actions ({applications.length} total)
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleArchiveAll}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all text-xs"
+                                    >
+                                        <ArchiveBoxIcon className="h-3.5 w-3.5" />
+                                        <span>Archive All</span>
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteAll}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-lg font-medium hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all text-xs"
+                                    >
+                                        <TrashIcon className="h-3.5 w-3.5" />
+                                        <span>Delete All</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Premium Table */}
+                    {sortedApplications.length === 0 ? (
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-16 text-center">
+                            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-5">
+                                <BriefcaseIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                {searchQuery || statusFilter !== 'All' ? 'No applications found' : 'No applications yet'}
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto font-medium">
+                                {searchQuery || statusFilter !== 'All'
+                                    ? 'Try adjusting your search or filter criteria'
+                                    : 'Start tracking your job applications by adding your first one'}
+                            </p>
+                            {!searchQuery && statusFilter === 'All' && isMember && (
+                                <button
+                                    onClick={() => setAddApplication(true)}
+                                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+                                >
+                                    <PlusIcon className="h-4 w-4" />
+                                    Add Your First Application
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 overflow-hidden">
+                            {/* Table */}
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                            <th
+                                                onClick={() => handleSort('company')}
+                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <BuildingOfficeIcon className="h-4 w-4" />
+                                                    Company
+                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                </div>
+                                            </th>
+                                            <th
+                                                onClick={() => handleSort('title')}
+                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <BriefcaseIcon className="h-4 w-4" />
+                                                    Position
+                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                </div>
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Level
+                                            </th>
+                                            <th
+                                                onClick={() => handleSort('status')}
+                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    Status
+                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                </div>
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPinIcon className="h-4 w-4" />
+                                                    Location
+                                                </div>
+                                            </th>
+                                            <th
+                                                onClick={() => handleSort('date')}
+                                                className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <CalendarIcon className="h-4 w-4" />
+                                                    Date
+                                                    <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {paginatedApplications.map((app, idx) => (
+                                            <tr
+                                                key={app.id}
+                                                onClick={() => isMember && openApplicationModal(app)}
+                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                title={!isMember ? "Only Members can edit applications" : ""}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="relative h-10 w-10 flex-shrink-0">
+                                                            <img
+                                                                src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                alt={app.company}
+                                                                className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow bg-white"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                    e.target.nextSibling.style.display = 'flex';
+                                                                }}
+                                                            />
+                                                            <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                                                <BuildingOfficeIcon className="h-5 w-5 text-white" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xs">
+                                                            {app.company}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-xs font-medium text-gray-900 dark:text-white">{app.title}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                                        {app.role}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
+                                                        {app.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                        <MapPinIcon className="h-3.5 w-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                                                        <span>
+                                                            {app.location?.city
+                                                                ? `${app.location.city}, ${app.location.country}`
+                                                                : app.location?.country || 'Unknown'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                                        {new Date(app.date).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                                        Showing <span className="font-semibold text-gray-900 dark:text-white">{((currentPage - 1) * itemsPerPage) + 1}</span> to{' '}
+                                        <span className="font-semibold text-gray-900 dark:text-white">{Math.min(currentPage * itemsPerPage, sortedApplications.length)}</span> of{' '}
+                                        <span className="font-semibold text-gray-900 dark:text-white">{sortedApplications.length}</span> applications
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <ChevronLeftIcon className="h-4 w-4" />
+                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                    className={`px-2.5 py-1 rounded-lg font-medium text-xs transition-all ${currentPage === i + 1
+                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                        }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <ChevronRightIcon className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Modals */}
+            {addApplication && (
+                <ApplicationCreate setAddApplication={setAddApplication} />
+            )}
+
+            {applicationId && (
+                <ApplicationInfo
+                    applicationId={applicationId}
+                    setApplicationId={setApplicationId}
+                    application={application}
+                    setApplication={setApplication}
+                    archiveUserApplicationRequest={archiveUserApplicationRequest}
+                    deleteUserApplicationRequest={deleteUserApplicationRequest}
+                    refreshApplications={() => setFetchApplications(true)}
+                />
+            )}
+
+            <SignInPrompt
+                isOpen={showSignInPrompt}
+                onClose={() => setShowSignInPrompt(false)}
+            />
+        </div>
     )
 }
-
-
 
 export default Applications

@@ -1,16 +1,16 @@
-from typing import Any
+from typing import Any, Dict, List
 
 import app.database.session as session
 import app.ents.home.crud as home_crud
 import app.ents.home.schema as home_schema
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 home_router = APIRouter(prefix="/home")
 
 
-@home_router.get(".team", response_model=dict[str, list[home_schema.Team]])
-def get_team(db: Session = Depends(session.get_db)) -> Any:
+@home_router.get(".team", response_model=Dict[str, list[home_schema.Team]])
+def get_team(db: Database = Depends(session.get_db)) -> Any:
     """
     Retrieve all active team.
     """
@@ -19,9 +19,9 @@ def get_team(db: Session = Depends(session.get_db)) -> Any:
 
 
 @home_router.get(
-    ".beneficiaries", response_model=dict[str, list[home_schema.Beneficiary]]
+    ".beneficiaries", response_model=Dict[str, list[home_schema.Beneficiary]]
 )
-def get_beneficiaries(db: Session = Depends(session.get_db)) -> Any:
+def get_beneficiaries(db: Database = Depends(session.get_db)) -> Any:
     """
     Retrieve all active beneficiaries.
     """
@@ -33,8 +33,8 @@ def get_beneficiaries(db: Session = Depends(session.get_db)) -> Any:
     }
 
 
-@home_router.get(".partners", response_model=dict[str, list[home_schema.Partner]])
-def get_partners(db: Session = Depends(session.get_db)) -> Any:
+@home_router.get(".partners", response_model=Dict[str, list[home_schema.Partner]])
+def get_partners(db: Database = Depends(session.get_db)) -> Any:
     """
     Retrieve all active partners.
     """

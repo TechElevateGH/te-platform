@@ -1,59 +1,91 @@
-import app.ents.application.schema as application_schema
-from app.database.base_class import Base
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from typing import Optional, Any
+from pydantic import BaseModel, Field, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+from pydantic_core import core_schema
+from bson import ObjectId
 
 
-class Application(Base):
-    __tablename__ = "applications"
-    id = Column(Integer, primary_key=True, index=True)
-    date = Column(String, nullable=False)
-    notes = Column(String, nullable=False)
-    recruiter_name = Column(String, nullable=False)
-    recruiter_email = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    title = Column(String, nullable=False)
-    status = Column(String, nullable=False)
-    referred = Column(Boolean, nullable=False)
-    active = Column(Boolean, default=True, nullable=False)
-    archived = Column(Boolean, nullable=False)
+# Custom type for MongoDB ObjectId compatible with Pydantic v2
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: Any
+    ) -> core_schema.CoreSchema:
+        return core_schema.union_schema(
+            [
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.chain_schema(
+                    [
+                        core_schema.str_schema(),
+                        core_schema.no_info_plain_validator_function(cls.validate),
+                    ]
+                ),
+            ]
+        )
 
-    # Relationships
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="applications")
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
-    company = relationship("Company", back_populates="applications")
-    location_id = Column(Integer, ForeignKey("locations.id"), nullable=False)
-    location = relationship("Location", back_populates="application")
+    @classmethod
+    def validate(cls, v):
+        if isinstance(v, ObjectId):
+            return v
+        if isinstance(v, str) and ObjectId.is_valid(v):
+            return ObjectId(v)
+        raise ValueError("Invalid ObjectId")
 
-
-class File(Base):
-    __tablename__ = "files"
-    id = Column(Integer, primary_key=True, index=True)
-    file_id = Column(String, nullable=False)
-    date = Column(String, nullable=False)
-    link = Column(String, nullable=False)
-    name = Column(String, nullable=False)
-    reviewed = Column(Boolean, nullable=False, default=False)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="files")
-    active = Column(Boolean, nullable=False, default=True)
-    type = Column(Enum(application_schema.FileType), nullable=False)
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, schema: core_schema.CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        return {"type": "string"}
 
 
-class ResumeReview(Base):
-    __tablename__ = "resume_review"
-    id = Column(Integer, primary_key=True, index=True)
-    date = Column(String, nullable=False)
-    link = Column(String, nullable=False)
-    name = Column(String, nullable=False)
+class Application(BaseModel):
+    """Embedded Application document - stored in MemberUser.applications array"""
 
-    # Relationships
-    requester_id = Column(Integer, ForeignKey("users.id"))
-    reviewers_id = Column(Integer, ForeignKey("users.id"))
-    requester = relationship(
-        "User", back_populates="resume_review_requests", foreign_keys=[requester_id]
-    )
-    reviewers = relationship(
-        "User", back_populates="resume_reviews", foreign_keys=[reviewers_id]
-    )
+    id: str  # UUID for identifying this application
+    company: str  # Just store company name as string
+    location: dict  # Store location as {"country": "...", "city": "..."}
+    date: str
+    notes: str = ""
+    recruiter_name: str = ""
+    recruiter_email: str = ""
+    role: str
+    title: str
+    status: str
+    referred: bool = False
+    active: bool = True
+    archived: bool = False
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class Resume(BaseModel):
+    """Embedded Resume document - stored in MemberUser.resumes array"""
+
+    id: str  # UUID for identifying this resume
+    file_id: str  # Google Drive file ID
+    date: str
+    link: str  # Google Drive link
+    name: str
+    role: str = ""  # Target role for this resume
+    notes: str = ""  # Additional notes about this resume
+    archived: bool = False
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class ResumeReview(BaseModel):
+    """MongoDB Resume Review document model"""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    requester_id: PyObjectId
+    reviewer_id: Optional[PyObjectId] = None
+    date: str
+    link: str
+    name: str
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

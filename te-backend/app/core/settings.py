@@ -1,82 +1,61 @@
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import (
+    AnyHttpUrl,
+    EmailStr,
+    field_validator,
+)
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    API_STR: str
-    PROJECT_NAME: str = "TechElevate"
-    SERVER_HOST: str
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=True, env_file_encoding="utf-8"
+    )
 
-    # Security
+    API_STR: str
+    PROJECT_NAME: str
+    SERVER_HOST: str
+    DOMAIN: str
+    PORT: int = 8000
+
     SECRET_KEY: str
     AUTHJWT_SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    # CORS
-    BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = [
-        "http://localhost:3000",
-    ]
+    BACKEND_CORS_ORIGINS: Union[str, list[AnyHttpUrl]] = "http://localhost:3000"
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: Union[str, list[str]]) -> Union[list[str], str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
-
-    # Sentry
-    SENTRY_DSN: Optional[HttpUrl] = ""
-
-    @validator("SENTRY_DSN", pre=True)
-    def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
-        if len(v) == 0:
-            return None
-        return v
-
-    # # SMTP
-    # SMTP_USER: str
-    # SMTP_HOST: str
-    # SMTP_PORT: str
-    # SMTP_TLS: str
-    # SMTP_PASSWORD: str
-    # EMAILS_FROM_NAME: str
-    # EMAILS_FROM_EMAIL: str
-
-    # Database
-    DATABASE_PORT: int
-    POSTGRES_HOST: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn]
-    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, list]) -> Union[list[str], list]:
         if isinstance(v, str):
+            if not v or v.strip() == "":
+                # Return default if empty
+                return ["http://localhost:3000"]
+            if not v.startswith("["):
+                # Split by comma and filter out empty strings
+                return [i.strip() for i in v.split(",") if i.strip()]
+        if isinstance(v, list):
             return v
+        return [v]
 
-        scheme = "postgresql"
-        user = values.get("POSTGRES_USER")
-        password = values.get("POSTGRES_PASSWORD")
-        host = values.get("POSTGRES_HOST")  # type: ignore
-        port = values.get("POSTGRES_PORT")
-        db = values.get("POSTGRES_DB")
-        return f"{scheme}://{user}:{password}@{host}:{port}/{db}"
+    # Email Configuration
+    EMAILS_ENABLED: bool
+    EMAILS_FROM_NAME: str
+    EMAILS_FROM_EMAIL: EmailStr
+    EMAIL_TEMPLATES_DIR: str = "app/email-templates"
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 
-    # @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    # def assemble_db_connection(cls, v: Optional[str], values: dict[str, Any]) -> Any:
-    #     if isinstance(v, str):
-    #         return v
-    #     return PostgresDsn.build(
-    #         scheme="postgresql",
-    #         user=values.get("POSTGRES_USER"),
-    #         password=values.get("POSTGRES_PASSWORD"),
-    #         host=values.get("POSTGRES_HOST"),  # type: ignore
-    #         path=f"/{values.get('POSTGRES_DB') or ''}",
-    #     )
+    # SMTP Configuration (optional)
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: Optional[int] = None
+    SMTP_TLS: Optional[bool] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+
+    # MongoDB Configuration
+    MONGODB_URI: str
+    MONGODB_DB_NAME: str
 
     # Superuser
     FIRST_SUPERUSER_EMAIL: EmailStr
@@ -90,9 +69,23 @@ class Settings(BaseSettings):
     GDRIVE_OTHER_FILES: str
     GDRIVE_LESSONS: str
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    # Google Drive Service Account Credentials
+    GOOGLE_TYPE: str = "service_account"
+    GOOGLE_PROJECT_ID: Optional[str] = None
+    GOOGLE_PRIVATE_KEY_ID: Optional[str] = None
+    GOOGLE_PRIVATE_KEY: Optional[str] = None
+    GOOGLE_CLIENT_EMAIL: Optional[str] = None
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_AUTH_URI: str = "https://accounts.google.com/o/oauth2/auth"
+    GOOGLE_TOKEN_URI: str = "https://oauth2.googleapis.com/token"
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL: str = "https://www.googleapis.com/oauth2/v1/certs"
+    GOOGLE_CLIENT_X509_CERT_URL: Optional[str] = None
+    GOOGLE_UNIVERSE_DOMAIN: str = "googleapis.com"
+
+    # Google OAuth 2.0 for User Authentication
+    GOOGLE_OAUTH_CLIENT_ID: Optional[str] = None
+    GOOGLE_OAUTH_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_OAUTH_REDIRECT_URI: Optional[str] = None
 
 
 settings = Settings()

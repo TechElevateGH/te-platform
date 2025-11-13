@@ -1,12 +1,11 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useState, Fragment } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronDownIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/20/solid'
 
 
 const LearningGroup = ({ subcategory, rawLessons }) => {
     const { userRole } = useAuth();
 
-    let [lessons, setLessons] = useState(rawLessons);
+    let [lessons] = useState(rawLessons);
 
     const mapPlaylistsToLessons = (lessons) => {
         return lessons.reduce((acc, lesson) => {
@@ -18,7 +17,6 @@ const LearningGroup = ({ subcategory, rawLessons }) => {
         }, {});
     };
     let playlistToLessons = mapPlaylistsToLessons(lessons)
-    console.log(userRole)
 
     return (
         <div className="px-6 mt-3">

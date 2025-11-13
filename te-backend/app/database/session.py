@@ -1,16 +1,19 @@
 from typing import Generator
 
 from app.core.settings import settings
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from pymongo import MongoClient
+from pymongo.database import Database
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI, pool_pre_ping=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# MongoDB client
+client = MongoClient(settings.MONGODB_URI)
+mongodb = client[settings.MONGODB_DB_NAME]
 
 
-def get_db() -> Generator:
-    db = SessionLocal()
+def get_db() -> Generator[Database, None, None]:
+    """
+    Dependency for getting MongoDB database instance.
+    """
     try:
-        yield db
+        yield mongodb
     finally:
-        db.close()
+        pass  # Connection pooling handled by MongoClient

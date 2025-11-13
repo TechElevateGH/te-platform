@@ -5,4 +5,7 @@ export const countries = [
 
 export const jobTitles = ["Software Engineer", "Analyst", "Business Intelligence Engineer", "Systems Engineer", "Data Engineer", "Data Scientist", "Product Manager", "Technical Product Manager", "UX Designer", "ML Engineer", "AI Engineer", "Other......."]
 
-export const jobRoles = ["Intern", "New Grad", "Mid-level", "Senior", "Associate", "Apprentice", "Lead", "Other....."]
+export const jobLevels = ["Intern", "New Grad", "Mid-level", "Senior", "Associate", "Apprentice", "Lead", "Other....."]
+
+// Keep for backwards compatibility
+export const jobRoles = jobLevels

@@ -1,14 +1,14 @@
 
 import app.core.security as security
 from app.ents.user import models, schema
-from sqlalchemy.orm import Session
+from pymongo.database import Database
 
 
-def read_multi(db: Session, *, skip: int = 0, limit: int = 100) -> list[models.User]:
+def read_multi(db: Database, *, skip: int = 0, limit: int = 100) -> list[models.User]:
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
-def create(db: Session, *, data: schema.UserCreate) -> models.User:
+def create(db: Database, *, data: schema.UserCreate) -> models.User:
     data.password = security.get_password_hash(data.password)
     user = models.User(
         **(data.dict()),
@@ -22,7 +22,7 @@ def create(db: Session, *, data: schema.UserCreate) -> models.User:
 
 
 # def update(
-#     db: Session,
+#     db: Database,
 #     *,
 #     db_obj: models.User,
 #     data: schema.UserUpdate | dict[str, Any],

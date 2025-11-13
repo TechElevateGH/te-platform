@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -26,11 +27,11 @@ class PostingBase(BaseModel):
     middle_name: str = ""
     last_name: str
     image: str = ""
-    date_of_birth: str | None = ""
+    date_of_birth: Optional[str] = ""
     contact: str = ""
     address: str = ""
     university: str = ""
-    mentor_id: int | None = None
+    mentor_id: Optional[int] = None
     is_active: bool = True
     start_date: str = date.today().strftime("%Y-%m-%d")
     end_date: str = ""
@@ -40,12 +41,11 @@ class PostingCreate(PostingBase):
     password: str
 
 
-class PostingUpdate(PostingBase):
-    ...
+class PostingUpdate(PostingBase): ...
 
 
 class PostingInDBBase(PostingBase):
-    id: int | None = None
+    id: Optional[int] = None
     full_name: str = ""
 
     class Config:
@@ -56,5 +56,4 @@ class PostingInDB(PostingInDBBase):
     password: str
 
 
-class PostingRead(PostingInDBBase):
-    ...
+class PostingRead(PostingInDBBase): ...
