@@ -1,32 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkedin, faGithub, faTwitter, faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
-const navigation = {
-    platform: [
-        { name: 'Features', href: '#features' },
-        { name: 'How It Works', href: '/how-it-works' },
-        { name: 'Success Stories', href: '#testimonials' },
-        { name: 'Pricing', href: '/pricing' },
-    ],
-    company: [
-        { name: 'About Us', href: '#team' },
-        { name: 'Our Team', href: '#team' },
-        { name: 'Careers', href: '/careers' },
-        { name: 'Contact', href: '/contact' },
-    ],
-    resources: [
-        { name: 'Learning Hub', href: '/learning' },
-        { name: 'Blog', href: '/blog' },
-        { name: 'Help Center', href: '/help' },
-        { name: 'Community', href: '/community' },
-    ],
-    legal: [
-        { name: 'Privacy Policy', href: '/privacy' },
-        { name: 'Terms of Service', href: '/terms' },
-        { name: 'Cookie Policy', href: '/cookies' },
-    ],
-};
-
 const socialLinks = [
     { name: 'LinkedIn', icon: faLinkedin, href: 'https://linkedin.com', color: 'hover:text-blue-500' },
     { name: 'GitHub', icon: faGithub, href: 'https://github.com/TechElevateGH', color: 'hover:text-gray-900' },

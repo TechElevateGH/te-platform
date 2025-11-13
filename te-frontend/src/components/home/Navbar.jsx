@@ -9,7 +9,6 @@ import NotificationBell from './NotificationBell';
 const navigation = [
     { name: 'Home', href: '#home' },
     { name: 'Features', href: '#features' },
-    { name: 'Team', href: '#team' },
     { name: 'Impact', href: '#impact' },
     { name: 'Testimonials', href: '#testimonials' },
 ];
