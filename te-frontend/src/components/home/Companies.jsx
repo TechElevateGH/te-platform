@@ -52,10 +52,10 @@ const Companies = () => {
                 {/* Section Header */}
                 <div className="text-center mb-16">
                     <h2 className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-3">
-                        Trusted by the Best
+                        Celebrate with Us
                     </h2>
                     <h3 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                        Where Our Members Work
+                        Some of Our Wins!
                     </h3>
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
                         TechElevate members have secured positions at leading tech companies worldwide,
@@ -109,7 +109,7 @@ const Companies = () => {
                 </div>
 
                 {/* Success Stats */}
-                <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
                     <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
                         <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
                             35+

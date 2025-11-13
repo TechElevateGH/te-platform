@@ -4,9 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TechElevate Platform Documentation</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --bg-primary: #0f172a;
@@ -48,8 +51,8 @@
         padding: 0;
       }
       body {
-        font-family: 'Gentium Book Plus', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
-          Arial, serif;
+        font-family: "Gentium Book Plus", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Helvetica, Arial, serif;
         font-size: 16px;
         line-height: 1.75;
         background: var(--bg-primary);
@@ -91,7 +94,12 @@
       .logo {
         font-size: 1.25rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
+        background: linear-gradient(
+          135deg,
+          #2563eb 0%,
+          #06b6d4 50%,
+          #a855f7 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -102,7 +110,12 @@
       .logo-icon {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
+        background: linear-gradient(
+          135deg,
+          #2563eb 0%,
+          #06b6d4 50%,
+          #a855f7 100%
+        );
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -146,46 +159,53 @@
         background: var(--border);
       }
       .hero {
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
-        color: #fff;
-        padding: 6rem 1.5rem 7rem;
-        text-align: center;
+        background: linear-gradient(
+          180deg,
+          rgba(37, 99, 235, 0.08) 0%,
+          rgba(6, 182, 212, 0.05) 100%
+        );
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        padding: 4rem 1.5rem 4rem;
         position: relative;
         overflow: hidden;
       }
       .hero::before {
-        content: '';
+        content: "";
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 40%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-        animation: float 20s ease-in-out infinite;
-      }
-      @keyframes float {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-20px) rotate(5deg); }
+        top: 0;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: radial-gradient(
+          ellipse at top right,
+          rgba(37, 99, 235, 0.05) 0%,
+          transparent 60%
+        );
+        pointer-events: none;
       }
       .hero-content {
-        max-width: 800px;
-        margin: 0 auto;
+        max-width: 900px;
+        margin: 0;
+        padding-left: var(--sidebar-width);
+        padding-right: 1.5rem;
       }
       .hero h1 {
-        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-size: clamp(2rem, 4vw, 3rem);
         font-weight: 700;
-        margin-bottom: 1.5rem;
-        line-height: 1.1;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        color: var(--heading);
       }
       .hero p {
-        font-size: 1.3rem;
-        opacity: 0.95;
-        margin-bottom: 2.5rem;
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
       }
       .hero-actions {
         display: flex;
         align-items: center;
-        justify-content: center;
         gap: 1rem;
         flex-wrap: wrap;
       }
@@ -193,35 +213,35 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 1rem 2rem;
-        border-radius: 9999px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         text-decoration: none;
         transition: all 0.2s ease;
         cursor: pointer;
         border: none;
       }
       .btn-primary {
-        background: #fff;
-        color: #2563eb;
-        box-shadow: 0 4px 14px rgba(255, 255, 255, 0.3);
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
       }
       .btn-primary:hover {
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        background: var(--accent-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         text-decoration: none;
       }
       .btn-secondary {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
       }
       .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.5);
-        transform: translateY(-2px);
+        background: var(--surface);
+        border-color: var(--accent);
+        color: var(--accent);
         text-decoration: none;
       }
       .layout {
@@ -282,9 +302,11 @@
         margin-left: var(--sidebar-width);
         padding: 3rem 1.5rem 5rem;
         max-width: 900px;
+        text-align: left;
       }
       section {
         margin-bottom: 4rem;
+        text-align: left;
       }
       h2 {
         font-size: 2.5rem;
@@ -292,6 +314,7 @@
         color: var(--heading);
         margin: 3rem 0 1.5rem;
         line-height: 1.2;
+        text-align: left;
       }
       h2:first-child {
         margin-top: 0;
@@ -302,25 +325,30 @@
         color: var(--heading);
         margin: 2.5rem 0 1rem;
         line-height: 1.3;
+        text-align: left;
       }
       h4 {
         font-size: 1.35rem;
         font-weight: 600;
         color: var(--heading);
         margin: 2rem 0 0.75rem;
+        text-align: left;
       }
       p {
         margin: 1.25rem 0;
         color: var(--text);
+        text-align: left;
       }
       ul,
       ol {
         margin: 1.25rem 0;
         padding-left: 1.75rem;
+        text-align: left;
       }
       li {
         margin: 0.5rem 0;
         color: var(--text);
+        text-align: left;
       }
       li strong {
         color: var(--heading);
@@ -333,6 +361,7 @@
         color: var(--text);
         padding: 0.2em 0.4em;
         border-radius: 5px;
+        text-align: left;
       }
       pre {
         background: var(--code-bg);
@@ -341,10 +370,12 @@
         overflow-x: auto;
         margin: 1.5rem 0;
         border: 1px solid var(--border);
+        text-align: left;
       }
       pre code {
         background: none;
         padding: 0;
+        text-align: left;
       }
       .note {
         background: rgba(8, 126, 164, 0.1);
@@ -352,12 +383,14 @@
         padding: 1.5rem;
         border-radius: 8px;
         margin: 2rem 0;
+        text-align: left;
       }
       .note strong {
         display: block;
         color: var(--accent);
         font-weight: 700;
         margin-bottom: 0.5rem;
+        text-align: left;
       }
       .warning {
         background: rgba(245, 158, 11, 0.1);
@@ -366,29 +399,41 @@
         border-radius: 12px;
         margin: 2rem 0;
         box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+        text-align: left;
       }
       .warning strong {
         display: block;
         color: var(--warning);
         font-weight: 700;
         margin-bottom: 0.5rem;
+        text-align: left;
       }
       .info-box {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.1) 0%,
+          rgba(168, 85, 247, 0.1) 100%
+        );
         border-left: 4px solid var(--accent);
         padding: 1.5rem;
         border-radius: 12px;
         margin: 2rem 0;
         box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        text-align: left;
       }
       .info-box strong {
         display: block;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--accent) 0%,
+          var(--accent-purple) 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         font-weight: 700;
         margin-bottom: 0.5rem;
+        text-align: left;
       }
       .success-box {
         background: rgba(16, 185, 129, 0.1);
@@ -397,9 +442,11 @@
         border-radius: 12px;
         margin: 2rem 0;
         box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+        text-align: left;
       }
       .success-box strong {
         display: block;
+        text-align: left;
         color: var(--success);
         font-weight: 700;
         margin-bottom: 0.5rem;
@@ -416,6 +463,7 @@
         border-radius: 12px;
         padding: 2rem;
         transition: all 0.15s;
+        text-align: left;
       }
       .card:hover {
         border-color: var(--accent);
@@ -426,9 +474,11 @@
         margin-top: 0;
         font-size: 1.4rem;
         color: var(--accent);
+        text-align: left;
       }
       .card h4 {
         margin-top: 0;
+        text-align: left;
         font-size: 1.2rem;
         color: var(--accent);
       }
@@ -488,13 +538,16 @@
           margin-left: 0;
         }
         .hero {
-          padding: 3rem 1.5rem 4rem;
+          padding: 2rem 1.5rem 3rem;
+        }
+        .hero-content {
+          padding-left: 0;
         }
         .hero h1 {
-          font-size: 2.5rem;
+          font-size: 1.75rem;
         }
         .hero p {
-          font-size: 1.1rem;
+          font-size: 1rem;
         }
         h2 {
           font-size: 2rem;
@@ -521,23 +574,6 @@
         <button id="theme" class="theme"><span id="icon">🌙</span></button>
       </div>
     </header>
-
-    <div class="hero">
-      <div class="hero-content">
-        <h1>🚀 TechElevate Platform Documentation</h1>
-        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95;">
-          Complete technical reference, deployment guide, and API documentation for the TechElevate talent enablement platform.
-        </p>
-        <p style="font-size: 1rem; margin-bottom: 2.5rem; opacity: 0.9;">
-          Empowering African tech talent to land their dream jobs through comprehensive job tracking, referrals, learning resources, and career development tools.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#overview">📖 Get Started</a>
-          <a class="btn btn-secondary" href="#deployment">🚀 Deployment Guide</a>
-          <a class="btn btn-secondary" href="#api">⚡ API Reference</a>
-        </div>
-      </div>
-    </div>
 
     <div class="layout">
       <aside class="sidebar" id="sidebar">
@@ -1957,14 +1993,21 @@ npm test -- NewFeature.test.js</code></pre>
 
         <section id="deployment">
           <h2>Deployment</h2>
-          <p>TechElevate uses modern cloud infrastructure for reliable, scalable deployment across all environments.</p>
+          <p>
+            TechElevate uses modern cloud infrastructure for reliable, scalable
+            deployment across all environments.
+          </p>
 
           <h3>🚀 Production Deployment (Render)</h3>
-          <p>Our production environment is deployed on <strong>Render</strong>, providing automatic deploys from GitHub with zero-downtime updates.</p>
+          <p>
+            Our production environment is deployed on <strong>Render</strong>,
+            providing automatic deploys from GitHub with zero-downtime updates.
+          </p>
 
           <h4>Backend Deployment on Render</h4>
           <div class="info-box">
-            <strong>✨ Current Setup:</strong> The TechElevate API is deployed at <code>https://te-platform.onrender.com</code>
+            <strong>✨ Current Setup:</strong> The TechElevate API is deployed
+            at <code>https://te-platform.onrender.com</code>
           </div>
 
           <pre><code># render.yaml configuration
@@ -1994,7 +2037,9 @@ services:
         value: https://techelevate.netlify.app</code></pre>
 
           <h4>Deployment Scripts</h4>
-          <p><strong>prestart.sh</strong> - Runs before the application starts:</p>
+          <p>
+            <strong>prestart.sh</strong> - Runs before the application starts:
+          </p>
           <pre><code>#!/bin/bash
 # Database initialization and migrations
 python -m app.database.init_db
@@ -2009,12 +2054,23 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
           <ol>
             <li>Navigate to your service dashboard</li>
             <li>Go to <strong>Environment</strong> tab</li>
-            <li>Add each variable:
+            <li>
+              Add each variable:
               <ul>
-                <li><code>MONGODB_URL</code> - Your MongoDB Atlas connection string</li>
-                <li><code>SECRET_KEY</code> - JWT signing key (use secure random string)</li>
-                <li><code>GOOGLE_PRIVATE_KEY</code> - Service account private key</li>
-                <li><code>GOOGLE_CLIENT_EMAIL</code> - Service account email</li>
+                <li>
+                  <code>MONGODB_URL</code> - Your MongoDB Atlas connection
+                  string
+                </li>
+                <li>
+                  <code>SECRET_KEY</code> - JWT signing key (use secure random
+                  string)
+                </li>
+                <li>
+                  <code>GOOGLE_PRIVATE_KEY</code> - Service account private key
+                </li>
+                <li>
+                  <code>GOOGLE_CLIENT_EMAIL</code> - Service account email
+                </li>
                 <li><code>GOOGLE_FOLDER_ID</code> - Google Drive folder ID</li>
                 <li><code>FRONTEND_URL</code> - Frontend domain for CORS</li>
               </ul>
@@ -2024,7 +2080,8 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
 
           <h3>Frontend Deployment on Netlify</h3>
           <div class="info-box">
-            <strong>✨ Current Setup:</strong> The TechElevate app is deployed at <code>https://techelevate.netlify.app</code>
+            <strong>✨ Current Setup:</strong> The TechElevate app is deployed
+            at <code>https://techelevate.netlify.app</code>
           </div>
 
           <h4>Build Configuration</h4>
@@ -2046,7 +2103,8 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
           <h4>Deployment Steps</h4>
           <ol>
             <li>Connect GitHub repository to Netlify</li>
-            <li>Configure build settings:
+            <li>
+              Configure build settings:
               <ul>
                 <li>Base directory: <code>te-frontend</code></li>
                 <li>Build command: <code>npm run build</code></li>
@@ -2054,7 +2112,9 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
               </ul>
             </li>
             <li>Set environment variables in Netlify UI</li>
-            <li>Enable automatic deploys from <code>deployment</code> branch</li>
+            <li>
+              Enable automatic deploys from <code>deployment</code> branch
+            </li>
             <li>Configure custom domain (optional)</li>
           </ol>
 

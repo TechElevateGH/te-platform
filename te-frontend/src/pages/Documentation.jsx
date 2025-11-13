@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const Documentation = () => {
-    const [iframeSrc, setIframeSrc] = useState('');
+    const [htmlContent, setHtmlContent] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const urlRef = useRef('');
     const navigate = useNavigate();
 
     const fetchDocumentation = useCallback(async () => {
@@ -26,19 +25,20 @@ const Documentation = () => {
             console.log('Response data type:', typeof response.data);
             console.log('Response data length:', response.data?.length);
 
-            const blob = new Blob([response.data], { type: 'text/html' });
-            const blobUrl = URL.createObjectURL(blob);
-
-            if (urlRef.current) {
-                URL.revokeObjectURL(urlRef.current);
-            }
-
-            urlRef.current = blobUrl;
-            setIframeSrc(blobUrl);
+            setHtmlContent(response.data);
         } catch (err) {
             console.error('Documentation error:', err);
             console.error('Error response:', err?.response);
-            setError(err?.response?.data?.detail || err?.message || 'Unable to load documentation.');
+
+            // Provide helpful error message for timeouts
+            let errorMessage = 'Unable to load documentation.';
+            if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+                errorMessage = 'The backend is warming up (cold start). Please try again in a moment.';
+            } else {
+                errorMessage = err?.response?.data?.detail || err?.message || errorMessage;
+            }
+
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -46,11 +46,6 @@ const Documentation = () => {
 
     useEffect(() => {
         fetchDocumentation();
-        return () => {
-            if (urlRef.current) {
-                URL.revokeObjectURL(urlRef.current);
-            }
-        };
     }, [fetchDocumentation]);
 
     return (
@@ -73,30 +68,20 @@ const Documentation = () => {
                         >
                             API Docs
                         </a>
-                        {iframeSrc && (
-                            <a
-                                className="rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow hover:bg-sky-400"
-                                href={iframeSrc}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Open in new tab
-                            </a>
-                        )}
                     </div>
                 </div>
             </header>
 
-            <main className="flex-1 relative" style={{ minHeight: 'calc(100vh - 73px)' }}>
+            <main className="flex-1" style={{ minHeight: 'calc(100vh - 73px)' }}>
                 {isLoading ? (
-                    <div className="flex h-full items-center justify-center absolute inset-0">
+                    <div className="flex h-full items-center justify-center">
                         <div className="flex flex-col items-center gap-3 text-center">
                             <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
                             <p className="text-sm text-slate-400">Loading documentation…</p>
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="flex h-full items-center justify-center absolute inset-0">
+                    <div className="flex h-full items-center justify-center">
                         <div className="rounded-xl border border-slate-800 bg-slate-900 px-6 py-8 text-center shadow">
                             <h2 className="text-lg font-semibold text-white">We hit a snag</h2>
                             <p className="mt-2 text-sm text-slate-400">{error}</p>
@@ -110,11 +95,9 @@ const Documentation = () => {
                         </div>
                     </div>
                 ) : (
-                    <iframe
-                        title="TechElevate Documentation"
-                        src={iframeSrc}
-                        className="absolute inset-0 w-full h-full border-0"
-                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                    <div
+                        dangerouslySetInnerHTML={{ __html: htmlContent }}
+                        className="w-full h-full"
                     />
                 )}
             </main>
