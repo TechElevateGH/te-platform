@@ -238,8 +238,8 @@ const UserAccountManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredPrivilegedUsers.map((user) => (
-                                                <tr 
-                                                    key={user._id || user.id} 
+                                                <tr
+                                                    key={user._id || user.id}
                                                     onClick={() => handleEditPrivileged(user)}
                                                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                                                 >
@@ -341,8 +341,8 @@ const UserAccountManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredMemberUsers.map((user) => (
-                                                <tr 
-                                                    key={user._id || user.id} 
+                                                <tr
+                                                    key={user._id || user.id}
                                                     onClick={() => handleViewMember(user)}
                                                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                                                 >
@@ -525,11 +525,10 @@ const UserAccountManagement = () => {
                                             toggleUserStatus(selectedMember._id || selectedMember.id, selectedMember.is_active, false);
                                             setShowMemberModal(false);
                                         }}
-                                        className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${
-                                            selectedMember.is_active
+                                        className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${selectedMember.is_active
                                                 ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                                 : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                        }`}
+                                            }`}
                                     >
                                         {selectedMember.is_active ? 'Deactivate Account' : 'Activate Account'}
                                     </button>

@@ -75,6 +75,7 @@ async def options_handler(request: Request, call_next):
     """Handle OPTIONS preflight requests directly to avoid authentication issues."""
     if request.method == "OPTIONS":
         return JSONResponse(
+            content={"status": "ok"},
             status_code=200,
             headers={
                 "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
