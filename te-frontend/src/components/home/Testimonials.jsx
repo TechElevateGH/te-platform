@@ -2,40 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from '@heroicons/react/24/solid';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-const testimonials = [
-    {
-        name: 'Amara Okonkwo',
-        role: 'Software Engineer at Google',
-        location: 'Lagos, Nigeria',
-        image: 'https://ui-avatars.com/api/?name=Amara+Okonkwo&size=128&background=3B82F6&color=fff&bold=true',
-        content: 'TechElevate transformed my career journey. The mentorship and resources helped me land my dream job at Google. The community support was invaluable throughout my interview preparation.',
-        rating: 5,
-    },
-    {
-        name: 'Kwame Mensah',
-        role: 'Data Scientist at Microsoft',
-        location: 'Accra, Ghana',
-        image: 'https://ui-avatars.com/api/?name=Kwame+Mensah&size=128&background=06B6D4&color=fff&bold=true',
-        content: 'The application tracking feature kept me organized during my job search. With guidance from my mentor, I went from zero interviews to multiple offers. Forever grateful!',
-        rating: 5,
-    },
-    {
-        name: 'Fatima Ibrahim',
-        role: 'Full Stack Developer at Amazon',
-        location: 'Nairobi, Kenya',
-        image: 'https://ui-avatars.com/api/?name=Fatima+Ibrahim&size=128&background=8B5CF6&color=fff&bold=true',
-        content: 'The learning resources on TechElevate are top-notch. From DSA workshops to system design, everything I needed was in one place. The resume reviews were game-changing.',
-        rating: 5,
-    },
-    {
-        name: 'Chibueze Nwankwo',
-        role: 'Product Manager at Meta',
-        location: 'Abuja, Nigeria',
-        image: 'https://ui-avatars.com/api/?name=Chibueze+Nwankwo&size=128&background=10B981&color=fff&bold=true',
-        content: 'As someone from a non-traditional background, I felt lost. TechElevate gave me direction, confidence, and the connections I needed to break into tech PM roles.',
-        rating: 5,
-    },
-];
+import { testimonials } from '../../data/testimonials';
 
 const Testimonials = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -77,9 +44,9 @@ const Testimonials = () => {
                         <span className="text-sm font-semibold text-white">Success Stories</span>
                     </div>
                     <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                        Hear from our{' '}
+                        Hear from some of our{' '}
                         <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                            successful mentees
+                            people
                         </span>
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-blue-100">

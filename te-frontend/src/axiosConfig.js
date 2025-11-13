@@ -13,20 +13,21 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // Use localStorage for cross-tab auth persistence
     const token = localStorage.getItem('accessToken');
-    if (token) {
+    const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+
+    // Do NOT attach an Authorization header for guest mode to avoid backend 401 redirect noise
+    if (token && token !== 'guest-mode' && !isGuestMode) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     // Track request start time
-    config.metadata = { 
+    config.metadata = {
       startTime: new Date().getTime(),
     };
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Add response interceptor to handle 401 errors
@@ -44,24 +45,27 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth data from sessionStorage
+      const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+      const token = localStorage.getItem('accessToken');
+
+      // If guest mode, suppress redirect logic entirely; guests are expected to have limited/no backend access
+      if (isGuestMode || token === 'guest-mode') {
+        return Promise.reject(error);
+      }
+
+      // Clear auth data from sessionStorage (legacy/session based)
       sessionStorage.removeItem('accessToken');
       sessionStorage.removeItem('userId');
       sessionStorage.removeItem('userRole');
-      
-      // Show a user-friendly message
+
       const currentPath = window.location.pathname;
       const isAlreadyOnLogin = currentPath === '/login' || currentPath === '/lead-login';
-      
+
       if (!isAlreadyOnLogin) {
-        // Store the attempted URL to redirect back after login
         sessionStorage.setItem('redirectAfterLogin', currentPath);
         sessionStorage.setItem('sessionExpired', 'true');
-        
-        // Determine which login page to use based on previous role
         const wasPrivileged = sessionStorage.getItem('wasPrivilegedUser') === 'true';
         const loginPath = wasPrivileged ? '/lead-login' : '/login';
-        
         window.location.href = loginPath;
       }
     }

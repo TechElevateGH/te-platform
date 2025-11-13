@@ -84,18 +84,44 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const loginAsGuest = () => {
+    // Guest mode: userRole=0, no token, guest userId
+    const guestUserId = 'guest';
+    const guestRole = '0';
+    const guestToken = 'guest-mode';
+
+    // Set localStorage first - this is synchronous and immediate
+    localStorage.setItem('accessToken', guestToken);
+    localStorage.setItem('userId', guestUserId);
+    localStorage.setItem('userRole', guestRole);
+    localStorage.setItem('isGuestMode', 'true');
+
+    // Then dispatch the state update
+    dispatch({ type: 'login', payload: { userId: guestUserId, userRole: guestRole, accessToken: guestToken } });
+
+    // Track guest session in PostHog
+    posthog.identify(guestUserId, {
+      role: guestRole,
+      isGuest: true,
+    });
+  };
+
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
     localStorage.removeItem('wasPrivilegedUser');
+    localStorage.removeItem('isGuestMode');
     dispatch({ type: 'logout' });
 
     // Reset PostHog user
     posthog.reset();
   };
 
-  const isAuthenticated = !!state.accessToken;
+  // Treat guest mode with a localStorage access token as authenticated for UI routing purposes
+  const isGuest = localStorage.getItem('isGuestMode') === 'true';
+  const storageToken = localStorage.getItem('accessToken');
+  const isAuthenticated = !!state.accessToken || (isGuest && !!storageToken);
 
 
   return (
@@ -106,7 +132,9 @@ export const AuthProvider = ({ children }) => {
         accessToken: state.accessToken,
         isAuthenticated,
         isLoading,
+        isGuest,
         login,
+        loginAsGuest,
         logout,
       }}
     >

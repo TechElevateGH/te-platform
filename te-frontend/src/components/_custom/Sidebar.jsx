@@ -18,7 +18,7 @@ function classNames(...classes) {
 
 const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
-    const { logout, userRole } = useAuth();
+    const { logout, userRole, isGuest } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false)
     const [showScrollIndicator, setShowScrollIndicator] = useState(false)
     const sidebarContentRef = useRef(null)
@@ -137,7 +137,13 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                 {/* Role Badge and Logout - Mobile Only */}
                                                 <li className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
                                                     {/* Role Badge */}
-                                                    {userRole && (() => {
+                                                    {isGuest ? (
+                                                        <div className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-3">
+                                                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                                                Guest Mode
+                                                            </span>
+                                                        </div>
+                                                    ) : userRole && (() => {
                                                         const roleNum = parseInt(userRole);
                                                         if (roleNum >= 2) {
                                                             let roleInfo;
@@ -161,13 +167,13 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                     <button
                                                         onClick={() => {
                                                             logout();
-                                                            navigate('/');
+                                                            navigate(isGuest ? '/login' : '/');
                                                             setSidebarOpen(false);
                                                         }}
                                                         className="group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
                                                     >
                                                         <ArrowLeftOnRectangleIcon className="h-5 w-5 text-red-600 dark:text-red-500" />
-                                                        <span className="flex-1 text-left">Logout</span>
+                                                        <span className="flex-1 text-left">{isGuest ? 'Exit Guest Mode' : 'Logout'}</span>
                                                     </button>
                                                 </li>
                                             </ul>

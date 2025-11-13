@@ -20,6 +20,9 @@ import Documentation from './pages/Documentation';
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Also check localStorage as a fallback for immediate guest login
+  const hasTokenInStorage = !!localStorage.getItem('accessToken');
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -28,7 +31,8 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  // Check both state and localStorage to handle immediate navigation after guest login
+  if (!isAuthenticated && !hasTokenInStorage) {
     return <Navigate to="/login" replace />;
   }
   return children;

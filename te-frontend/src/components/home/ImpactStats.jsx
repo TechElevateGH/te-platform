@@ -17,7 +17,7 @@ const stats = [
         suffix: '+',
         icon: TrophyIcon,
         color: 'from-purple-500 to-pink-500',
-        description: 'Mentees who landed their dream jobs',
+        description: 'Our people who landed their dream jobs',
     },
     {
         id: 1,

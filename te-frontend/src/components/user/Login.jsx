@@ -13,7 +13,7 @@ import {
 import { useDarkMode } from '../../context/DarkModeContext';
 
 const Login = () => {
-    const { login } = useAuth();
+    const { login, loginAsGuest } = useAuth();
     const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -106,6 +106,14 @@ const Login = () => {
         setLoginData({ ...loginData, [name]: value });
     };
 
+    const handleGuestLogin = () => {
+        loginAsGuest();
+        // Use setTimeout to ensure localStorage is written and state is updated
+        setTimeout(() => {
+            navigate('/workspace', { replace: true });
+        }, 100);
+    };
+
     // Compact single Google button (others hidden until implemented)
     const GoogleIcon = (
         <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -127,9 +135,11 @@ const Login = () => {
             <div className="relative max-w-md w-full">
                 {/* Logo + Dark Mode Toggle */}
                 <div className="flex items-center justify-center mb-8 relative">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl select-none">
-                        <span className="text-white font-bold text-3xl tracking-wide">TE</span>
-                    </div>
+                    <img
+                        src="/te-logo.png"
+                        alt="TechElevate Logo"
+                        className="h-20 w-20 select-none"
+                    />
                     <button
                         type="button"
                         onClick={toggleDarkMode}
@@ -158,6 +168,18 @@ const Login = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Guest Login Button - Small and at top */}
+                    <div className="mb-4">
+                        <button
+                            type="button"
+                            onClick={handleGuestLogin}
+                            className="group relative w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <span>Continue as Guest</span>
+                            <ArrowRightIcon className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
 
                     {/* Compact Google OAuth button */}
                     <div className="mb-6">
