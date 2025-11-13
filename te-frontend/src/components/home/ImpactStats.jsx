@@ -112,7 +112,7 @@ const ImpactStats = () => {
                         </span>
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                        Our platform has empowered thousands of talented individuals to achieve their dreams in the tech industry.
+                        Our platform empowers talented individuals to achieve their dreams in the tech industry.
                     </p>
                 </div>
 

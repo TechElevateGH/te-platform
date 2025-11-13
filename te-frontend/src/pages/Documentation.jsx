@@ -22,6 +22,10 @@ const Documentation = () => {
                 },
             });
 
+            console.log('Documentation response:', response);
+            console.log('Response data type:', typeof response.data);
+            console.log('Response data length:', response.data?.length);
+
             const blob = new Blob([response.data], { type: 'text/html' });
             const blobUrl = URL.createObjectURL(blob);
 
@@ -32,7 +36,9 @@ const Documentation = () => {
             urlRef.current = blobUrl;
             setIframeSrc(blobUrl);
         } catch (err) {
-            setError(err?.response?.data?.detail || 'Unable to load documentation.');
+            console.error('Documentation error:', err);
+            console.error('Error response:', err?.response);
+            setError(err?.response?.data?.detail || err?.message || 'Unable to load documentation.');
         } finally {
             setIsLoading(false);
         }
@@ -81,16 +87,16 @@ const Documentation = () => {
                 </div>
             </header>
 
-            <main className="flex-1">
+            <main className="flex-1 relative" style={{ minHeight: 'calc(100vh - 73px)' }}>
                 {isLoading ? (
-                    <div className="flex h-full items-center justify-center">
+                    <div className="flex h-full items-center justify-center absolute inset-0">
                         <div className="flex flex-col items-center gap-3 text-center">
                             <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
                             <p className="text-sm text-slate-400">Loading documentation…</p>
                         </div>
                     </div>
                 ) : error ? (
-                    <div className="flex h-full items-center justify-center">
+                    <div className="flex h-full items-center justify-center absolute inset-0">
                         <div className="rounded-xl border border-slate-800 bg-slate-900 px-6 py-8 text-center shadow">
                             <h2 className="text-lg font-semibold text-white">We hit a snag</h2>
                             <p className="mt-2 text-sm text-slate-400">{error}</p>
@@ -107,7 +113,7 @@ const Documentation = () => {
                     <iframe
                         title="TechElevate Documentation"
                         src={iframeSrc}
-                        className="h-full w-full flex-1 border-0"
+                        className="absolute inset-0 w-full h-full border-0"
                         sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                     />
                 )}

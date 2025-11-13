@@ -4,28 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TechElevate Platform Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --bg: #23272f;
-        --surface: #2d333b;
-        --border: rgba(255, 255, 255, 0.1);
-        --text: #ebecf0;
-        --text-secondary: #99a1b3;
-        --heading: #fff;
-        --accent: #087ea4;
-        --accent-hover: #149eca;
-        --link: #58c4dc;
-        --code-bg: rgba(0, 0, 0, 0.3);
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --surface: #1e293b;
+        --border: rgba(148, 163, 184, 0.1);
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --heading: #ffffff;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --accent-cyan: #06b6d4;
+        --accent-purple: #a855f7;
+        --link: #60a5fa;
+        --code-bg: rgba(0, 0, 0, 0.4);
+        --success: #10b981;
+        --warning: #f59e0b;
+        --error: #ef4444;
         --sidebar-width: 280px;
       }
       body.light {
-        --bg: #fff;
-        --surface: #f6f7f9;
-        --border: rgba(0, 0, 0, 0.08);
-        --text: #23272f;
-        --text-secondary: #5e687e;
-        --heading: #23272f;
-        --link: #087ea4;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-tertiary: #e2e8f0;
+        --surface: #f8fafc;
+        --border: rgba(15, 23, 42, 0.08);
+        --text: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --heading: #0f172a;
+        --link: #3b82f6;
         --code-bg: rgba(0, 0, 0, 0.05);
       }
       * {
@@ -34,13 +48,13 @@
         padding: 0;
       }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
-          Arial, sans-serif;
-        font-size: 17px;
-        line-height: 1.7;
-        background: var(--bg);
+        font-family: 'Gentium Book Plus', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, serif;
+        font-size: 16px;
+        line-height: 1.75;
+        background: var(--bg-primary);
         color: var(--text);
-        transition: all 0.2s;
+        transition: all 0.3s ease;
       }
       a {
         color: var(--link);
@@ -75,23 +89,28 @@
         justify-content: space-between;
       }
       .logo {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 700;
-        color: var(--heading);
+        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         display: flex;
         align-items: center;
         gap: 0.75rem;
       }
       .logo-icon {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
         font-weight: 700;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
       }
       .theme {
         width: 40px;
@@ -127,10 +146,26 @@
         background: var(--border);
       }
       .hero {
-        background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 50%, #a855f7 100%);
         color: #fff;
-        padding: 5rem 1.5rem 6rem;
+        padding: 6rem 1.5rem 7rem;
         text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 40%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 20s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
       }
       .hero-content {
         max-width: 800px;
@@ -157,31 +192,36 @@
       .btn {
         display: inline-flex;
         align-items: center;
-        padding: 0.8rem 1.8rem;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
         border-radius: 9999px;
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1rem;
         text-decoration: none;
-        transition: all 0.15s;
+        transition: all 0.2s ease;
         cursor: pointer;
+        border: none;
       }
       .btn-primary {
         background: #fff;
-        color: var(--accent);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        color: #2563eb;
+        box-shadow: 0 4px 14px rgba(255, 255, 255, 0.3);
       }
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
         text-decoration: none;
       }
       .btn-secondary {
-        background: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.1);
         color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
       }
       .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
         text-decoration: none;
       }
       .layout {
@@ -320,15 +360,47 @@
         margin-bottom: 0.5rem;
       }
       .warning {
-        background: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid #ffc107;
+        background: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid var(--warning);
         padding: 1.5rem;
-        border-radius: 8px;
+        border-radius: 12px;
         margin: 2rem 0;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
       }
       .warning strong {
         display: block;
-        color: #ffc107;
+        color: var(--warning);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .info-box {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        border-left: 4px solid var(--accent);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+      }
+      .info-box strong {
+        display: block;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .success-box {
+        background: rgba(16, 185, 129, 0.1);
+        border-left: 4px solid var(--success);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 2rem 0;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+      }
+      .success-box strong {
+        display: block;
+        color: var(--success);
         font-weight: 700;
         margin-bottom: 0.5rem;
       }
@@ -443,7 +515,7 @@
       <div class="header-inner">
         <div class="logo">
           <button class="menu-toggle" id="menuToggle">☰</button>
-          <div class="logo-icon">T</div>
+          <div class="logo-icon">🚀</div>
           <span>TechElevate Docs</span>
         </div>
         <button id="theme" class="theme"><span id="icon">🌙</span></button>
@@ -452,14 +524,17 @@
 
     <div class="hero">
       <div class="hero-content">
-        <h1>TechElevate Platform Documentation</h1>
-        <p>
-          Complete technical reference and operational guide for the TechElevate
-          talent enablement platform.
+        <h1>🚀 TechElevate Platform Documentation</h1>
+        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95;">
+          Complete technical reference, deployment guide, and API documentation for the TechElevate talent enablement platform.
+        </p>
+        <p style="font-size: 1rem; margin-bottom: 2.5rem; opacity: 0.9;">
+          Empowering African tech talent to land their dream jobs through comprehensive job tracking, referrals, learning resources, and career development tools.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#overview">Get Started</a>
-          <a class="btn btn-secondary" href="#api">API Reference</a>
+          <a class="btn btn-primary" href="#overview">📖 Get Started</a>
+          <a class="btn btn-secondary" href="#deployment">🚀 Deployment Guide</a>
+          <a class="btn btn-secondary" href="#api">⚡ API Reference</a>
         </div>
       </div>
     </div>
@@ -1882,68 +1957,160 @@ npm test -- NewFeature.test.js</code></pre>
 
         <section id="deployment">
           <h2>Deployment</h2>
+          <p>TechElevate uses modern cloud infrastructure for reliable, scalable deployment across all environments.</p>
 
-          <h3>Backend Deployment</h3>
-          <p>The backend can be deployed to various platforms:</p>
+          <h3>🚀 Production Deployment (Render)</h3>
+          <p>Our production environment is deployed on <strong>Render</strong>, providing automatic deploys from GitHub with zero-downtime updates.</p>
 
-          <h4>Heroku</h4>
-          <pre><code># Install Heroku CLI and login
-heroku login
+          <h4>Backend Deployment on Render</h4>
+          <div class="info-box">
+            <strong>✨ Current Setup:</strong> The TechElevate API is deployed at <code>https://te-platform.onrender.com</code>
+          </div>
 
-# Create app
-heroku create techelevate-api
+          <pre><code># render.yaml configuration
+services:
+  - type: web
+    name: techelevate-api
+    env: python
+    region: oregon
+    plan: free
+    branch: deployment
+    buildCommand: "cd te-backend && pip install -r requirements.txt"
+    startCommand: "cd te-backend && ./start.sh"
+    preDeployCommand: "cd te-backend && ./prestart.sh"
+    healthCheckPath: /v1/health
+    envVars:
+      - key: MONGODB_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_FOLDER_ID
+        sync: false
+      - key: FRONTEND_URL
+        value: https://techelevate.netlify.app</code></pre>
 
-# Set environment variables
-heroku config:set MONGODB_URL=...
-heroku config:set SECRET_KEY=...
-# (set all .env variables)
+          <h4>Deployment Scripts</h4>
+          <p><strong>prestart.sh</strong> - Runs before the application starts:</p>
+          <pre><code>#!/bin/bash
+# Database initialization and migrations
+python -m app.database.init_db
+echo "Database initialization complete"</code></pre>
 
-# Deploy
-git push heroku main
+          <p><strong>start.sh</strong> - Starts the FastAPI server:</p>
+          <pre><code>#!/bin/bash
+# Start uvicorn with production settings
+uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
 
-# Run migrations if needed
-heroku run python -m app.database.init_db</code></pre>
+          <h4>Setting Environment Variables on Render</h4>
+          <ol>
+            <li>Navigate to your service dashboard</li>
+            <li>Go to <strong>Environment</strong> tab</li>
+            <li>Add each variable:
+              <ul>
+                <li><code>MONGODB_URL</code> - Your MongoDB Atlas connection string</li>
+                <li><code>SECRET_KEY</code> - JWT signing key (use secure random string)</li>
+                <li><code>GOOGLE_PRIVATE_KEY</code> - Service account private key</li>
+                <li><code>GOOGLE_CLIENT_EMAIL</code> - Service account email</li>
+                <li><code>GOOGLE_FOLDER_ID</code> - Google Drive folder ID</li>
+                <li><code>FRONTEND_URL</code> - Frontend domain for CORS</li>
+              </ul>
+            </li>
+            <li>Click <strong>Save Changes</strong> - Auto-redeploys</li>
+          </ol>
 
-          <h4>AWS EC2</h4>
-          <pre><code># On EC2 instance
-sudo apt update
-sudo apt install python3.9 python3-pip nginx
+          <h3>Frontend Deployment on Netlify</h3>
+          <div class="info-box">
+            <strong>✨ Current Setup:</strong> The TechElevate app is deployed at <code>https://techelevate.netlify.app</code>
+          </div>
 
-# Clone and setup
-git clone repo
-cd te-backend
-pip install -r requirements.txt
+          <h4>Build Configuration</h4>
+          <pre><code># netlify.toml
+[build]
+  command = "npm run build"
+  publish = "build"
+  base = "te-frontend"
 
-# Setup systemd service
-sudo nano /etc/systemd/system/techelevate.service
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
-# Configure nginx reverse proxy
-sudo nano /etc/nginx/sites-available/techelevate
+[build.environment]
+  REACT_APP_API_URL = "https://te-platform.onrender.com/v1"
+  NODE_VERSION = "18"</code></pre>
 
-# Start services
-sudo systemctl start techelevate
-sudo systemctl start nginx</code></pre>
+          <h4>Deployment Steps</h4>
+          <ol>
+            <li>Connect GitHub repository to Netlify</li>
+            <li>Configure build settings:
+              <ul>
+                <li>Base directory: <code>te-frontend</code></li>
+                <li>Build command: <code>npm run build</code></li>
+                <li>Publish directory: <code>te-frontend/build</code></li>
+              </ul>
+            </li>
+            <li>Set environment variables in Netlify UI</li>
+            <li>Enable automatic deploys from <code>deployment</code> branch</li>
+            <li>Configure custom domain (optional)</li>
+          </ol>
 
-          <h3>Frontend Deployment</h3>
+          <h3>Alternative Deployment Options</h3>
 
-          <h4>Vercel (Recommended)</h4>
+          <h4>Vercel (Frontend Alternative)</h4>
           <pre><code># Install Vercel CLI
 npm i -g vercel
 
-# Deploy
+# Deploy from te-frontend directory
 cd te-frontend
-vercel
+vercel --prod
 
-# Set environment variables in Vercel dashboard
-# API_URL=https://api.techelevate.org/v1</code></pre>
+# Environment variables can be set via:
+vercel env add REACT_APP_API_URL</code></pre>
 
-          <h4>Netlify</h4>
-          <pre><code># Build for production
-npm run build
+          <h4>AWS EC2 (Backend Alternative)</h4>
+          <pre><code># On EC2 instance (Ubuntu)
+sudo apt update && sudo apt install python3.9 python3-pip nginx
 
-# Deploy build folder via Netlify UI
-# Or use Netlify CLI
-netlify deploy --prod --dir=build</code></pre>
+# Clone repository
+git clone https://github.com/TechElevateGH/te-platform.git
+cd te-platform/te-backend
+
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Create systemd service
+sudo nano /etc/systemd/system/techelevate.service
+
+# Configure nginx as reverse proxy
+sudo nano /etc/nginx/sites-available/techelevate
+
+# Enable and start
+sudo systemctl enable techelevate
+sudo systemctl start techelevate
+sudo systemctl restart nginx</code></pre>
+
+          <h4>Docker Deployment</h4>
+          <pre><code># Dockerfile for backend
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Build and run
+docker build -t techelevate-api .
+docker run -p 8000:8000 --env-file .env techelevate-api
+
+# Docker Compose for full stack
+docker-compose up -d</code></pre>
 
           <h3>Production Checklist</h3>
           <ul>

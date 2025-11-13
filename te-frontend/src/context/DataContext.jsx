@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import companiesList from '../data/companies';
+import { companies as companiesList } from '../data/jobData';
 
 const DataContext = createContext();
 

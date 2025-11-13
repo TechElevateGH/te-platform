@@ -1,6 +1,7 @@
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import Features from "./Features";
+import Companies from "./Companies";
 import ImpactStats from "./ImpactStats";
 import Testimonials from "./Testimonials";
 import Footer from "./Footer";
@@ -148,6 +149,7 @@ const Home = () => {
                 </section>
             )}
             <Features />
+            <Companies />
             <ImpactStats />
             <Testimonials />
             <Footer />

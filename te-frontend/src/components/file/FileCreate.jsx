@@ -9,7 +9,7 @@ import { setNestedPropertyValue } from "../../utils";
 import SuccessFeedback from "../_custom/Alert/SuccessFeedback";
 import { Loading } from "../_custom/Loading";
 import SelectCombobox from "../_custom/SelectCombobox";
-import { jobTitles } from "../../data/data";
+import { jobTitles } from "../../data/jobData";
 import Toast from "../_custom/Toast";
 
 
