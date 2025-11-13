@@ -96,8 +96,10 @@ const Referrals = () => {
     const isMember = userRole && parseInt(userRole) === 1; // Only Members can request referrals
     const isReferrer = userRole && parseInt(userRole) === 2; // Referrer role
 
-    // State for view toggle
-    const [viewMode, setViewMode] = useState('companies'); // 'companies', 'my-requests', or 'all-requests'
+    // State for view toggle - persist across page refreshes
+    const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem('referralsViewMode') || 'companies';
+    });
     const [allReferrals, setAllReferrals] = useState([]);
     const [loadingAllReferrals, setLoadingAllReferrals] = useState(false);
     const [selectedReferral, setSelectedReferral] = useState(null);
@@ -121,6 +123,11 @@ const Referrals = () => {
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
     const [companyFilter, setCompanyFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
+
+    // Persist viewMode to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('referralsViewMode', viewMode);
+    }, [viewMode]);
 
     // Check if user is authenticated
     useEffect(() => {

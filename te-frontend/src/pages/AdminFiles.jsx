@@ -22,7 +22,9 @@ const AdminFiles = () => {
     const [resumeReviews, setResumeReviews] = useState([]);
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('files'); // 'files' or 'reviews'
+    const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('adminFilesActiveTab') || 'files';
+    });
     const [searchQuery, setSearchQuery] = useState('');
     const [fileTypeFilter, setFileTypeFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
@@ -83,6 +85,11 @@ const AdminFiles = () => {
     };
 
     const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
+
+    // Persist activeTab to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('adminFilesActiveTab', activeTab);
+    }, [activeTab]);
 
     // Fetch all users with their files
     const fetchAllUsersFiles = useCallback(async () => {
