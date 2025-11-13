@@ -7,39 +7,12 @@ const OAuthCallback = () => {
     const navigate = useNavigate();
     const [status, setStatus] = useState('processing'); // processing, success, error
     const [hasProcessed, setHasProcessed] = useState(false);
-    const [isStaleCallback, setIsStaleCallback] = useState(false);
 
     console.log('OAuthCallback component loaded!');
     console.log('Current URL:', window.location.href);
 
-    // Check for stale callback immediately on mount
     useEffect(() => {
-        const token = searchParams.get('token');
-        const userId = searchParams.get('user_id');
-        const role = searchParams.get('role');
-        const error = searchParams.get('error');
-
-        // If no parameters at all, this is a stale browser restore
-        if (!token && !userId && !role && !error) {
-            console.warn('[OAuthCallback] Stale callback detected (Chrome session restore) - redirecting immediately');
-            setIsStaleCallback(true);
-            const existingToken = localStorage.getItem('accessToken');
-
-            // Replace history state BEFORE redirecting to prevent Chrome from caching this URL
-            const targetPath = existingToken ? '/workspace' : '/login';
-            window.history.replaceState(null, '', targetPath);
-
-            if (existingToken) {
-                window.location.replace('/workspace');
-            } else {
-                window.location.replace('/login');
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        if (hasProcessed || isStaleCallback) return; // Prevent double processing or processing stale callback
+        if (hasProcessed) return; // Prevent double processing
 
         const handleOAuthCallback = () => {
             setHasProcessed(true);
@@ -62,28 +35,7 @@ const OAuthCallback = () => {
                 error: error
             });
 
-            // If no parameters at all, user might have reopened an old callback URL
-            // Check if already authenticated and redirect accordingly
-            if (!token && !userId && !role && !error) {
-                console.warn('OAuth callback accessed without parameters - this is likely a Chrome session restore');
-                const existingToken = localStorage.getItem('accessToken');
-
-                // Replace history state BEFORE redirecting to prevent Chrome from caching this URL
-                const targetPath = existingToken ? '/workspace' : '/login';
-                window.history.replaceState(null, '', targetPath);
-
-                if (existingToken) {
-                    console.log('User already authenticated, redirecting to workspace immediately...');
-                    // Use replace to avoid adding another history entry
-                    window.location.replace('/workspace');
-                } else {
-                    console.log('No auth found, redirecting to login immediately...');
-                    window.location.replace('/login');
-                }
-                return;
-            }
-
-            // Mark that OAuth is in progress to prevent browser restore issues
+            // Mark that OAuth is in progress
             sessionStorage.setItem('oauthInProgress', 'true');
 
             if (error) {
@@ -153,18 +105,6 @@ const OAuthCallback = () => {
         handleOAuthCallback();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]); // Only depend on searchParams to prevent re-runs
-
-    // Show minimal loading UI for stale callback while redirect happens
-    if (isStaleCallback) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-900 dark:to-slate-900 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
-                    <p className="mt-4 text-gray-600 dark:text-gray-400">Redirecting...</p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center py-12 px-4 transition-colors">
