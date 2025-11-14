@@ -653,13 +653,13 @@
                 </li>
                 <li>
                   <strong>render.yaml</strong>: production backend definition
-                  (Python runtime, <code>build.sh</code>,
-                  <code>start.sh</code>, <code>/health</code> probe, and
-                  declared environment variables).
+                  (Python runtime, <code>build.sh</code>, <code>start.sh</code>,
+                  <code>/health</code> probe, and declared environment
+                  variables).
                 </li>
                 <li>
-                  <strong>scripts/format.sh</strong>: battle-tested Ruff +
-                  isort formatter invoked by CI and <code>make format</code>.
+                  <strong>scripts/format.sh</strong>: battle-tested Ruff + isort
+                  formatter invoked by CI and <code>make format</code>.
                 </li>
               </ul>
             </div>
@@ -692,8 +692,7 @@
               <ul>
                 <li>
                   <strong>src/pages</strong>: route-level screens (e.g.,
-                  <code>Applications.jsx</code>,
-                  <code>Documentation.jsx</code>,
+                  <code>Applications.jsx</code>, <code>Documentation.jsx</code>,
                   <code>ResumeReviews.jsx</code>, admin consoles, etc.).
                 </li>
                 <li>
@@ -754,14 +753,14 @@
         <section id="personas">
           <h2>User Personas</h2>
 
-          <h3>Guest (role=0)</h3>
+          <h3>Guest</h3>
           <p>Unauthenticated visitors to the platform with limited access.</p>
           <div class="note">
             <strong>Access</strong>: Public learning content only (view-only
             mode for lessons and practice problems)
           </div>
 
-          <h3>Member (role=1)</h3>
+          <h3>Member</h3>
           <p>
             The primary user of the platform. Members are tech professionals or
             aspiring professionals looking for job opportunities. Stored in
@@ -784,7 +783,7 @@
             <code>/auth/google</code>
           </div>
 
-          <h3>Referrer (role=2)</h3>
+          <h3>Referrer</h3>
           <p>
             Employees at tech companies who are willing to provide internal
             referrals to qualified members. Stored in
@@ -804,7 +803,7 @@
             <code>lead_token</code> field)
           </div>
 
-          <h3>Volunteer (role=3)</h3>
+          <h3>Volunteer</h3>
           <p>
             TechElevate volunteers who provide resume reviews and create
             learning content.
@@ -820,7 +819,7 @@
             <code>POST /users/privileged/volunteers</code>
           </div>
 
-          <h3>Lead (role=4)</h3>
+          <h3>Lead</h3>
           <p>
             TechElevate staff members who manage the platform's content and
             operations. Stored in <code>privileged_users</code> collection.
@@ -843,7 +842,7 @@
             <code>/auth/management-login</code>
           </div>
 
-          <h3>Admin (role=5)</h3>
+          <h3>Admin</h3>
           <p>
             Platform administrators with full access to all system capabilities.
             Stored in <code>privileged_users</code> collection.
@@ -870,8 +869,8 @@
             The platform uses two MongoDB collections for users:
             <ul>
               <li>
-                <code>member_users</code>: Members (role=1) with email-based
-                auth, embedded applications/resumes, OAuth support
+                <code>member_users</code>: Members with email-based auth,
+                embedded applications/resumes, OAuth support
               </li>
               <li>
                 <code>privileged_users</code>: Referrers/Volunteers/Leads/Admins
@@ -1099,9 +1098,7 @@
             <tbody>
               <tr>
                 <td><code>member_users</code></td>
-                <td>
-                  Member accounts (role=1) with embedded applications & resumes
-                </td>
+                <td>Member accounts with embedded applications & resumes</td>
                 <td>
                   email, password, full_name, contact, university,
                   applications[], resumes[], referral_essay, cover_letter,
@@ -1190,9 +1187,9 @@
             </li>
             <li>
               <strong>Two User Collections</strong>:
-              <code>member_users</code> (role=1) and
-              <code>privileged_users</code> (roles 2-5) are separate collections
-              to optimize queries and enforce different validation rules.
+              <code>member_users</code> and <code>privileged_users</code> are
+              separate collections to optimize queries and enforce different
+              validation rules.
             </li>
           </ul>
         </section>
@@ -1251,7 +1248,7 @@
           </p>
 
           <h3>Authentication Flow</h3>
-          <p><strong>For Members (role=1):</strong></p>
+          <p><strong>For Members:</strong></p>
           <ol>
             <li>
               User submits email/password to <code>POST /auth/login</code> or
@@ -1285,7 +1282,7 @@
             <li>Token generated and stored (same flow as Members)</li>
           </ol>
 
-          <p><strong>For Referrers (role=2):</strong></p>
+          <p><strong>For Referrers:</strong></p>
           <ol>
             <li>
               User submits token only to <code>POST /auth/referrer-login</code>
@@ -2214,7 +2211,7 @@ Response:
   "token_type": "bearer"
 }
 
-Access: Referrers (role=2) only
+Access: Referrers only
 Errors:
 - 401: Invalid token</code></pre>
 
@@ -3016,8 +3013,12 @@ const createItem = async (itemData) =&gt; {
 
           <h3>Daily Flow</h3>
           <ol>
-            <li>Run <code>make frontend-dev</code> (or <code>make dev</code>).</li>
-            <li>Edit backend and frontend files—both hot-reload automatically.</li>
+            <li>
+              Run <code>make frontend-dev</code> (or <code>make dev</code>).
+            </li>
+            <li>
+              Edit backend and frontend files—both hot-reload automatically.
+            </li>
             <li>
               Before committing, run <code>make format</code> and the test steps
               from the next section.
@@ -3291,8 +3292,10 @@ docker-compose up -d</code></pre>
             <strong>Performance tips</strong>
             <ul>
               <li>
-                GZip is enabled server-side for the HTML payload
-                (<code>GZipMiddleware</code> in <code>app/main.py</code>).
+                GZip is enabled server-side for the HTML payload (<code
+                  >GZipMiddleware</code
+                >
+                in <code>app/main.py</code>).
               </li>
               <li>
                 The frontend automatically re-fetches in the background if the

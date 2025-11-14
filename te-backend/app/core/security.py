@@ -45,16 +45,20 @@ def create_access_token(
     return encoded_jwt
 
 
-def generate_password_reset_token(email: str) -> str:
-    delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
+def generate_password_reset_token(
+    email: str,
+    *,
+    reset_id: Optional[str] = None,
+    stage: str = "request",
+    expires_minutes: int = 15,
+) -> str:
+    delta = timedelta(minutes=expires_minutes)
     now = datetime.utcnow()
-    expires = now + delta
-    exp = expires.timestamp()
-    encoded_jwt = jwt.encode(
-        {"exp": exp, "nbf": now, "sub": email},
-        settings.SECRET_KEY,
-        algorithm="HS256",
-    )
+    expire = now + delta
+    payload = {"exp": expire, "nbf": now, "sub": email, "stage": stage}
+    if reset_id:
+        payload["rid"] = reset_id
+    encoded_jwt = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 
 
@@ -69,10 +73,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def verify_password_reset_token(token: str) -> Optional[str]:
+def verify_password_reset_token(token: str) -> Optional[dict[str, Optional[str]]]:
     try:
         decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return decoded_token["email"]
+        return {
+            "email": decoded_token.get("sub"),
+            "reset_id": decoded_token.get("rid"),
+            "stage": decoded_token.get("stage", "request"),
+        }
     except JWTError:
         return None
 

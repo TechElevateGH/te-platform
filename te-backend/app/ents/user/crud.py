@@ -1,9 +1,21 @@
+import random
+import string
+from datetime import datetime, timedelta
+from typing import Optional, Tuple
+
+from bson import ObjectId
+from fastapi import HTTPException, status
+from pymongo.database import Database
+
 import app.core.security as security
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
-from typing import Optional
-from fastapi import HTTPException, status
-from pymongo.database import Database
+
+
+PASSWORD_RESET_CODE_EXP_MINUTES = 15
+PASSWORD_RESET_SESSION_EXP_MINUTES = 15
+PASSWORD_RESET_REQUEST_COOLDOWN_SECONDS = 90
+PASSWORD_RESET_MAX_ATTEMPTS = 5
 
 
 def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.MemberUser]:
@@ -26,7 +38,6 @@ def get_user_by_username(
 
 def read_user_by_id(db: Database, *, id: str) -> Optional[user_models.MemberUser]:
     """Read user by ID from MongoDB"""
-    from bson import ObjectId
 
     try:
         user_data = db.member_users.find_one({"_id": ObjectId(id)})
@@ -160,8 +171,6 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
 
 def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> dict:
     """Create a new Referrer account (Admin only) - uses provided token and company"""
-    from bson import ObjectId
-
     # Check if username already exists in privileged_users
     existing_user = db.privileged_users.find_one({"username": data.username})
     if existing_user:
@@ -220,7 +229,6 @@ def read_user_essay(db: Database, *, user_id: str) -> str:
 
 def add_user_essay(db: Database, *, user_id: str, data: user_schema.Essay) -> str:
     """Add/update user referral essay in MongoDB"""
-    from bson import ObjectId
 
     result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"referral_essay": data.essay}}
@@ -234,7 +242,6 @@ def add_user_essay(db: Database, *, user_id: str, data: user_schema.Essay) -> st
 
 def update_essay(db: Database, user_id: str, *, data) -> str:
     """Update user referral essay in MongoDB"""
-    from bson import ObjectId
 
     essay_text = data.get("essay")
     result = db.member_users.update_one(
@@ -260,7 +267,6 @@ def add_user_cover_letter(
     db: Database, *, user_id: str, data: user_schema.CoverLetter
 ) -> str:
     """Add/update user cover letter in MongoDB"""
-    from bson import ObjectId
 
     result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$set": {"cover_letter": data.cover_letter}}
@@ -276,7 +282,6 @@ def update_user_profile(
     db: Database, *, user_id: str, data: user_schema.MemberUserUpdate
 ) -> user_models.MemberUser:
     """Update user profile in MongoDB"""
-    from bson import ObjectId
 
     # Get only the fields that were actually provided (exclude None values)
     update_data = data.dict(exclude_unset=True, exclude_none=True)
@@ -303,7 +308,6 @@ def update_privileged_user(
     db: Database, *, user_id: str, data: user_schema.PrivilegedUserUpdate
 ) -> dict:
     """Update privileged user account (Admin only)"""
-    from bson import ObjectId
 
     # Validate user_id
     if not ObjectId.is_valid(user_id):
@@ -364,6 +368,198 @@ def update_privileged_user(
         "is_active": user.is_active,
         "company_id": str(user.company_id) if user.company_id else None,
     }
+
+
+# ============= Password Reset Helpers =============
+
+
+def _generate_reset_code() -> str:
+    return "".join(random.choices(string.digits, k=6))
+
+
+def _ensure_request_cooldown(db: Database, email: str) -> None:
+    recent = db.password_resets.find_one(
+        {
+            "email": email,
+            "created_at": {
+                "$gt": datetime.utcnow()
+                - timedelta(seconds=PASSWORD_RESET_REQUEST_COOLDOWN_SECONDS)
+            },
+            "status": {"$in": ["requested", "verified"]},
+        }
+    )
+    if recent:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="A reset code was just sent. Please check your email before requesting another.",
+        )
+
+
+def create_password_reset_request(
+    db: Database, *, user: user_models.MemberUser
+) -> Tuple[user_models.PasswordReset, str]:
+    email = user.email.lower()
+    _ensure_request_cooldown(db, email)
+
+    # Remove previous pending resets for this email
+    db.password_resets.delete_many({"email": email, "status": {"$ne": "completed"}})
+
+    now = datetime.utcnow()
+    reset_data = {
+        "email": email,
+        "user_id": ObjectId(str(user.id)),
+        "code": _generate_reset_code(),
+        "status": "requested",
+        "attempts": 0,
+        "created_at": now,
+        "expires_at": now + timedelta(minutes=PASSWORD_RESET_CODE_EXP_MINUTES),
+    }
+
+    result = db.password_resets.insert_one(reset_data)
+    reset_doc = db.password_resets.find_one({"_id": result.inserted_id})
+    reset_model = user_models.PasswordReset(**reset_doc)
+
+    token = security.generate_password_reset_token(
+        email=email,
+        reset_id=str(reset_model.id),
+        stage="request",
+        expires_minutes=PASSWORD_RESET_CODE_EXP_MINUTES,
+    )
+
+    return reset_model, token
+
+
+def verify_password_reset_code(
+    db: Database,
+    *,
+    email: str,
+    code: str,
+    token: str,
+) -> str:
+    token_payload = security.verify_password_reset_token(token)
+    if not token_payload or token_payload.get("stage") != "request":
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+
+    if token_payload.get("email") != email:
+        raise HTTPException(
+            status_code=400, detail="Token does not match the provided email."
+        )
+
+    reset_id = token_payload.get("reset_id")
+    if not reset_id or not ObjectId.is_valid(reset_id):
+        raise HTTPException(status_code=400, detail="Invalid password reset request.")
+
+    reset_doc = db.password_resets.find_one({"_id": ObjectId(reset_id)})
+    if not reset_doc:
+        raise HTTPException(status_code=404, detail="Password reset request not found.")
+
+    reset = user_models.PasswordReset(**reset_doc)
+    now = datetime.utcnow()
+
+    if reset.status != "requested":
+        raise HTTPException(
+            status_code=400,
+            detail="This reset code has already been used. Please request a new one.",
+        )
+
+    if now > reset.expires_at:
+        db.password_resets.update_one(
+            {"_id": reset.id}, {"$set": {"status": "expired", "completed_at": now}}
+        )
+        raise HTTPException(
+            status_code=400, detail="Reset code expired. Please request a new code."
+        )
+
+    if reset.attempts >= PASSWORD_RESET_MAX_ATTEMPTS:
+        db.password_resets.update_one(
+            {"_id": reset.id}, {"$set": {"status": "locked", "completed_at": now}}
+        )
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed attempts. Please request a new reset code.",
+        )
+
+    if reset.code != code:
+        remaining = max(0, PASSWORD_RESET_MAX_ATTEMPTS - (reset.attempts + 1))
+        db.password_resets.update_one({"_id": reset.id}, {"$inc": {"attempts": 1}})
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid verification code. {remaining} attempts remaining.",
+        )
+
+    session_token = security.generate_password_reset_token(
+        email=email,
+        reset_id=str(reset.id),
+        stage="verified",
+        expires_minutes=PASSWORD_RESET_SESSION_EXP_MINUTES,
+    )
+
+    db.password_resets.update_one(
+        {"_id": reset.id},
+        {
+            "$set": {
+                "status": "verified",
+                "verified_at": now,
+                "session_expires_at": now
+                + timedelta(minutes=PASSWORD_RESET_SESSION_EXP_MINUTES),
+            }
+        },
+    )
+
+    return session_token
+
+
+def complete_password_reset(
+    db: Database,
+    *,
+    token: str,
+    new_password: str,
+) -> None:
+    token_payload = security.verify_password_reset_token(token)
+    if not token_payload or token_payload.get("stage") != "verified":
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+
+    reset_id = token_payload.get("reset_id")
+    if not reset_id or not ObjectId.is_valid(reset_id):
+        raise HTTPException(status_code=400, detail="Invalid password reset request.")
+
+    reset_doc = db.password_resets.find_one({"_id": ObjectId(reset_id)})
+    if not reset_doc:
+        raise HTTPException(status_code=404, detail="Password reset request not found.")
+
+    reset = user_models.PasswordReset(**reset_doc)
+    now = datetime.utcnow()
+
+    if reset.status != "verified":
+        raise HTTPException(status_code=400, detail="Reset request is no longer valid.")
+
+    if reset.session_expires_at and now > reset.session_expires_at:
+        db.password_resets.update_one(
+            {"_id": reset.id}, {"$set": {"status": "expired", "completed_at": now}}
+        )
+        raise HTTPException(
+            status_code=400, detail="Reset session expired. Please restart."
+        )
+
+    user_doc = db.member_users.find_one({"_id": reset.user_id})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User account not found.")
+
+    hashed_password = security.get_password_hash(new_password)
+    db.member_users.update_one(
+        {"_id": reset.user_id},
+        {"$set": {"password": hashed_password, "email_verified": True}},
+    )
+
+    db.password_resets.update_one(
+        {"_id": reset.id},
+        {
+            "$set": {
+                "status": "completed",
+                "completed_at": now,
+            }
+        },
+    )
 
 
 # def update(

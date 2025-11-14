@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
     FolderIcon,
     UserGroupIcon,
-    UserCircleIcon,
     SparklesIcon,
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
@@ -57,11 +56,10 @@ const Workspace = ({ setLogin }) => {
             ];
         }
 
-        // Referrers only see Referrals and Profile
+        // Referrers only see Referrals (Profile accessed via navbar)
         if (isReferrer) {
             return [
                 { name: 'Referrals', type: "app", icon: FolderIcon },
-                { name: 'Profile', type: "app", icon: UserCircleIcon },
             ];
         }
 
@@ -82,7 +80,6 @@ const Workspace = ({ setLogin }) => {
             { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
             { name: 'Learning', type: "learn", icon: BookOpenIcon },
             { name: 'Practice', type: "learn", icon: CodeBracketIcon },
-            { name: 'Profile', type: "app", icon: UserCircleIcon },
         ];
 
         // Lead/Admin gets additional admin sections

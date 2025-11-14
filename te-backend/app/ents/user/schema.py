@@ -1,8 +1,8 @@
 from datetime import date
 from enum import Enum
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserLogin(BaseModel):
@@ -123,3 +123,37 @@ class Essay(BaseModel):
 
 class CoverLetter(BaseModel):
     cover_letter: str
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+PasswordCode = Annotated[str, Field(min_length=6, max_length=6, pattern=r"^[0-9]{6}$")]
+PasswordStr = Annotated[str, Field(min_length=8, max_length=128)]
+
+
+class PasswordResetVerify(BaseModel):
+    email: EmailStr
+    code: PasswordCode
+    token: str
+
+
+class PasswordResetComplete(BaseModel):
+    token: str
+    new_password: PasswordStr
+
+
+class PasswordResetVerifyResponse(BaseModel):
+    success: bool
+    token: str
+
+
+class PasswordResetCompleteResponse(BaseModel):
+    success: bool
+    message: str
+
+
+class PasswordResetRequestResponse(BaseModel):
+    success: bool
+    message: str
