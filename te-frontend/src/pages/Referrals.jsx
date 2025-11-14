@@ -562,9 +562,13 @@ const Referrals = () => {
                                                             <td className="px-6 py-4 whitespace-nowrap">
                                                                 <div className="flex items-center gap-3">
                                                                     <img
-                                                                        src={company.image}
+                                                                        src={company.image || `https://logo.clearbit.com/${(company.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
                                                                         alt={company.name}
                                                                         className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
+                                                                        onError={(e) => {
+                                                                            e.target.onerror = null;
+                                                                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                        }}
                                                                     />
                                                                     <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                                                         {company.name}
@@ -839,9 +843,13 @@ const Referrals = () => {
                                                             <div className="flex items-center gap-3">
                                                                 <div className="h-10 w-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1.5 flex items-center justify-center flex-shrink-0">
                                                                     <img
-                                                                        src={referral.company.image}
-                                                                        alt={referral.company.name}
+                                                                        src={referral.company?.image || `https://logo.clearbit.com/${(referral.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                        alt={referral.company?.name}
                                                                         className="h-full w-full object-contain"
+                                                                        onError={(e) => {
+                                                                            e.target.onerror = null;
+                                                                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                        }}
                                                                     />
                                                                 </div>
                                                                 <span className="font-semibold text-gray-900 dark:text-white">{referral.company.name}</span>

@@ -503,14 +503,14 @@ const Profile = () => {
                                                 </div>
                                                 <div className="bg-cyan-50 border border-cyan-200 rounded-lg px-4 py-2">
                                                     <p className="text-xs text-cyan-600 font-semibold mb-1">Capabilities</p>
-                                                    <p className="text-sm text-cyan-900 font-medium">Manage Members & Referrals</p>
+                                                    <p className="text-sm text-cyan-900 font-medium">A call to duty!</p>
                                                 </div>
                                             </>
                                         )}
                                         {userRoleInt === 3 && (
                                             <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-                                                <p className="text-xs text-green-600 font-semibold mb-1">Capabilities</p>
-                                                <p className="text-sm text-green-900 font-medium">Add Referral Companies</p>
+                                                <p className="text-xs text-green-600 font-semibold mb-1">From all of us at TE:</p>
+                                                <p className="text-sm text-green-900 font-medium">Thank You!</p>
                                             </div>
                                         )}
                                         {userRoleInt === 2 && (

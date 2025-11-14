@@ -153,8 +153,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                         if (roleNum >= 2) {
                                                             let roleInfo;
                                                             if (roleNum >= 5) roleInfo = { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
-                                                            else if (roleNum >= 4) roleInfo = { label: 'Mentor', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
-                                                            else if (roleNum >= 3) roleInfo = { label: 'Lead', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
+                                                            else if (roleNum >= 4) roleInfo = { label: 'Lead', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+                                                            else if (roleNum >= 3) roleInfo = { label: 'Volunteer', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
                                                             else roleInfo = { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
 
                                                             return (

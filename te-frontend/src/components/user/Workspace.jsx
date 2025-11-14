@@ -38,13 +38,14 @@ const Workspace = ({ setLogin }) => {
 
     // Set default content based on role - Guests and Referrers have special defaults
     const userRoleInt = userRole ? parseInt(userRole) : 0;
-    const defaultContent = isGuest ? "Learning" : (userRoleInt === 2 ? "Referrals" : "Applications");
+    const defaultContent = isGuest ? "Learning" : (userRoleInt === 2 ? "Referrals" : (userRoleInt === 3 ? "Resume and Essays" : "Applications"));
     const [content, setContent] = useState(defaultContent)
 
     // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const isLeadOrAdmin = userRole && parseInt(userRole) >= 4;
     const isAdmin = userRole && parseInt(userRole) === 5;
     const isReferrer = userRole && parseInt(userRole) === 2;
+    const isVolunteer = userRole && parseInt(userRole) === 3;
 
     // Dynamic navigation based on role
     const navigation = useMemo(() => {
@@ -61,6 +62,16 @@ const Workspace = ({ setLogin }) => {
             return [
                 { name: 'Referrals', type: "app", icon: FolderIcon },
                 { name: 'Profile', type: "app", icon: UserCircleIcon },
+            ];
+        }
+
+        // Volunteers see Resume Reviews, Learning, and Referrals (no Applications or Profile)
+        if (isVolunteer) {
+            return [
+                { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
+                { name: 'Referrals', type: "app", icon: FolderIcon },
+                { name: 'Learning', type: "learn", icon: BookOpenIcon },
+                { name: 'Practice', type: "learn", icon: CodeBracketIcon },
             ];
         }
 
@@ -89,7 +100,7 @@ const Workspace = ({ setLogin }) => {
         }
 
         return baseNavigation;
-    }, [isAdmin, isReferrer, isLeadOrAdmin, isGuest]);
+    }, [isAdmin, isReferrer, isLeadOrAdmin, isGuest, isVolunteer]);
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {
@@ -325,10 +336,10 @@ const Workspace = ({ setLogin }) => {
                                             isLeadOrAdmin ? <ApplicationManagement /> : <Applications />
                                         ) :
                                             content === "Resume and Essays" ? (
-                                                isLeadOrAdmin ? <FilesManagement /> : <FilesAndEssay />
+                                                (isLeadOrAdmin || isVolunteer) ? <FilesManagement /> : <FilesAndEssay />
                                             ) :
                                                 content === "Referrals" ? (
-                                                    (isLeadOrAdmin || isReferrer) ? <ReferralsManagement /> : <Referrals />
+                                                    (isLeadOrAdmin || isReferrer || isVolunteer) ? <ReferralsManagement /> : <Referrals />
                                                 ) :
                                                     content === "Opportunities" ? <Opportunities /> :
                                                         content === "Practice" ? <Practice /> :

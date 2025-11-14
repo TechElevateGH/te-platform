@@ -636,15 +636,17 @@ const ReferralsManagement = () => {
                                             {visibleColumns.company && (
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2">
-                                                        {ref.company?.image && (
-                                                            <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
-                                                                <img
-                                                                    src={ref.company.image}
-                                                                    alt={ref.company.name}
-                                                                    className="h-full w-full object-contain"
-                                                                />
-                                                            </div>
-                                                        )}
+                                                        <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                            <img
+                                                                src={ref.company?.image || `https://logo.clearbit.com/${(ref.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                alt={ref.company?.name}
+                                                                className="h-full w-full object-contain"
+                                                                onError={(e) => {
+                                                                    e.target.onerror = null;
+                                                                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                }}
+                                                            />
+                                                        </div>
                                                         <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
                                                             {ref.company?.name}
                                                         </span>
