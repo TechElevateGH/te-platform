@@ -225,9 +225,9 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                 {appItems.map((item, index) => {
                                                     const colors = [
                                                         { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
-                                                        { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
+                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-green-500', ring: 'ring-emerald-500/20' },
                                                         { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
-                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
+                                                        { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
                                                     ];
                                                     const color = colors[index % colors.length];
                                                     return (

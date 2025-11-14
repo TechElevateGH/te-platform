@@ -352,10 +352,10 @@ const MyReferrals = ({ onFeedbackCount }) => {
                                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Level</p>
                                     <p className="text-base font-bold text-gray-900 dark:text-white">{selectedReferral.role}</p>
                                 </div>
-                                {selectedReferral.contact && (
+                                {selectedReferral.phone_number && (
                                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                                         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Contact</p>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{selectedReferral.contact}</p>
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-white break-all">{selectedReferral.phone_number}</p>
                                     </div>
                                 )}
                             </div>

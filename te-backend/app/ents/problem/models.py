@@ -49,7 +49,7 @@ class Posting(BaseModel):
     full_name: str = ""
     image: str = ""
     date_of_birth: Optional[str] = ""
-    contact: str = ""
+    phone_number: str = ""
     address: str = ""
     university: str = ""
     password: str  # Hashed password

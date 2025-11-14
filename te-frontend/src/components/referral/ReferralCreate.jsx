@@ -25,7 +25,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
 
     // Check user's available materials
     const hasReferralEssay = userInfo?.essay && userInfo.essay.trim() !== '';
-    const hasContact = userInfo?.contact && userInfo.contact.trim() !== '';
+    const hasPhoneNumber = userInfo?.phone_number && userInfo.phone_number.trim() !== '';
 
     // Company requirements
     const requirements = useMemo(() => company.referral_materials || {}, [company.referral_materials]);
@@ -33,10 +33,10 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const getMissingRequirements = useCallback(() => {
         const missing = [];
         if (requirements.resume && !hasResume) missing.push('resume');
-        if (requirements.referralEssay && !hasReferralEssay) missing.push('referral essay');
-        if (requirements.contact && !hasContact) missing.push('phone number');
+        if (requirements.essay && !hasReferralEssay) missing.push('referral essay');
+        if (requirements.phone_number && !hasPhoneNumber) missing.push('phone number');
         return missing;
-    }, [requirements, hasResume, hasReferralEssay, hasContact]);
+    }, [requirements, hasResume, hasReferralEssay, hasPhoneNumber]);
 
     const missingRequirements = useMemo(() => getMissingRequirements(), [getMissingRequirements]);
 
@@ -92,7 +92,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
         role: "New grad",
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
-        contact: userInfo?.contact || "",
+        phone_number: userInfo?.phone_number || "",
         essay: userInfo?.essay || "",
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
@@ -197,7 +197,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         </div>
 
                         {/* Requirements Section */}
-                        {(requirements.resume || requirements.referralEssay || requirements.contact) && (
+                        {(requirements.resume || requirements.essay || requirements.phone_number) && (
                             <div className="space-y-3">
                                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                                     <DocumentTextIcon className="h-4 w-4" />
@@ -217,7 +217,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 </span>
                                             </div>
                                         )}
-                                        {requirements.referralEssay && (
+                                        {requirements.essay && (
                                             <div className="flex items-center gap-3">
                                                 {hasReferralEssay ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
@@ -229,14 +229,14 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 </span>
                                             </div>
                                         )}
-                                        {requirements.contact && (
+                                        {requirements.phone_number && (
                                             <div className="flex items-center gap-3">
-                                                {hasContact ? (
+                                                {hasPhoneNumber ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                 ) : (
                                                     <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
+                                                <span className={`text-sm font-semibold ${hasPhoneNumber ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
                                                     Phone Number
                                                 </span>
                                             </div>

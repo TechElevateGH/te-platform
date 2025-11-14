@@ -48,7 +48,7 @@ class MemberUser(BaseModel):
     last_name: str
     full_name: str
     image: str = ""
-    contact: str = ""
+    phone_number: str = ""
     address: str = ""
     password: Optional[str] = None  # Hashed password (optional for OAuth users)
     date_of_birth: str = ""

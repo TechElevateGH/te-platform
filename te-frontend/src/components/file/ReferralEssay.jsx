@@ -200,7 +200,7 @@ const Essay = ({ isMember = true }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                <UserIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                <UserIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Referral Essay</h3>
@@ -228,7 +228,7 @@ const Essay = ({ isMember = true }) => {
                                 !updateReferralEssay ? (
                                     <button
                                         onClick={() => setUpdateReferralEssay(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-300 text-sm font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-gray-600 transition-all border border-purple-200 dark:border-purple-700"
+                                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 text-emerald-700 dark:text-emerald-300 text-sm font-semibold rounded-lg hover:bg-emerald-50 dark:hover:bg-gray-600 transition-all border border-emerald-200 dark:border-emerald-700"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />
                                         Edit
@@ -259,8 +259,8 @@ const Essay = ({ isMember = true }) => {
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <UserIcon className="h-8 w-8 text-purple-400 dark:text-purple-500" />
+                                    <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <UserIcon className="h-8 w-8 text-emerald-400 dark:text-emerald-500" />
                                     </div>
                                     <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                                         No referral essay added
@@ -270,7 +270,7 @@ const Essay = ({ isMember = true }) => {
                                     </p>
                                     <button
                                         onClick={() => setUpdateReferralEssay(true)}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />
                                         Add Referral Essay
@@ -280,8 +280,8 @@ const Essay = ({ isMember = true }) => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-3">
-                                <p className="text-xs text-purple-800 dark:text-purple-200 font-medium">
+                            <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 rounded-lg p-3">
+                                <p className="text-xs text-emerald-800 dark:text-emerald-200 font-medium">
                                     💡 Write in <strong>third person</strong>: "[Name] is a software engineer with 5 years of experience..." This will be used when requesting referrals.
                                 </p>
                             </div>
@@ -289,7 +289,7 @@ const Essay = ({ isMember = true }) => {
                                 rows={10}
                                 name="referral_essay"
                                 id="referral_essay"
-                                className="block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent transition-all text-sm font-medium resize-none"
+                                className="block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-transparent transition-all text-sm font-medium resize-none"
                                 placeholder="[Your name] is a passionate software engineer with expertise in..."
                                 defaultValue={userInfo?.essay || ''}
                                 onChange={(e) => setReferralEssayBody(e.target.value)}
@@ -301,7 +301,7 @@ const Essay = ({ isMember = true }) => {
                                 </p>
                                 <button
                                     type="button"
-                                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-purple-700 hover:to-pink-700 active:scale-95 transition-all duration-200"
+                                    className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-emerald-700 hover:to-green-700 active:scale-95 transition-all duration-200"
                                     onClick={updateReferralEssayRequest}
                                 >
                                     Save Referral Essay

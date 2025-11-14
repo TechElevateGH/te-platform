@@ -46,7 +46,7 @@ const Profile = () => {
     const [editedInfo, setEditedInfo] = useState({
         full_name: '',
         email: '',
-        contact: '',
+        phone_number: '',
         university: '',
         date_of_birth: '',
         address: '',
@@ -59,7 +59,7 @@ const Profile = () => {
             setEditedInfo({
                 full_name: userInfo.full_name || '',
                 email: userInfo.email || '',
-                contact: userInfo.contact || '',
+                phone_number: userInfo.phone_number || '',
                 university: userInfo.university || '',
                 date_of_birth: userInfo.date_of_birth || '',
                 address: userInfo.address || '',
@@ -168,7 +168,7 @@ const Profile = () => {
             setEditedInfo({
                 full_name: userInfo.full_name || '',
                 email: userInfo.email || '',
-                contact: userInfo.contact || '',
+                phone_number: userInfo.phone_number || '',
                 university: userInfo.university || '',
                 date_of_birth: userInfo.date_of_birth || '',
                 address: userInfo.address || '',
@@ -648,15 +648,15 @@ const Profile = () => {
                                         {isEditing ? (
                                             <input
                                                 type="tel"
-                                                value={editedInfo.contact}
-                                                onChange={(e) => handleChange('contact', e.target.value)}
+                                                value={editedInfo.phone_number}
+                                                onChange={(e) => handleChange('phone_number', e.target.value)}
                                                 className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-sm sm:text-base dark:placeholder-gray-500"
                                                 placeholder="+233 XX XXX XXXX"
                                             />
                                         ) : (
                                             <p className="text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2">
                                                 <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                                                {editedInfo.contact || 'Not provided'}
+                                                {editedInfo.phone_number || 'Not provided'}
                                             </p>
                                         )}
                                     </div>

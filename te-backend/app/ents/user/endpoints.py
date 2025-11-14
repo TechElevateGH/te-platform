@@ -283,7 +283,7 @@ def update_member_profile(
     Update member user profile information.
 
     - **user_id**: User's ID
-    - **data**: Fields to update (name, contact, university, etc.)
+    - **data**: Fields to update (name, phone_number, university, etc.)
     - Returns: Updated user information
 
     **Note**: Email changes are NOT allowed through this endpoint.

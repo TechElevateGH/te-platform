@@ -19,19 +19,13 @@ class LocationBase(BaseModel):
 class ReferralMaterials(BaseModel):
     resume: bool = True
     essay: bool = True
-    contact: bool = True
+    phone_number: bool = True
 
 
-class CompanyBase(BaseModel):
+class ReferralCompanyBase(BaseModel):
     name: str
     image: str = ""
-
-
-class CompanyCreate(CompanyBase):
-    domain: str
-    location: LocationBase
-    can_refer: bool = True
-    referral_materials: ReferralMaterials = None
+    referral_link: str = ""
 
 
 class ReferralCompanyCreate(BaseModel):
@@ -39,6 +33,7 @@ class ReferralCompanyCreate(BaseModel):
 
     name: str
     image: str = ""
+    referral_link: str = ""
     description: str = ""
     website: str = ""
     industry: str = ""
@@ -46,11 +41,11 @@ class ReferralCompanyCreate(BaseModel):
     headquarters: str = ""
     # Referral requirements
     requires_resume: bool = True
-    requires_contact: bool = True
+    requires_phone_number: bool = True
     requires_essay: bool = True
 
 
-class CompanyReadBase(CompanyBase):
+class CompanyReadBase(ReferralCompanyBase):
     id: str  # MongoDB ObjectId as string
     domain: str
     can_refer: bool = True
@@ -72,7 +67,7 @@ class ReferralRequest(BaseModel):
     role: str
     request_note: str
     resume: str
-    contact: str = ""  # User's contact (phone/email)
+    phone_number: str = ""  # User's phone number
     essay: str = ""  # Referral essay/cover letter URL
     date: str = date.today().strftime("%d-%m-%Y")
 
@@ -96,18 +91,18 @@ class ReferralReadBase(BaseModel):
     feedback_date: Optional[str] = None
     status: ReferralStatuses
     resume: str = ""
-    contact: str = ""  # User's contact info
+    phone_number: str = ""  # User's phone number
     essay: str = ""  # Referral essay/cover letter URL
 
 
 class ReferralRead(ReferralReadBase):
-    company: CompanyBase
+    company: ReferralCompanyBase
 
 
 class ReferralReadWithUser(ReferralReadBase):
     """Referral with user information for Lead/Admin view"""
 
-    company: CompanyBase
+    company: ReferralCompanyBase
     user_name: str
     user_email: str
 

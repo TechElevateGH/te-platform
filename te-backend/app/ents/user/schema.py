@@ -84,7 +84,7 @@ class MemberUserBase(BaseModel):
     last_name: str
     full_name: str = ""
     image: str = ""
-    contact: str = ""
+    phone_number: str = ""
     address: str = ""
     university: str = ""
     referral_essay: str = ""  # Referral essay text
@@ -108,7 +108,7 @@ class MemberUserUpdate(BaseModel):
 
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
-    contact: Optional[str] = None
+    phone_number: Optional[str] = None
     address: Optional[str] = None
     university: Optional[str] = None
     image: Optional[str] = None

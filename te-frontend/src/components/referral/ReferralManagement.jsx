@@ -196,18 +196,18 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            {referral.contact && (
+                                            {referral.phone_number && (
                                                 <div className="col-span-2">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Contact</p>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                        <p className="font-semibold text-gray-900 dark:text-white">{referral.contact}</p>
+                                                        <p className="font-semibold text-gray-900 dark:text-white">{referral.phone_number}</p>
                                                         <button
-                                                            onClick={() => copyToClipboard(referral.contact, 'contact')}
+                                                            onClick={() => copyToClipboard(referral.phone_number, 'phone_number')}
                                                             className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                                                             title="Copy contact"
                                                         >
-                                                            {copiedField === 'contact' ? (
+                                                            {copiedField === 'phone_number' ? (
                                                                 <CheckCircleIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
                                                             ) : (
                                                                 <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />

@@ -219,7 +219,7 @@ const Files = () => {
                                 <button
                                     onClick={() => setActiveTab('reviews')}
                                     className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${activeTab === 'reviews'
-                                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20'
+                                        ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-500/30 dark:shadow-emerald-500/20'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                         }`}
                                 >
@@ -242,12 +242,12 @@ const Files = () => {
                                 {/* Header with Actions */}
                                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-4 transition-colors">
                                     <div className="flex items-center justify-between">
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">My Resumes</h2>
+                                        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">My Resumes</h2>
                                         {isMember && (
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg text-xs"
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-medium hover:from-emerald-700 hover:to-green-700 transition-all shadow-md hover:shadow-lg text-xs"
                                                     onClick={() => setShowReviewModal(true)}
                                                 >
                                                     <DocumentTextIcon className="h-4 w-4" />
@@ -591,8 +591,8 @@ const Files = () => {
                                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                                        <UserIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                                        <UserIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                     </div>
                                     <div className="text-left">
                                         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Referral Essay</h3>
@@ -621,7 +621,7 @@ const Files = () => {
                                                         onClick={() => {
                                                             navigator.clipboard.writeText(userInfo.essay);
                                                         }}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors"
                                                     >
                                                         <ClipboardIcon className="h-4 w-4" />
                                                         Copy
@@ -645,7 +645,7 @@ const Files = () => {
                                                 {isMember && (
                                                     <button
                                                         onClick={() => setExpandedReferralEssay(false)}
-                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
                                                     >
                                                         <PencilSquareIcon className="h-4 w-4" />
                                                         Add Referral Essay
@@ -689,7 +689,7 @@ const Files = () => {
             {showReviewModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl">
+                        <div className="sticky top-0 bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-4 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <DocumentTextIcon className="h-6 w-6" />
@@ -708,16 +708,16 @@ const Files = () => {
 
                         <form onSubmit={handleReviewSubmit} className="p-6 space-y-4">
                             {/* Important Info Banner */}
-                            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <svg className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-200 mb-1">
+                                        <h3 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200 mb-1">
                                             Important: Grant Edit Access
                                         </h3>
-                                        <p className="text-xs text-purple-800 dark:text-purple-300">
+                                        <p className="text-xs text-emerald-800 dark:text-emerald-300">
                                             Please ensure <span className="font-semibold">info@techelevate.org</span> has <span className="font-semibold">Edit access</span> to your Google Doc so our reviewers can add comments and suggestions directly to your resume.
                                         </p>
                                     </div>
