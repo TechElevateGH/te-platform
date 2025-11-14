@@ -82,7 +82,9 @@ class PrivilegedUser(BaseModel):
     lead_token: str  # Plain token for login
     role: int  # UserRoles enum value (2=Referrer, 3=Lead, 5=Admin)
     company_id: Optional[PyObjectId] = None  # For Referrer users only
-    company_name: Optional[str] = None  # Company name for Referrer users (denormalized for quick access)
+    company_name: Optional[str] = (
+        None  # Company name for Referrer users (denormalized for quick access)
+    )
     is_active: bool = True
 
     class Config:

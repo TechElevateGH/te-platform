@@ -1152,17 +1152,18 @@ const ReferralsManagement = () => {
                                                 </div>
                                             )}
 
-                                            {/* Glassy View Button */}
+                                            {/* View Button */}
                                             {visibleColumns.actions && (
                                                 <button
                                                     onClick={() => {
                                                         setSelectedReferral(ref);
                                                         setIsManagementModalOpen(true);
                                                     }}
-                                                    className="w-full px-3 py-2 bg-gradient-to-r from-blue-500/90 to-blue-600/90 backdrop-blur-sm text-white text-xs font-semibold rounded-md shadow-sm hover:shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-1.5 border border-blue-400/20"
+                                                    className="group relative mx-auto px-8 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-300 ease-out flex items-center justify-center gap-2 overflow-hidden"
                                                 >
-                                                    <EyeIcon className="h-3.5 w-3.5" />
-                                                    View Details
+                                                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                                                    <EyeIcon className="h-4 w-4 relative z-10" />
+                                                    <span className="relative z-10">View</span>
                                                 </button>
                                             )}
                                         </div>
