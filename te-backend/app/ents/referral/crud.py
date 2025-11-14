@@ -1,16 +1,16 @@
-import app.ents.company.models as company_models
-import app.ents.company.schema as company_schema
+import app.ents.referral.models as referral_models
+import app.ents.referral.schema as referral_schema
 import app.ents.user.crud as user_crud
 from typing import Optional
 from pymongo.database import Database
 from fastapi import HTTPException
 
 
-def create_admin_company(
-    db: Database, *, data: company_schema.AdminCompanyCreate
-) -> company_models.Company:
+def create_referral_company(
+    db: Database, *, data: referral_schema.ReferralCompanyCreate
+) -> referral_models.Company:
     """
-    Create a new company for referrals (Admin/Lead only).
+    Create a new company for referrals (Volunteer/Lead/Admin only).
     Simplified creation with basic company information and referral requirements.
     """
     # Check if company with this name already exists
@@ -46,20 +46,22 @@ def create_admin_company(
 
     # Fetch and return the created company
     company_data = db.companies.find_one({"_id": result.inserted_id})
-    return company_models.Company(**company_data)
+    return referral_models.Company(**company_data)
 
 
 def read_company_by_id(
     db: Database, *, company_id: int
-) -> Optional[company_models.Company]:
+) -> Optional[referral_models.Company]:
     """Get company by integer ID from MongoDB"""
     company_data = db.companies.find_one({"id": company_id})
     if not company_data:
         return None
-    return company_models.Company(**company_data)
+    return referral_models.Company(**company_data)
 
 
-def read_user_referrals(db: Database, *, user_id: str) -> list[company_models.Referral]:
+def read_user_referrals(
+    db: Database, *, user_id: str
+) -> list[referral_models.Referral]:
     """
     Get all referrals for a specific user from MongoDB.
     """
@@ -70,22 +72,22 @@ def read_user_referrals(db: Database, *, user_id: str) -> list[company_models.Re
         return []
 
     referrals_data = db.referrals.find({"user_id": ObjectId(user_id)})
-    return [company_models.Referral(**ref) for ref in referrals_data]
+    return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
 def read_all_referrals(
     db: Database, *, skip: int = 0, limit: int = 100
-) -> list[company_models.Referral]:
+) -> list[referral_models.Referral]:
     """
     Get all referrals in the system (for Lead/Admin users) from MongoDB.
     """
     referrals_data = db.referrals.find().skip(skip).limit(limit)
-    return [company_models.Referral(**ref) for ref in referrals_data]
+    return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
 def read_company_referrals(
     db: Database, *, company_id: str, skip: int = 0, limit: int = 100
-) -> list[company_models.Referral]:
+) -> list[referral_models.Referral]:
     """
     Get all referrals for a specific company from MongoDB.
     Useful for seeing all referral requests to a particular company.
@@ -94,23 +96,23 @@ def read_company_referrals(
     referrals_data = (
         db.referrals.find({"company_name": company_id}).skip(skip).limit(limit)
     )
-    return [company_models.Referral(**ref) for ref in referrals_data]
+    return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
 def read_referrals_by_status(
     db: Database, *, status: str, skip: int = 0, limit: int = 100
-) -> list[company_models.Referral]:
+) -> list[referral_models.Referral]:
     """
     Get all referrals with a specific status from MongoDB.
     Useful for filtering by 'in_review', 'completed', 'declined', etc.
     """
     referrals_data = db.referrals.find({"status": status}).skip(skip).limit(limit)
-    return [company_models.Referral(**ref) for ref in referrals_data]
+    return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
 def read_user_company_referrals(
     db: Database, *, user_id: str, company_id: str
-) -> list[company_models.Referral]:
+) -> list[referral_models.Referral]:
     """
     Get all referrals for a specific user at a specific company from MongoDB.
     Useful for checking if user already requested referral at this company.
@@ -121,7 +123,7 @@ def read_user_company_referrals(
     referrals_data = db.referrals.find(
         {"user_id": ObjectId(user_id), "company_name": company_id}
     )
-    return [company_models.Referral(**ref) for ref in referrals_data]
+    return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
 def count_referrals_by_company(db: Database, *, company_id: str) -> int:
@@ -142,8 +144,8 @@ def count_referrals_by_status(db: Database, *, status: str) -> int:
 def request_referral(
     db: Database,
     user_id: str,
-    data: company_schema.ReferralRequest,
-) -> company_models.Referral:
+    data: referral_schema.ReferralRequest,
+) -> referral_models.Referral:
     """Create a new referral request in MongoDB"""
     from bson import ObjectId
 
@@ -162,7 +164,7 @@ def request_referral(
         "resume": data.resume,
         "contact": data.contact or "",
         "essay": data.essay or "",
-        "status": company_schema.ReferralStatuses.pending.value,
+        "status": referral_schema.ReferralStatuses.pending.value,
         "referral_date": data.date,
     }
 
@@ -171,24 +173,34 @@ def request_referral(
 
     # Fetch and return the created referral
     referral_data = db.referrals.find_one({"_id": result.inserted_id})
-    return company_models.Referral(**referral_data)
+    return referral_models.Referral(**referral_data)
 
 
 def update_referral_status(
     db: Database,
     *,
     referral_id: str,
-    data: company_schema.ReferralUpdateStatus,
-) -> company_models.Referral:
+    data: referral_schema.ReferralUpdateStatus,
+    user_role: int = None,
+) -> referral_models.Referral:
     """
-    Update referral status and review note (for Lead/Admin users) in MongoDB.
+    Update referral status and review note in MongoDB.
+    Sets feedback_date when a Referrer (role=2) provides feedback.
     """
     from bson import ObjectId
+    from datetime import datetime
 
     # Build update data
     update_data = {"status": data.status.value}
     if data.review_note:
         update_data["review_note"] = data.review_note
+
+    # Set feedback_date when Referrer provides feedback (only if not already set)
+    if user_role == 2:  # Referrer role
+        # Check if feedback_date is already set
+        existing = db.referrals.find_one({"_id": ObjectId(referral_id)})
+        if existing and not existing.get("feedback_date"):
+            update_data["feedback_date"] = datetime.now().strftime("%d-%m-%Y")
 
     # Update in MongoDB
     result = db.referrals.update_one(
@@ -200,7 +212,7 @@ def update_referral_status(
 
     # Fetch and return updated referral
     referral_data = db.referrals.find_one({"_id": ObjectId(referral_id)})
-    return company_models.Referral(**referral_data)
+    return referral_models.Referral(**referral_data)
 
 
 def export_referrals_to_google_sheets(
@@ -248,7 +260,7 @@ def export_referrals_to_google_sheets(
     else:
         referrals_data = db.referrals.find()
 
-    referrals = [company_models.Referral(**ref) for ref in referrals_data]
+    referrals = [referral_models.Referral(**ref) for ref in referrals_data]
 
     # Create new spreadsheet
     spreadsheet = {
@@ -336,9 +348,9 @@ def export_referrals_to_google_sheets(
 # def update(
 #     db: Database,
 #     *,
-#     db_obj: company_models.Company,
-#     data: company_schema.CompanyUpdate | dict[str, Any],
-# ) -> company_models.Company:
+#     db_obj: referral_models.Company,
+#     data: referral_schema.CompanyUpdate | dict[str, Any],
+# ) -> referral_models.Company:
 #     if isinstance(data, dict):
 #         update_data = data
 #     else:

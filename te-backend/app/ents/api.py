@@ -2,7 +2,7 @@ from app.ents.application.endpoints import (
     applications_router,
     user_applications_router,
 )
-from app.ents.referral_company.endpoints import referral_company_router, referral_router
+from app.ents.referral.endpoints import referral_router
 from app.ents.home.endpoints import home_router
 from app.ents.documentation.endpoints import documentation_router
 from app.ents.learning.endpoints import router as learning_router
@@ -42,8 +42,7 @@ api_router.include_router(
 )  # Has its own tags from router definition
 api_router.include_router(resumes_router)
 
-# Company and referral management
-api_router.include_router(referral_company_router, tags=["Referral Companies"])
+# Referral management
 api_router.include_router(referral_router, tags=["Referrals"])
 
 # Resume review management

@@ -134,7 +134,7 @@ def create_volunteer_account(
     """
     # Force role to be Volunteer
     data.role = user_schema.UserRoles.volunteer
-    
+
     result = user_crud.create_lead_user(db, data=data)
     return {
         "volunteer": result,

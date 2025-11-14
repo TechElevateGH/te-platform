@@ -130,7 +130,11 @@ def management_login_access_token(
     print(user)
 
     # Only allow Volunteer (3), Lead (4), and Admin (5) to use this endpoint
-    if user.role not in [user_schema.UserRoles.volunteer, user_schema.UserRoles.lead, user_schema.UserRoles.admin]:
+    if user.role not in [
+        user_schema.UserRoles.volunteer,
+        user_schema.UserRoles.lead,
+        user_schema.UserRoles.admin,
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This endpoint is for management users only. Referrers should use /auth/referrer-login",

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
 import {
@@ -11,14 +11,16 @@ import {
     BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 
-const CreateLeadAdmin = ({ show, onClose }) => {
+const CreateLeadAdmin = ({ show, onClose, userRole }) => {
     const { accessToken } = useAuth();
-    const [accountType, setAccountType] = useState('lead'); // 'lead' or 'referrer'
+    const isLead = userRole === 4;
+
+    const [accountType, setAccountType] = useState(null);
     const [companies, setCompanies] = useState([]);
     const [formData, setFormData] = useState({
         username: '',
         token: '',
-        role: '3', // Default to Lead (3)
+        role: isLead ? '3' : '4', // Default to Volunteer (3) for Lead, Lead (4) for Admin
         company_id: '', // For referrer accounts
     });
     const [createdCredentials, setCreatedCredentials] = useState(null);
@@ -26,16 +28,22 @@ const CreateLeadAdmin = ({ show, onClose }) => {
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
 
-    // Fetch companies when modal opens and accountType is referrer
+    // Reset accountType when modal opens
     useEffect(() => {
-        if (show && accountType === 'referrer') {
-            fetchCompanies();
+        if (show) {
+            setAccountType(null); // Reset to null to show account type selector
+            setFormData(prev => ({
+                ...prev,
+                role: isLead ? '3' : '4'
+            }));
         }
-    }, [show, accountType]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
 
-    const fetchCompanies = async () => {
+    // Fetch companies when modal opens and accountType is referrer
+    const fetchCompanies = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/companies', {
+            const response = await axiosInstance.get('/referrals/companies/list', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -45,7 +53,14 @@ const CreateLeadAdmin = ({ show, onClose }) => {
             console.error('Error fetching companies:', err);
             setError('Failed to load companies');
         }
-    };
+    }, [accessToken]);
+
+    // Fetch companies when accountType is referrer
+    useEffect(() => {
+        if (show && accountType === 'referrer') {
+            fetchCompanies();
+        }
+    }, [show, accountType, fetchCompanies]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -77,14 +92,14 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                     role: 'Referrer',
                     company: companies.find(c => c.id === formData.company_id)?.name || 'Unknown',
                 });
-            } else {
-                // Create lead/admin account
+            } else if (accountType === 'volunteer') {
+                // Create volunteer account
                 response = await axiosInstance.post(
-                    '/users/privileged/leads',
+                    '/users/privileged/volunteers',
                     {
                         username: formData.username,
                         token: formData.token,
-                        role: parseInt(formData.role),
+                        role: 3, // Volunteer role
                     },
                     {
                         headers: {
@@ -95,9 +110,37 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
                 // Show the created credentials
                 setCreatedCredentials({
-                    username: response.data.lead.username,
+                    username: response.data.volunteer.username,
                     token: formData.token,
-                    role: response.data.lead.role === 5 ? 'Admin' : 'Lead',
+                    role: 'Volunteer',
+                });
+            } else {
+                // Create management account (Lead/Admin/Volunteer via role dropdown)
+                const roleInt = parseInt(formData.role);
+                const endpoint = roleInt === 3
+                    ? '/users/privileged/volunteers'
+                    : '/users/privileged/leads';
+
+                response = await axiosInstance.post(
+                    endpoint,
+                    {
+                        username: formData.username,
+                        token: formData.token,
+                        role: roleInt,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                // Show the created credentials
+                const roleNames = { 3: 'Volunteer', 4: 'Lead', 5: 'Admin' };
+                setCreatedCredentials({
+                    username: response.data.volunteer?.username || response.data.lead?.username,
+                    token: formData.token,
+                    role: roleNames[roleInt] || 'Unknown',
                 });
             }
 
@@ -105,7 +148,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
             setFormData({
                 username: '',
                 token: '',
-                role: '3',
+                role: isLead ? '3' : '4',
                 company_id: '',
             });
         } catch (err) {
@@ -130,11 +173,11 @@ const CreateLeadAdmin = ({ show, onClose }) => {
     const handleClose = () => {
         setCreatedCredentials(null);
         setError('');
-        setAccountType('lead');
+        setAccountType(null); // Reset to show account type selector on next open
         setFormData({
             username: '',
             token: '',
-            role: '3',
+            role: isLead ? '3' : '4',
             company_id: '',
         });
         onClose();
@@ -149,7 +192,9 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                 <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <ShieldCheckIcon className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">Create Privileged Account</h2>
+                        <h2 className="text-xl font-bold">
+                            Create Management Account
+                        </h2>
                     </div>
                     <button
                         onClick={handleClose}
@@ -243,21 +288,44 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 Account Type *
                             </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setAccountType('lead');
-                                        setFormData({ ...formData, company_id: '' });
-                                    }}
-                                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'lead'
-                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
-                                        }`}
-                                >
-                                    <ShieldCheckIcon className="h-5 w-5" />
-                                    Lead/Admin
-                                </button>
+                            <div className={`grid ${isLead ? 'grid-cols-2' : 'grid-cols-3'} gap-3`}>
+                                {/* Lead/Admin/Volunteer - Show for Admin only as one option with role dropdown */}
+                                {!isLead && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAccountType('management');
+                                            setFormData({ ...formData, company_id: '', role: '4' });
+                                        }}
+                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'management'
+                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                            }`}
+                                    >
+                                        <ShieldCheckIcon className="h-5 w-5" />
+                                        <span className="text-xs sm:text-sm">Management</span>
+                                    </button>
+                                )}
+
+                                {/* Volunteer - Show for Lead */}
+                                {isLead && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAccountType('volunteer');
+                                            setFormData({ ...formData, company_id: '', role: '3' });
+                                        }}
+                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'volunteer'
+                                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                            }`}
+                                    >
+                                        <ShieldCheckIcon className="h-5 w-5" />
+                                        <span className="text-xs sm:text-sm">Volunteer</span>
+                                    </button>
+                                )}
+
+                                {/* Referrer - Show for both */}
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -270,117 +338,134 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                         }`}
                                 >
                                     <BuildingOfficeIcon className="h-5 w-5" />
-                                    Referrer
+                                    <span className="text-xs sm:text-sm">Referrer</span>
                                 </button>
                             </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                                Username *
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.username}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, username: e.target.value })
-                                }
-                                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                                placeholder="e.g., love"
-                            />
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {accountType === 'referrer' 
-                                    ? 'Internal identifier (not used for login)'
-                                    : 'Username for login authentication'
-                                }
-                            </p>
-                        </div>
+                        {/* Show form fields only when account type is selected */}
+                        {accountType && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Username *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.username}
+                                        onChange={(e) =>
+                                            setFormData({ ...formData, username: e.target.value })
+                                        }
+                                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        placeholder="e.g., love"
+                                    />
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {accountType === 'referrer'
+                                            ? 'Internal identifier (not used for login)'
+                                            : 'Username for login authentication'
+                                        }
+                                    </p>
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                                Token *
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.token}
-                                onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                                placeholder="e.g., peace"
-                            />
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {accountType === 'referrer'
-                                    ? 'Referrers authenticate with token only'
-                                    : 'Access token for authentication (minimum 8 characters recommended)'
-                                }
-                            </p>
-                        </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Token *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.token}
+                                        onChange={(e) => setFormData({ ...formData, token: e.target.value })}
+                                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        placeholder="e.g., peace"
+                                    />
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {accountType === 'referrer'
+                                            ? 'Referrers authenticate with token only'
+                                            : accountType === 'volunteer'
+                                                ? 'Volunteers authenticate with username and token'
+                                                : 'Access token for authentication (minimum 8 characters recommended)'
+                                        }
+                                    </p>
+                                </div>
 
-                        {accountType === 'lead' ? (
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                                    Role *
-                                </label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
-                                >
-                                    <option value="3">Lead</option>
-                                    <option value="5">Admin</option>
-                                </select>
-                            </div>
-                        ) : (
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                                    Assigned Company *
-                                </label>
-                                <select
-                                    value={formData.company_id}
-                                    onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
-                                    required
-                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-cyan-500 dark:focus:border-cyan-400"
-                                >
-                                    <option value="">Select a company...</option>
-                                    {companies.map((company) => (
-                                        <option key={company.id} value={company.id}>
-                                            {company.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    Referrer will manage referrals for this company
-                                </p>
-                            </div>
+                                {accountType === 'management' ? (
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                            Role *
+                                        </label>
+                                        <select
+                                            value={formData.role}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                                        >
+                                            <option value="3">Volunteer</option>
+                                            <option value="4">Lead</option>
+                                            <option value="5">Admin</option>
+                                        </select>
+                                    </div>
+                                ) : accountType === 'volunteer' ? (
+                                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                        <p className="text-sm text-green-700 dark:text-green-400">
+                                            <span className="font-semibold">Role:</span> Volunteer (3)
+                                        </p>
+                                        <p className="text-xs text-green-600 dark:text-green-500 mt-1">
+                                            We really appreciate our Volunteers!
+                                        </p>
+                                    </div>
+                                ) : accountType === 'referrer' ? (
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                            Assigned Company *
+                                        </label>
+                                        <select
+                                            value={formData.company_id}
+                                            onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
+                                            required
+                                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-cyan-500 dark:focus:border-cyan-400"
+                                        >
+                                            <option value="">Select a company...</option>
+                                            {companies.map((company) => (
+                                                <option key={company.id} value={company.id}>
+                                                    {company.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            Referrer will manage referrals for this company
+                                        </p>
+                                    </div>
+                                ) : null}
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UserPlusIcon className="h-5 w-5" />
+                                                Create Account
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleClose}
+                                        className="px-6 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </>
                         )}
-
-                        <div className="flex gap-3 pt-4">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                                        Creating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <UserPlusIcon className="h-5 w-5" />
-                                        Create Account
-                                    </>
-                                )}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleClose}
-                                className="px-6 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
                     </form>
                 )}
             </div>

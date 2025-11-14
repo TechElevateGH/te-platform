@@ -31,7 +31,7 @@ const LeadLogin = () => {
                     userId: response.data.user.id,
                     role: response.data.user.role
                 });
-                
+
                 login(
                     response.data.access_token,
                     response.data.user.id,
