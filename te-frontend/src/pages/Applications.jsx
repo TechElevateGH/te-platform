@@ -549,8 +549,8 @@ const Applications = () => {
                                         key={app.id}
                                         onClick={() => isMember && openApplicationModal(app)}
                                         className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-4 ${isMember
-                                                ? 'cursor-pointer active:scale-[0.98] transition-transform'
-                                                : 'cursor-not-allowed opacity-60'
+                                            ? 'cursor-pointer active:scale-[0.98] transition-transform'
+                                            : 'cursor-not-allowed opacity-60'
                                             }`}
                                         title={!isMember ? "Only Members can edit applications" : ""}
                                     >
@@ -668,7 +668,7 @@ const Applications = () => {
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
+                                        <tbody>
                                             {paginatedApplications.map((app, idx) => (
                                                 <tr
                                                     key={app.id}

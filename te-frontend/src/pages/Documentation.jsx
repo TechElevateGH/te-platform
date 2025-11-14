@@ -314,6 +314,147 @@ const Documentation = () => {
         setDocsTheme(fallbackTheme);
     }, [setDocsTheme]);
 
+    useEffect(() => {
+        const container = contentRef.current;
+        if (!container) {
+            return;
+        }
+
+        const sidebar = container.querySelector('#sidebar');
+        if (!(sidebar instanceof HTMLElement)) {
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'te-docs-sidebar-overlay';
+        Object.assign(overlay.style, {
+            position: 'fixed',
+            inset: '0',
+            zIndex: '60',
+            backgroundColor: docsTheme === 'light' ? 'rgba(255, 255, 255, 0.98)' : 'rgba(0, 0, 0, 0.9)',
+            transition: 'opacity 150ms ease, visibility 150ms ease',
+            opacity: '0',
+            visibility: 'hidden',
+            pointerEvents: 'none',
+        });
+        document.body.appendChild(overlay);
+
+        const mobileQuery = window.matchMedia('(max-width: 1024px)');
+
+        const getDocToggleButton = () => container.querySelector('button.sidebar-toggle, button[aria-label*="navigation" i], button[data-sidebar-toggle]');
+        const getExternalToggleButton = () => document.querySelector('[data-docs-sidebar-toggle="true"]');
+
+        const isSidebarOpen = () => {
+            if (sidebar.classList.contains('open')) {
+                return true;
+            }
+            const docToggle = getDocToggleButton();
+            if (docToggle instanceof HTMLElement) {
+                const ariaExpanded = docToggle.getAttribute('aria-expanded');
+                if (ariaExpanded === 'true' || docToggle.classList.contains('open') || docToggle.classList.contains('is-open')) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const isMobile = () => mobileQuery.matches;
+
+        const updateSidebarStyles = () => {
+            const open = isSidebarOpen();
+            const mobile = isMobile();
+            overlay.style.backgroundColor = docsTheme === 'light' ? 'rgba(255, 255, 255, 0.98)' : 'rgba(0, 0, 0, 0.9)';
+
+            if (open && mobile) {
+                overlay.style.opacity = '1';
+                overlay.style.visibility = 'visible';
+                overlay.style.pointerEvents = 'auto';
+                sidebar.style.backgroundColor = docsTheme === 'light' ? '#ffffff' : '#000000';
+                sidebar.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.45)';
+                sidebar.style.zIndex = '70';
+            } else {
+                overlay.style.opacity = '0';
+                overlay.style.visibility = 'hidden';
+                overlay.style.pointerEvents = 'none';
+                sidebar.style.backgroundColor = '';
+                sidebar.style.boxShadow = '';
+                sidebar.style.zIndex = '';
+            }
+        };
+
+        const closeSidebar = () => {
+            if (!isSidebarOpen()) {
+                updateSidebarStyles();
+                return;
+            }
+
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            } else {
+                const docToggle = getDocToggleButton();
+                if (docToggle instanceof HTMLElement) {
+                    docToggle.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                } else {
+                    const externalToggle = getExternalToggleButton();
+                    externalToggle?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                }
+            }
+
+            updateSidebarStyles();
+        };
+
+        overlay.addEventListener('click', closeSidebar);
+
+        const handleOutsidePointer = (event) => {
+            if (!isMobile() || !isSidebarOpen()) {
+                return;
+            }
+            const target = event.target;
+            if (!(target instanceof Element)) {
+                closeSidebar();
+                return;
+            }
+            if (sidebar.contains(target)) {
+                return;
+            }
+            if (target.closest('[data-docs-sidebar-toggle]')) {
+                return;
+            }
+            closeSidebar();
+        };
+
+        document.addEventListener('pointerdown', handleOutsidePointer);
+
+        const observer = new MutationObserver(updateSidebarStyles);
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class', 'style'] });
+
+        const resizeListener = () => updateSidebarStyles();
+        window.addEventListener('resize', resizeListener);
+        if (mobileQuery.addEventListener) {
+            mobileQuery.addEventListener('change', updateSidebarStyles);
+        } else if (mobileQuery.addListener) {
+            mobileQuery.addListener(updateSidebarStyles);
+        }
+
+        updateSidebarStyles();
+
+        return () => {
+            overlay.removeEventListener('click', closeSidebar);
+            document.removeEventListener('pointerdown', handleOutsidePointer);
+            window.removeEventListener('resize', resizeListener);
+            if (mobileQuery.removeEventListener) {
+                mobileQuery.removeEventListener('change', updateSidebarStyles);
+            } else if (mobileQuery.removeListener) {
+                mobileQuery.removeListener(updateSidebarStyles);
+            }
+            observer.disconnect();
+            overlay.remove();
+            sidebar.style.backgroundColor = '';
+            sidebar.style.boxShadow = '';
+            sidebar.style.zIndex = '';
+        };
+    }, [htmlContent, docsTheme]);
+
     const isDarkTheme = docsTheme !== 'light';
     const wrapperClass = `min-h-screen flex flex-col ${isDarkTheme ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`;
     const headerClass = `border-b backdrop-blur ${isDarkTheme ? 'border-slate-800 bg-slate-900/80' : 'border-slate-200 bg-white/90'}`;
@@ -332,17 +473,21 @@ const Documentation = () => {
         <div className={wrapperClass}>
             <header className={headerClass}>
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/')}
+                        className="flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-lg"
+                    >
                         <img
                             src="/te-logo.png"
                             alt="TechElevate logo"
                             className="h-10 w-10 select-none"
                         />
-                        <div className="flex flex-col">
+                        <div className="flex flex-col text-left">
                             <span className={`text-xs font-medium uppercase tracking-widest ${subtitleClass}`}>TechElevate</span>
                             <span className="text-base font-semibold">Documentation</span>
                         </div>
-                    </div>
+                    </button>
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
@@ -357,6 +502,7 @@ const Documentation = () => {
                             onClick={triggerDocsSidebar}
                             className={navButtonClass}
                             title="Toggle documentation navigation"
+                            data-docs-sidebar-toggle="true"
                         >
                             <Bars3Icon className="h-5 w-5" />
                         </button>

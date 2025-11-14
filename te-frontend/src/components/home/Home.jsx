@@ -6,7 +6,7 @@ import ImpactStats from "./ImpactStats";
 import Testimonials from "./Testimonials";
 import Footer from "./Footer";
 import { useAuth } from '../../context/AuthContext';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import {
     BriefcaseIcon,
     AcademicCapIcon,
@@ -23,10 +23,11 @@ const roleLabels = {
 };
 
 const Home = () => {
-    // Store previous page once (avoid rewriting each render)
-    if (!localStorage.getItem('prevPage')) {
-        localStorage.setItem('prevPage', '/');
-    }
+    useEffect(() => {
+        if (!sessionStorage.getItem('prevPage')) {
+            sessionStorage.setItem('prevPage', '/');
+        }
+    }, []);
     const { isAuthenticated, userRole, isGuest } = useAuth();
     const roleText = useMemo(() => roleLabels[userRole] ?? '', [userRole]);
     const showQuickAccess = isAuthenticated && !isGuest;
