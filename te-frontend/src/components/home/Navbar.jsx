@@ -39,11 +39,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
         setShowLogoutConfirm(true);
     };
 
-    const exitGuestMode = () => {
-        logout();
-        navigate('/login');
-    };
-
     const confirmLogout = () => {
         setShowLogoutConfirm(false);
         logout();

@@ -373,7 +373,7 @@ const ReferralsManagement = () => {
                             {!isReferrer && (
                                 <button
                                     onClick={() => setShowAddCompany(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
                                 >
                                     <PlusIcon className="h-3.5 w-3.5" />
                                     Add Company
@@ -821,7 +821,7 @@ const ReferralsManagement = () => {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-4 py-3 rounded-t-lg">
+                        <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-3 rounded-t-lg">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <BuildingOfficeIcon className="h-5 w-5" />
@@ -914,7 +914,7 @@ const ReferralsManagement = () => {
                             <div className="flex gap-2 pt-1">
                                 <button
                                     type="submit"
-                                    className="flex-1 px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded transition-all"
+                                    className="flex-1 px-3 py-1.5 text-sm bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded transition-all"
                                 >
                                     Add Company
                                 </button>

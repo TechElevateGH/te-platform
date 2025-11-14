@@ -13,8 +13,6 @@ import {
     TrophyIcon,
     SparklesIcon,
     XMarkIcon,
-    SunIcon,
-    MoonIcon,
     PlusIcon,
     ChevronDownIcon,
     ChevronUpIcon,
@@ -67,7 +65,7 @@ const Learning = ({ setContent }) => {
     const isLoggedIn = isAuthenticated;
     const isLeadOrAdmin = userRole >= 4; // Lead (4) or Admin (5)
 
-    const { darkMode, toggleDarkMode } = useDarkMode();
+    const { darkMode } = useDarkMode();
     const [showStats, setShowStats] = useState(false);
     const [searchQuery, setSearchQuery] = useState(''); // Search filter for topics
     const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
@@ -349,8 +347,8 @@ const Learning = ({ setContent }) => {
     }, []);    // Get difficulty badge based on category
     const getDifficultyInfo = useCallback((categoryName) => {
         const difficultyMap = {
-            'Essentials': { level: 'Beginner', color: 'bg-blue-100 text-blue-700', icon: '🔵' },
-            'Time & Space Complexity': { level: 'Beginner', color: 'bg-blue-100 text-blue-700', icon: '🔵' },
+            'Essentials': { level: 'Beginner', color: 'bg-yellow-100 text-blue-700', icon: '🔵' },
+            'Time & Space Complexity': { level: 'Beginner', color: 'bg-yellow-100 text-blue-700', icon: '🔵' },
             'Arrays & Strings': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
             'Pointers': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
             'Linked Lists': { level: 'Easy', color: 'bg-green-100 text-green-700', icon: '🟢' },
@@ -488,8 +486,8 @@ const Learning = ({ setContent }) => {
     if (isLoggedIn && isReferrer) {
         return (
             <div className={`min-h-screen flex items-center justify-center ${darkMode
-                ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950'
-                : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100'
+                ? 'bg-gradient-to-br from-slate-950 via-orange-950/30 to-amber-950/30'
+                : 'bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-100'
                 }`}>
                 <div className="max-w-md mx-auto p-8 text-center">
                     <div className="w-20 h-20 mx-auto mb-6 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
@@ -505,7 +503,7 @@ const Learning = ({ setContent }) => {
                     </p>
                     <button
                         onClick={() => window.location.href = '/referrals'}
-                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                        className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
                     >
                         Go to Referrals
                     </button>
@@ -516,16 +514,16 @@ const Learning = ({ setContent }) => {
 
     return (
         <div className={`min-h-screen transition-colors duration-500 ${darkMode
-            ? 'dark bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950'
-            : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100'
+            ? 'dark bg-gradient-to-br from-slate-950 via-orange-950/30 to-amber-950/30'
+            : 'bg-gradient-to-br from-orange-50 via-orange-50 to-yellow-100'
             } relative overflow-hidden`}>
             {/* Animated background elements for dark mode */}
             {darkMode && (
                 <>
                     {/* Glowing orbs */}
-                    <div className="absolute top-1/4 -left-48 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
-                    <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+                    <div className="absolute top-1/4 -left-48 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
                 </>
             )}
 
@@ -537,7 +535,7 @@ const Learning = ({ setContent }) => {
             {/* Header (lower z to allow sidebar overlay) */}
             <div className={`sticky top-0 z-30 border-b shadow-lg backdrop-blur-xl transition-all duration-300 ${darkMode
                 ? 'bg-slate-900/80 border-slate-700/50'
-                : 'bg-white/80 border-purple-200/30'
+                : 'bg-white/80 border-orange-200/30'
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -556,7 +554,7 @@ const Learning = ({ setContent }) => {
                                 {isMember && (
                                     <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
                                         <span className="flex items-center gap-1.5">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                            <div className="w-2 h-2 rounded-full bg-orange-500"></div>
                                             {stats.totalTopics} Topics
                                         </span>
                                         <span className="flex items-center gap-1.5">
@@ -564,7 +562,7 @@ const Learning = ({ setContent }) => {
                                             {stats.completed} Completed
                                         </span>
                                         <span className="flex items-center gap-1.5">
-                                            <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                                            <div className="w-2 h-2 rounded-full bg-orange-500"></div>
                                             {stats.bookmarked} Saved
                                         </span>
                                     </div>
@@ -572,21 +570,10 @@ const Learning = ({ setContent }) => {
                             </div>
                         </div>
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <button
-                                onClick={toggleDarkMode}
-                                className="flex items-center gap-2 px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg transition-all text-sm"
-                                aria-label="Toggle dark mode"
-                            >
-                                {darkMode ? (
-                                    <SunIcon className="w-4 h-4" />
-                                ) : (
-                                    <MoonIcon className="w-4 h-4" />
-                                )}
-                            </button>
                             {isMember && (
                                 <button
                                     onClick={() => setShowStats(!showStats)}
-                                    className="group flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:border-indigo-400 dark:hover:border-indigo-500 transition-all text-sm"
+                                    className="group flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:border-blue-400 dark:hover:border-orange-500 transition-all text-sm"
                                 >
                                     <ChartBarIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                                     <span className="hidden sm:inline">Stats</span>
@@ -595,9 +582,9 @@ const Learning = ({ setContent }) => {
                             {isLeadOrAdmin && setContent && (
                                 <button
                                     onClick={() => setContent('Learning Analytics')}
-                                    className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 text-sm whitespace-nowrap overflow-hidden"
+                                    className="group relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-orange-500/50 transition-all duration-300 text-sm whitespace-nowrap overflow-hidden"
                                 >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                                     <ChartBarIcon className="h-4 w-4 relative z-10 group-hover:scale-110 transition-transform" />
                                     <span className="relative z-10">Member Analytics</span>
                                     <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300"></div>
@@ -621,7 +608,7 @@ const Learning = ({ setContent }) => {
                             <button
                                 onClick={() => setActiveTab('dsa')}
                                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'dsa'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
@@ -630,7 +617,7 @@ const Learning = ({ setContent }) => {
                             <button
                                 onClick={() => setActiveTab('python')}
                                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'python'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
@@ -639,7 +626,7 @@ const Learning = ({ setContent }) => {
                             <button
                                 onClick={() => setActiveTab('system-design')}
                                 className={`whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-sm transition-colors ${activeTab === 'system-design'
-                                    ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                                    ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
@@ -680,7 +667,7 @@ const Learning = ({ setContent }) => {
                                 </button>
                                 <button
                                     onClick={() => setShowIncompleteOnly(b => !b)}
-                                    className={`px-3 py-2 rounded-lg text-xs font-semibold border transition flex items-center gap-1 ${showIncompleteOnly ? 'bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'bg-white/70 dark:bg-slate-800/70 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                                    className={`px-3 py-2 rounded-lg text-xs font-semibold border transition flex items-center gap-1 ${showIncompleteOnly ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-600 text-orange-700 dark:text-orange-400 shadow-sm' : 'bg-white/70 dark:bg-slate-800/70 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
                                     title="Toggle incomplete filter"
                                 >
                                     <ClockIcon className="w-3.5 h-3.5" />
@@ -698,7 +685,7 @@ const Learning = ({ setContent }) => {
                                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Progress</span>
                                 <span className="text-sm font-bold text-gray-800 dark:text-white">{stats.percentage}%</span>
                                 <div className="flex-1 h-2 bg-gray-200/60 dark:bg-gray-700/60 rounded-full overflow-hidden">
-                                    <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all" style={{ width: `${stats.percentage}%` }}></div>
+                                    <div className="h-full bg-gradient-to-r from-orange-500 via-orange-500 to-yellow-500 rounded-full transition-all" style={{ width: `${stats.percentage}%` }}></div>
                                 </div>
                             </div>
                         </div>
@@ -743,7 +730,7 @@ const Learning = ({ setContent }) => {
                                     <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Done</p>
                                 </div>
                                 <div className="text-center">
-                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg">
+                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center shadow-lg">
                                         <ClockIcon className="h-8 w-8 text-white" />
                                     </div>
                                     <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.remaining}</p>
@@ -760,12 +747,12 @@ const Learning = ({ setContent }) => {
 
                             <div className={`pt-6 border-t ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
                                 <div className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border ${darkMode
-                                    ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-700/50'
-                                    : 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-indigo-200/50'
+                                    ? 'bg-gradient-to-r from-orange-500/20 to-orange-500/20 border-orange-700/50'
+                                    : 'bg-gradient-to-r from-orange-500/10 to-orange-500/10 border-orange-200/50'
                                     }`}>
                                     <FireSolidIcon className="h-7 w-7 text-orange-500" />
                                     <div className="text-center">
-                                        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">{stats.percentage}%</p>
+                                        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">{stats.percentage}%</p>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Complete</p>
                                     </div>
                                 </div>
@@ -780,10 +767,10 @@ const Learning = ({ setContent }) => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {/* Book Card */}
-                        <div className="glass dark:bg-gradient-to-br dark:from-amber-900/20 dark:to-orange-900/20 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-700/30 border-amber-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                        <div className="glass dark:bg-gradient-to-br dark:from-amber-900/20 dark:to-orange-900/20 bg-gradient-to-br from-orange-50 to-orange-50 dark:border-amber-700/30 border-amber-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
                             <div className="flex items-start gap-3">
                                 <div className="flex-shrink-0">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
                                         <BookOpenIcon className="h-6 w-6 text-white" />
                                     </div>
                                 </div>
@@ -804,16 +791,16 @@ const Learning = ({ setContent }) => {
                         </div>
 
                         {/* Learning Tip Card */}
-                        <div className="glass dark:bg-gradient-to-br dark:from-indigo-900/20 dark:to-purple-900/20 bg-gradient-to-br from-indigo-50 to-purple-50 dark:border-indigo-700/30 border-indigo-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
+                        <div className="glass dark:bg-gradient-to-br dark:from-blue-900/20 dark:to-purple-900/20 bg-gradient-to-br from-blue-50 to-purple-50 dark:border-blue-700/30 border-blue-200/50 rounded-xl p-4 border shadow-md hover:shadow-lg transition-all">
                             <div className="flex items-start gap-3">
                                 <div className="flex-shrink-0">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center shadow-md">
                                         <LightBulbIcon className="h-6 w-6 text-white" />
                                     </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 mb-1">
-                                        <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-semibold">
+                                        <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400 rounded-full text-xs font-semibold">
                                             💡 Pro Tip
                                         </span>
                                     </div>
@@ -836,9 +823,9 @@ const Learning = ({ setContent }) => {
                     <div className="flex gap-6">
                         {/* Sign-in Prompt for Non-logged-in Users */}
                         {!authLoading && !isLoggedIn && (
-                            <div className="w-full glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-indigo-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl mb-6">
+                            <div className="w-full glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-blue-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl mb-6">
                                 <div className="flex items-start gap-6">
-                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl shadow-lg">
                                         <AcademicCapIcon className="w-10 h-10 text-white" />
                                     </div>
                                     <div className="flex-1">
@@ -848,7 +835,7 @@ const Learning = ({ setContent }) => {
                                         </p>
                                         <a
                                             href="/login"
-                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
                                         >
                                             <AcademicCapIcon className="w-5 h-5" />
                                             <span>Sign In to Track Progress</span>
@@ -893,7 +880,7 @@ const Learning = ({ setContent }) => {
                                                             scrollToCategory(category.category);
                                                         }}
                                                         className={`w-full text-left px-3 py-2.5 rounded-xl transition-all ${isActive
-                                                            ? 'bg-indigo-500 text-white shadow-md'
+                                                            ? 'bg-orange-500 text-white shadow-md'
                                                             : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
                                                             }`}
                                                     >
@@ -906,7 +893,7 @@ const Learning = ({ setContent }) => {
                                                         {isMember && (
                                                             <div className="w-full bg-white/30 dark:bg-gray-600/30 rounded-full h-1.5 overflow-hidden">
                                                                 <div
-                                                                    className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-indigo-500'
+                                                                    className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-orange-500'
                                                                         }`}
                                                                     style={{ width: `${progressPercentage}%` }}
                                                                 ></div>
@@ -970,15 +957,15 @@ const Learning = ({ setContent }) => {
                                                                                 <circle cx="18" cy="18" r="15" fill="none" stroke="url(#gradProgress)" strokeWidth="4" strokeLinecap="round" strokeDasharray="94" strokeDashoffset={isMember ? 94 - Math.round((category.completed / category.total) * 94) : 94} />
                                                                                 <defs>
                                                                                     <linearGradient id="gradProgress" x1="0" y1="0" x2="1" y2="1">
-                                                                                        <stop offset="0%" stopColor="#6366F1" />
-                                                                                        <stop offset="50%" stopColor="#8B5CF6" />
-                                                                                        <stop offset="100%" stopColor="#EC4899" />
+                                                                                        <stop offset="0%" stopColor="#2563EB" />
+                                                                                        <stop offset="50%" stopColor="#3B82F6" />
+                                                                                        <stop offset="100%" stopColor="#60A5FA" />
                                                                                     </linearGradient>
                                                                                 </defs>
                                                                             </svg>
                                                                         )}
                                                                         {isMember && (
-                                                                            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                                                                            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-orange-600 dark:text-orange-400">
                                                                                 {Math.round((category.completed / category.total) * 100)}%
                                                                             </div>
                                                                         )}
@@ -988,7 +975,7 @@ const Learning = ({ setContent }) => {
                                                                     </h2>
                                                                 </div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-700 dark:text-indigo-300`}>
+                                                                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-semibold bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/40 dark:to-amber-900/40 text-orange-700 dark:text-orange-300`}>
                                                                         {category.difficulty.level}
                                                                     </span>
                                                                     <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md text-xs font-medium">
@@ -1029,15 +1016,15 @@ const Learning = ({ setContent }) => {
                                                                     className={`transition-all border-l-2 ${isCompleted
                                                                         ? 'bg-emerald-50/40 dark:bg-emerald-900/10 border-emerald-500 dark:border-emerald-400'
                                                                         : isBookmarked
-                                                                            ? 'bg-amber-50/30 dark:bg-amber-900/10 border-amber-500 dark:border-amber-400'
-                                                                            : 'bg-white/20 dark:bg-gray-800/20 border-transparent hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-white/40 dark:hover:bg-gray-800/30'
+                                                                            ? 'bg-orange-50/30 dark:bg-amber-900/10 border-orange-500 dark:border-amber-400'
+                                                                            : 'bg-white/20 dark:bg-gray-800/20 border-transparent hover:border-blue-400 dark:hover:border-blue-500 hover:bg-white/40 dark:hover:bg-gray-800/30'
                                                                         } backdrop-blur-sm`}
                                                                 >
                                                                     <div className="px-3 py-2 hover:bg-white/30 dark:hover:bg-gray-700/30 transition-all">
                                                                         <div className="flex items-start gap-2">
                                                                             {/* Number & Status */}
                                                                             <div className="flex items-center gap-2 flex-shrink-0">
-                                                                                <div className="relative w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 flex items-center justify-center shadow-sm">
+                                                                                <div className="relative w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 flex items-center justify-center shadow-sm">
                                                                                     <span className="text-white font-bold text-xs">
                                                                                         {globalIndex}
                                                                                     </span>
@@ -1080,13 +1067,13 @@ const Learning = ({ setContent }) => {
                                                                                     {isMember && (
                                                                                         <button
                                                                                             onClick={() => toggleBookmark(category.category, topic.name)}
-                                                                                            className="group/bookmark flex-shrink-0 p-0.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                                                                            className="group/bookmark flex-shrink-0 p-0.5 rounded hover:bg-orange-50 dark:hover:bg-amber-900/20 transition-colors"
                                                                                             aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
                                                                                         >
                                                                                             {isBookmarked ? (
-                                                                                                <BookmarkSolidIcon className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 group-hover/bookmark:scale-110 transition-transform" />
+                                                                                                <BookmarkSolidIcon className="h-3.5 w-3.5 text-orange-500 dark:text-amber-400 group-hover/bookmark:scale-110 transition-transform" />
                                                                                             ) : (
-                                                                                                <BookmarkIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-amber-500 dark:group-hover/bookmark:text-amber-400 group-hover/bookmark:scale-110 transition-all" />
+                                                                                                <BookmarkIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 group-hover/bookmark:text-orange-500 dark:group-hover/bookmark:text-amber-400 group-hover/bookmark:scale-110 transition-all" />
                                                                                             )}
                                                                                         </button>
                                                                                     )}
@@ -1122,7 +1109,7 @@ const Learning = ({ setContent }) => {
                                                                                                     href={resource.url}
                                                                                                     target="_blank"
                                                                                                     rel="noopener noreferrer"
-                                                                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white/60 dark:bg-gray-700/40 backdrop-blur-md border border-indigo-200/60 dark:border-indigo-700/30 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-indigo-50/80 dark:hover:bg-indigo-900/20 hover:shadow-sm transition-all group/resource"
+                                                                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-white/60 dark:bg-gray-700/40 backdrop-blur-md border border-orange-200/60 dark:border-orange-700/30 text-orange-700 dark:text-orange-300 rounded-md text-xs font-medium hover:bg-orange-50/80 dark:hover:bg-orange-900/20 hover:shadow-sm transition-all group/resource"
                                                                                                 >
                                                                                                     <span className="truncate max-w-[90px]">{resource.name}</span>
                                                                                                     <ArrowTopRightOnSquareIcon className="h-2.5 w-2.5 opacity-60 group-hover/resource:opacity-100 transition-opacity flex-shrink-0" />
@@ -1157,7 +1144,7 @@ const Learning = ({ setContent }) => {
                                                                                                 {isAdmin && (
                                                                                                     <button
                                                                                                         onClick={() => openCreateLessonModal(category.category, topic.name)}
-                                                                                                        className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                                                                                                        className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-orange-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
                                                                                                     >
                                                                                                         <PlusIcon className="w-3.5 h-3.5" />
                                                                                                         Add Lesson
@@ -1221,7 +1208,7 @@ const Learning = ({ setContent }) => {
                                                                                                                                     href={resource.url}
                                                                                                                                     target="_blank"
                                                                                                                                     rel="noopener noreferrer"
-                                                                                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                                                                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs hover:bg-yellow-100 dark:hover:bg-blue-900/30 transition-colors"
                                                                                                                                 >
                                                                                                                                     {resource.title}
                                                                                                                                     <ArrowTopRightOnSquareIcon className="w-2.5 h-2.5" />
@@ -1257,7 +1244,7 @@ const Learning = ({ setContent }) => {
                                                                                                     href={resource.url}
                                                                                                     target="_blank"
                                                                                                     rel="noopener noreferrer"
-                                                                                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-700 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-medium hover:shadow-md transition-all"
+                                                                                                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-700 border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-300 rounded-lg text-xs font-medium hover:shadow-md transition-all"
                                                                                                 >
                                                                                                     <span>{resource.name}</span>
                                                                                                     <ArrowTopRightOnSquareIcon className="h-3 w-3" />
@@ -1300,7 +1287,7 @@ const Learning = ({ setContent }) => {
                             {/* Footer CTA */}
                             <div className="mt-6">
                                 <div className="glass dark:bg-gray-800/50 dark:border-gray-700/50 rounded-xl p-6 border border-white/20 shadow-xl text-center">
-                                    <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                    <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
                                         <AcademicCapIcon className="h-6 w-6 text-white" />
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
@@ -1330,9 +1317,9 @@ const Learning = ({ setContent }) => {
                     <div className="space-y-6">
                         {/* Sign-in Prompt for Non-logged-in Users */}
                         {!authLoading && !isLoggedIn && (
-                            <div className="glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-indigo-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl">
+                            <div className="glass dark:bg-gradient-to-br dark:from-purple-900/40 dark:via-blue-900/30 dark:to-blue-900/40 bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 backdrop-blur-sm rounded-2xl border-2 border-purple-300/50 dark:border-purple-600/30 p-8 shadow-xl">
                                 <div className="flex items-start gap-6">
-                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-lg">
+                                    <div className="flex-shrink-0 p-4 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl shadow-lg">
                                         <AcademicCapIcon className="w-10 h-10 text-white" />
                                     </div>
                                     <div className="flex-1">
@@ -1342,7 +1329,7 @@ const Learning = ({ setContent }) => {
                                         </p>
                                         <a
                                             href="/login"
-                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all"
                                         >
                                             <AcademicCapIcon className="w-5 h-5" />
                                             <span>Sign In to Track Progress</span>
@@ -1354,7 +1341,7 @@ const Learning = ({ setContent }) => {
 
                         {/* Python Progress Header - Only for Members */}
                         {isMember && (
-                            <div className="glass dark:bg-gradient-to-r dark:from-blue-900/30 dark:to-indigo-900/30 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30 shadow-lg">
+                            <div className="glass dark:bg-gradient-to-r dark:from-blue-900/30 dark:to-blue-900/30 bg-gradient-to-r from-orange-50 to-blue-50 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-700/30 shadow-lg">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Python Programming</h2>
@@ -1362,13 +1349,13 @@ const Learning = ({ setContent }) => {
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="text-center">
-                                            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                                            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
                                                 {pythonCompletedTopics.size}
                                             </div>
                                             <div className="text-xs text-gray-500 dark:text-gray-400">Completed</div>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                                            <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
                                                 {Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0)}
                                             </div>
                                             <div className="text-xs text-gray-500 dark:text-gray-400">Total Topics</div>
@@ -1378,7 +1365,7 @@ const Learning = ({ setContent }) => {
                                 <div className="mt-4">
                                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                         <div
-                                            className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-500"
+                                            className="bg-gradient-to-r from-orange-500 to-blue-600 h-2 rounded-full transition-all duration-500"
                                             style={{
                                                 width: `${Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0) > 0
                                                     ? (pythonCompletedTopics.size / Object.values(pythonTopics).reduce((sum, cat) => sum + cat.topics.length, 0)) * 100
@@ -1405,7 +1392,7 @@ const Learning = ({ setContent }) => {
                                     >
                                         {/* Category Header */}
                                         <div
-                                            className="px-8 py-6 border-b border-gray-200/50 dark:border-slate-700/50 cursor-pointer bg-gradient-to-r from-transparent via-gray-50/30 to-transparent dark:via-slate-700/20 hover:from-blue-50/50 hover:via-indigo-50/50 hover:to-blue-50/50 dark:hover:from-blue-900/20 dark:hover:via-indigo-900/20 dark:hover:to-blue-900/20 transition-all"
+                                            className="px-8 py-6 border-b border-gray-200/50 dark:border-slate-700/50 cursor-pointer bg-gradient-to-r from-transparent via-gray-50/30 to-transparent dark:via-slate-700/20 hover:from-orange-50/50 hover:via-blue-50/50 hover:to-orange-50/50 dark:hover:from-blue-900/20 dark:hover:via-blue-900/20 dark:hover:to-blue-900/20 transition-all"
                                             onClick={() => {
                                                 const newCollapsed = new Set(pythonCollapsedCategories);
                                                 if (newCollapsed.has(categoryName)) {
@@ -1457,7 +1444,7 @@ const Learning = ({ setContent }) => {
                                                         </div>
                                                         <div className="w-40 bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
                                                             <div
-                                                                className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm relative overflow-hidden"
+                                                                className="bg-gradient-to-r from-orange-500 via-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm relative overflow-hidden"
                                                                 style={{ width: `${(categoryCompleted / categoryData.topics.length) * 100}%` }}
                                                             >
                                                                 <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -1482,7 +1469,7 @@ const Learning = ({ setContent }) => {
                                                             key={topicIdx}
                                                             className={`group relative rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${isCompleted
                                                                 ? 'border-green-400 dark:border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20'
-                                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg'
+                                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-orange-500 hover:shadow-lg'
                                                                 }`}
                                                             onClick={() => {
                                                                 const newExpanded = new Set(pythonExpandedTopics);
@@ -1532,7 +1519,7 @@ const Learning = ({ setContent }) => {
                                                                     <div className="flex items-center gap-3 flex-shrink-0">
                                                                         {/* Resources badge */}
                                                                         {!isExpanded && topic.resources && topic.resources.length > 0 && (
-                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-xs font-semibold">
+                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-lg text-xs font-semibold">
                                                                                 <BookOpenIcon className="w-3.5 h-3.5" />
                                                                                 {topic.resources.length} resource{topic.resources.length > 1 ? 's' : ''}
                                                                             </span>
@@ -1557,7 +1544,7 @@ const Learning = ({ setContent }) => {
                                                                                     title={isBookmarked ? "Remove bookmark" : "Bookmark topic"}
                                                                                 >
                                                                                     {isBookmarked ? (
-                                                                                        <BookmarkSolidIcon className="w-5 h-5 text-amber-500" />
+                                                                                        <BookmarkSolidIcon className="w-5 h-5 text-orange-500" />
                                                                                     ) : (
                                                                                         <BookmarkIcon className="w-5 h-5 text-gray-400 group-hover:text-amber-400" />
                                                                                     )}
@@ -1603,7 +1590,7 @@ const Learning = ({ setContent }) => {
                                                                                     <ul className="space-y-2.5 text-left">
                                                                                         {topic.keyPoints.map((point, i) => (
                                                                                             <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-3 leading-relaxed">
-                                                                                                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
+                                                                                                <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-orange-500 mt-2"></span>
                                                                                                 <span className="flex-1 text-left">{point}</span>
                                                                                             </li>
                                                                                         ))}
@@ -1615,7 +1602,7 @@ const Learning = ({ setContent }) => {
                                                                             {topic.resources && topic.resources.length > 0 && (
                                                                                 <div className="text-left">
                                                                                     <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                                                                                        <BookOpenIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                                                                                        <BookOpenIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                                                                                         Learning Resources
                                                                                     </h5>
                                                                                     <div className="space-y-2.5 text-left">
@@ -1625,11 +1612,11 @@ const Learning = ({ setContent }) => {
                                                                                                 href={resource.url}
                                                                                                 target="_blank"
                                                                                                 rel="noopener noreferrer"
-                                                                                                className="group/link flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 transition-all shadow-sm hover:shadow-md text-left"
+                                                                                                className="group/link flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-gray-50 to-white dark:from-slate-900/50 dark:to-slate-800/50 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:border-blue-400 dark:hover:border-orange-500 hover:bg-gradient-to-r hover:from-orange-50 hover:to-blue-50 dark:hover:from-blue-900/20 dark:hover:to-blue-900/20 transition-all shadow-sm hover:shadow-md text-left"
                                                                                                 onClick={(e) => e.stopPropagation()}
                                                                                             >
                                                                                                 {resource.type === 'video' && <VideoCameraIcon className="w-5 h-5 text-red-500 flex-shrink-0" />}
-                                                                                                {resource.type === 'article' && <BookOpenIcon className="w-5 h-5 text-blue-500 flex-shrink-0" />}
+                                                                                                {resource.type === 'article' && <BookOpenIcon className="w-5 h-5 text-orange-500 flex-shrink-0" />}
                                                                                                 <span className="flex-1 group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 font-medium text-left">
                                                                                                     {resource.title}
                                                                                                 </span>
@@ -1703,7 +1690,7 @@ const Learning = ({ setContent }) => {
             {isAdmin && (
                 <button
                     onClick={() => setShowAddLesson(true)}
-                    className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/50 hover:scale-110 transition-all flex items-center justify-center group z-50"
+                    className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 text-white rounded-full shadow-2xl hover:shadow-orange-500/50 hover:scale-110 transition-all flex items-center justify-center group z-50"
                     aria-label="Add new lesson"
                 >
                     <PlusIcon className="w-7 h-7 group-hover:rotate-90 transition-transform duration-300" />

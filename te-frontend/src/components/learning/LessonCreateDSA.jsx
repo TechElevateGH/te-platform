@@ -175,7 +175,7 @@ const LessonCreateDSA = ({ isOpen, onClose, onSuccess, editLesson = null, defaul
                 <div className="w-screen max-w-4xl">
                     <div className="flex h-full flex-col bg-white shadow-xl">
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6">
+                        <div className="bg-gradient-to-r blue-600 px-6 py-6">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-2xl font-bold text-white">
                                     {editLesson ? 'Edit Lesson' : 'Create New DSA Lesson'}
@@ -547,7 +547,7 @@ const LessonCreateDSA = ({ isOpen, onClose, onSuccess, editLesson = null, defaul
                                 <button
                                     onClick={handleSubmit}
                                     disabled={isSubmitting || !formData.title || !formData.category || !formData.topic}
-                                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-6 py-2 bg-gradient-to-r blue-600 text-white rounded-md hover:blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? 'Saving...' : (editLesson ? 'Update Lesson' : 'Create Lesson')}
                                 </button>
