@@ -23,6 +23,7 @@ import LearningAnalytics from '../../pages/LearningAnalytics'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import Profile from './Profile'
+import { getUserEndpoint } from '../../utils/userEndpoints'
 import { useLocation } from 'react-router-dom'
 
 
@@ -100,7 +101,20 @@ const Workspace = ({ setLogin }) => {
     }, [isAdmin, isReferrer, isLeadOrAdmin, isGuest, isVolunteer]);
 
     const getUserInfoRequest = useCallback(async () => {
-        axiosInstance.get(`/users/${userId}`, {
+        // Get effective role with fallback to sessionStorage
+        const storedRole = sessionStorage.getItem('userRole');
+        const effectiveRole = userRole || parseInt(storedRole);
+
+        // Safety check: Don't fetch user info if we don't have a valid role
+        if (!effectiveRole || !userId) {
+            console.warn('[Workspace] Skipping getUserInfoRequest - missing role or userId', { effectiveRole, userId });
+            return;
+        }
+
+        const endpoint = getUserEndpoint(effectiveRole, userId);
+        console.log('[DEBUG Workspace] getUserInfoRequest - userRole:', userRole, 'storedRole:', storedRole, 'effectiveRole:', effectiveRole, 'endpoint:', endpoint);
+
+        axiosInstance.get(endpoint, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -114,9 +128,15 @@ const Workspace = ({ setLogin }) => {
                 }
                 console.error('Error fetching user info:', error);
             })
-    }, [accessToken, logout, setUserInfo, userId]);
+    }, [accessToken, logout, setUserInfo, userId, userRole]);
 
     const getUserFilesRequest = useCallback(async () => {
+        // Only members (role=1) have resumes and essays
+        // Referrers, Volunteers, Leads, and Admins don't have these files
+        if (userRole !== 1) {
+            return;
+        }
+
         try {
             // Fetch resumes
             const resumesResponse = await axiosInstance.get(`/users/${userId}/resumes`, {
@@ -165,7 +185,7 @@ const Workspace = ({ setLogin }) => {
             }
             console.error('Error fetching user files:', error);
         }
-    }, [accessToken, logout, setOtherFiles, setResumes, userId]);
+    }, [accessToken, logout, setOtherFiles, setResumes, userId, userRole]);
 
 
     useEffect(() => {

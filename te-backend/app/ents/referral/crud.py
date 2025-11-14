@@ -180,7 +180,9 @@ def read_company_referrals(
     referrals_data = (
         db.referrals.find({"company_name": company_id}).skip(skip).limit(limit)
     )
-    return [referral_models.Referral(**ref) for ref in referrals_data]
+    referrals_list = [referral_models.Referral(**ref) for ref in referrals_data]
+
+    return referrals_list
 
 
 def read_referrals_by_status(

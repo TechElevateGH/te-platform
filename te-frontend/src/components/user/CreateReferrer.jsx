@@ -50,7 +50,7 @@ const CreateReferrer = ({ show, onClose }) => {
 
         try {
             const response = await axiosInstance.post(
-                '/users/referrers',
+                '/users/privileged/referrers',
                 {
                     username: formData.username,
                     token: formData.token,

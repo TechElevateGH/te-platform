@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+from bson import ObjectId
 import app.database.session as session
 import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
@@ -8,6 +9,22 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.database import Database
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+
+def _serialize_mongo_document(value: Any) -> Any:
+    """Recursively convert MongoDB ObjectId instances to str for JSON serialization.
+
+    FastAPI/Pydantic cannot serialize raw ObjectId objects; leaving them causes
+    PydanticSerializationError. This helper walks dicts/lists and converts all
+    ObjectIds to their hex string representation.
+    """
+    if isinstance(value, ObjectId):
+        return str(value)
+    if isinstance(value, dict):
+        return {k: _serialize_mongo_document(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_serialize_mongo_document(v) for v in value]
+    return value
 
 
 # ============= Privileged User Management (Admin Only) =============
@@ -168,10 +185,114 @@ def update_privileged_user(
     }
 
 
+# ============= Query-based User Retrieval by Role =============
+
+
+@router.get("", response_model=Dict[str, Any])
+def get_user_by_role_query(
+    db: Database = Depends(session.get_db),
+    *,
+    referrer_id: Optional[str] = None,
+    volunteer_id: Optional[str] = None,
+    lead_id: Optional[str] = None,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Retrieve user details by role-specific query parameter.
+
+    - **referrer_id**: Fetch referrer with this ID (queries privileged_users with role=2)
+    - **volunteer_id**: Fetch volunteer with this ID (queries privileged_users with role=3)
+    - **lead_id**: Fetch lead/admin with this ID (queries privileged_users with role=4 or 5)
+
+    Only one query parameter should be provided at a time.
+
+    **Authorization**:
+    - Referrers/Volunteers/Leads: Can only view their own profile
+    - Admins: Can view any user's profile
+    """
+    user_role = user_dependencies.get_user_role(current_user)
+
+    # Determine which query parameter was provided
+    if referrer_id:
+        # Authorization check
+        if user_role == 2 and str(current_user.id) != referrer_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Can only view your own profile",
+            )
+        # Validate ObjectId and fetch
+        try:
+            oid = ObjectId(referrer_id)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Referrer not found"
+            )
+        user_data = db.privileged_users.find_one({"_id": oid, "role": 2})
+
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Referrer not found"
+            )
+
+    elif volunteer_id:
+        # Authorization check
+        if user_role == 3 and str(current_user.id) != volunteer_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Can only view your own profile",
+            )
+        try:
+            oid = ObjectId(volunteer_id)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer not found"
+            )
+        user_data = db.privileged_users.find_one({"_id": oid, "role": 3})
+
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Volunteer not found"
+            )
+
+    elif lead_id:
+        # Authorization check
+        if user_role == 4 and str(current_user.id) != lead_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Can only view your own profile",
+            )
+        try:
+            oid = ObjectId(lead_id)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Lead/Admin not found"
+            )
+        user_data = db.privileged_users.find_one({"_id": oid, "role": {"$in": [4, 5]}})
+
+        if not user_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Lead/Admin not found"
+            )
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Must provide one of: referrer_id, volunteer_id, or lead_id",
+        )
+
+    # Recursively serialize any nested ObjectIds (e.g., company_id)
+    user_data = _serialize_mongo_document(user_data)
+    # Ensure id field consistency
+    if "_id" in user_data:
+        user_data["id"] = user_data.get("id") or user_data["_id"]
+        user_data["_id"] = user_data["id"]
+    return {"user": user_data}
+
+
 # ============= Member User Management =============
 
 
-@router.get("", response_model=list[Dict[str, Any]])
+@router.get("/members", response_model=list[Dict[str, Any]])
 def list_member_users(
     db: Database = Depends(session.get_db),
     _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),

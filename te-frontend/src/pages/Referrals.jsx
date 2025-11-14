@@ -196,7 +196,7 @@ const Referrals = () => {
 
         setLoadingAllReferrals(true);
         try {
-            const response = await axiosInstance.get('/referrals/all', {
+            const response = await axiosInstance.get('/referrals', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setAllReferrals(response.data.referrals || []);
