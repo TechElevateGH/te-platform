@@ -100,7 +100,7 @@ const Practice = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-red-100 dark:from-slate-950 dark:via-rose-950/30 dark:to-pink-950/30">
             <header className="bg-white/70 backdrop-blur border-b border-rose-200 dark:bg-slate-900/70 dark:border-rose-800/30">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 text-left">
                     <span className="text-xs font-semibold uppercase tracking-[0.35em] text-rose-500 dark:text-rose-400">Practice Vault</span>
                     <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">Practice smarter, not harder</h1>
                     <p className="mt-2 text-sm text-slate-600 max-w-2xl dark:text-slate-300">
@@ -111,7 +111,7 @@ const Practice = () => {
 
             <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-12 text-slate-900 dark:text-slate-100">
                 {resourceCategories.length > 0 && (
-                    <section className="space-y-6">
+                    <section className="space-y-6 text-left">
                         <div>
                             <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Recommended path</span>
                             <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Core resources we actually use</h2>
@@ -177,7 +177,7 @@ const Practice = () => {
                 )}
 
                 {companionTips.length > 0 && (
-                    <section className="space-y-6">
+                    <section className="space-y-6 text-left">
                         <div>
                             <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Practice principles</span>
                             <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Keep these mindsets in rotation</h2>
@@ -210,7 +210,7 @@ const Practice = () => {
                 )}
 
                 <section className="rounded-2xl border border-slate-200 bg-slate-900 text-white p-8 shadow-lg dark:border-slate-800">
-                    <div className="space-y-4">
+                    <div className="space-y-4 text-left">
                         <div className="flex items-center gap-3">
                             <LightBulbIcon className="h-6 w-6 text-amber-300" />
                             <h2 className="text-xl font-semibold text-white">Revision is everything</h2>

@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import ApplicationInfo from '../components/application/ApplicationInfo';
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
 import {
     MagnifyingGlassIcon,
     UserGroupIcon,
@@ -679,17 +680,11 @@ const ApplicationManagement = () => {
                                                     <div className="flex items-center gap-2">
                                                         <div className="relative h-5 w-5 flex-shrink-0">
                                                             <img
-                                                                src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                src={getCompanyLogoUrl(app.company)}
                                                                 alt={app.company}
                                                                 className="h-5 w-5 rounded object-cover border border-gray-200 dark:border-gray-700 bg-white"
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                    e.target.nextSibling.style.display = 'flex';
-                                                                }}
+                                                                onError={handleCompanyLogoError}
                                                             />
-                                                            <div className="hidden h-5 w-5 rounded bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center">
-                                                                <BuildingOfficeIcon className="h-3 w-3 text-white" />
-                                                            </div>
                                                         </div>
                                                         <span className="font-semibold text-gray-900 dark:text-white text-xs">{app.company}</span>
                                                     </div>

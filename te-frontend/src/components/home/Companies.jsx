@@ -80,7 +80,7 @@ const Companies = () => {
                                 key={`${company.name}-${index}`}
                                 className="flex-shrink-0 group"
                             >
-                                <div className="flex flex-col items-center justify-center w-44 h-28 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer p-4">
+                                <div className="flex flex-col items-center justify-center w-44 h-28 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-2xl hover:scale-105 transition-all duration-300 p-4">
                                     {/* Company Logo */}
                                     <div className="w-16 h-16 mb-2 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                                         <img

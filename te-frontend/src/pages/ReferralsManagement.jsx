@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import ReferralManagement from '../components/referral/ReferralManagement';
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
 import {
     PlusIcon,
     BuildingOfficeIcon,
@@ -44,7 +45,8 @@ const ReferralsManagement = () => {
     }, [isReferrer]);
 
     // Advanced Features State
-    const [sortBy, setSortBy] = useState('date_desc');
+    const [sortField, setSortField] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [showDateFilter, setShowDateFilter] = useState(false);
@@ -224,27 +226,28 @@ const ReferralsManagement = () => {
 
     // Sorting logic
     const sortedReferrals = [...filteredReferrals].sort((a, b) => {
-        switch (sortBy) {
-            case 'date_desc':
-                return new Date(b.submitted_date || 0) - new Date(a.submitted_date || 0);
-            case 'date_asc':
-                return new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
-            case 'company_asc':
-                return (a.company?.name || '').localeCompare(b.company?.name || '');
-            case 'company_desc':
-                return (b.company?.name || '').localeCompare(a.company?.name || '');
-            case 'member_asc':
-                return (a.user_name || '').localeCompare(b.user_name || '');
-            case 'member_desc':
-                return (b.user_name || '').localeCompare(a.user_name || '');
-            case 'status_asc':
-                return (a.status || '').localeCompare(b.status || '');
-            case 'status_desc':
-                return (b.status || '').localeCompare(a.status || '');
+        let comparison = 0;
+        
+        switch (sortField) {
+            case 'date':
+                comparison = new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
+                break;
+            case 'company':
+                comparison = (a.company?.name || '').localeCompare(b.company?.name || '');
+                break;
+            case 'member':
+                comparison = (a.user_name || '').localeCompare(b.user_name || '');
+                break;
+            case 'status':
+                comparison = (a.status || '').localeCompare(b.status || '');
+                break;
             default:
-                return 0;
+                comparison = 0;
         }
+        
+        return sortOrder === 'asc' ? comparison : -comparison;
     });
+
 
     // Clear all filters
     const clearAllFilters = () => {
@@ -420,7 +423,7 @@ const ReferralsManagement = () => {
                         {/* Filters Section - Right Side (Narrower) */}
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                             {/* Status Filter */}
-                            <div className={isReferrer ? "md:col-span-3" : "md:col-span-2"}>
+                            <div className={isReferrer ? "md:col-span-2" : "md:col-span-2"}>
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -459,31 +462,41 @@ const ReferralsManagement = () => {
                                 </div>
                             )}
 
-                            {/* Sort Dropdown */}
-                            <div className={isReferrer ? "md:col-span-2" : "md:col-span-2"}>
+                            {/* Sort Field Dropdown */}
+                            <div className="md:col-span-2">
                                 <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    value={sortField}
+                                    onChange={(e) => setSortField(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
                                 >
-                                    <option value="date_desc">Date ↓</option>
-                                    <option value="date_asc">Date ↑</option>
-                                    <option value="company_asc">Company A-Z</option>
-                                    <option value="company_desc">Company Z-A</option>
-                                    <option value="member_asc">Member A-Z</option>
-                                    <option value="member_desc">Member Z-A</option>
-                                    <option value="status_asc">Status A-Z</option>
-                                    <option value="status_desc">Status Z-A</option>
+                                    <option value="date">📅 Date</option>
+                                    <option value="company">🏢 Company</option>
+                                    <option value="member">👤 Member</option>
+                                    <option value="status">📊 Status</option>
                                 </select>
                             </div>
 
-                            {/* Date Range Toggle */}
-                            <div className={isReferrer ? "md:col-span-2" : "md:col-span-1"}>
+                            {/* Sort Order Dropdown */}
+                            <div className="md:col-span-2">
+                                <select
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
+                                >
+                                    <option value="desc">↓ Desc</option>
+                                    <option value="asc">↑ Asc</option>
+                                </select>
+                            </div>
+
+                            {/* Date Range Toggle - More Compact */}
+                            <div className={isReferrer ? "md:col-span-1" : "md:col-span-1"}>
                                 <button
                                     onClick={() => setShowDateFilter(!showDateFilter)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center"
+                                    className={`w-full px-3 py-2 text-sm border ${showDateFilter || dateRange.start || dateRange.end ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'} rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 shadow-sm`}
+                                    title="Date Range Filter"
                                 >
-                                    <span>{dateRange.start || dateRange.end ? '📅' : '📅'}</span>
+                                    <span>📅</span>
+                                    {(dateRange.start || dateRange.end) && <span className="text-xs">●</span>}
                                 </button>
                             </div>
                         </div>
@@ -600,7 +613,7 @@ const ReferralsManagement = () => {
                                         </th>
                                     )}
                                     {visibleColumns.actions && (
-                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                             Actions
                                         </th>
                                     )}
@@ -638,13 +651,10 @@ const ReferralsManagement = () => {
                                                     <div className="flex items-center gap-2">
                                                         <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
                                                             <img
-                                                                src={ref.company?.image || `https://logo.clearbit.com/${(ref.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                src={getCompanyLogoUrl(ref.company?.name)}
                                                                 alt={ref.company?.name}
                                                                 className="h-full w-full object-contain"
-                                                                onError={(e) => {
-                                                                    e.target.onerror = null;
-                                                                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
-                                                                }}
+                                                                onError={handleCompanyLogoError}
                                                             />
                                                         </div>
                                                         <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
@@ -737,56 +747,62 @@ const ReferralsManagement = () => {
                                             )}
                                             {visibleColumns.status && (
                                                 <td className="px-4 py-3">
-                                                    <select
-                                                        value={ref.status}
-                                                        onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
-                                                        className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
-                                                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
-                                                            : ref.status === 'Pending'
-                                                                ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
-                                                                : ref.status === 'Declined'
-                                                                    ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
-                                                                    : ref.status === 'Cancelled'
-                                                                        ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
-                                                                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
-                                                            }`}
-                                                    >
-                                                        <option value="Pending">Pending</option>
-                                                        <option value="Completed">Completed</option>
-                                                        <option value="Declined">Declined</option>
-                                                        {!isReferrer && <option value="Cancelled">Cancelled</option>}
-                                                    </select>
+                                                    <div className="flex justify-start">
+                                                        <select
+                                                            value={ref.status}
+                                                            onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                            className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
+                                                                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
+                                                                : ref.status === 'Pending'
+                                                                    ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
+                                                                    : ref.status === 'Declined'
+                                                                        ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
+                                                                        : ref.status === 'Cancelled'
+                                                                            ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
+                                                                            : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
+                                                                }`}
+                                                        >
+                                                            <option value="Pending">Pending</option>
+                                                            <option value="Completed">Completed</option>
+                                                            <option value="Declined">Declined</option>
+                                                            {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                                        </select>
+                                                    </div>
                                                 </td>
                                             )}
                                             {visibleColumns.resume && (
                                                 <td className="px-4 py-3">
-                                                    {ref.has_resume ? (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
-                                                            Yes
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                            No
-                                                        </span>
-                                                    )}
+                                                    <div className="flex justify-start">
+                                                        {ref.has_resume ? (
+                                                            <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
+                                                                Yes
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                No
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             )}
                                             {visibleColumns.essay && (
                                                 <td className="px-4 py-3">
-                                                    {ref.has_essay ? (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
-                                                            Yes
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                            No
-                                                        </span>
-                                                    )}
+                                                    <div className="flex justify-start">
+                                                        {ref.has_essay ? (
+                                                            <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
+                                                                Yes
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                No
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             )}
                                             {visibleColumns.actions && (
                                                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                                                    <div className="flex items-center justify-end gap-2">
+                                                    <div className="flex items-center justify-start gap-2">
                                                         <button
                                                             onClick={() => {
                                                                 setSelectedReferral(ref);

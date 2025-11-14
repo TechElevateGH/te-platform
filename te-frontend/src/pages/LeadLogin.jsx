@@ -143,17 +143,17 @@ const LeadLogin = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                                className="group relative w-full flex items-center justify-center gap-2 px-4 py-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                             >
                                 {loading ? (
                                     <>
-                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-                                        Authenticating...
+                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                                        <span>Authenticating...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <ShieldCheckIcon className="h-5 w-5 mr-2" />
-                                        Sign In
+                                        <ShieldCheckIcon className="h-5 w-5" />
+                                        <span>Sign In</span>
                                     </>
                                 )}
                             </button>

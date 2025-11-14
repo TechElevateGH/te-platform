@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { MapPinIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import { jobStatuses } from './ApplicationInfo'
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../../utils'
 
 
 
@@ -35,7 +36,8 @@ const ApplicationItem = ({ allowSelection, addSelectedItem, application, setAppl
                     <img
                         alt={application.company.name}
                         className="h-6 w-6 object-contain"
-                        src={application.company.image}
+                        src={getCompanyLogoUrl(application.company.name)}
+                        onError={handleCompanyLogoError}
                     />
                 </div>
 

@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/20/solid";
 import axiosInstance from "../../axiosConfig";
 import { useAuth } from "../../context/AuthContext";
-
+import { getCompanyLogoUrl, handleCompanyLogoError } from "../../utils";
 
 const MyReferrals = ({ onFeedbackCount }) => {
     const { accessToken, userId } = useAuth();
@@ -245,9 +245,10 @@ const MyReferrals = ({ onFeedbackCount }) => {
                                         <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1.5 flex items-center justify-center flex-shrink-0">
                                                 <img
-                                                    src={referral.company?.image}
+                                                    src={getCompanyLogoUrl(referral.company?.name)}
                                                     alt={referral.company?.name}
                                                     className="h-full w-full object-contain"
+                                                    onError={handleCompanyLogoError}
                                                 />
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -270,7 +271,9 @@ const MyReferrals = ({ onFeedbackCount }) => {
                                         <span className="text-sm text-gray-700 dark:text-gray-200">{referral.role}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {getStatusBadge(referral.status)}
+                                        <div className="flex justify-start">
+                                            {getStatusBadge(referral.status)}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="text-sm text-gray-600 dark:text-gray-300">{referral.referral_date}</span>
@@ -290,19 +293,21 @@ const MyReferrals = ({ onFeedbackCount }) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {referral.status === 'Pending' && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleCancelReferral(referral.id);
-                                                }}
-                                                disabled={cancellingId === referral.id}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                            >
-                                                <XCircleIcon className="h-3.5 w-3.5" />
-                                                {cancellingId === referral.id ? 'Cancelling...' : 'Cancel'}
-                                            </button>
-                                        )}
+                                        <div className="flex justify-start">
+                                            {referral.status === 'Pending' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCancelReferral(referral.id);
+                                                    }}
+                                                    disabled={cancellingId === referral.id}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <XCircleIcon className="h-3.5 w-3.5" />
+                                                    {cancellingId === referral.id ? 'Cancelling...' : 'Cancel'}
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -321,9 +326,10 @@ const MyReferrals = ({ onFeedbackCount }) => {
                                 <div className="flex items-center gap-4">
                                     <div className="h-16 w-16 rounded-xl border-2 border-white/20 bg-white dark:bg-gray-900 p-2 flex items-center justify-center shadow-lg">
                                         <img
-                                            src={selectedReferral.company?.image}
+                                            src={getCompanyLogoUrl(selectedReferral.company?.name)}
                                             alt={selectedReferral.company?.name}
                                             className="h-full w-full object-contain"
+                                            onError={handleCompanyLogoError}
                                         />
                                     </div>
                                     <div>

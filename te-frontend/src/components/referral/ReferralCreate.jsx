@@ -10,7 +10,7 @@ import axiosInstance from "../../axiosConfig";
 import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
 import { useData } from "../../context/DataContext";
 import { FormTextArea } from "../_custom/FormInputs";
-import { setNestedPropertyValue } from "../../utils";
+import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } from "../../utils";
 import { useAuth } from "../../context/AuthContext";
 import SelectCombobox from "../_custom/SelectCombobox";
 import { trackEvent } from "../../analytics/events";
@@ -182,13 +182,10 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Company</h3>
                             <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
                                 <img
-                                    src={company.image || `https://logo.clearbit.com/${(company.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                    src={getCompanyLogoUrl(company.name)}
                                     alt={company.name}
                                     className="h-12 w-12 rounded-lg object-cover border border-blue-200 dark:border-blue-700 shadow-sm"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
-                                    }}
+                                    onError={handleCompanyLogoError}
                                 />
                                 <div>
                                     <p className="text-lg font-bold text-blue-900 dark:text-blue-200">{company.name}</p>
@@ -307,7 +304,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                     className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all text-sm font-medium"
                                 />
                                 <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                                    If available, include the job posting ID or requisition number
+                                    If available, include the job posting ID or requisition number. You can separate multiple IDs with commas, spaces, or semicolons.
                                 </p>
                             </div>
 

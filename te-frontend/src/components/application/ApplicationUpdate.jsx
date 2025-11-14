@@ -6,7 +6,7 @@ import axiosInstance from '../../axiosConfig';
 
 import { useAuth } from '../../context/AuthContext'
 import { FormSelect, FormInput } from '../_custom/FormInputs'
-import { setNestedPropertyValue } from '../../utils'
+import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } from '../../utils'
 import { jobStatuses } from './ApplicationInfo'
 import { customInputMap } from './ApplicationCreate'
 import { countries } from '../../data/data'
@@ -118,7 +118,8 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                                         height="32"
                                                         alt={application.company.name}
                                                         className="rounded-lg ring-2 ring-white/30"
-                                                        src={application.company.image}
+                                                        src={getCompanyLogoUrl(application.company.name)}
+                                                        onError={handleCompanyLogoError}
                                                     />
                                                     <div>
                                                         <Dialog.Title className="text-xl font-bold text-white">

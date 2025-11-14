@@ -795,7 +795,7 @@ const AdminFiles = () => {
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Submitted</th>
                                             <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Reviewer</th>
                                             {isAdmin && (
-                                                <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Actions</th>
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Actions</th>
                                             )}
                                         </tr>
                                     </thead>
@@ -819,23 +819,27 @@ const AdminFiles = () => {
                                                         <span className="text-sm text-gray-700 dark:text-gray-300">{review.job_title}</span>
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
-                                                            {review.level}
-                                                        </span>
+                                                        <div className="flex justify-start">
+                                                            <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                                {review.level}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending'
-                                                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                                            : review.status === 'In Review'
-                                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                                : review.status === 'Completed'
-                                                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                                            }`}>
-                                                            {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
-                                                            {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
-                                                            {review.status}
-                                                        </span>
+                                                        <div className="flex justify-start">
+                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending'
+                                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                                                : review.status === 'In Review'
+                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                                    : review.status === 'Completed'
+                                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                                }`}>
+                                                                {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
+                                                                {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
+                                                                {review.status}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <span className="text-sm text-gray-600 dark:text-gray-400">{review.submitted_date}</span>
@@ -847,7 +851,7 @@ const AdminFiles = () => {
                                                     </td>
                                                     {isAdmin && (
                                                         <td className="px-4 py-3">
-                                                            <div className="flex items-center justify-end gap-2">
+                                                            <div className="flex items-center justify-start gap-2">
                                                                 <button
                                                                     onClick={() => handleViewReview(review)}
                                                                     className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
