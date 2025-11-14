@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useState } from 'react'
-import { PencilIcon, TrashIcon, ArchiveBoxIcon, BuildingOfficeIcon } from '@heroicons/react/20/solid'
+import { PencilIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/20/solid'
 import { useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import axiosInstance from '../../axiosConfig';
@@ -7,7 +7,7 @@ import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext'
 import { FormInput } from '../_custom/FormInputs'
 import SelectCombobox from '../_custom/SelectCombobox'
-import { setNestedPropertyValue } from '../../utils'
+import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } from '../../utils'
 import { countries } from '../../data/jobData'
 
 export const jobStatuses = {
@@ -183,17 +183,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                             <div className="flex items-center gap-3">
                                                 <div className="relative h-10 w-10 flex-shrink-0">
                                                     <img
-                                                        src={`https://logo.clearbit.com/${(application.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                        src={getCompanyLogoUrl(application.company)}
                                                         alt={application.company}
                                                         className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700"
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'flex';
-                                                        }}
+                                                        onError={handleCompanyLogoError}
                                                     />
-                                                    <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center">
-                                                        <BuildingOfficeIcon className="h-5 w-5 text-white" />
-                                                    </div>
                                                 </div>
                                                 <div>
                                                     <h3 className="text-base font-semibold text-gray-900 dark:text-white">

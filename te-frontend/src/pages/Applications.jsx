@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { HttpStatusCode } from 'axios'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils'
 
 import { Loading } from '../components/_custom/Loading'
 import SignInPrompt from '../components/_custom/Alert/SignInPrompt'
@@ -558,17 +559,11 @@ const Applications = () => {
                                         <div className="flex items-start gap-3 mb-3">
                                             <div className="relative h-12 w-12 flex-shrink-0">
                                                 <img
-                                                    src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                    src={getCompanyLogoUrl(app.company)}
                                                     alt={app.company}
                                                     className="h-12 w-12 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white"
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
-                                                    }}
+                                                    onError={handleCompanyLogoError}
                                                 />
-                                                <div className="hidden h-12 w-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm">
-                                                    <BuildingOfficeIcon className="h-6 w-6 text-white" />
-                                                </div>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
@@ -680,17 +675,11 @@ const Applications = () => {
                                                         <div className="flex items-center gap-3">
                                                             <div className="relative h-10 w-10 flex-shrink-0">
                                                                 <img
-                                                                    src={`https://logo.clearbit.com/${(app.company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                    src={getCompanyLogoUrl(app.company)}
                                                                     alt={app.company}
                                                                     className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 group-hover:shadow-md transition-shadow bg-white"
-                                                                    onError={(e) => {
-                                                                        e.target.style.display = 'none';
-                                                                        e.target.nextSibling.style.display = 'flex';
-                                                                    }}
+                                                                    onError={handleCompanyLogoError}
                                                                 />
-                                                                <div className="hidden h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                                                                    <BuildingOfficeIcon className="h-5 w-5 text-white" />
-                                                                </div>
                                                             </div>
                                                             <div className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-xs">
                                                                 {app.company}
@@ -706,9 +695,11 @@ const Applications = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
-                                                            {app.status}
-                                                        </span>
+                                                        <div className="flex justify-start">
+                                                            <span className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border ${getStatusBadge(app.status)}`}>
+                                                                {app.status}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 font-medium">

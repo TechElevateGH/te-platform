@@ -227,7 +227,12 @@ const Essay = ({ isMember = true }) => {
                             {isMember && (
                                 !updateReferralEssay ? (
                                     <button
-                                        onClick={() => setUpdateReferralEssay(true)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setUpdateReferralEssay(true);
+                                        }}
                                         className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 text-emerald-700 dark:text-emerald-300 text-sm font-semibold rounded-lg hover:bg-emerald-50 dark:hover:bg-gray-600 transition-all border border-emerald-200 dark:border-emerald-700"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />
@@ -235,7 +240,12 @@ const Essay = ({ isMember = true }) => {
                                     </button>
                                 ) : (
                                     <button
-                                        onClick={() => setUpdateReferralEssay(false)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setUpdateReferralEssay(false);
+                                        }}
                                         className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-all border border-gray-200 dark:border-gray-600"
                                     >
                                         <XMarkIcon className="h-4 w-4" />
@@ -269,7 +279,12 @@ const Essay = ({ isMember = true }) => {
                                         Write in third person (he/she, him/her)
                                     </p>
                                     <button
-                                        onClick={() => setUpdateReferralEssay(true)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setUpdateReferralEssay(true);
+                                        }}
                                         className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Union
 
 import app.database.session as session
 import app.ents.referral.crud as referral_crud
@@ -9,7 +9,6 @@ import app.ents.user.models as user_models
 from app.core.permissions import require_lead
 from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.database import Database
-from typing import Union
 
 referral_router = APIRouter(prefix="/referrals")
 
@@ -100,6 +99,26 @@ def add_referral_company(
     return {"company": referral_dependencies.parse_company_basic(company)}
 
 
+@referral_router.patch(
+    "/companies/{company_id}",
+    response_model=Dict[str, referral_schema.CompanyReadBase],
+)
+def update_referral_company(
+    company_id: str,
+    db: Database = Depends(session.get_db),
+    *,
+    data: referral_schema.ReferralCompanyUpdate,
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_lead
+    ),
+) -> Any:
+    """Update a referral company (Lead+ required)."""
+    company = referral_crud.update_referral_company(
+        db, company_id=company_id, data=data
+    )
+    return {"company": referral_dependencies.parse_company_basic(company)}
+
+
 @referral_router.post(
     "",
     response_model=Dict[str, referral_schema.ReferralRead],
@@ -124,70 +143,114 @@ def request_referral(
 
 @referral_router.get(
     "",
-    response_model=Dict[str, list[referral_schema.ReferralRead]],
-)
-def get_user_referrals(
-    db: Database = Depends(session.get_db),
-    *,
-    user_id: str,
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_user),
-) -> Any:
-    """
-    Get all referrals of `user`.
-    """
-    referrals = referral_crud.read_user_referrals(db, user_id=user_id)
-    return {
-        "referrals": [
-            referral_dependencies.parse_referral(referral) for referral in referrals
-        ]
-    }
-
-
-@referral_router.get(
-    "/all",
     response_model=Dict[str, list[referral_schema.ReferralReadWithUser]],
 )
-def get_all_referrals(
+def get_referrals(
     db: Database = Depends(session.get_db),
     *,
     skip: int = 0,
     limit: int = 100,
-    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    user_id: Optional[str] = None,  # Filter by user
+    company_id: Optional[str] = None,  # Filter by company
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get all referrals in the system.
-    - Referrers (role=2): Only see referrals for their assigned company
-    - Lead/Admin (role>=3): See all referrals
+    Get referrals with optional filtering.
+
+    Query Parameters:
+    - user_id: Filter by specific user's referrals
+    - company_id: Filter by company ID
+      * Referrers: Can only use their assigned company_id (validated)
+      * Lead/Admin: Can use any company_id
+    - skip: Number of records to skip for pagination
+    - limit: Maximum number of records to return
+
+    Access Control:
+    - Members (role=1): Can only see their own referrals (user_id must match)
+    - Referrers (role=2): Automatically filtered to their assigned company (can optionally provide company_id but must match)
+    - Volunteers/Lead/Admin (role≥3): Can see all referrals or filter by user_id/company_id
     """
-    from app.core.permissions import is_referrer, require_referrer
+    from app.core.permissions import is_referrer, is_member, require_referrer
 
-    # Require at least Referrer level access
-    require_referrer(user)
+    # If filtering by specific user
+    if user_id:
+        # Members can only view their own referrals
+        if is_member(current_user) and str(current_user.id) != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Members can only view their own referrals",
+            )
 
-    # If user is a Referrer, filter by their company
-    if is_referrer(user):
-        if not user.company_id:
+        referrals = referral_crud.read_user_referrals(db, user_id=user_id)
+        return {
+            "referrals": [
+                referral_dependencies.parse_referral_with_user(referral)
+                for referral in referrals
+            ]
+        }
+
+    # For viewing all referrals (requires at least Referrer role)
+    require_referrer(current_user)
+
+    # Determine which company to filter by
+    filter_company_id = None
+
+    # If user is a Referrer, they can only see their assigned company
+    if is_referrer(current_user):
+        if not current_user.company_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Referrer account has no assigned company",
             )
-        # Get company name from company_id
+
+        # If referrer provided company_id, verify it matches their assigned company
+        if company_id:
+            # Ensure both are ObjectIds for comparison
+            from bson import ObjectId
+
+            provided_id = (
+                ObjectId(company_id) if isinstance(company_id, str) else company_id
+            )
+            assigned_id = (
+                current_user.company_id
+                if not isinstance(current_user.company_id, str)
+                else ObjectId(current_user.company_id)
+            )
+
+            if provided_id != assigned_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Referrers can only view referrals for their assigned company",
+                )
+
+        filter_company_id = current_user.company_id
+    # If user is Lead/Admin and provided company_id, use it for filtering
+    elif company_id:
+        filter_company_id = company_id
+
+    # Fetch referrals based on filter
+    if filter_company_id:
+        # Get company name from company_id for filtering
         from bson import ObjectId
 
-        company = db.companies.find_one({"_id": ObjectId(user.company_id)})
+        # Ensure filter_company_id is an ObjectId
+        if isinstance(filter_company_id, str):
+            filter_company_id = ObjectId(filter_company_id)
+
+        company = db.companies.find_one({"_id": filter_company_id})
         if not company:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Assigned company not found",
+                detail="Company not found",
             )
         company_name = company.get("name", "")
 
-        # Get only referrals for this referrer's company (by company name)
+        # Get referrals filtered by company (using company name)
         referrals = referral_crud.read_company_referrals(
             db, company_id=company_name, skip=skip, limit=limit
         )
     else:
-        # Lead/Admin can see all referrals
+        # No filter - get all referrals (Lead/Admin only)
         referrals = referral_crud.read_all_referrals(db, skip=skip, limit=limit)
 
     return {

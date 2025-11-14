@@ -119,17 +119,17 @@ const ReferrerLogin = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                                className="group relative w-full flex items-center justify-center gap-2 px-4 py-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
                             >
                                 {loading ? (
                                     <>
-                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-                                        Authenticating...
+                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                                        <span>Authenticating...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <BuildingOfficeIcon className="h-5 w-5 mr-2" />
-                                        Access Referrals Portal
+                                        <BuildingOfficeIcon className="h-5 w-5" />
+                                        <span>Access Referrals Portal</span>
                                     </>
                                 )}
                             </button>

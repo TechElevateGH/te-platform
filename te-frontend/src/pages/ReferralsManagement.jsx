@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import ReferralManagement from '../components/referral/ReferralManagement';
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
 import {
     PlusIcon,
     BuildingOfficeIcon,
@@ -13,25 +15,32 @@ import {
     XMarkIcon,
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
-    ArrowDownTrayIcon
+    ArrowDownTrayIcon,
+    PencilIcon
 } from '@heroicons/react/24/outline';
 import { ClipboardDocumentIcon } from '@heroicons/react/20/solid';
 
 const ReferralsManagement = () => {
     const { accessToken, userRole } = useAuth();
+    const { userInfo } = useData();
     const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddCompany, setShowAddCompany] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('Pending');
+    const [statusFilter, setStatusFilter] = useState(''); // Empty = show all statuses
     const [memberFilter, setMemberFilter] = useState('');
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
     const [copiedField, setCopiedField] = useState(null);
+    const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+    const [referrerCompany, setReferrerCompany] = useState(null);
 
     // Check if user is a referrer (role = 2) - use sessionStorage as fallback for immediate availability
     const storedRole = sessionStorage.getItem('userRole');
-    const isReferrer = userRole === 2 || parseInt(storedRole) === 2;
+    const effectiveRole = userRole || parseInt(storedRole) || 0;
+    const isReferrer = effectiveRole === 2;
+    const isLead = effectiveRole >= 3; // Volunteers, Leads, Admins
+    const isAdmin = effectiveRole >= 4; // Leads and Admins
 
     // Company filter - only initialize for non-referrers
     const [companyFilter, setCompanyFilter] = useState('');
@@ -43,8 +52,50 @@ const ReferralsManagement = () => {
         }
     }, [isReferrer]);
 
+    // Show welcome message for referrers once per session and auto-hide after 3 seconds
+    useEffect(() => {
+        if (isReferrer) {
+            const hasSeenWelcome = sessionStorage.getItem('hasSeenReferrerWelcome');
+            if (!hasSeenWelcome) {
+                setShowWelcomeMessage(true);
+                sessionStorage.setItem('hasSeenReferrerWelcome', 'true');
+                const timer = setTimeout(() => {
+                    setShowWelcomeMessage(false);
+                }, 3000);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isReferrer]);
+
+    // Fetch referrer's company data
+    useEffect(() => {
+        const fetchReferrerCompany = async () => {
+            if (isReferrer && userInfo?.company_id) {
+                try {
+                    // Fetch all companies and find the one matching company_id
+                    // OR fetch referrals for this company to get company info
+                    const response = await axiosInstance.get('/referrals/companies', {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    });
+                    // Find the company that matches the referrer's company_id
+                    const company = response.data?.companies?.find(c => c.id === userInfo.company_id);
+                    if (company) {
+                        setReferrerCompany(company);
+                    }
+                } catch (error) {
+                    console.error('Error fetching referrer company:', error);
+                }
+            }
+        };
+
+        fetchReferrerCompany();
+    }, [isReferrer, userInfo, accessToken]);
+
     // Advanced Features State
-    const [sortBy, setSortBy] = useState('date_desc');
+    const [sortField, setSortField] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [showDateFilter, setShowDateFilter] = useState(false);
@@ -59,6 +110,12 @@ const ReferralsManagement = () => {
         resume: false,
         essay: false
     });
+
+    // Tab Management
+    const [activeTab, setActiveTab] = useState('referrals'); // 'referrals' or 'companies'
+    const [companies, setCompanies] = useState([]);
+    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [showCompanyModal, setShowCompanyModal] = useState(false);
 
     // Column Management
     const toggleColumn = (column) => {
@@ -108,29 +165,115 @@ const ReferralsManagement = () => {
         requires_essay: true,
     });
 
+    // Edit Company State
+    const [showEditCompany, setShowEditCompany] = useState(false);
+    const [editingCompany, setEditingCompany] = useState(null);
+    const [editCompanyForm, setEditCompanyForm] = useState({
+        name: '',
+        image: '',
+        description: '',
+        website: '',
+        industry: '',
+        size: '',
+        headquarters: '',
+        referral_link: '',
+        requires_resume: true,
+        requires_phone_number: true,
+        requires_essay: true,
+    });
+
     // Fetch all referrals
     const fetchAllReferrals = useCallback(async () => {
-        setLoading(true);
         try {
-            const response = await axiosInstance.get('/referrals/all', {
+            // Calculate role inside callback to avoid stale closure
+            const currentRole = parseInt(userRole || sessionStorage.getItem('userRole') || '0');
+            const currentIsReferrer = currentRole === 2;
+
+            // Build endpoint: for referrers explicitly include company_id
+            let endpoint = '/referrals';
+            if (currentIsReferrer && userInfo?.company_id) {
+                endpoint = `/referrals?company_id=${userInfo.company_id}`;
+            }
+
+            const response = await axiosInstance.get(endpoint, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            setReferrals(response.data?.referrals || []);
+            const rawReferrals = response.data?.referrals || [];
+            const enriched = rawReferrals.map(r => ({
+                ...r,
+                submitted_date: r.submitted_date || r.date || '',
+                has_resume: r.has_resume !== undefined ? r.has_resume : Boolean(r.resume),
+                has_essay: r.has_essay !== undefined ? r.has_essay : Boolean(r.essay),
+            }));
+            setReferrals(enriched);
         } catch (error) {
             console.error('Error fetching referrals:', error);
             setReferrals([]);
-        } finally {
-            setLoading(false);
+        }
+    }, [accessToken, userRole, userInfo?.company_id]);
+
+    // Fetch all companies
+    const fetchCompanies = useCallback(async () => {
+        try {
+            const response = await axiosInstance.get('/referrals/companies', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            setCompanies(response.data?.companies || []);
+        } catch (error) {
+            console.error('Error fetching companies:', error);
+            setCompanies([]);
         }
     }, [accessToken]);
 
+    // Unified initial + role-change fetch (runs when accessToken/role ready)
     useEffect(() => {
-        if (accessToken) {
+        if (!accessToken) return;
+
+        // Wait for userRole to load from AuthContext (comes from localStorage on mount)
+        if (!userRole && !sessionStorage.getItem('userRole')) return;
+
+        const currentRole = parseInt(userRole || sessionStorage.getItem('userRole') || '0');
+        const currentIsReferrer = currentRole === 2;
+        const currentIsLead = currentRole >= 3;
+        const currentIsAdmin = currentRole >= 4;
+
+        setLoading(true);
+
+        const run = async () => {
+            try {
+                if (currentIsReferrer || currentIsLead || currentIsAdmin) {
+                    await fetchAllReferrals();
+                    if (currentIsLead || currentIsAdmin) {
+                        await fetchCompanies();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        run();
+    }, [accessToken, userRole, userInfo?.company_id, fetchAllReferrals, fetchCompanies]);
+
+    // Safety re-fetch: If initial render missed because role/userInfo wasn't ready yet
+    useEffect(() => {
+        if (!accessToken) return;
+        if (isReferrer && userInfo?.company_id && referrals.length === 0 && !loading) {
             fetchAllReferrals();
         }
-    }, [accessToken, fetchAllReferrals]);
+    }, [accessToken, isReferrer, userInfo?.company_id, referrals.length, loading, fetchAllReferrals]);
+
+    // Refetch when company_id appears (covers race: referrals fetch ran before userInfo hydrated)
+    useEffect(() => {
+        if (isReferrer && accessToken && userInfo?.company_id && referrals.length === 0) {
+            fetchAllReferrals();
+        }
+    }, [isReferrer, accessToken, userInfo?.company_id, referrals.length, fetchAllReferrals]);
 
     // Add new company
     const handleAddCompany = async (e) => {
@@ -156,7 +299,48 @@ const ReferralsManagement = () => {
         }
     };
 
+    // Handle opening edit company modal
+    const handleEditCompanyOpen = (company) => {
+        setEditingCompany(company);
+        // Populate form with company data
+        setEditCompanyForm({
+            name: company.name || '',
+            image: company.image || '',
+            description: company.metadata?.description || '',
+            website: company.domain || '',
+            industry: company.metadata?.industry || '',
+            size: company.metadata?.size || '',
+            headquarters: company.metadata?.headquarters || '',
+            referral_link: company.referral_link || '',
+            requires_resume: company.referral_materials?.resume ?? true,
+            requires_phone_number: company.referral_materials?.phone_number ?? true,
+            requires_essay: company.referral_materials?.essay ?? true,
+        });
+        setShowEditCompany(true);
+    };
 
+    // Handle edit company submission
+    const handleEditCompany = async (e) => {
+        e.preventDefault();
+        if (!editingCompany) return;
+
+        try {
+            await axiosInstance.patch(`/referrals/companies/${editingCompany.id}`, editCompanyForm, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            setShowEditCompany(false);
+            setEditingCompany(null);
+            alert('Company updated successfully!');
+        } catch (error) {
+            console.error('Error updating company:', error);
+            alert(error.response?.data?.detail || 'Failed to update company. Please try again.');
+        }
+    };
+
+
+    // Handle referral update from modal
     // Handle referral update from modal
     const handleReferralUpdate = (updatedReferral) => {
         setReferrals(prevReferrals =>
@@ -224,27 +408,28 @@ const ReferralsManagement = () => {
 
     // Sorting logic
     const sortedReferrals = [...filteredReferrals].sort((a, b) => {
-        switch (sortBy) {
-            case 'date_desc':
-                return new Date(b.submitted_date || 0) - new Date(a.submitted_date || 0);
-            case 'date_asc':
-                return new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
-            case 'company_asc':
-                return (a.company?.name || '').localeCompare(b.company?.name || '');
-            case 'company_desc':
-                return (b.company?.name || '').localeCompare(a.company?.name || '');
-            case 'member_asc':
-                return (a.user_name || '').localeCompare(b.user_name || '');
-            case 'member_desc':
-                return (b.user_name || '').localeCompare(a.user_name || '');
-            case 'status_asc':
-                return (a.status || '').localeCompare(b.status || '');
-            case 'status_desc':
-                return (b.status || '').localeCompare(a.status || '');
+        let comparison = 0;
+
+        switch (sortField) {
+            case 'date':
+                comparison = new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
+                break;
+            case 'company':
+                comparison = (a.company?.name || '').localeCompare(b.company?.name || '');
+                break;
+            case 'member':
+                comparison = (a.user_name || '').localeCompare(b.user_name || '');
+                break;
+            case 'status':
+                comparison = (a.status || '').localeCompare(b.status || '');
+                break;
             default:
-                return 0;
+                comparison = 0;
         }
+
+        return sortOrder === 'asc' ? comparison : -comparison;
     });
+
 
     // Clear all filters
     const clearAllFilters = () => {
@@ -311,10 +496,19 @@ const ReferralsManagement = () => {
                     <div className="flex items-center justify-between">
                         {/* Left: Title */}
                         <div className="flex-shrink-0">
-                            <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <PaperAirplaneIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                                Referral Management
-                            </h1>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <PaperAirplaneIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                    Referral Management
+                                </h1>
+                                {/* Company Pill for Referrers */}
+                                {isReferrer && referrerCompany && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md">
+                                        <BuildingOfficeIcon className="h-4 w-4" />
+                                        <span className="text-sm font-semibold">{referrerCompany.name}</span>
+                                    </div>
+                                )}
+                            </div>
                             <p className="text-left text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                 {isReferrer ? 'View and manage referral requests for your company' : 'Process member referral requests and manage companies'}
                             </p>
@@ -384,429 +578,599 @@ const ReferralsManagement = () => {
                 </div>
             </header>
 
+            {/* Welcome Message for Referrers */}
+            {isReferrer && showWelcomeMessage && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-lg shadow-2xl border-2 border-blue-400 max-w-md pointer-events-auto">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-1">
+                                <h3 className="font-bold text-lg mb-1">Thank You! 🎉</h3>
+                                <p className="text-sm text-blue-50">
+                                    Thank you for referring members of our community. We greatly appreciate you!
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowWelcomeMessage(false)}
+                                className="text-white/80 hover:text-white transition-colors flex-shrink-0"
+                            >
+                                <XMarkIcon className="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto px-4 py-3">
 
-                {/* Stats + Filters Combined in One Row */}
-                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2.5 mb-3 transition-colors">
-                    <div className="flex items-end gap-4">
-                        {/* Stats Section - Left Side (Compact) */}
-                        <div className="flex items-center gap-2.5 text-xs flex-shrink-0 pb-1 min-w-fit">
-                            {!isReferrer && (
-                                <>
-                                    <div className="flex items-center gap-1.5">
-                                        <ChartBarIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                        <span className="text-gray-500 dark:text-gray-400">Total:</span>
-                                        <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
-                                    </div>
-                                    <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
-                                </>
-                            )}
-                            <div className="flex items-center gap-1.5">
-                                <ClockIcon className="h-3.5 w-3.5 text-yellow-500" />
-                                <span className="text-gray-500 dark:text-gray-400">Pending:</span>
-                                <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
-                            </div>
-                            <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
-                            <div className="flex items-center gap-1.5">
-                                <CheckCircleIcon className="h-3.5 w-3.5 text-blue-500" />
-                                <span className="text-gray-500 dark:text-gray-400">Completed:</span>
-                                <span className="font-bold text-blue-600 dark:text-blue-400">{stats.completed}</span>
-                            </div>
-                        </div>
-
-                        {/* Vertical Divider */}
-                        <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 flex-shrink-0"></div>
-
-                        {/* Filters Section - Right Side (Narrower) */}
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                            {/* Status Filter */}
-                            <div className={isReferrer ? "md:col-span-3" : "md:col-span-2"}>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                {/* Tabs - Only for Lead+ users */}
+                {(isLead || isAdmin) && (
+                    <div className="mb-3">
+                        <div className="border-b border-gray-200 dark:border-gray-700">
+                            <nav className="-mb-px flex space-x-4" aria-label="Tabs">
+                                <button
+                                    onClick={() => setActiveTab('referrals')}
+                                    className={`${activeTab === 'referrals'
+                                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        } whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors`}
                                 >
-                                    <option value="">All Statuses</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Declined">Declined</option>
-                                    <option value="Completed">Completed</option>
-                                    {!isReferrer && <option value="Cancelled">Cancelled</option>}
-                                </select>
+                                    Member Referrals
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('companies')}
+                                    className={`${activeTab === 'companies'
+                                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        } whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors`}
+                                >
+                                    Companies
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                )}
+
+                {/* Stats + Filters for Member Referrals Tab */}
+                {activeTab === 'referrals' && (
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2.5 mb-3 transition-colors">
+                        <div className="flex items-end gap-4">
+                            {/* Stats Section - Left Side (Compact) */}
+                            <div className="flex items-center gap-2.5 text-xs flex-shrink-0 pb-1 min-w-fit">
+                                {!isReferrer && (
+                                    <>
+                                        <div className="flex items-center gap-1.5">
+                                            <ChartBarIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                            <span className="text-gray-500 dark:text-gray-400">Total:</span>
+                                            <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
+                                        </div>
+                                        <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
+                                    </>
+                                )}
+                                <div className="flex items-center gap-1.5">
+                                    <ClockIcon className="h-3.5 w-3.5 text-yellow-500" />
+                                    <span className="text-gray-500 dark:text-gray-400">Pending:</span>
+                                    <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
+                                </div>
+                                <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
+                                <div className="flex items-center gap-1.5">
+                                    <CheckCircleIcon className="h-3.5 w-3.5 text-blue-500" />
+                                    <span className="text-gray-500 dark:text-gray-400">Completed:</span>
+                                    <span className="font-bold text-blue-600 dark:text-blue-400">{stats.completed}</span>
+                                </div>
                             </div>
 
-                            {/* Member Filter */}
-                            <div className={isReferrer ? "md:col-span-5" : "md:col-span-4"}>
-                                <input
-                                    type="text"
-                                    placeholder="Filter by member..."
-                                    value={memberFilter}
-                                    onChange={(e) => setMemberFilter(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                            </div>
+                            {/* Vertical Divider */}
+                            <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 flex-shrink-0"></div>
 
-                            {/* Company Filter - Hidden for referrers */}
-                            {!isReferrer && (
-                                <div className="md:col-span-3">
+                            {/* Filters Section - Right Side (Narrower) */}
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                {/* Status Filter */}
+                                <div className={isReferrer ? "md:col-span-2" : "md:col-span-2"}>
+                                    <select
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    >
+                                        <option value="">All Statuses</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Approved">Approved</option>
+                                        {!isReferrer && <option value="Declined">Declined</option>}
+                                        <option value="Completed">Completed</option>
+                                        {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                    </select>
+                                </div>
+
+                                {/* Member Filter */}
+                                <div className={isReferrer ? "md:col-span-5" : "md:col-span-4"}>
                                     <input
                                         type="text"
-                                        placeholder="Company..."
-                                        value={companyFilter}
-                                        onChange={(e) => setCompanyFilter(e.target.value)}
+                                        placeholder="Filter by member..."
+                                        value={memberFilter}
+                                        onChange={(e) => setMemberFilter(e.target.value)}
                                         className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                                     />
                                 </div>
-                            )}
 
-                            {/* Sort Dropdown */}
-                            <div className={isReferrer ? "md:col-span-2" : "md:col-span-2"}>
-                                <select
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                >
-                                    <option value="date_desc">Date ↓</option>
-                                    <option value="date_asc">Date ↑</option>
-                                    <option value="company_asc">Company A-Z</option>
-                                    <option value="company_desc">Company Z-A</option>
-                                    <option value="member_asc">Member A-Z</option>
-                                    <option value="member_desc">Member Z-A</option>
-                                    <option value="status_asc">Status A-Z</option>
-                                    <option value="status_desc">Status Z-A</option>
-                                </select>
-                            </div>
+                                {/* Company Filter - Hidden for referrers */}
+                                {!isReferrer && (
+                                    <div className="md:col-span-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Company..."
+                                            value={companyFilter}
+                                            onChange={(e) => setCompanyFilter(e.target.value)}
+                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                )}
 
-                            {/* Date Range Toggle */}
-                            <div className={isReferrer ? "md:col-span-2" : "md:col-span-1"}>
-                                <button
-                                    onClick={() => setShowDateFilter(!showDateFilter)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center"
-                                >
-                                    <span>{dateRange.start || dateRange.end ? '📅' : '📅'}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                                {/* Sort Field Dropdown */}
+                                <div className="md:col-span-2">
+                                    <select
+                                        value={sortField}
+                                        onChange={(e) => setSortField(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
+                                    >
+                                        <option value="date">📅 Date</option>
+                                        <option value="company">🏢 Company</option>
+                                        <option value="member">👤 Member</option>
+                                        <option value="status">📊 Status</option>
+                                    </select>
+                                </div>
 
-                    {/* Date Range - Collapsible Section */}
-                    {showDateFilter && (
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                            <div className="md:col-span-6">
-                                <label className="block text-left text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
-                                    Date Range
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="date"
-                                        value={dateRange.start}
-                                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                                        placeholder="Start date"
-                                        className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={dateRange.end}
-                                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                                        placeholder="End date"
-                                        className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    />
+                                {/* Sort Order Dropdown */}
+                                <div className="md:col-span-2">
+                                    <select
+                                        value={sortOrder}
+                                        onChange={(e) => setSortOrder(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
+                                    >
+                                        <option value="desc">↓ Desc</option>
+                                        <option value="asc">↑ Asc</option>
+                                    </select>
+                                </div>
+
+                                {/* Date Range Toggle - More Compact */}
+                                <div className={isReferrer ? "md:col-span-1" : "md:col-span-1"}>
+                                    <button
+                                        onClick={() => setShowDateFilter(!showDateFilter)}
+                                        className={`w-full px-3 py-2 text-sm border ${showDateFilter || dateRange.start || dateRange.end ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'} rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 shadow-sm`}
+                                        title="Date Range Filter"
+                                    >
+                                        <span>📅</span>
+                                        {(dateRange.start || dateRange.end) && <span className="text-xs">●</span>}
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    )}
 
-                    {/* Active Filters & Clear */}
-                    {(searchQuery || statusFilter || memberFilter || (!isReferrer && companyFilter) || dateRange.start || dateRange.end) && (
-                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-left text-xs text-gray-500 dark:text-gray-400">Active:</span>
-                                {statusFilter && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                        Status: {statusFilter}
-                                    </span>
-                                )}
-                                {memberFilter && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                        Member: {memberFilter}
-                                    </span>
-                                )}
-                                {!isReferrer && companyFilter && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                        Company: {companyFilter}
-                                    </span>
-                                )}
-                                {(dateRange.start || dateRange.end) && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                        Date: {dateRange.start || '...'} to {dateRange.end || '...'}
-                                    </span>
-                                )}
+                        {/* Date Range - Collapsible Section */}
+                        {showDateFilter && (
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                <div className="md:col-span-6">
+                                    <label className="block text-left text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+                                        Date Range
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="date"
+                                            value={dateRange.start}
+                                            onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                                            placeholder="Start date"
+                                            className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                        <input
+                                            type="date"
+                                            value={dateRange.end}
+                                            onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                                            placeholder="End date"
+                                            className="flex-1 px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <button
-                                onClick={clearAllFilters}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                            >
-                                <XMarkIcon className="h-3 w-3" />
-                                Clear All
-                            </button>
-                        </div>
-                    )}
-                </div>
+                        )}
+
+                        {/* Active Filters & Clear */}
+                        {(searchQuery || statusFilter || memberFilter || (!isReferrer && companyFilter) || dateRange.start || dateRange.end) && (
+                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-left text-xs text-gray-500 dark:text-gray-400">Active:</span>
+                                    {statusFilter && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Status: {statusFilter}
+                                        </span>
+                                    )}
+                                    {memberFilter && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Member: {memberFilter}
+                                        </span>
+                                    )}
+                                    {!isReferrer && companyFilter && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Company: {companyFilter}
+                                        </span>
+                                    )}
+                                    {(dateRange.start || dateRange.end) && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Date: {dateRange.start || '...'} to {dateRange.end || '...'}
+                                        </span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                >
+                                    <XMarkIcon className="h-3 w-3" />
+                                    Clear All
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Referrals Table */}
-                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
-                                    {visibleColumns.company && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Company
-                                        </th>
-                                    )}
-                                    {visibleColumns.jobTitle && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Position
-                                        </th>
-                                    )}
-                                    {visibleColumns.member && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Member
-                                        </th>
-                                    )}
-                                    {visibleColumns.email && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                    )}
-                                    {visibleColumns.phone_number && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Phone Number
-                                        </th>
-                                    )}
-                                    {visibleColumns.status && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                    )}
-                                    {visibleColumns.resume && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Resume
-                                        </th>
-                                    )}
-                                    {visibleColumns.essay && (
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Essay
-                                        </th>
-                                    )}
-                                    {visibleColumns.actions && (
-                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Actions
-                                        </th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
-                                {sortedReferrals.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="9" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                                            No referral requests found
-                                        </td>
+                {activeTab === 'referrals' && (
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                        {visibleColumns.company && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Company
+                                            </th>
+                                        )}
+                                        {visibleColumns.jobTitle && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Position
+                                            </th>
+                                        )}
+                                        {visibleColumns.member && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Member
+                                            </th>
+                                        )}
+                                        {visibleColumns.email && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Email
+                                            </th>
+                                        )}
+                                        {visibleColumns.phone_number && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Phone Number
+                                            </th>
+                                        )}
+                                        {visibleColumns.status && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                        )}
+                                        {visibleColumns.resume && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Resume
+                                            </th>
+                                        )}
+                                        {visibleColumns.essay && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Essay
+                                            </th>
+                                        )}
+                                        {visibleColumns.actions && (
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        )}
                                     </tr>
-                                ) : (
-                                    sortedReferrals.map((ref) => (
-                                        <tr
-                                            key={ref.id}
-                                            onClick={() => {
-                                                setSelectedReferral(ref);
-                                                setIsManagementModalOpen(true);
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    setSelectedReferral(ref);
-                                                    setIsManagementModalOpen(true);
-                                                }
-                                            }}
-                                            tabIndex={0}
-                                            role="button"
-                                            aria-label={`View referral request for ${ref.user_name || 'member'} at ${ref.company?.name || 'company'}`}
-                                            className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
-                                        >
-                                            {visibleColumns.company && (
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
-                                                            <img
-                                                                src={ref.company?.image || `https://logo.clearbit.com/${(ref.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
-                                                                alt={ref.company?.name}
-                                                                className="h-full w-full object-contain"
-                                                                onError={(e) => {
-                                                                    e.target.onerror = null;
-                                                                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
-                                                            {ref.company?.name}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.jobTitle && (
-                                                <td className="px-4 py-3">
-                                                    <div>
-                                                        <div className="text-left font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
-                                                        <div className="text-left text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.member && (
-                                                <td className="px-4 py-3">
-                                                    <div className="space-y-1">
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                                    {sortedReferrals.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="9" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                No referral requests found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        sortedReferrals.map((ref) => (
+                                            <tr
+                                                key={ref.id}
+                                                className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
+                                            >
+                                                {visibleColumns.company && (
+                                                    <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
-                                                            <button
-                                                                onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
-                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                title="Copy name"
-                                                            >
-                                                                {copiedField === `name-${ref.id}` ? (
-                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                ) : (
-                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                                )}
-                                                            </button>
+                                                            <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                                <img
+                                                                    src={getCompanyLogoUrl(ref.company?.name)}
+                                                                    alt={ref.company?.name}
+                                                                    className="h-full w-full object-contain"
+                                                                    onError={handleCompanyLogoError}
+                                                                />
+                                                            </div>
+                                                            <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
+                                                                {ref.company?.name}
+                                                            </span>
                                                         </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.jobTitle && (
+                                                    <td className="px-4 py-3">
+                                                        <div>
+                                                            <div className="text-left font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
+                                                            <div className="text-left text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.member && (
+                                                    <td className="px-4 py-3">
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
+                                                                <button
+                                                                    onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
+                                                                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                    title="Copy name"
+                                                                >
+                                                                    {copiedField === `name-${ref.id}` ? (
+                                                                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                    ) : (
+                                                                        <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                    )}
+                                                                </button>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                                <button
+                                                                    onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                    title="Copy email"
+                                                                >
+                                                                    {copiedField === `email-${ref.id}` ? (
+                                                                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                    ) : (
+                                                                        <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                    )}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.email && (
+                                                    <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                             <button
-                                                                onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
                                                                 className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                 title="Copy email"
                                                             >
-                                                                {copiedField === `email-${ref.id}` ? (
+                                                                {copiedField === `email-standalone-${ref.id}` ? (
                                                                     <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                                                                 ) : (
                                                                     <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                                                                 )}
                                                             </button>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.email && (
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
-                                                        <button
-                                                            onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
-                                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                            title="Copy email"
-                                                        >
-                                                            {copiedField === `email-standalone-${ref.id}` ? (
-                                                                <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                            ) : (
-                                                                <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                            )}
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.phone_number && (
-                                                <td className="px-4 py-3">
-                                                    {ref.phone_number ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
-                                                            <button
-                                                                onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
-                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                title="Copy phone number"
+                                                    </td>
+                                                )}
+                                                {visibleColumns.phone_number && (
+                                                    <td className="px-4 py-3">
+                                                        {ref.phone_number ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
+                                                                <button
+                                                                    onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
+                                                                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                    title="Copy phone number"
+                                                                >
+                                                                    {copiedField === `phone-${ref.id}` ? (
+                                                                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                    ) : (
+                                                                        <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                    )}
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-left text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.status && (
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex justify-start">
+                                                            <select
+                                                                value={ref.status}
+                                                                onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                                className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
+                                                                    : ref.status === 'Pending'
+                                                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
+                                                                        : ref.status === 'Declined'
+                                                                            ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
+                                                                            : ref.status === 'Cancelled'
+                                                                                ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
+                                                                                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
+                                                                    }`}
                                                             >
-                                                                {copiedField === `phone-${ref.id}` ? (
-                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                ) : (
-                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                                )}
+                                                                <option value="Pending">Pending</option>
+                                                                <option value="Completed">Completed</option>
+                                                                {!isReferrer && <option value="Declined">Declined</option>}
+                                                                {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.resume && (
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex justify-start">
+                                                            {ref.has_resume ? (
+                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
+                                                                    Yes
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                    No
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.essay && (
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex justify-start">
+                                                            {ref.has_essay ? (
+                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
+                                                                    Yes
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                    No
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.actions && (
+                                                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                                                        <div className="flex items-center justify-start gap-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedReferral(ref);
+                                                                    setIsManagementModalOpen(true);
+                                                                }}
+                                                                className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                            >
+                                                                <EyeIcon className="h-3.5 w-3.5" />
+                                                                View
                                                             </button>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-left text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
-                                                    )}
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* Companies Table - Only for Lead+ */}
+                {activeTab === 'companies' && (isLead || isAdmin) && (
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Company
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Referral Link
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Requirements
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    {companies.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                No companies found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        companies.map((company) => (
+                                            <tr
+                                                key={company.id}
+                                                className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                                                onClick={() => {
+                                                    setSelectedCompany(company);
+                                                    setShowCompanyModal(true);
+                                                }}
+                                            >
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        {company.image && (
+                                                            <img
+                                                                src={company.image}
+                                                                alt={company.name}
+                                                                className="h-8 w-8 rounded object-cover"
+                                                            />
+                                                        )}
+                                                        <div className="flex justify-start">
+                                                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {company.name}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                            )}
-                                            {visibleColumns.status && (
                                                 <td className="px-4 py-3">
-                                                    <select
-                                                        value={ref.status}
-                                                        onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
-                                                        className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
-                                                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
-                                                            : ref.status === 'Pending'
-                                                                ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
-                                                                : ref.status === 'Declined'
-                                                                    ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
-                                                                    : ref.status === 'Cancelled'
-                                                                        ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
-                                                                        : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
-                                                            }`}
-                                                    >
-                                                        <option value="Pending">Pending</option>
-                                                        <option value="Completed">Completed</option>
-                                                        <option value="Declined">Declined</option>
-                                                        {!isReferrer && <option value="Cancelled">Cancelled</option>}
-                                                    </select>
+                                                    <div className="flex justify-start">
+                                                        {company.referral_link ? (
+                                                            <a
+                                                                href={company.referral_link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate max-w-xs"
+                                                            >
+                                                                {company.referral_link}
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
+                                                        )}
+                                                    </div>
                                                 </td>
-                                            )}
-                                            {visibleColumns.resume && (
                                                 <td className="px-4 py-3">
-                                                    {ref.has_resume ? (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
-                                                            Yes
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                            No
-                                                        </span>
-                                                    )}
+                                                    <div className="flex justify-start gap-1 flex-wrap">
+                                                        {company.referral_materials?.requires_resume && (
+                                                            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                                                Resume
+                                                            </span>
+                                                        )}
+                                                        {company.referral_materials?.requires_essay && (
+                                                            <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                                                                Essay
+                                                            </span>
+                                                        )}
+                                                        {company.referral_materials?.requires_phone_number && (
+                                                            <span className="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                                                                Phone
+                                                            </span>
+                                                        )}
+                                                        {!company.referral_materials?.requires_resume &&
+                                                            !company.referral_materials?.requires_essay &&
+                                                            !company.referral_materials?.requires_phone_number && (
+                                                                <span className="text-sm text-gray-400 dark:text-gray-500">None</span>
+                                                            )}
+                                                    </div>
                                                 </td>
-                                            )}
-                                            {visibleColumns.essay && (
-                                                <td className="px-4 py-3">
-                                                    {ref.has_essay ? (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
-                                                            Yes
-                                                        </span>
-                                                    ) : (
-                                                        <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                            No
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            )}
-                                            {visibleColumns.actions && (
-                                                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                                                    <div className="flex items-center justify-end gap-2">
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <div className="flex justify-start">
                                                         <button
-                                                            onClick={() => {
-                                                                setSelectedReferral(ref);
-                                                                setIsManagementModalOpen(true);
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditCompanyOpen(company);
                                                             }}
-                                                            className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                                                         >
-                                                            <EyeIcon className="h-3.5 w-3.5" />
-                                                            View
+                                                            <PencilIcon className="h-4 w-4" />
                                                         </button>
                                                     </div>
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Results Count */}
                 {sortedReferrals.length > 0 && (
@@ -921,6 +1285,261 @@ const ReferralsManagement = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowAddCompany(false)}
+                                    className="px-4 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* View Company Modal */}
+            {showCompanyModal && selectedCompany && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-lg sticky top-0">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    {selectedCompany.image && (
+                                        <img
+                                            src={selectedCompany.image}
+                                            alt={selectedCompany.name}
+                                            className="h-10 w-10 rounded object-cover"
+                                        />
+                                    )}
+                                    <h2 className="text-lg font-bold">{selectedCompany.name}</h2>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            handleEditCompanyOpen(selectedCompany);
+                                            setShowCompanyModal(false);
+                                        }}
+                                        className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                                        title="Edit Company"
+                                    >
+                                        <PencilIcon className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowCompanyModal(false);
+                                            setSelectedCompany(null);
+                                        }}
+                                        className="text-white/80 hover:text-white transition-colors"
+                                    >
+                                        <XMarkIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            {/* Referral Link - Always show */}
+                            <div>
+                                <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Referral Link</h3>
+                                {selectedCompany.referral_link ? (
+                                    <a
+                                        href={selectedCompany.referral_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-left text-sm text-blue-600 dark:text-blue-400 hover:underline break-all"
+                                    >
+                                        {selectedCompany.referral_link}
+                                    </a>
+                                ) : (
+                                    <p className="text-left text-sm text-gray-500 dark:text-gray-400">Not provided</p>
+                                )}
+                            </div>
+
+                            {/* Requirements - Always show */}
+                            <div>
+                                <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Required Materials</h3>
+                                <div className="flex gap-2 flex-wrap">
+                                    {selectedCompany.referral_materials?.requires_resume && (
+                                        <span className="px-3 py-1 text-sm font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Resume
+                                        </span>
+                                    )}
+                                    {selectedCompany.referral_materials?.requires_essay && (
+                                        <span className="px-3 py-1 text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                                            Essay
+                                        </span>
+                                    )}
+                                    {selectedCompany.referral_materials?.requires_phone_number && (
+                                        <span className="px-3 py-1 text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                                            Phone Number
+                                        </span>
+                                    )}
+                                    {!selectedCompany.referral_materials?.requires_resume &&
+                                        !selectedCompany.referral_materials?.requires_essay &&
+                                        !selectedCompany.referral_materials?.requires_phone_number && (
+                                            <span className="text-left text-sm text-gray-500 dark:text-gray-400">No special requirements</span>
+                                        )}
+                                </div>
+                            </div>
+
+                            {/* Description */}
+                            {selectedCompany.description && (
+                                <div>
+                                    <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description</h3>
+                                    <p className="text-left text-sm text-gray-600 dark:text-gray-400">{selectedCompany.description}</p>
+                                </div>
+                            )}
+
+                            {/* Company Details Grid */}
+                            {(selectedCompany.metadata?.industry || selectedCompany.metadata?.size || selectedCompany.metadata?.headquarters) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Industry */}
+                                    {selectedCompany.metadata?.industry && (
+                                        <div>
+                                            <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Industry</h3>
+                                            <p className="text-left text-sm text-gray-600 dark:text-gray-400">{selectedCompany.metadata.industry}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Size */}
+                                    {selectedCompany.metadata?.size && (
+                                        <div>
+                                            <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Company Size</h3>
+                                            <p className="text-left text-sm text-gray-600 dark:text-gray-400">{selectedCompany.metadata.size}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Headquarters */}
+                                    {selectedCompany.metadata?.headquarters && (
+                                        <div>
+                                            <h3 className="text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Headquarters</h3>
+                                            <p className="text-left text-sm text-gray-600 dark:text-gray-400">{selectedCompany.metadata.headquarters}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Company Modal */}
+            {showEditCompany && editingCompany && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-3 rounded-t-lg sticky top-0">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <BuildingOfficeIcon className="h-5 w-5" />
+                                    <h2 className="text-base font-bold">Edit Company: {editingCompany.name}</h2>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowEditCompany(false);
+                                        setEditingCompany(null);
+                                    }}
+                                    className="text-white/80 hover:text-white transition-colors"
+                                >
+                                    <XMarkIcon className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleEditCompany} className="p-4 space-y-3">
+                            {/* Company Name */}
+                            <div>
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                                    Company Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editCompanyForm.name}
+                                    onChange={(e) => setEditCompanyForm({ ...editCompanyForm, name: e.target.value })}
+                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                    placeholder="e.g., Google, Microsoft"
+                                />
+                            </div>
+
+                            {/* Website */}
+                            <div>
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                                    Website
+                                </label>
+                                <input
+                                    type="url"
+                                    value={editCompanyForm.website}
+                                    onChange={(e) => setEditCompanyForm({ ...editCompanyForm, website: e.target.value })}
+                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                    placeholder="https://company.com"
+                                />
+                            </div>
+
+                            {/* Referral Link */}
+                            <div>
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                                    Referral Link
+                                </label>
+                                <input
+                                    type="url"
+                                    value={editCompanyForm.referral_link}
+                                    onChange={(e) => setEditCompanyForm({ ...editCompanyForm, referral_link: e.target.value })}
+                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                    placeholder="https://company.com/referral-portal"
+                                />
+                            </div>
+
+                            {/* Referral Requirements */}
+                            <div>
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
+                                    Referral Requirements
+                                </label>
+                                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded p-2.5 space-y-1.5">
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            checked={editCompanyForm.requires_resume}
+                                            onChange={(e) => setEditCompanyForm({ ...editCompanyForm, requires_resume: e.target.checked })}
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
+                                        />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Resume</span>
+                                    </label>
+
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            checked={editCompanyForm.requires_phone_number}
+                                            onChange={(e) => setEditCompanyForm({ ...editCompanyForm, requires_phone_number: e.target.checked })}
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
+                                        />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Phone Number</span>
+                                    </label>
+
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            checked={editCompanyForm.requires_essay}
+                                            onChange={(e) => setEditCompanyForm({ ...editCompanyForm, requires_essay: e.target.checked })}
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
+                                        />
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Referral Essay</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 pt-1">
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-3 py-1.5 text-sm bg-gradient-to-r from-amber-600 to-orange-600 hover:from-orange-700 hover:to-amber-700 text-white font-medium rounded transition-all"
+                                >
+                                    Update Company
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditCompany(false);
+                                        setEditingCompany(null);
+                                    }}
                                     className="px-4 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                                 >
                                     Cancel

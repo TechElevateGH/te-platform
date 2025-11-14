@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon, BuildingOfficeIcon } from '@heroicons/react/20/solid'
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../../utils'
 
 const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
     const [query, setQuery] = useState('')
@@ -138,20 +139,11 @@ const CompanyCombobox = ({ companies, value, onChange, required = true }) => {
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-shrink-0">
                                                     <img
-                                                        src={`https://logo.clearbit.com/${(company || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                        src={getCompanyLogoUrl(company)}
                                                         alt={company || ''}
                                                         className="w-8 h-8 rounded-lg object-cover shadow-sm bg-white"
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none'
-                                                            e.target.nextSibling.style.display = 'flex'
-                                                        }}
+                                                        onError={handleCompanyLogoError}
                                                     />
-                                                    <div
-                                                        className={`w-8 h-8 rounded-lg hidden items-center justify-center shadow-sm ${active ? 'bg-gradient-to-r from-blue-600 to-blue-700' : 'bg-gray-100 dark:bg-gray-600'
-                                                            }`}
-                                                    >
-                                                        <BuildingOfficeIcon className={`h-4 w-4 ${active ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
-                                                    </div>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'

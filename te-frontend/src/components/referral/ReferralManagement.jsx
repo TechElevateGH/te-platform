@@ -17,6 +17,7 @@ import { FormTextArea } from '../_custom/FormInputs';
 import SelectCombobox from '../_custom/SelectCombobox';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { getCompanyLogoUrl, handleCompanyLogoError } from '../../utils';
 
 const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
     const { accessToken } = useAuth();
@@ -230,9 +231,10 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Company</p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <img
-                                                        src={referral.company.image}
+                                                        src={getCompanyLogoUrl(referral.company.name)}
                                                         alt={referral.company.name}
                                                         className="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600"
+                                                        onError={handleCompanyLogoError}
                                                     />
                                                     <p className="font-semibold text-gray-900 dark:text-white">{referral.company.name}</p>
                                                 </div>
@@ -244,10 +246,22 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                             <div className="col-span-2">
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Job Title</p>
                                                 <p className="font-semibold text-gray-900 dark:text-white mt-1">{referral.job_title}</p>
-                                                {referral.job_id && (
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Job ID: {referral.job_id}</p>
-                                                )}
                                             </div>
+                                            {referral.job_id && (
+                                                <div className="col-span-2">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Job ID(s)</p>
+                                                    <div className="flex flex-wrap gap-2 mt-1">
+                                                        {referral.job_id.split(/[,;\s]+/).filter(id => id.trim()).map((id, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className="inline-flex items-center px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-md border border-blue-200 dark:border-blue-700"
+                                                            >
+                                                                {id.trim()}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 

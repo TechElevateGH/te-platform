@@ -180,7 +180,7 @@ export const NotificationProvider = ({ children }) => {
                 });
 
                 // Check for new referral requests
-                const allReferralsResponse = await axiosInstance.get('/referrals/all', {
+                const allReferralsResponse = await axiosInstance.get('/referrals', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 

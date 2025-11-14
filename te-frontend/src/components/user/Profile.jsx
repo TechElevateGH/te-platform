@@ -19,6 +19,7 @@ import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
 import EditPrivilegedAccount from './EditPrivilegedAccount';
+import { getUserEndpoint } from '../../utils/userEndpoints';
 
 const Profile = () => {
     const { userInfo, setUserInfo } = useData();
@@ -156,8 +157,9 @@ const Profile = () => {
                 const updateData = { ...editedInfo };
                 delete updateData.email; // Remove email from update
 
+                const endpoint = getUserEndpoint(userRole, userId);
                 const response = await axiosInstance.patch(
-                    `/users/${userId}`,
+                    endpoint,
                     updateData,
                     {
                         headers: {

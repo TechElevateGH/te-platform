@@ -45,6 +45,23 @@ class ReferralCompanyCreate(BaseModel):
     requires_essay: bool = True
 
 
+class ReferralCompanyUpdate(BaseModel):
+    """Schema for updating referral companies"""
+
+    name: Optional[str] = None
+    image: Optional[str] = None
+    referral_link: Optional[str] = None
+    description: Optional[str] = None
+    website: Optional[str] = None
+    industry: Optional[str] = None
+    size: Optional[str] = None
+    headquarters: Optional[str] = None
+    # Referral requirements
+    requires_resume: Optional[bool] = None
+    requires_phone_number: Optional[bool] = None
+    requires_essay: Optional[bool] = None
+
+
 class CompanyReadBase(ReferralCompanyBase):
     id: str  # MongoDB ObjectId as string
     domain: str
