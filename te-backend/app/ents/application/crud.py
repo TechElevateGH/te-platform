@@ -7,7 +7,6 @@ import app.core.service as service
 import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
 from fastapi import HTTPException
-from app.core.settings import settings
 from googleapiclient.http import MediaFileUpload
 from pymongo.database import Database
 
@@ -41,7 +40,6 @@ def create_application(
         "archived": False,
     }
 
-    # Add to user's applications array using $push
     result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$push": {"applications": application_data}}
     )
@@ -180,137 +178,6 @@ def delete_application(db: Database, *, user_id: str, application_id: str) -> bo
     return result.modified_count > 0
 
 
-# ============= Resume CRUD Operations (Embedded in member_users) =============
-
-
-def read_resumes(db: Database, *, user_id: str) -> list[application_models.Resume]:
-    """Read all resumes for a user from their embedded resumes array"""
-    from bson import ObjectId
-
-    user = db.member_users.find_one({"_id": ObjectId(user_id)}, {"resumes": 1})
-
-    if not user or "resumes" not in user:
-        return []
-
-    return [application_models.Resume(**resume) for resume in user.get("resumes", [])]
-
-
-def upload_file(file, parent) -> application_schema.FileUpload:
-    """Upload a file to Google Drive"""
-    drive_service = service.get_drive_service()
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(file.file.read())
-
-    file_metadata = {
-        "name": file.filename,
-        "parents": [parent],
-    }
-
-    media = MediaFileUpload(temp_file.name, resumable=True)
-    uploaded_file = (
-        drive_service.files()
-        .create(
-            body=file_metadata,
-            media_body=media,
-            fields="id,name,webContentLink",
-        )
-        .execute()
-    )
-
-    os.remove(temp_file.name)
-    return application_schema.FileUpload(
-        file_id=uploaded_file.get("id"),
-        name=uploaded_file.get("name"),
-        link=uploaded_file.get("webContentLink"),
-    )
-
-
-def create_resume(
-    db: Database, file, user_id: str, role: str = "", notes: str = ""
-) -> application_models.Resume:
-    """Upload and create a new resume for a member (embedded in user document)"""
-    from bson import ObjectId
-
-    # Upload to Google Drive
-    uploaded_file = upload_file(file=file, parent=settings.GDRIVE_RESUMES)
-
-    new_resume = {
-        "id": str(uuid4()),  # Generate unique ID
-        "file_id": uploaded_file.file_id,
-        "name": uploaded_file.name,
-        "link": uploaded_file.link[: uploaded_file.link.find("&export=download")]
-        if "&export=download" in uploaded_file.link
-        else uploaded_file.link,
-        "date": date.today().strftime("%Y-%m-%d"),
-        "role": role,
-        "notes": notes,
-        "archived": False,
-    }
-
-    # Add to user's resumes array using $push
-    db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$push": {"resumes": new_resume}}
-    )
-
-    return application_models.Resume(**new_resume)
-
-
-def delete_resume(db: Database, *, resume_id: str, user_id: str) -> bool:
-    """Delete a resume by UUID from user's embedded resumes array"""
-    from bson import ObjectId
-
-    # Remove from user's resumes array using $pull
-    result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$pull": {"resumes": {"id": resume_id}}}
-    )
-
-    return result.modified_count > 0
-
-
-def update_resume(
-    db: Database,
-    *,
-    resume_id: str,
-    user_id: str,
-    data: application_schema.ResumeUpdate,
-) -> application_models.Resume | None:
-    """Update resume metadata such as name, role, notes, or archived flag"""
-    from bson import ObjectId
-
-    update_fields: dict[str, object] = {}
-
-    if data.name is not None:
-        update_fields["resumes.$[res].name"] = data.name
-    if data.role is not None:
-        update_fields["resumes.$[res].role"] = data.role
-    if data.notes is not None:
-        update_fields["resumes.$[res].notes"] = data.notes
-    if data.archived is not None:
-        update_fields["resumes.$[res].archived"] = data.archived
-
-    if not update_fields:
-        return None
-
-    result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)},
-        {"$set": update_fields},
-        array_filters=[{"res.id": resume_id}],
-    )
-
-    if result.modified_count == 0:
-        return None
-
-    updated_user = db.member_users.find_one(
-        {"_id": ObjectId(user_id)},
-        {"resumes": {"$elemMatch": {"id": resume_id}}},
-    )
-
-    if not updated_user or "resumes" not in updated_user or not updated_user["resumes"]:
-        return None
-
-    return application_models.Resume(**updated_user["resumes"][0])
-
-
 # ============= Helper Functions =============
 
 
@@ -341,20 +208,3 @@ def upload_member_file(file, parent) -> application_schema.FileUpload:
         name=uploaded_file.get("name"),
         link=uploaded_file.get("webContentLink"),
     )
-
-
-# def update(
-#     db: Database,
-#     *,
-#     db_obj: company_models.Company,
-#     data: referral_company_schema.CompanyUpdate | dict[str, Any],
-# ) -> company_models.Company:
-#     if isinstance(data, dict):
-#         update_data = data
-#     else:
-#         update_data = data.dict(exclude_unset=True)
-#     if update_data["password"]:
-#         hashed_password = security.get_password_hash(update_data["password"])
-#         del update_data["password"]
-#         update_data["hashed_password"] = hashed_password
-#     return super().update(db, db_obj=db_obj, data=update_data)

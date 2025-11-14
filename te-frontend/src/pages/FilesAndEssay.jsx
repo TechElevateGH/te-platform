@@ -84,7 +84,7 @@ const Files = () => {
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axiosInstance.post('/resume-reviews', reviewFormData, {
+            await axiosInstance.post('/resumes/reviews', reviewFormData, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
 

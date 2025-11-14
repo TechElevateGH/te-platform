@@ -112,7 +112,7 @@ const AdminFiles = () => {
     // Fetch resume review requests
     const fetchResumeReviews = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/resume-reviews/all', {
+            const response = await axiosInstance.get('/resumes/reviews/all', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setResumeReviews(response.data?.reviews || []);
@@ -146,7 +146,7 @@ const AdminFiles = () => {
     // Assign review to a reviewer
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
         try {
-            await axiosInstance.patch(`/resume-reviews/${reviewId}`, {
+            await axiosInstance.patch(`/resumes/reviews/${reviewId}`, {
                 status: 'In Review'
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -182,7 +182,7 @@ const AdminFiles = () => {
 
         setSubmittingReview(true);
         try {
-            await axiosInstance.patch(`/resume-reviews/${selectedReview.id}`, {
+            await axiosInstance.patch(`/resumes/reviews/${selectedReview.id}`, {
                 feedback: reviewFeedback,
                 status: reviewStatus
             }, {

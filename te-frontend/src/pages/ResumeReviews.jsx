@@ -131,7 +131,7 @@ const ResumeReviews = () => {
         setLoading(true);
         try {
             // Fetch user's own requests
-            const myResponse = await axiosInstance.get('/resume-reviews/my-requests', {
+            const myResponse = await axiosInstance.get('/resumes/reviews/my-requests', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             const myReqs = myResponse.data?.reviews || [];
@@ -139,7 +139,7 @@ const ResumeReviews = () => {
 
             // If volunteer or above, fetch all requests
             if (isVolunteerOrAbove) {
-                const allResponse = await axiosInstance.get('/resume-reviews/all', {
+                const allResponse = await axiosInstance.get('/resumes/reviews/all', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
                 setReviews(allResponse.data?.reviews || []);
@@ -190,7 +190,7 @@ const ResumeReviews = () => {
         if (!isVolunteerOrAbove) return;
 
         try {
-            const response = await axiosInstance.get('/resume-reviews/my-assignments', {
+            const response = await axiosInstance.get('/resumes/reviews/my-assignments', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setMyAssignedReviews(response.data?.reviews || []);
@@ -204,7 +204,7 @@ const ResumeReviews = () => {
         if (!isAdmin) return;
 
         try {
-            const response = await axiosInstance.get('/resume-reviews/assignments', {
+            const response = await axiosInstance.get('/resumes/reviews/assignments', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setAllAssignments(response.data?.assignments || []);
@@ -225,7 +225,7 @@ const ResumeReviews = () => {
     const handleSubmitRequest = async (e) => {
         e.preventDefault();
         try {
-            await axiosInstance.post('/resume-reviews', formData, {
+            await axiosInstance.post('/resumes/reviews', formData, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
 
@@ -254,7 +254,7 @@ const ResumeReviews = () => {
 
     const handleUpdateStatus = async (reviewId, newStatus, feedback = '') => {
         try {
-            await axiosInstance.patch(`/resume-reviews/${reviewId}`, {
+            await axiosInstance.patch(`/resumes/reviews/${reviewId}`, {
                 status: newStatus,
                 feedback: feedback
             }, {
@@ -282,7 +282,7 @@ const ResumeReviews = () => {
             type: 'warning',
             onConfirm: async () => {
                 try {
-                    await axiosInstance.patch(`/resume-reviews/${reviewId}/cancel`, {}, {
+                    await axiosInstance.patch(`/resumes/reviews/${reviewId}/cancel`, {}, {
                         headers: { Authorization: `Bearer ${accessToken}` }
                     });
                     setToast({ message: 'Review request cancelled', type: 'success' });
@@ -317,7 +317,7 @@ const ResumeReviews = () => {
 
         try {
             if (assignMode === 'single') {
-                await axiosInstance.post(`/resume-reviews/${reviewToAssign.id}/assign`, {
+                await axiosInstance.post(`/resumes/reviews/${reviewToAssign.id}/assign`, {
                     reviewer_id: assignee.id,
                     reviewer_name: assignee.name
                 }, {
@@ -327,7 +327,7 @@ const ResumeReviews = () => {
             } else {
                 // Bulk assign
                 const reviewIds = Array.from(selectedReviewIds);
-                await axiosInstance.post('/resume-reviews/bulk-assign', {
+                await axiosInstance.post('/resumes/reviews/bulk-assign', {
                     review_ids: reviewIds,
                     reviewer_id: assignee.id,
                     reviewer_name: assignee.name

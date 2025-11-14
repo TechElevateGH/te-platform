@@ -78,13 +78,6 @@ class Settings(BaseSettings):
     MONGODB_URI: str
     MONGODB_DB_NAME: str
 
-    # Superuser
-    FIRST_SUPERUSER_EMAIL: EmailStr
-    FIRST_SUPERUSER_FIRST_NAME: str
-    FIRST_SUPERUSER_LAST_NAME: str
-    FIRST_SUPERUSER_PASSWORD: str
-    USERS_OPEN_REGISTRATION: bool
-
     # Google Drive
     GDRIVE_RESUMES: str
     GDRIVE_OTHER_FILES: str

@@ -1,7 +1,6 @@
 from app.ents.application.endpoints import (
     applications_router,
     user_applications_router,
-    user_resumes_router,
 )
 from app.ents.referral_company.endpoints import referral_company_router, referral_router
 from app.ents.home.endpoints import home_router
@@ -10,7 +9,11 @@ from app.ents.learning.endpoints import router as learning_router
 from app.ents.problem.endpoints import router as problem_router
 from app.ents.user.auth import auth_router
 from app.ents.user.endpoints import router as users_router
-from app.ents.resumereview.endpoints import router as resume_review_router
+from app.ents.resume import (
+    resume_reviews_router,
+    resumes_router,
+    user_resumes_router,
+)
 from app.ents.verification.endpoints import router as verification_router
 from fastapi import APIRouter
 
@@ -37,15 +40,14 @@ api_router.include_router(applications_router)  # Admin/Lead endpoints
 api_router.include_router(
     user_resumes_router
 )  # Has its own tags from router definition
+api_router.include_router(resumes_router)
 
 # Company and referral management
 api_router.include_router(referral_company_router, tags=["Referral Companies"])
 api_router.include_router(referral_router, tags=["Referrals"])
 
 # Resume review management
-api_router.include_router(
-    resume_review_router, prefix="/resume-reviews", tags=["Resume Reviews"]
-)
+api_router.include_router(resume_reviews_router)
 
 # Learning and practice
 api_router.include_router(learning_router, tags=["Learning"])

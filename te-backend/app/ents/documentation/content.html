@@ -17,9 +17,10 @@
         --bg-tertiary: #334155;
         --surface: #1e293b;
         --border: rgba(148, 163, 184, 0.1);
-        --text: #f1f5f9;
-        --text-secondary: #94a3b8;
-        --text-muted: #64748b;
+        --bg: rgba(15, 23, 42, 0.85);
+        --text: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.72);
+        --text-muted: rgba(255, 255, 255, 0.56);
         --heading: #ffffff;
         --accent: #3b82f6;
         --accent-hover: #2563eb;
@@ -38,6 +39,7 @@
         --bg-tertiary: #e2e8f0;
         --surface: #f8fafc;
         --border: rgba(15, 23, 42, 0.08);
+        --bg: rgba(255, 255, 255, 0.9);
         --text: #0f172a;
         --text-secondary: #475569;
         --text-muted: #64748b;
@@ -564,17 +566,6 @@
   <body id="top">
     <div class="progress" id="progress"></div>
 
-    <header>
-      <div class="header-inner">
-        <div class="logo">
-          <button class="menu-toggle" id="menuToggle">☰</button>
-          <div class="logo-icon">🚀</div>
-          <span>TechElevate Docs</span>
-        </div>
-        <button id="theme" class="theme"><span id="icon">🌙</span></button>
-      </div>
-    </header>
-
     <div class="layout">
       <aside class="sidebar" id="sidebar">
         <nav>
@@ -593,6 +584,7 @@
           <div class="section-title">Features</div>
           <a href="#auth">Authentication & Authorization</a>
           <a href="#resumes">Resume Management</a>
+          <a href="#resume-reviews">Resume Reviews</a>
           <a href="#applications">Application Tracking</a>
           <a href="#referrals">Referral System</a>
           <a href="#companies">Company Database</a>
@@ -603,6 +595,7 @@
           <a href="#api-auth">Authentication APIs</a>
           <a href="#api-users">User APIs</a>
           <a href="#api-resumes">Resume APIs</a>
+          <a href="#api-resume-reviews">Resume Review APIs</a>
           <a href="#api-referrals">Referral APIs</a>
           <a href="#api-companies">Company APIs</a>
 
@@ -1137,6 +1130,122 @@
     └── Archive/</code></pre>
         </section>
 
+        <section id="resume-reviews">
+          <h2>Resume Reviews</h2>
+          <p>
+            Members can request structured feedback on any uploaded resume. All
+            review requests, assignments, and volunteer workflows live inside
+            the consolidated <code>app/ents/resume</code> module, ensuring the
+            same schemas power uploads and review tasks.
+          </p>
+
+          <h3>Highlights</h3>
+          <div class="cards">
+            <div class="card">
+              <h4>Single Source</h4>
+              <p>
+                CRUD helpers, Pydantic schemas, and routers for uploads and
+                reviews share the same package. Legacy imports from
+                <code>app.ents.resume_review</code> forward to the new module.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Role Aware</h4>
+              <p>
+                Members submit requests, volunteers add feedback, and leads or
+                admins manage assignments and bulk operations from one screen.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Assignment Tools</h4>
+              <p>
+                Leads can assign individual requests or bulk assign several to a
+                volunteer, and reviewers see a dedicated “My Assignments” view.
+              </p>
+            </div>
+          </div>
+
+          <h3>Workflow</h3>
+          <ol>
+            <li>
+              Member submits a request with resume link, target role, and notes.
+            </li>
+            <li>Request enters the queue as <code>Pending</code>.</li>
+            <li>
+              Volunteers can self-update status to <code>In Review</code> when
+              they begin, or leads can assign reviewers directly.
+            </li>
+            <li>
+              Reviewer provides feedback and marks the request
+              <code>Completed</code> when done.
+            </li>
+            <li>
+              Members may cancel their own requests at any time before
+              completion.
+            </li>
+          </ol>
+
+          <h3>Status Lifecycle</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Who can set</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Pending</code></td>
+                <td>New request awaiting assignment.</td>
+                <td>System (on create)</td>
+              </tr>
+              <tr>
+                <td><code>In Review</code></td>
+                <td>Reviewer actively working on feedback.</td>
+                <td>Assigned volunteer, lead, or admin</td>
+              </tr>
+              <tr>
+                <td><code>Completed</code></td>
+                <td>Feedback delivered to the member.</td>
+                <td>Assigned volunteer, lead, or admin</td>
+              </tr>
+              <tr>
+                <td><code>Cancelled</code></td>
+                <td>Member withdrew the request before completion.</td>
+                <td>Request owner</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Resume Review Document</h3>
+          <pre><code>{
+  "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+  "user_id": "64fd0a9556abc8f72fa12d9c",
+  "user_name": "Ada Lovelace",
+  "user_email": "ada@example.com",
+  "resume_link": "https://drive.google.com/file/...",
+  "job_title": "Senior Backend Engineer",
+  "level": "Mid/Senior",
+  "status": "Pending",
+  "submitted_date": "2025-11-06",
+  "reviewed_by": null,
+  "reviewer_name": null,
+  "assigned_date": null,
+  "review_date": null,
+  "feedback": "",
+  "notes": "Focus on quantifying impact for recent roles",
+  "updated_at": null
+}</code></pre>
+
+          <div class="note">
+            <strong>Heads up</strong>
+            Bulk assignment endpoints automatically stamp
+            <code>assigned_date</code>, move the status to
+            <code>In Review</code>, and audit the user who triggered the action.
+          </div>
+        </section>
+
         <section id="applications">
           <h2>Application Tracking</h2>
           <p>
@@ -1560,6 +1669,154 @@ Response:
 }</code></pre>
         </section>
 
+        <section id="api-resume-reviews">
+          <h2>Resume Review APIs</h2>
+          <div class="info-box">
+            <strong>Roles &amp; Permissions</strong>
+            Members create and cancel their own requests, volunteers review and
+            update feedback, while leads/admins can assign, bulk assign, and
+            delete review objects.
+          </div>
+
+          <h3>Create Review Request</h3>
+          <pre><code>POST /v1/resumes/reviews
+Headers: Authorization: Bearer &lt;token&gt;
+Role: member
+
+Request:
+{
+  "resume_link": "https://drive.google.com/file/...",
+  "job_title": "Senior Backend Engineer",
+  "level": "Mid/Senior",
+  "notes": "Please focus on STAR stories"
+}
+
+Response:
+{
+  "message": "Resume review request submitted successfully",
+  "review_id": "65f7b1c7b8d9cbe7e5f1a4d2"
+}</code></pre>
+
+          <h3>Get My Review Requests</h3>
+          <pre><code>GET /v1/resumes/reviews/my-requests
+Headers: Authorization: Bearer &lt;token&gt;
+Role: member
+
+Response:
+{
+  "reviews": [
+    {
+      "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+      "status": "Pending",
+      "resume_link": "https://drive.google.com/file/...",
+      "job_title": "Senior Backend Engineer",
+      "level": "Mid/Senior",
+      "feedback": "",
+      "notes": "Please focus on STAR stories",
+      "submitted_date": "2025-11-06"
+    }
+  ]
+}</code></pre>
+
+          <h3>List All Review Requests</h3>
+          <pre><code>GET /v1/resumes/reviews/all
+Headers: Authorization: Bearer &lt;token&gt;
+Role: volunteer (3) or higher
+
+Response:
+{
+  "reviews": [ ... ]
+}</code></pre>
+
+          <h3>Update Review Status / Feedback</h3>
+          <pre><code>PATCH /v1/resumes/reviews/{review_id}
+Headers: Authorization: Bearer &lt;token&gt;
+Role: volunteer (3) or higher
+
+Request:
+{
+  "status": "In Review",
+  "feedback": "Working on interview preparation notes"
+}
+
+Response:
+{
+  "message": "Resume review request updated successfully",
+  "review": { ... }
+}</code></pre>
+
+          <h3>Cancel Review Request</h3>
+          <pre><code>PATCH /v1/resumes/reviews/{review_id}/cancel
+Headers: Authorization: Bearer &lt;token&gt;
+Role: member (request owner)
+
+Response:
+{
+  "message": "Resume review request cancelled successfully",
+  "review": { ... }
+}</code></pre>
+
+          <h3>Assign a Review</h3>
+          <pre><code>POST /v1/resumes/reviews/{review_id}/assign
+Headers: Authorization: Bearer &lt;token&gt;
+Role: lead (4) or admin (5)
+
+Request:
+{
+  "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+  "reviewer_name": "Grace Hopper"
+}
+
+Response:
+{
+  "message": "Resume review assigned successfully",
+  "review": { ... }
+}</code></pre>
+
+          <h3>Bulk Assign Reviews</h3>
+          <pre><code>POST /v1/resumes/reviews/bulk-assign
+Headers: Authorization: Bearer &lt;token&gt;
+Role: lead (4) or admin (5)
+
+Request:
+{
+  "review_ids": ["65f7b1c7b8d9cbe7e5f1a4d2", "65f7b28cb8d9cbe7e5f1a4d8"],
+  "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+  "reviewer_name": "Grace Hopper"
+}
+
+Response:
+{
+  "message": "Successfully assigned 2 resume review(s)",
+  "assigned_count": 2,
+  "total_requested": 2
+}</code></pre>
+
+          <h3>Reviewer Assignment Views</h3>
+          <pre><code>GET /v1/resumes/reviews/my-assignments
+Headers: Authorization: Bearer &lt;token&gt;
+Role: volunteer (3) or higher
+
+GET /v1/resumes/reviews/assignments
+Headers: Authorization: Bearer &lt;token&gt;
+Role: admin (5)
+
+Response:
+{
+  "assignments": [ ... ]
+}</code></pre>
+
+          <h3>Delete Review</h3>
+          <pre><code>DELETE /v1/resumes/reviews/{review_id}
+Headers: Authorization: Bearer &lt;token&gt;
+Role: admin (5)
+
+Response:
+{
+  "message": "Resume review request permanently deleted successfully"
+}</code></pre>
+        </section>
+
         <section id="api-referrals">
           <h2>Referral APIs</h2>
 
@@ -1839,6 +2096,15 @@ make backend
             <li><strong>Type hints</strong>: Always use type annotations</li>
           </ul>
 
+          <div class="note">
+            <strong>Resume module tip</strong>
+            The resume package now owns both file uploads and review workflows.
+            Import schemas and CRUD helpers from
+            <code>app.ents.resume</code> (legacy
+            <code>app.ents.resume_review</code> paths forward to the new
+            module).
+          </div>
+
           <h3>Adding a New Endpoint</h3>
           <pre><code># 1. Define schema in ents/[module]/schema.py
 class NewItemCreate(BaseModel):
@@ -1932,7 +2198,7 @@ import NewFeature from './pages/NewFeature';
           <pre><code>import api from '../axiosConfig';
 
 // GET request
-const fetchData = async () => {
+const fetchData = async () =&gt; {
   try {
     const response = await api.get('/endpoint');
     setData(response.data);
@@ -1943,7 +2209,7 @@ const fetchData = async () => {
 };
 
 // POST request
-const createItem = async (itemData) => {
+const createItem = async (itemData) =&gt; {
   try {
     const response = await api.post('/items', itemData);
     showNotification('Item created!', 'success');
