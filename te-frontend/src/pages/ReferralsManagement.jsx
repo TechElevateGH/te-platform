@@ -52,7 +52,7 @@ const ReferralsManagement = () => {
         company: true,
         jobTitle: true,
         member: true,
-        contact: true,
+        phone_number: true,
         status: true,
         actions: true,
         email: false,
@@ -70,7 +70,7 @@ const ReferralsManagement = () => {
             company: true,
             jobTitle: true,
             member: true,
-            contact: true,
+            phone_number: true,
             status: true,
             actions: true,
             email: false,
@@ -85,7 +85,7 @@ const ReferralsManagement = () => {
             jobTitle: true,
             member: true,
             email: true,
-            contact: true,
+            phone_number: true,
             status: true,
             resume: true,
             essay: true,
@@ -96,10 +96,15 @@ const ReferralsManagement = () => {
     // Add Company Form
     const [companyForm, setCompanyForm] = useState({
         name: '',
+        image: '',
+        description: '',
         website: '',
         industry: '',
+        size: '',
+        headquarters: '',
+        referral_link: '',
         requires_resume: true,
-        requires_contact: true,
+        requires_phone_number: true,
         requires_essay: true,
     });
 
@@ -138,14 +143,9 @@ const ReferralsManagement = () => {
             });
             setCompanyForm({
                 name: '',
-                image: '',
-                description: '',
-                website: '',
-                industry: '',
-                size: '',
-                headquarters: '',
+                referral_link: '',
                 requires_resume: true,
-                requires_contact: true,
+                requires_phone_number: true,
                 requires_essay: true,
             });
             setShowAddCompany(false);
@@ -259,13 +259,13 @@ const ReferralsManagement = () => {
 
     // CSV Export
     const exportToCSV = () => {
-        const headers = ['Company', 'Job Title', 'Member', 'Email', 'Contact', 'Status', 'Resume', 'Essay'];
+        const headers = ['Company', 'Job Title', 'Member', 'Email', 'Phone Number', 'Status', 'Resume', 'Essay'];
         const rows = sortedReferrals.map(ref => [
             ref.company?.name || '',
             ref.job_title || '',
             ref.user_name || '',
             ref.user_email || '',
-            ref.contact || '',
+            ref.phone_number || '',
             ref.status || '',
             ref.has_resume ? 'Yes' : 'No',
             ref.has_essay ? 'Yes' : 'No'
@@ -315,7 +315,7 @@ const ReferralsManagement = () => {
                                 <PaperAirplaneIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                                 Referral Management
                             </h1>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="text-left text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                 {isReferrer ? 'View and manage referral requests for your company' : 'Process member referral requests and manage companies'}
                             </p>
                         </div>
@@ -334,7 +334,7 @@ const ReferralsManagement = () => {
                                 {showColumnSelector && (
                                     <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-50">
                                         <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                            <span className="text-xs font-bold text-gray-900 dark:text-white">Visible Columns</span>
+                                            <span className="text-left text-xs font-bold text-gray-900 dark:text-white">Visible Columns</span>
                                             <button onClick={() => setShowColumnSelector(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                                 <XMarkIcon className="h-4 w-4" />
                                             </button>
@@ -348,7 +348,7 @@ const ReferralsManagement = () => {
                                                         onChange={() => toggleColumn(col)}
                                                         className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                                                     />
-                                                    <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                    <span className="text-left text-sm text-gray-700 dark:text-gray-300 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
                                                 </label>
                                             ))}
                                         </div>
@@ -373,7 +373,7 @@ const ReferralsManagement = () => {
                             {!isReferrer && (
                                 <button
                                     onClick={() => setShowAddCompany(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
                                 >
                                     <PlusIcon className="h-3.5 w-3.5" />
                                     Add Company
@@ -493,7 +493,7 @@ const ReferralsManagement = () => {
                     {showDateFilter && (
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                             <div className="md:col-span-6">
-                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+                                <label className="block text-left text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
                                     Date Range
                                 </label>
                                 <div className="flex gap-2">
@@ -520,7 +520,7 @@ const ReferralsManagement = () => {
                     {(searchQuery || statusFilter || memberFilter || (!isReferrer && companyFilter) || dateRange.start || dateRange.end) && (
                         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-xs text-gray-500 dark:text-gray-400">Active:</span>
+                                <span className="text-left text-xs text-gray-500 dark:text-gray-400">Active:</span>
                                 {statusFilter && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                                         Status: {statusFilter}
@@ -579,9 +579,9 @@ const ReferralsManagement = () => {
                                             Email
                                         </th>
                                     )}
-                                    {visibleColumns.contact && (
+                                    {visibleColumns.phone_number && (
                                         <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Contact
+                                            Phone Number
                                         </th>
                                     )}
                                     {visibleColumns.status && (
@@ -621,21 +621,33 @@ const ReferralsManagement = () => {
                                                 setSelectedReferral(ref);
                                                 setIsManagementModalOpen(true);
                                             }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setSelectedReferral(ref);
+                                                    setIsManagementModalOpen(true);
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                            role="button"
+                                            aria-label={`View referral request for ${ref.user_name || 'member'} at ${ref.company?.name || 'company'}`}
                                             className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
                                         >
                                             {visibleColumns.company && (
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2">
-                                                        {ref.company?.image && (
-                                                            <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
-                                                                <img
-                                                                    src={ref.company.image}
-                                                                    alt={ref.company.name}
-                                                                    className="h-full w-full object-contain"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        <span className="font-medium text-gray-900 dark:text-white text-sm">
+                                                        <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                            <img
+                                                                src={ref.company?.image || `https://logo.clearbit.com/${(ref.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                alt={ref.company?.name}
+                                                                className="h-full w-full object-contain"
+                                                                onError={(e) => {
+                                                                    e.target.onerror = null;
+                                                                    e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
                                                             {ref.company?.name}
                                                         </span>
                                                     </div>
@@ -644,8 +656,8 @@ const ReferralsManagement = () => {
                                             {visibleColumns.jobTitle && (
                                                 <td className="px-4 py-3">
                                                     <div>
-                                                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
+                                                        <div className="text-left font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
+                                                        <div className="text-left text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
                                                     </div>
                                                 </td>
                                             )}
@@ -653,7 +665,7 @@ const ReferralsManagement = () => {
                                                 <td className="px-4 py-3">
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
+                                                            <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
                                                             <button
                                                                 onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
                                                                 className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
@@ -667,7 +679,7 @@ const ReferralsManagement = () => {
                                                             </button>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                            <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                             <button
                                                                 onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
                                                                 className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
@@ -686,7 +698,7 @@ const ReferralsManagement = () => {
                                             {visibleColumns.email && (
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                        <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                         <button
                                                             onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
                                                             className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
@@ -701,17 +713,17 @@ const ReferralsManagement = () => {
                                                     </div>
                                                 </td>
                                             )}
-                                            {visibleColumns.contact && (
+                                            {visibleColumns.phone_number && (
                                                 <td className="px-4 py-3">
-                                                    {ref.contact ? (
+                                                    {ref.phone_number ? (
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-sm text-gray-700 dark:text-gray-200">{ref.contact}</span>
+                                                            <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
                                                             <button
-                                                                onClick={() => copyToClipboard(ref.contact, `contact-${ref.id}`)}
+                                                                onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
                                                                 className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                title="Copy contact"
+                                                                title="Copy phone number"
                                                             >
-                                                                {copiedField === `contact-${ref.id}` ? (
+                                                                {copiedField === `phone-${ref.id}` ? (
                                                                     <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                                                                 ) : (
                                                                     <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
@@ -719,7 +731,7 @@ const ReferralsManagement = () => {
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
+                                                        <span className="text-left text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
                                                     )}
                                                 </td>
                                             )}
@@ -807,17 +819,27 @@ const ReferralsManagement = () => {
             {/* Add Company Modal */}
             {showAddCompany && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <BuildingOfficeIcon className="h-6 w-6" />
-                                Add New Referral Company
-                            </h2>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-3 rounded-t-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <BuildingOfficeIcon className="h-5 w-5" />
+                                    <h2 className="text-base font-bold">Add New Referral Company</h2>
+                                </div>
+                                <button
+                                    onClick={() => setShowAddCompany(false)}
+                                    className="text-white/80 hover:text-white transition-colors"
+                                >
+                                    <XMarkIcon className="h-4 w-4" />
+                                </button>
+                            </div>
                         </div>
 
-                        <form onSubmit={handleAddCompany} className="p-6 space-y-4">
+                        <form onSubmit={handleAddCompany} className="p-4 space-y-3">
+                            {/* Company Name */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
                                     Company Name *
                                 </label>
                                 <input
@@ -825,140 +847,81 @@ const ReferralsManagement = () => {
                                     required
                                     value={companyForm.name}
                                     onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
                                     placeholder="e.g., Google, Microsoft"
                                 />
+                                <p className="mt-1 text-left text-xs text-gray-500 dark:text-gray-400">
+                                    Enter the full company name
+                                </p>
                             </div>
 
+                            {/* Referral Link */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                    Logo URL
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                                    Referral Link
                                 </label>
                                 <input
                                     type="url"
-                                    value={companyForm.image}
-                                    onChange={(e) => setCompanyForm({ ...companyForm, image: e.target.value })}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="https://..."
+                                    value={companyForm.referral_link}
+                                    onChange={(e) => setCompanyForm({ ...companyForm, referral_link: e.target.value })}
+                                    className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                    placeholder="https://company.com/referral-portal"
                                 />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                    Description
-                                </label>
-                                <textarea
-                                    value={companyForm.description}
-                                    onChange={(e) => setCompanyForm({ ...companyForm, description: e.target.value })}
-                                    rows={3}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Brief description of the company..."
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                        Website
-                                    </label>
-                                    <input
-                                        type="url"
-                                        value={companyForm.website}
-                                        onChange={(e) => setCompanyForm({ ...companyForm, website: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="https://..."
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                        Industry
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={companyForm.industry}
-                                        onChange={(e) => setCompanyForm({ ...companyForm, industry: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="e.g., Technology"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                        Company Size
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={companyForm.size}
-                                        onChange={(e) => setCompanyForm({ ...companyForm, size: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="e.g., 1000-5000"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                        Headquarters
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={companyForm.headquarters}
-                                        onChange={(e) => setCompanyForm({ ...companyForm, headquarters: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="e.g., San Francisco, CA"
-                                    />
-                                </div>
+                                <p className="mt-1 text-left text-xs text-gray-500 dark:text-gray-400">
+                                    Optional: Direct link to company's referral portal
+                                </p>
                             </div>
 
                             {/* Referral Requirements */}
-                            <div className="border-t pt-4">
-                                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                            <div>
+                                <label className="block text-left text-xs font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
                                     Referral Requirements
                                 </label>
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 cursor-pointer">
+                                <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded p-2.5 space-y-1.5">
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
                                         <input
                                             type="checkbox"
                                             checked={companyForm.requires_resume}
                                             onChange={(e) => setCompanyForm({ ...companyForm, requires_resume: e.target.checked })}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
                                         />
-                                        <span className="text-sm text-gray-700">Requires Resume</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Resume</span>
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
+
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
                                         <input
                                             type="checkbox"
-                                            checked={companyForm.requires_contact}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, requires_contact: e.target.checked })}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                            checked={companyForm.requires_phone_number}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, requires_phone_number: e.target.checked })}
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
                                         />
-                                        <span className="text-sm text-gray-700">Requires Contact Information</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Phone Number</span>
                                     </label>
-                                    <label className="flex items-center gap-2 cursor-pointer">
+
+                                    <label className="flex items-start gap-2 cursor-pointer group hover:bg-white dark:hover:bg-gray-700 p-1.5 rounded transition-colors">
                                         <input
                                             type="checkbox"
                                             checked={companyForm.requires_essay}
                                             onChange={(e) => setCompanyForm({ ...companyForm, requires_essay: e.target.checked })}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-500 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600"
                                         />
-                                        <span className="text-sm text-gray-700">Requires Referral Essay</span>
+                                        <span className="text-xs font-medium text-gray-900 dark:text-white">Referral Essay</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 pt-1">
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
+                                    className="flex-1 px-3 py-1.5 text-sm bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded transition-all"
                                 >
-                                    Add Referral Company
+                                    Add Company
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setShowAddCompany(false)}
-                                    className="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                                    className="px-4 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                                 >
                                     Cancel
                                 </button>

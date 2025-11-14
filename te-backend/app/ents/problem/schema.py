@@ -28,7 +28,7 @@ class PostingBase(BaseModel):
     last_name: str
     image: str = ""
     date_of_birth: Optional[str] = ""
-    contact: str = ""
+    phone_number: str = ""
     address: str = ""
     university: str = ""
     mentor_id: Optional[int] = None

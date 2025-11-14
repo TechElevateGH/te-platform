@@ -416,7 +416,7 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
                     "role": 1,  # Member role
                     "password": None,  # No password for OAuth users
                     "middle_name": "",
-                    "contact": "",
+                    "phone_number": "",
                     "address": "",
                     "date_of_birth": "",
                     "university": "",

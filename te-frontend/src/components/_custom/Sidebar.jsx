@@ -8,9 +8,6 @@ import {
     ChevronDownIcon,
     ArrowLeftOnRectangleIcon
 } from '@heroicons/react/24/outline'
-import {
-    RocketLaunchIcon
-} from '@heroicons/react/24/solid'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -97,9 +94,11 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                 onClick={() => navigate('/')}
                                                 className="flex items-center gap-3 group"
                                             >
-                                                <div className="h-11 w-11 rounded-xl bg-te-gradient flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
-                                                </div>
+                                                <img
+                                                    src="/te-logo.png"
+                                                    alt="TechElevate Logo"
+                                                    className="h-11 w-11 rounded-xl shadow-md group-hover:shadow-lg transition-all"
+                                                />
                                                 <div>
                                                     <h1 className="text-lg font-bold text-gray-900 dark:text-white transition-colors">TechElevate</h1>
                                                     <p className="text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">Career Platform</p>
@@ -153,8 +152,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                         if (roleNum >= 2) {
                                                             let roleInfo;
                                                             if (roleNum >= 5) roleInfo = { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
-                                                            else if (roleNum >= 4) roleInfo = { label: 'Mentor', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
-                                                            else if (roleNum >= 3) roleInfo = { label: 'Lead', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
+                                                            else if (roleNum >= 4) roleInfo = { label: 'Lead', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+                                                            else if (roleNum >= 3) roleInfo = { label: 'Volunteer', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
                                                             else roleInfo = { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
 
                                                             return (
@@ -225,9 +224,9 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                 {appItems.map((item, index) => {
                                                     const colors = [
                                                         { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
-                                                        { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
+                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-green-500', ring: 'ring-emerald-500/20' },
                                                         { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
-                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
+                                                        { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
                                                     ];
                                                     const color = colors[index % colors.length];
                                                     return (

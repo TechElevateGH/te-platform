@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 def create_referral_company(
     db: Database, *, data: referral_schema.ReferralCompanyCreate
-) -> referral_models.Company:
+) -> referral_models.ReferralCompany:
     """
     Create a new company for referrals (Volunteer/Lead/Admin only).
     Simplified creation with basic company information and referral requirements.
@@ -25,12 +25,13 @@ def create_referral_company(
         "name": data.name,
         "domain": data.website if data.website else "",
         "image": data.image if data.image else "",
+        "referral_link": data.referral_link or "",
         "can_refer": True,
         "locations": [],  # Can be added later if needed
         "referral_materials": {
             "resume": data.requires_resume,
             "essay": data.requires_essay,
-            "contact": data.requires_contact,
+            "phone_number": data.requires_phone_number,
         },
         # Store additional info in a metadata field
         "metadata": {
@@ -46,17 +47,26 @@ def create_referral_company(
 
     # Fetch and return the created company
     company_data = db.companies.find_one({"_id": result.inserted_id})
-    return referral_models.Company(**company_data)
+    return referral_models.ReferralCompany(**company_data)
 
 
 def read_company_by_id(
     db: Database, *, company_id: int
-) -> Optional[referral_models.Company]:
+) -> Optional[referral_models.ReferralCompany]:
     """Get company by integer ID from MongoDB"""
     company_data = db.companies.find_one({"id": company_id})
     if not company_data:
         return None
-    return referral_models.Company(**company_data)
+    return referral_models.ReferralCompany(**company_data)
+
+
+def read_referral_companies(
+    db: Database, *, skip: int = 0, limit: int = 100
+) -> list[referral_models.ReferralCompany]:
+    """Return referral companies ordered alphabetically by name."""
+
+    companies_cursor = db.companies.find().sort("name", 1).skip(skip).limit(limit)
+    return [referral_models.ReferralCompany(**company) for company in companies_cursor]
 
 
 def read_user_referrals(
@@ -162,7 +172,7 @@ def request_referral(
         "role": data.role,
         "request_note": data.request_note,
         "resume": data.resume,
-        "contact": data.contact or "",
+        "phone_number": data.phone_number or "",
         "essay": data.essay or "",
         "status": referral_schema.ReferralStatuses.pending.value,
         "referral_date": data.date,
@@ -232,19 +242,19 @@ def export_referrals_to_google_sheets(
 
     # Load Google credentials from environment variables
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-    
+
     credentials_info = {
         "type": settings.GOOGLE_TYPE,
         "project_id": settings.GOOGLE_PROJECT_ID,
         "private_key_id": settings.GOOGLE_PRIVATE_KEY_ID,
-        "private_key": settings.GOOGLE_PRIVATE_KEY.replace('\\n', '\n'),
+        "private_key": settings.GOOGLE_PRIVATE_KEY.replace("\\n", "\n"),
         "client_email": settings.GOOGLE_CLIENT_EMAIL,
         "client_id": settings.GOOGLE_CLIENT_ID,
         "auth_uri": settings.GOOGLE_AUTH_URI,
         "token_uri": settings.GOOGLE_TOKEN_URI,
         "auth_provider_x509_cert_url": settings.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
         "client_x509_cert_url": settings.GOOGLE_CLIENT_X509_CERT_URL,
-        "universe_domain": settings.GOOGLE_UNIVERSE_DOMAIN
+        "universe_domain": settings.GOOGLE_UNIVERSE_DOMAIN,
     }
 
     credentials = service_account.Credentials.from_service_account_info(
@@ -348,9 +358,9 @@ def export_referrals_to_google_sheets(
 # def update(
 #     db: Database,
 #     *,
-#     db_obj: referral_models.Company,
+#     db_obj: referral_models.ReferralCompany,
 #     data: referral_schema.CompanyUpdate | dict[str, Any],
-# ) -> referral_models.Company:
+# ) -> referral_models.ReferralCompany:
 #     if isinstance(data, dict):
 #         update_data = data
 #     else:

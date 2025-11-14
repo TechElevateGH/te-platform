@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDarkMode } from '../../context/DarkModeContext';
-import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon, HomeIcon } from '@heroicons/react/24/outline';
-import { RocketLaunchIcon } from '@heroicons/react/24/solid';
+import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import NotificationBell from './NotificationBell';
 
 const navigation = [
@@ -27,8 +26,8 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const getRoleInfo = (role) => {
         const roleNum = parseInt(role);
         if (roleNum >= 5) return { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
-        if (roleNum >= 4) return { label: 'Mentor', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
-        if (roleNum >= 3) return { label: 'Lead', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
+        if (roleNum >= 4) return { label: 'Lead', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+        if (roleNum >= 3) return { label: 'Volunteer', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
         if (roleNum >= 2) return { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
         return null;
     };
@@ -37,11 +36,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
     const handleLogoutClick = () => {
         setShowLogoutConfirm(true);
-    };
-
-    const exitGuestMode = () => {
-        logout();
-        navigate('/login');
     };
 
     const confirmLogout = () => {
@@ -122,9 +116,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                         {/* Logo */}
                         <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <RocketLaunchIcon className="h-6 w-6 text-white" />
-                            </div>
+                            <img
+                                src="/te-logo.png"
+                                alt="TechElevate Logo"
+                                className="h-10 w-10 rounded-xl shadow-lg shadow-blue-500/20"
+                            />
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
                                 TechElevate
                             </span>
@@ -160,15 +156,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                 )}
                             </>
                         )}
-
-                        {/* Home Shortcut - Mobile */}
-                        <button
-                            onClick={() => navigate('/')}
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                            title="Go to home"
-                        >
-                            <HomeIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                        </button>
 
                         {/* Dark Mode Toggle - Mobile (for all pages) */}
                         <button
@@ -280,9 +267,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     <div className="fixed inset-y-0 right-0 z-[70] w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
                         <div className="flex items-center justify-between">
                             <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
-                                </div>
+                                <img
+                                    src="/te-logo.png"
+                                    alt="TechElevate Logo"
+                                    className="h-10 w-10 rounded-xl shadow-lg shadow-blue-500/20"
+                                />
                                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
                                     TechElevate
                                 </span>

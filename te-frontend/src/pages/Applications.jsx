@@ -234,7 +234,7 @@ const Applications = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100/50 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-blue-900/20 transition-colors">
             {/* Premium Header */}
             <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">

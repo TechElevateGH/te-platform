@@ -98,10 +98,10 @@ const companionTips = [
 
 const Practice = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-            <header className="bg-white/70 backdrop-blur border-b border-slate-200 dark:bg-slate-900/70 dark:border-slate-800">
+        <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-red-100 dark:from-slate-950 dark:via-rose-950/30 dark:to-pink-950/30">
+            <header className="bg-white/70 backdrop-blur border-b border-rose-200 dark:bg-slate-900/70 dark:border-rose-800/30">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-                    <span className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 dark:text-slate-400">Practice Vault</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.35em] text-rose-500 dark:text-rose-400">Practice Vault</span>
                     <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">Practice smarter, not harder</h1>
                     <p className="mt-2 text-sm text-slate-600 max-w-2xl dark:text-slate-300">
                         Focus on the exact resources we trust, revise relentlessly, and build confidence through patterns—not endless blind grinding.

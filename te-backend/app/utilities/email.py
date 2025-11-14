@@ -45,26 +45,108 @@ def send_test_email(email_to: str) -> None:
     )
 
 
-def send_reset_password_email(email_to: str, email: str, token: str) -> None:
+def send_password_reset_email(email_to: str, code: str, reset_link: str) -> None:
+    """Send password reset email containing verification code and CTA link."""
+
     project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - Password recovery for user {email}"
+    subject = f"{project_name} - Reset your password"
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                margin: 0;
+                padding: 0;
+                background: #f8fafc;
+                color: #0f172a;
+            }}
+            .wrapper {{
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 32px 20px;
+            }}
+            .card {{
+                background: #ffffff;
+                border-radius: 20px;
+                padding: 36px;
+                box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+                border: 1px solid rgba(15, 23, 42, 0.06);
+            }}
+            .badge {{
+                display: inline-block;
+                padding: 6px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                background: rgba(59, 130, 246, 0.12);
+                color: #2563eb;
+                border-radius: 999px;
+                margin-bottom: 18px;
+            }}
+            .code {{
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+                font-size: 36px;
+                font-weight: 700;
+                letter-spacing: 12px;
+                text-align: center;
+                color: #0f172a;
+                background: #f1f5f9;
+                border-radius: 16px;
+                padding: 18px 12px;
+                border: 1px solid rgba(148, 163, 184, 0.45);
+            }}
+            .cta {{
+                display: inline-block;
+                margin-top: 24px;
+                padding: 14px 28px;
+                border-radius: 999px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #2563eb, #06b6d4);
+                color: white;
+            }}
+            .footer {{
+                margin-top: 32px;
+                text-align: center;
+                font-size: 13px;
+                color: #64748b;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="card">
+                <span class="badge">Password Reset</span>
+                <h2 style="margin: 0 0 12px 0;">Hi there,</h2>
+                <p style="margin: 0 0 18px 0;">
+                    Use the one-time code below to reset your TechElevate password. This code
+                    will expire in 15 minutes.
+                </p>
+                <div class="code">{code}</div>
+                <p style="margin: 22px 0 12px 0;">
+                    Or click the button below to continue the reset flow:
+                </p>
+                <a href="{reset_link}" class="cta">Continue password reset</a>
+                <p style="margin: 24px 0 0 0; color: #94a3b8; font-size: 13px;">
+                    If you did not request this reset, you can safely ignore this email.
+                </p>
+            </div>
+            <p class="footer">© {project_name} — Secure talent enablement platform</p>
+        </div>
+    </body>
+    </html>
+    """
 
-    with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
-        template_str = f.read()
-
-    server_host = settings.SERVER_HOST
-    link = f"{server_host}/reset-password?token={token}"
     send_email(
         email_to=email_to,
         subject_template=subject,
-        html_template=template_str,
-        environment={
-            "project_name": settings.PROJECT_NAME,
-            "username": email,
-            "email": email_to,
-            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
-            "link": link,
-        },
+        html_template=html_template,
+        environment={},
     )
 
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     ExclamationTriangleIcon,
     BriefcaseIcon,
@@ -25,10 +25,32 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
 
     // Check user's available materials
     const hasReferralEssay = userInfo?.essay && userInfo.essay.trim() !== '';
-    const hasContact = userInfo?.contact && userInfo.contact.trim() !== '';
+    const hasPhoneNumber = userInfo?.phone_number && userInfo.phone_number.trim() !== '';
 
     // Company requirements
-    const requirements = company.referral_materials || {};
+    const requirements = useMemo(() => company.referral_materials || {}, [company.referral_materials]);
+
+    const getMissingRequirements = useCallback(() => {
+        const missing = [];
+        if (requirements.resume && !hasResume) missing.push('resume');
+        if (requirements.essay && !hasReferralEssay) missing.push('referral essay');
+        if (requirements.phone_number && !hasPhoneNumber) missing.push('phone number');
+        return missing;
+    }, [requirements, hasResume, hasReferralEssay, hasPhoneNumber]);
+
+    const missingRequirements = useMemo(() => getMissingRequirements(), [getMissingRequirements]);
+
+    const formatRequirementList = (items) => {
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+    };
+
+    const requirementWarningMessage = missingRequirements.length > 0
+        ? `Please add your ${formatRequirementList(missingRequirements)} before requesting a referral.`
+        : '';
+
+    const hasAllRequiredMaterials = missingRequirements.length === 0;
 
     const [selectedResumeId, setSelectedResumeId] = useState(
         hasResume ? availableResumes[0].id : null
@@ -70,7 +92,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
         role: "New grad",
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
-        contact: userInfo?.contact || "",
+        phone_number: userInfo?.phone_number || "",
         essay: userInfo?.essay || "",
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
@@ -79,8 +101,15 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const [submitError, setSubmitError] = useState("");
 
     const createReferralRequest = async () => {
-        setIsSubmitting(true);
         setSubmitError("");
+
+        const latestMissingRequirements = getMissingRequirements();
+        if (latestMissingRequirements.length > 0) {
+            setSubmitError(`Please add your ${formatRequirementList(latestMissingRequirements)} before requesting a referral.`);
+            return false;
+        }
+
+        setIsSubmitting(true);
 
         try {
             const response = await axiosInstance.post(`/referrals`, referralData, {
@@ -129,7 +158,8 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             setHandler={setReferralCompanyId}
             requestHandler={createReferralRequest}
             isSubmitting={isSubmitting}
-            submitButtonText="Request Referral"
+            isSubmitDisabled={!hasAllRequiredMaterials}
+            submitButtonText={hasAllRequiredMaterials ? "Request Referral" : "Complete Requirements"}
             children={
                 !hasResume ? (
                     <div className="px-6 py-8">
@@ -152,9 +182,13 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Company</h3>
                             <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
                                 <img
-                                    src={company.image}
+                                    src={company.image || `https://logo.clearbit.com/${(company.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
                                     alt={company.name}
                                     className="h-12 w-12 rounded-lg object-cover border border-blue-200 dark:border-blue-700 shadow-sm"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                    }}
                                 />
                                 <div>
                                     <p className="text-lg font-bold text-blue-900 dark:text-blue-200">{company.name}</p>
@@ -167,7 +201,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         </div>
 
                         {/* Requirements Section */}
-                        {(requirements.resume || requirements.referralEssay || requirements.contact) && (
+                        {(requirements.resume || requirements.essay || requirements.phone_number) && (
                             <div className="space-y-3">
                                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                                     <DocumentTextIcon className="h-4 w-4" />
@@ -187,7 +221,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 </span>
                                             </div>
                                         )}
-                                        {requirements.referralEssay && (
+                                        {requirements.essay && (
                                             <div className="flex items-center gap-3">
                                                 {hasReferralEssay ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
@@ -199,20 +233,28 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                 </span>
                                             </div>
                                         )}
-                                        {requirements.contact && (
+                                        {requirements.phone_number && (
                                             <div className="flex items-center gap-3">
-                                                {hasContact ? (
+                                                {hasPhoneNumber ? (
                                                     <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                                                 ) : (
                                                     <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
-                                                <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
-                                                    Contact
+                                                <span className={`text-sm font-semibold ${hasPhoneNumber ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
+                                                    Phone Number
                                                 </span>
                                             </div>
                                         )}
                                     </div>
                                 </div>
+                                {!hasAllRequiredMaterials && requirementWarningMessage && (
+                                    <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-100">
+                                        <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
+                                        <p className="text-xs font-semibold leading-snug">
+                                            {requirementWarningMessage}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
 

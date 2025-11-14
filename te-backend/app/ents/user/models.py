@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Any
 from pydantic import BaseModel, EmailStr, Field, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
@@ -48,7 +49,7 @@ class MemberUser(BaseModel):
     last_name: str
     full_name: str
     image: str = ""
-    contact: str = ""
+    phone_number: str = ""
     address: str = ""
     password: Optional[str] = None  # Hashed password (optional for OAuth users)
     date_of_birth: str = ""
@@ -87,3 +88,25 @@ class PrivilegedUser(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
+
+class PasswordReset(BaseModel):
+    """MongoDB password reset request model."""
+
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    email: EmailStr
+    user_id: PyObjectId
+    code: str
+    status: str = "requested"  # requested -> verified -> completed/expired
+    attempts: int = 0
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime
+    verified_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    session_token_hash: Optional[str] = None
+    session_expires_at: Optional[datetime] = None
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}

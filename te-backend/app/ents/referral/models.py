@@ -51,15 +51,15 @@ class Location(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class Company(BaseModel):
-    """MongoDB Company document model"""
+class ReferralCompany(BaseModel):
+    """MongoDB ReferralCompany document model"""
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     name: str
     domain: str
     image: str = ""
+    referral_link: str = ""
     can_refer: bool = True
-    locations: List[Location] = []
     referral_materials: dict = {}
     metadata: dict = {}  # Store additional company info and requirements
 
@@ -81,7 +81,7 @@ class Referral(BaseModel):
     request_note: str = ""
     review_note: Optional[str] = ""
     resume: str = ""  # Google Drive link
-    contact: str = ""  # User's contact info
+    phone_number: str = ""  # User's phone number
     essay: str = ""  # Referral essay/cover letter URL
     referral_date: str
     feedback_date: Optional[str] = None  # Date when referrer provided feedback

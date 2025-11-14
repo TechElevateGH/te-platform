@@ -30,50 +30,55 @@ const mockReferralCompanies = [
         id: 1,
         name: 'Microsoft',
         image: 'https://logo.clearbit.com/microsoft.com',
+        referral_link: 'https://forms.microsoft.com/r/sample',
         referral_materials: {
             resume: true,
-            referralEssay: true,
-            contact: true
+            essay: true,
+            phone_number: true
         }
     },
     {
         id: 2,
         name: 'Amazon',
         image: 'https://logo.clearbit.com/amazon.com',
+        referral_link: 'https://amazon.jobs/referral',
         referral_materials: {
             resume: true,
-            referralEssay: false,
-            contact: true
+            essay: false,
+            phone_number: true
         }
     },
     {
         id: 3,
         name: 'Google',
         image: 'https://logo.clearbit.com/google.com',
+        referral_link: 'https://goo.gle/techelevate-referral',
         referral_materials: {
             resume: true,
-            referralEssay: true,
-            contact: false
+            essay: true,
+            phone_number: false
         }
     },
     {
         id: 4,
         name: 'Apple',
         image: 'https://logo.clearbit.com/apple.com',
+        referral_link: '',
         referral_materials: {
             resume: true,
-            referralEssay: false,
-            contact: false
+            essay: false,
+            phone_number: false
         }
     },
     {
         id: 5,
         name: 'Netflix',
         image: 'https://logo.clearbit.com/netflix.com',
+        referral_link: '',
         referral_materials: {
             resume: false,
-            referralEssay: false,
-            contact: false
+            essay: false,
+            phone_number: false
         }
     }
 ];
@@ -119,6 +124,19 @@ const Referrals = () => {
         setMyReferralsFeedbackCount(count);
     }, []);
 
+    const handleReferralAction = useCallback((company) => {
+        if (!isMember) return;
+
+        if (company.referral_link) {
+            window.open(company.referral_link, '_blank', 'noopener,noreferrer');
+            setSelectedCompany(null);
+            setReferralCompanyId(null);
+        } else {
+            setSelectedCompany(company);
+            setReferralCompanyId(company.id);
+        }
+    }, [isMember, setReferralCompanyId, setSelectedCompany]);
+
     // Filters for All Requests view
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
     const [companyFilter, setCompanyFilter] = useState('');
@@ -135,6 +153,41 @@ const Referrals = () => {
             setShowSignInPrompt(true);
         }
     }, [accessToken]);
+
+    useEffect(() => {
+        if (accessToken) {
+            setFetchReferralCompanies(true);
+        }
+    }, [accessToken, setFetchReferralCompanies]);
+
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            if (!fetchReferralCompanies) return;
+
+            // Allow browsing mock data for guests while still supporting real data for members
+            if (!accessToken) {
+                setReferralCompanies(mockReferralCompanies);
+                setFetchReferralCompanies(false);
+                return;
+            }
+
+            try {
+                const response = await axiosInstance.get('/referrals/companies', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                setReferralCompanies(response.data?.companies || []);
+            } catch (error) {
+                console.error('Error fetching referral companies:', error);
+                setReferralCompanies(mockReferralCompanies);
+            } finally {
+                setFetchReferralCompanies(false);
+            }
+        };
+
+        if (fetchReferralCompanies) {
+            fetchCompanies();
+        }
+    }, [accessToken, fetchReferralCompanies, setFetchReferralCompanies, setReferralCompanies]);
 
     // Fetch all referrals for Lead/Admin users
     const fetchAllReferrals = useCallback(async () => {
@@ -256,25 +309,19 @@ const Referrals = () => {
     };
 
     useEffect(() => {
-        // Fetch referral companies for member view
-        if (referralCompanies.length === 0) {
-            setReferralCompanies(mockReferralCompanies);
-        }
-        setFetchReferralCompanies(false);
-
-        // Fetch all referrals if user is Lead/Admin and viewing all requests
         if (isLeadOrAdmin && viewMode === 'all-requests') {
             fetchAllReferrals();
         }
-    }, [referralCompanies.length, setFetchReferralCompanies, setReferralCompanies, isLeadOrAdmin, viewMode, fetchAllReferrals]);
+    }, [isLeadOrAdmin, viewMode, fetchAllReferrals]);
 
     // Helper function to check if all requirements are met
     const checkRequirementsMet = (company) => {
+        const materials = company.referral_materials || {};
         const requirements = [];
         // Check actual resumes from context, not displayResumes which includes mock data
-        if (company.referral_materials.resume) requirements.push(resumes.length !== 0);
-        if (company.referral_materials.referralEssay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
-        if (company.referral_materials.contact) requirements.push(userInfo?.contact && userInfo.contact.trim() !== '');
+        if (materials.resume) requirements.push(resumes.length !== 0);
+        if (materials.essay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
+        if (materials.phone_number) requirements.push(userInfo?.phone_number && userInfo.phone_number.trim() !== '');
 
         if (requirements.length === 0) return 'No Requirements';
         const allMet = requirements.every(req => req);
@@ -292,7 +339,7 @@ const Referrals = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
+        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-cyan-100/50 dark:from-cyan-950/30 dark:via-blue-950/30 dark:to-cyan-900/20 transition-colors">
             {/* Ultra Compact Header */}
             <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -503,82 +550,81 @@ const Referrals = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                                {filteredCompanies.map((company, index) => (
-                                                    <tr
-                                                        key={company.id}
-                                                        onClick={() => {
-                                                            if (!isMember) return;
-                                                            setSelectedCompany(company);
-                                                            setReferralCompanyId(company.id);
-                                                        }}
-                                                        className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
-                                                        title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
-                                                    >
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src={company.image}
-                                                                    alt={company.name}
-                                                                    className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
-                                                                />
-                                                                <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                                    {company.name}
+                                                {filteredCompanies.map((company, index) => {
+                                                    const materials = company.referral_materials || {};
+                                                    return (
+                                                        <tr
+                                                            key={company.id}
+                                                            onClick={() => handleReferralAction(company)}
+                                                            className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                            title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
+                                                        >
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center gap-3">
+                                                                    <img
+                                                                        src={company.image || `https://logo.clearbit.com/${(company.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                        alt={company.name}
+                                                                        className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
+                                                                        onError={(e) => {
+                                                                            e.target.onerror = null;
+                                                                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                        }}
+                                                                    />
+                                                                    <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                                        {company.name}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="flex flex-col gap-2">
-                                                                {company.referral_materials.resume && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        {resumes.length !== 0 ? (
-                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                        ) : (
-                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                        )}
-                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Resume</span>
-                                                                    </div>
-                                                                )}
-                                                                {company.referral_materials.referralEssay && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        {userInfo?.essay && userInfo.essay.trim() !== '' ? (
-                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                        ) : (
-                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                        )}
-                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Referral Essay</span>
-                                                                    </div>
-                                                                )}
-                                                                {company.referral_materials.contact && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        {userInfo?.contact && userInfo.contact.trim() !== '' ? (
-                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                        ) : (
-                                                                            <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                        )}
-                                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Contact</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (!isMember) return;
-                                                                    setSelectedCompany(company);
-                                                                    setReferralCompanyId(company.id);
-                                                                }}
-                                                                disabled={!isMember}
-                                                                title={!isMember ? "Only Members can request referrals" : ""}
-                                                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
-                                                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
-                                                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                    }`}
-                                                            >
-                                                                Request Referral
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <div className="flex flex-col gap-2">
+                                                                    {materials.resume && (
+                                                                        <div className="flex items-center gap-2">
+                                                                            {resumes.length !== 0 ? (
+                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                            ) : (
+                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                            )}
+                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Resume</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {materials.essay && (
+                                                                        <div className="flex items-center gap-2">
+                                                                            {userInfo?.essay && userInfo.essay.trim() !== '' ? (
+                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                            ) : (
+                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                            )}
+                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Referral Essay</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {materials.phone_number && (
+                                                                        <div className="flex items-center gap-2">
+                                                                            {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
+                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                            ) : (
+                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                            )}
+                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Contact</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                                                <button
+                                                                    onClick={() => handleReferralAction(company)}
+                                                                    disabled={!isMember}
+                                                                    title={!isMember ? "Only Members can request referrals" : ""}
+                                                                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
+                                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
+                                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                        }`}
+                                                                >
+                                                                    {company.referral_link ? 'Open Referral Link' : 'Request Referral'}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -797,9 +843,13 @@ const Referrals = () => {
                                                             <div className="flex items-center gap-3">
                                                                 <div className="h-10 w-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1.5 flex items-center justify-center flex-shrink-0">
                                                                     <img
-                                                                        src={referral.company.image}
-                                                                        alt={referral.company.name}
+                                                                        src={referral.company?.image || `https://logo.clearbit.com/${(referral.company?.name || '').toLowerCase().replace(/\s+/g, '')}.com`}
+                                                                        alt={referral.company?.name}
                                                                         className="h-full w-full object-contain"
+                                                                        onError={(e) => {
+                                                                            e.target.onerror = null;
+                                                                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234B5563"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 1v14h14V5H5zm7 3a2 2 0 100 4 2 2 0 000-4zm-4 8l3-3 2 2 4-4 3 3v2H8v-2z"/></svg>';
+                                                                        }}
                                                                     />
                                                                 </div>
                                                                 <span className="font-semibold text-gray-900 dark:text-white">{referral.company.name}</span>
@@ -844,11 +894,11 @@ const Referrals = () => {
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            {referral.contact ? (
+                                                            {referral.phone_number ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="text-sm text-gray-700 dark:text-gray-200">{referral.contact}</span>
+                                                                    <span className="text-sm text-gray-700 dark:text-gray-200">{referral.phone_number}</span>
                                                                     <button
-                                                                        onClick={() => copyToClipboard(referral.contact, `contact-${referral.id}`)}
+                                                                        onClick={() => copyToClipboard(referral.phone_number, `contact-${referral.id}`)}
                                                                         className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                         title="Copy contact"
                                                                     >

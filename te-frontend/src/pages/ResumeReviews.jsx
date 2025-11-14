@@ -459,7 +459,7 @@ const ResumeReviews = () => {
                     <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700">
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                <DocumentTextIcon className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                                <DocumentTextIcon className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
                                 Resume Reviews
                             </h1>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -493,7 +493,7 @@ const ResumeReviews = () => {
                                                                 type="checkbox"
                                                                 checked={visibleColumns[col]}
                                                                 onChange={() => toggleColumn(col)}
-                                                                className="rounded border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-purple-500"
+                                                                className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500"
                                                             />
                                                             <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
                                                         </label>
@@ -501,7 +501,7 @@ const ResumeReviews = () => {
                                                 </div>
                                                 <div className="flex gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
                                                     <button onClick={resetColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-500">Reset</button>
-                                                    <button onClick={showAllColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-white bg-purple-600 rounded hover:bg-purple-700">Show All</button>
+                                                    <button onClick={showAllColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded hover:bg-emerald-700">Show All</button>
                                                 </div>
                                             </div>
                                         )}
@@ -521,7 +521,7 @@ const ResumeReviews = () => {
                             {/* Request Button */}
                             <button
                                 onClick={() => setShowRequestForm(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/30"
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-600 text-white text-sm font-semibold rounded-lg hover:from-emerald-600 hover:to-blue-700 transition-all shadow-lg shadow-emerald-500/30"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 Request Review
@@ -568,7 +568,7 @@ const ResumeReviews = () => {
                             <button
                                 onClick={() => setActiveTab('all')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'all'
-                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
                                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
@@ -577,13 +577,13 @@ const ResumeReviews = () => {
                             <button
                                 onClick={() => setActiveTab('myAssignments')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'myAssignments'
-                                    ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
                                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                     }`}
                             >
                                 My Assignments
                                 {myAssignedReviews.length > 0 && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
                                         {myAssignedReviews.length}
                                     </span>
                                 )}
@@ -592,13 +592,13 @@ const ResumeReviews = () => {
                                 <button
                                     onClick={() => setActiveTab('assignments')}
                                     className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assignments'
-                                        ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
                                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                 >
                                     All Assignments
                                     {allAssignments.length > 0 && (
-                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
                                             {allAssignments.length}
                                         </span>
                                     )}
@@ -615,7 +615,7 @@ const ResumeReviews = () => {
                     <div className="mb-6">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                 My Resume Review Requests
                             </h2>
                             <div className="flex items-center gap-3">
@@ -623,7 +623,7 @@ const ResumeReviews = () => {
                                 <select
                                     value={myRequestsStatusFilter}
                                     onChange={(e) => setMyRequestsStatusFilter(e.target.value)}
-                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 transition-colors"
+                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 transition-colors"
                                 >
                                     <option value="active">Active (Pending + In Review)</option>
                                     <option value="">All Statuses</option>
@@ -714,7 +714,7 @@ const ResumeReviews = () => {
                                         placeholder="Search reviews (member, email, job title)..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                                     />
                                 </div>
 
@@ -726,7 +726,7 @@ const ResumeReviews = () => {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                                     >
                                         <option value="date_desc">Newest First</option>
                                         <option value="date_asc">Oldest First</option>
@@ -741,7 +741,7 @@ const ResumeReviews = () => {
                                 <button
                                     onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
-                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                                         : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                         }`}
                                 >
@@ -766,7 +766,7 @@ const ResumeReviews = () => {
                             <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-purple-600 dark:text-purple-500" />
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                                         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
                                     </div>
                                     {(statusFilter || levelFilter) && (
@@ -789,7 +789,7 @@ const ResumeReviews = () => {
                                         <select
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                         >
                                             <option value="">All Statuses</option>
                                             <option value="Pending">Pending</option>
@@ -808,7 +808,7 @@ const ResumeReviews = () => {
                                         <select
                                             value={levelFilter}
                                             onChange={(e) => setLevelFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                                         >
                                             <option value="">All Levels</option>
                                             <option value="Intern">Intern</option>
@@ -829,13 +829,13 @@ const ResumeReviews = () => {
                     <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                         {/* Bulk Actions Bar */}
                         {isLeadOrAbove && selectedReviewIds.size > 0 && (
-                            <div className="px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-200 dark:border-purple-800 flex items-center justify-between">
-                                <span className="text-sm font-medium text-purple-900 dark:text-purple-300">
+                            <div className="px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
+                                <span className="text-sm font-medium text-emerald-900 dark:text-emerald-300">
                                     {selectedReviewIds.size} review{selectedReviewIds.size !== 1 ? 's' : ''} selected
                                 </span>
                                 <button
                                     onClick={() => handleOpenAssignModal('bulk')}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded transition-colors"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
                                 >
                                     <UserGroupIcon className="h-4 w-4" />
                                     Assign Selected
@@ -853,7 +853,7 @@ const ResumeReviews = () => {
                                                     type="checkbox"
                                                     checked={selectedReviewIds.size === sortedReviews.length && sortedReviews.length > 0}
                                                     onChange={toggleSelectAll}
-                                                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                                 />
                                             </th>
                                         )}
@@ -910,7 +910,7 @@ const ResumeReviews = () => {
                                         sortedReviews.map((review) => (
                                             <tr
                                                 key={review.id}
-                                                className="hover:bg-gradient-to-r hover:from-purple-50/30 hover:to-pink-50/30 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all"
+                                                className="hover:bg-gradient-to-r hover:from-emerald-50/30 hover:to-blue-50/30 dark:hover:from-emerald-900/20 dark:hover:to-blue-900/20 transition-all"
                                             >
                                                 {isLeadOrAbove && (
                                                     <td className="px-4 py-3">
@@ -918,7 +918,7 @@ const ResumeReviews = () => {
                                                             type="checkbox"
                                                             checked={selectedReviewIds.has(review.id)}
                                                             onChange={() => toggleReviewSelection(review.id)}
-                                                            className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                                         />
                                                     </td>
                                                 )}
@@ -989,7 +989,7 @@ const ResumeReviews = () => {
                                                                 href={review.resume_link}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                                className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                             >
                                                                 <EyeIcon className="h-3.5 w-3.5" />
                                                                 View
@@ -999,7 +999,7 @@ const ResumeReviews = () => {
                                                             {isLeadOrAbove && review.status === 'Pending' && !review.reviewer_name && (
                                                                 <button
                                                                     onClick={() => handleOpenAssignModal('single', review)}
-                                                                    className="px-2.5 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700 transition-colors flex items-center gap-1"
+                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
                                                                 >
                                                                     <UserGroupIcon className="h-3.5 w-3.5" />
                                                                     Assign
@@ -1105,7 +1105,7 @@ const ResumeReviews = () => {
                                                             href={review.resume_link}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                            className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                         >
                                                             <EyeIcon className="h-3.5 w-3.5" />
                                                             View
@@ -1185,7 +1185,7 @@ const ResumeReviews = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <div className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                                                    <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                                                         {review.reviewer_name}
                                                     </div>
                                                 </td>
@@ -1201,7 +1201,7 @@ const ResumeReviews = () => {
                                                             href={review.resume_link}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                            className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                         >
                                                             <EyeIcon className="h-3.5 w-3.5" />
                                                             View
@@ -1222,7 +1222,7 @@ const ResumeReviews = () => {
             {showRequestForm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl">
+                        <div className="sticky top-0 bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-4 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <DocumentTextIcon className="h-6 w-6" />
@@ -1248,7 +1248,7 @@ const ResumeReviews = () => {
                                     value={formData.resume_link}
                                     onChange={(e) => setFormData({ ...formData, resume_link: e.target.value })}
                                     placeholder="https://docs.google.com/document/d/..."
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 />
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     Make sure your resume is shared with "Anyone with the link can view"
@@ -1265,7 +1265,7 @@ const ResumeReviews = () => {
                                     value={formData.job_title}
                                     onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
                                     placeholder="e.g., Software Engineer, Data Analyst"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 />
                             </div>
 
@@ -1277,7 +1277,7 @@ const ResumeReviews = () => {
                                     required
                                     value={formData.level}
                                     onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 >
                                     <option value="Intern">Intern</option>
                                     <option value="Entry Level">Entry Level (0-2 years)</option>
@@ -1296,7 +1296,7 @@ const ResumeReviews = () => {
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     placeholder="Any specific areas you'd like feedback on?"
                                     rows="3"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 ></textarea>
                             </div>
 
@@ -1310,7 +1310,7 @@ const ResumeReviews = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
+                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-lg hover:from-emerald-600 hover:to-blue-700 transition-all shadow-lg"
                                 >
                                     Submit Request
                                 </button>
@@ -1324,7 +1324,7 @@ const ResumeReviews = () => {
             {showAssignModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full">
-                        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-4 rounded-t-2xl">
+                        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-4 rounded-t-2xl">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <UserGroupIcon className="h-6 w-6" />
@@ -1354,7 +1354,7 @@ const ResumeReviews = () => {
                                 <select
                                     value={selectedAssignee}
                                     onChange={(e) => setSelectedAssignee(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 >
                                     <option value="">-- Select a volunteer or lead --</option>
                                     {assignableUsers.map(user => (
@@ -1377,7 +1377,7 @@ const ResumeReviews = () => {
                                     type="button"
                                     onClick={handleAssignSubmit}
                                     disabled={!selectedAssignee}
-                                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Assign
                                 </button>
@@ -1391,7 +1391,7 @@ const ResumeReviews = () => {
             {selectedReview && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={() => setSelectedReview(null)}>
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-700 dark:to-pink-700 px-6 py-5">
+                        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 dark:from-emerald-700 dark:to-blue-700 px-6 py-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div>
                                     <h2 className="text-xl font-bold text-white mb-1">Resume Review</h2>
@@ -1434,7 +1434,7 @@ const ResumeReviews = () => {
                                     href={selectedReview.resume_link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border-2 border-purple-200 dark:border-purple-700 rounded-xl transition-all hover:shadow-lg hover:shadow-purple-500/20"
+                                    className="group inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border-2 border-emerald-200 dark:border-emerald-700 rounded-xl transition-all hover:shadow-lg hover:shadow-emerald-500/20"
                                 >
                                     <DocumentTextIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                                     View Resume
@@ -1454,11 +1454,11 @@ const ResumeReviews = () => {
                             {/* Feedback */}
                             {selectedReview.feedback && selectedReview.feedback.trim() && (
                                 <div>
-                                    <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-3">
+                                    <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-3">
                                         Feedback from {selectedReview.reviewer_name || 'Reviewer'}
                                     </p>
-                                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border-2 border-purple-200 dark:border-purple-800 shadow-sm">
-                                        <p className="text-sm text-purple-900 dark:text-purple-200 leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
+                                    <div className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 rounded-xl p-4 border-2 border-emerald-200 dark:border-emerald-800 shadow-sm">
+                                        <p className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
                                     </div>
                                 </div>
                             )}

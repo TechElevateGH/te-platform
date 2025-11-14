@@ -6,33 +6,30 @@ def parse_company_basic(company):
     return referral_schema.CompanyReadBase(
         id=str(company.id),
         name=company.name,
-        domain=company.domain,
-        image=company.image,
-        can_refer=company.can_refer,
+        domain=getattr(company, "domain", ""),
+        image=getattr(company, "image", ""),
+        referral_link=getattr(company, "referral_link", ""),
+        can_refer=getattr(company, "can_refer", True),
     )
 
 
 def parse_company(company):
-    company_base = referral_schema.CompanyReadBase(**vars(company))
-    new_company = referral_schema.CompanyRead(
+    company_base = parse_company_basic(company)
+    materials = company.referral_materials or {}
+    locations = getattr(company, "locations", [])
+    return referral_schema.CompanyRead(
         **company_base.dict(),
-        locations=[
-            referral_schema.LocationRead(**vars(loc)) for loc in company.locations
-        ],
-        referral_materials=referral_schema.ReferralMaterials(
-            **vars(company.referral_materials)
-        ),
+        locations=[referral_schema.LocationRead(**vars(loc)) for loc in locations],
+        referral_materials=referral_schema.ReferralMaterials(**materials),
     )
-    return new_company
 
 
 def parse_company_for_referrals(user_id, company):
-    company_base = referral_schema.CompanyReadBase(**vars(company))
+    company_base = parse_company_basic(company)
+    materials = company.referral_materials or {}
     return referral_schema.CompanyReadForReferrals(
         **company_base.dict(),
-        referral_materials=referral_schema.ReferralMaterials(
-            **vars(company.referral_materials)
-        ),
+        referral_materials=referral_schema.ReferralMaterials(**materials),
     )
 
 
@@ -42,7 +39,7 @@ def parse_referral(referral):
     company_name = referral.company_name or "Unknown Company"
 
     # Create a minimal company object with just the name
-    company_base = referral_schema.CompanyBase(name=company_name, image="")
+    company_base = referral_schema.ReferralCompanyBase(name=company_name, image="")
 
     referral_dict = {
         "id": str(referral.id),
@@ -55,7 +52,7 @@ def parse_referral(referral):
         "date": referral.referral_date,
         "status": referral.status,
         "resume": referral.resume,
-        "contact": referral.contact,
+        "phone_number": referral.phone_number,
         "essay": referral.essay,
     }
 
@@ -75,7 +72,7 @@ def parse_referral_with_user(referral):
     company_name = referral.company_name or "Unknown Company"
 
     # Create minimal company object
-    company_base = referral_schema.CompanyBase(name=company_name, image="")
+    company_base = referral_schema.ReferralCompanyBase(name=company_name, image="")
 
     referral_dict = {
         "id": str(referral.id),
@@ -88,7 +85,7 @@ def parse_referral_with_user(referral):
         "date": referral.referral_date,
         "status": referral.status,
         "resume": referral.resume,
-        "contact": referral.contact,
+        "phone_number": referral.phone_number,
         "essay": referral.essay,
     }
 

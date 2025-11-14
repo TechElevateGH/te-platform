@@ -25,7 +25,7 @@ const Register = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        phone: '',
+        phoneNumber: '',
         university: '',
         address: ''
     });
@@ -72,7 +72,7 @@ const Register = () => {
                 middle_name: formData.middleName,
                 last_name: formData.lastName,
                 password: formData.password,
-                contact: formData.phone,
+                phone_number: formData.phoneNumber,
                 address: formData.address,
                 university: formData.university,
             });
@@ -351,7 +351,7 @@ const Register = () => {
                                 <input
                                     type="tel"
                                     required
-                                    value={formData.phone}
+                                    value={formData.phoneNumber}
                                     onChange={(e) => handleInputChange('phone', e.target.value)}
                                     className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="+1 (555) 000-0000"

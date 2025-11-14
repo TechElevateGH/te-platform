@@ -1087,6 +1087,15 @@ const FilesManagement = () => {
                                                 <tr
                                                     key={user.id}
                                                     onClick={() => handleUserClick(user)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            e.preventDefault();
+                                                            handleUserClick(user);
+                                                        }
+                                                    }}
+                                                    tabIndex={0}
+                                                    role="button"
+                                                    aria-label={`View file details for ${user.full_name || 'member'}`}
                                                     className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                                 >
                                                     {visibleColumns.member && (

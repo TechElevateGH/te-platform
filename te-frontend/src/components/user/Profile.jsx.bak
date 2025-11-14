@@ -736,6 +736,219 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </div>
+
+
+                        {/* Password Reset Modal */}
+                        {showPasswordResetModal && (
+                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                                <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-xs font-semibold tracking-wide text-blue-500 uppercase mb-1">Secure Reset</p>
+                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset your password</h3>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                We’ll send a one-time code to <span className="font-semibold">{resetEmail || 'your email'}</span> and walk you through setting a new password.
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={closePasswordResetModal}
+                                            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                                            aria-label="Close password reset"
+                                        >
+                                            <XMarkIcon className="h-6 w-6" />
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-6 grid grid-cols-3 gap-3">
+                                        {passwordResetSteps.map((step, index) => {
+                                            const isComplete = index < activeResetStepIndex;
+                                            const isActive = index === activeResetStepIndex;
+                                            return (
+                                                <div key={step.id} className="flex flex-col items-center text-center">
+                                                    <div
+                                                        className={`w-10 h-10 rounded-full flex items-center justify-center border-2 text-sm font-bold ${isComplete || isActive
+                                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-200'
+                                                            : 'border-gray-200 dark:border-gray-700 text-gray-400'
+                                                            }`}
+                                                    >
+                                                        {isComplete ? <CheckIcon className="h-5 w-5" /> : index + 1}
+                                                    </div>
+                                                    <span className={`mt-2 text-xs font-semibold ${isComplete || isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                        {step.label}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {resetStatus.message && (
+                                        <div
+                                            className={`mt-6 rounded-2xl border px-4 py-3 text-sm font-medium ${resetStatus.type === 'error'
+                                                ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
+                                                : 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                                                }`}
+                                        >
+                                            {resetStatus.message}
+                                        </div>
+                                    )}
+
+                                    {/* Step Content */}
+                                    <div className="mt-6 space-y-5">
+                                        {resetStep === 'request' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                        Account Email
+                                                    </label>
+                                                    <input
+                                                        type="email"
+                                                        value={resetEmail}
+                                                        onChange={(e) => setResetEmail(e.target.value)}
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    />
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                        We recommend using your current profile email so we can match your account instantly.
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-900/20 px-4 py-3 text-xs text-blue-700 dark:text-blue-200 flex items-start gap-3">
+                                                    <ShieldCheckIcon className="h-5 w-5 text-blue-500 dark:text-blue-300 flex-shrink-0" />
+                                                    <p>Reset links expire in 15 minutes and codes are single-use. You can always request another if it expires.</p>
+                                                </div>
+
+                                                <button
+                                                    onClick={handlePasswordResetRequest}
+                                                    disabled={resetLoading}
+                                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+                                                    {resetLoading ? (
+                                                        <>
+                                                            <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                                                            <span>Sending code…</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <EnvelopeIcon className="h-5 w-5" />
+                                                            <span>Send Reset Code</span>
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {resetStep === 'verify' && (
+                                            <>
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                    Enter the six-digit code we emailed to <span className="font-semibold">{resetEmail}</span>.
+                                                </p>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    {resetCode.map((digit, index) => (
+                                                        <input
+                                                            key={index}
+                                                            id={`reset-code-${index}`}
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            maxLength={1}
+                                                            value={digit}
+                                                            onChange={(e) => handlePasswordResetCodeChange(index, e.target.value)}
+                                                            onKeyDown={(e) => handlePasswordResetCodeKeyDown(index, e)}
+                                                            className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
+                                                    <button
+                                                        onClick={handlePasswordResetResend}
+                                                        disabled={resetLoading || resetResendCooldown > 0}
+                                                        className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold disabled:opacity-60"
+                                                    >
+                                                        <ArrowPathIcon className="h-4 w-4" />
+                                                        {resetResendCooldown > 0 ? `Resend in ${resetResendCooldown}s` : 'Resend code'}
+                                                    </button>
+                                                    <button
+                                                        onClick={handlePasswordResetVerify}
+                                                        disabled={resetLoading}
+                                                        className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60"
+                                                    >
+                                                        {resetLoading ? 'Verifying...' : 'Verify Code'}
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {resetStep === 'complete' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                        New Password
+                                                    </label>
+                                                    <input
+                                                        type="password"
+                                                        value={resetNewPassword}
+                                                        onChange={(e) => setResetNewPassword(e.target.value)}
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                        placeholder="At least 8 characters"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                        Confirm Password
+                                                    </label>
+                                                    <input
+                                                        type="password"
+                                                        value={resetConfirmPassword}
+                                                        onChange={(e) => setResetConfirmPassword(e.target.value)}
+                                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                                        placeholder="Re-enter new password"
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={handlePasswordResetComplete}
+                                                    disabled={resetLoading}
+                                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-60"
+                                                >
+                                                    {resetLoading ? 'Updating…' : 'Update Password'}
+                                                </button>
+                                            </>
+                                        )}
+
+                                        {resetStep === 'done' && (
+                                            <div className="text-center py-8">
+                                                <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mx-auto mb-4">
+                                                    <CheckCircleIcon className="h-10 w-10" />
+                                                </div>
+                                                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password updated!</h4>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                                    You can now sign in with your new password. For security, consider logging out of other sessions.
+                                                </p>
+                                                <div className="flex flex-col sm:flex-row gap-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            setResetStep('request');
+                                                            setResetStatus({ type: null, message: '' });
+                                                            setResetNewPassword('');
+                                                            setResetConfirmPassword('');
+                                                            setResetRequestToken('');
+                                                            setResetSessionToken('');
+                                                            setResetResendCooldown(0);
+                                                        }}
+                                                        className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200"
+                                                    >
+                                                        Start another reset
+                                                    </button>
+                                                    <button
+                                                        onClick={closePasswordResetModal}
+                                                        className="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md"
+                                                    >
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                             {/* Admin Info Section */}
                             <div className="mt-8 grid md:grid-cols-2 gap-6">
                                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -1095,218 +1308,6 @@ const Profile = () => {
                         >
                             Cancel
                         </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Password Reset Modal */}
-            {showPasswordResetModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-start justify-between gap-4">
-                            <div>
-                                <p className="text-xs font-semibold tracking-wide text-blue-500 uppercase mb-1">Secure Reset</p>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset your password</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    We'll send a one-time code to <span className="font-semibold">{resetEmail || 'your email'}</span> and walk you through setting a new password.
-                                </p>
-                            </div>
-                            <button
-                                onClick={closePasswordResetModal}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                                aria-label="Close password reset"
-                            >
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
-                        </div>
-
-                        <div className="mt-6 grid grid-cols-3 gap-3">
-                            {passwordResetSteps.map((step, index) => {
-                                const isComplete = index < activeResetStepIndex;
-                                const isActive = index === activeResetStepIndex;
-                                return (
-                                    <div key={step.id} className="flex flex-col items-center text-center">
-                                        <div
-                                            className={`w-10 h-10 rounded-full flex items-center justify-center border-2 text-sm font-bold ${isComplete || isActive
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-200'
-                                                : 'border-gray-200 dark:border-gray-700 text-gray-400'
-                                                }`}
-                                        >
-                                            {isComplete ? <CheckIcon className="h-5 w-5" /> : index + 1}
-                                        </div>
-                                        <span className={`mt-2 text-xs font-semibold ${isComplete || isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
-                                            {step.label}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {resetStatus.message && (
-                            <div
-                                className={`mt-6 rounded-2xl border px-4 py-3 text-sm font-medium ${resetStatus.type === 'error'
-                                    ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                                    : 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
-                                    }`}
-                            >
-                                {resetStatus.message}
-                            </div>
-                        )}
-
-                        {/* Step Content */}
-                        <div className="mt-6 space-y-5">
-                            {resetStep === 'request' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                            Account Email
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={resetEmail}
-                                            onChange={(e) => setResetEmail(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                            We recommend using your current profile email so we can match your account instantly.
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-900/20 px-4 py-3 text-xs text-blue-700 dark:text-blue-200 flex items-start gap-3">
-                                        <ShieldCheckIcon className="h-5 w-5 text-blue-500 dark:text-blue-300 flex-shrink-0" />
-                                        <p>Reset links expire in 15 minutes and codes are single-use. You can always request another if it expires.</p>
-                                    </div>
-
-                                    <button
-                                        onClick={handlePasswordResetRequest}
-                                        disabled={resetLoading}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                                    >
-                                        {resetLoading ? (
-                                            <>
-                                                <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                                                <span>Sending code…</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <EnvelopeIcon className="h-5 w-5" />
-                                                <span>Send Reset Code</span>
-                                            </>
-                                        )}
-                                    </button>
-                                </>
-                            )}
-
-                            {resetStep === 'verify' && (
-                                <>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                                        Enter the six-digit code we emailed to <span className="font-semibold">{resetEmail}</span>.
-                                    </p>
-                                    <div className="flex items-center justify-between gap-2">
-                                        {resetCode.map((digit, index) => (
-                                            <input
-                                                key={index}
-                                                id={`reset-code-${index}`}
-                                                type="text"
-                                                inputMode="numeric"
-                                                maxLength={1}
-                                                value={digit}
-                                                onChange={(e) => handlePasswordResetCodeChange(index, e.target.value)}
-                                                onKeyDown={(e) => handlePasswordResetCodeKeyDown(index, e)}
-                                                className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            />
-                                        ))}
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
-                                        <button
-                                            onClick={handlePasswordResetResend}
-                                            disabled={resetLoading || resetResendCooldown > 0}
-                                            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold disabled:opacity-60"
-                                        >
-                                            <ArrowPathIcon className="h-4 w-4" />
-                                            {resetResendCooldown > 0 ? `Resend in ${resetResendCooldown}s` : 'Resend code'}
-                                        </button>
-                                        <button
-                                            onClick={handlePasswordResetVerify}
-                                            disabled={resetLoading}
-                                            className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60"
-                                        >
-                                            {resetLoading ? 'Verifying...' : 'Verify Code'}
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-
-                            {resetStep === 'complete' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                            New Password
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={resetNewPassword}
-                                            onChange={(e) => setResetNewPassword(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                            placeholder="At least 8 characters"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                            Confirm Password
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={resetConfirmPassword}
-                                            onChange={(e) => setResetConfirmPassword(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                            placeholder="Re-enter new password"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={handlePasswordResetComplete}
-                                        disabled={resetLoading}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-60"
-                                    >
-                                        {resetLoading ? 'Updating…' : 'Update Password'}
-                                    </button>
-                                </>
-                            )}
-
-                            {resetStep === 'done' && (
-                                <div className="text-center py-8">
-                                    <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircleIcon className="h-10 w-10" />
-                                    </div>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password updated!</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                                        You can now sign in with your new password. For security, consider logging out of other sessions.
-                                    </p>
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <button
-                                            onClick={() => {
-                                                setResetStep('request');
-                                                setResetStatus({ type: null, message: '' });
-                                                setResetNewPassword('');
-                                                setResetConfirmPassword('');
-                                                setResetRequestToken('');
-                                                setResetSessionToken('');
-                                                setResetResendCooldown(0);
-                                            }}
-                                            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200"
-                                        >
-                                            Start another reset
-                                        </button>
-                                        <button
-                                            onClick={closePasswordResetModal}
-                                            className="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md"
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
             )}
