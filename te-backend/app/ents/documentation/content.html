@@ -2034,7 +2034,7 @@ services:
       - key: GOOGLE_FOLDER_ID
         sync: false
       - key: FRONTEND_URL
-        value: https://techelevate.netlify.app</code></pre>
+        value: https://techelevate.vercel.app</code></pre>
 
           <h4>Deployment Scripts</h4>
           <p>
@@ -2078,58 +2078,64 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1</code></pre>
             <li>Click <strong>Save Changes</strong> - Auto-redeploys</li>
           </ol>
 
-          <h3>Frontend Deployment on Netlify</h3>
+          <h3>Frontend Deployment on Vercel</h3>
           <div class="info-box">
-            <strong>✨ Current Setup:</strong> The TechElevate app is deployed
-            at <code>https://techelevate.netlify.app</code>
+            <strong>✨ Current Setup:</strong> The TechElevate web app is
+            deployed at <code>https://techelevate.vercel.app</code>
           </div>
 
           <h4>Build Configuration</h4>
-          <pre><code># netlify.toml
-[build]
-  command = "npm run build"
-  publish = "build"
-  base = "te-frontend"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[build.environment]
-  REACT_APP_API_URL = "https://te-platform.onrender.com/v1"
-  NODE_VERSION = "18"</code></pre>
+          <pre><code># vercel.json
+{
+  "builds": [
+    {
+      "src": "te-frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}</code></pre>
 
           <h4>Deployment Steps</h4>
           <ol>
-            <li>Connect GitHub repository to Netlify</li>
             <li>
-              Configure build settings:
+              Create a Vercel project and set the root directory to
+              <code>te-frontend</code>
+            </li>
+            <li>Framework preset: <strong>Create React App</strong></li>
+            <li>Build command: <code>npm run build</code></li>
+            <li>Output directory: <code>build</code></li>
+            <li>
+              Configure environment variables in Vercel UI:
               <ul>
-                <li>Base directory: <code>te-frontend</code></li>
-                <li>Build command: <code>npm run build</code></li>
-                <li>Publish directory: <code>te-frontend/build</code></li>
+                <li><code>REACT_APP_API_URL</code> → Backend API base URL</li>
+                <li><code>REACT_APP_POSTHOG_KEY</code> → PostHog client key</li>
+                <li>
+                  <code>REACT_APP_POSTHOG_HOST</code> → PostHog ingestion host
+                </li>
               </ul>
             </li>
-            <li>Set environment variables in Netlify UI</li>
-            <li>
-              Enable automatic deploys from <code>deployment</code> branch
-            </li>
-            <li>Configure custom domain (optional)</li>
+            <li>Trigger a deploy (main branch: <code>deployment</code>)</li>
+            <li>Assign custom domain if required</li>
           </ol>
 
           <h3>Alternative Deployment Options</h3>
 
-          <h4>Vercel (Frontend Alternative)</h4>
-          <pre><code># Install Vercel CLI
-npm i -g vercel
-
-# Deploy from te-frontend directory
+          <h4>Netlify (Legacy Frontend)</h4>
+          <pre><code># Deploy from te-frontend directory
 cd te-frontend
-vercel --prod
+netlify deploy --prod
 
-# Environment variables can be set via:
-vercel env add REACT_APP_API_URL</code></pre>
+# Required environment variables
+netlify env:set REACT_APP_API_URL https://te-platform.onrender.com/v1</code></pre>
 
           <h4>AWS EC2 (Backend Alternative)</h4>
           <pre><code># On EC2 instance (Ubuntu)
