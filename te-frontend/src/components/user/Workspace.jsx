@@ -1,12 +1,12 @@
-import { Fragment, useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
     FolderIcon,
-    XMarkIcon,
     UserGroupIcon,
     UserCircleIcon,
-
+    XMarkIcon,
+    SparklesIcon,
 } from '@heroicons/react/24/outline'
-import { Dialog, Transition } from '@headlessui/react'
+import { useNavigate } from 'react-router-dom'
 import axiosInstance from "../../axiosConfig"
 import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon } from '@heroicons/react/20/solid'
 import Applications from '../../pages/Applications'
@@ -29,15 +29,18 @@ import { useLocation } from 'react-router-dom'
 
 
 const Workspace = ({ setLogin }) => {
-    const { userId, accessToken, logout, userRole } = useAuth();
+    const { userId, accessToken, logout, userRole, isGuest } = useAuth();
     const { setUserInfo, setResumes, setOtherFiles, fetchFiles, setFetchFiles } = useData();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    // Show compact guest banner only once per guest session
+    const [showGuestAlert, setShowGuestAlert] = useState(false)
 
-    // Set default content based on role - Referrers go to Referrals by default
+    // Set default content based on role - Guests and Referrers have special defaults
     const userRoleInt = userRole ? parseInt(userRole) : 0;
-    const defaultContent = userRoleInt === 2 ? "Referrals" : "Applications";
+    const defaultContent = isGuest ? "Learning" : (userRoleInt === 2 ? "Referrals" : "Applications");
     const [content, setContent] = useState(defaultContent)
 
     // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
@@ -47,6 +50,14 @@ const Workspace = ({ setLogin }) => {
 
     // Dynamic navigation based on role
     const navigation = useMemo(() => {
+        // Guests only see Learning and Practice
+        if (isGuest) {
+            return [
+                { name: 'Learning', type: "learn", icon: BookOpenIcon },
+                { name: 'Practice', type: "learn", icon: CodeBracketIcon },
+            ];
+        }
+
         // Referrers only see Referrals and Profile
         if (isReferrer) {
             return [
@@ -80,7 +91,7 @@ const Workspace = ({ setLogin }) => {
         }
 
         return baseNavigation;
-    }, [isAdmin, isReferrer, isLeadOrAdmin]);
+    }, [isAdmin, isReferrer, isLeadOrAdmin, isGuest]);
 
     const getUserInfoRequest = useCallback(async () => {
         axiosInstance.get(`/users/${userId}`, {
@@ -186,20 +197,36 @@ const Workspace = ({ setLogin }) => {
         const fetchData = async () => {
             await getUserInfoRequest();
         }
-        if (accessToken) {
+        // Skip fetching user info for guest users
+        if (accessToken && !isGuest) {
             fetchData();
         }
-    }, [accessToken, getUserInfoRequest])
+    }, [accessToken, getUserInfoRequest, isGuest])
+
+    // One-time guest banner display logic
+    useEffect(() => {
+        if (isGuest) {
+            const shown = localStorage.getItem('guestWelcomeShown') === 'true';
+            if (!shown) {
+                setShowGuestAlert(true);
+                localStorage.setItem('guestWelcomeShown', 'true');
+            }
+        } else {
+            // Reset flag when not in guest mode so future guest sessions see it again
+            localStorage.removeItem('guestWelcomeShown');
+        }
+    }, [isGuest]);
 
     useEffect(() => {
         const fetchData = async () => {
             await getUserFilesRequest();
         }
-        if (accessToken && fetchFiles) {
+        // Skip fetching user files for guest users
+        if (accessToken && fetchFiles && !isGuest) {
             fetchData();
             setFetchFiles(false);
         }
-    }, [accessToken, fetchFiles, getUserFilesRequest, setFetchFiles])
+    }, [accessToken, fetchFiles, getUserFilesRequest, setFetchFiles, isGuest])
 
 
 
@@ -213,60 +240,52 @@ const Workspace = ({ setLogin }) => {
     return (
         <>
             <div className="bg-[#fafafa] dark:bg-gray-950 transition-colors">
-                <Transition.Root show={sidebarOpen} as={Fragment}>
-                    <Dialog as="div" className="relative z-50 xl:hidden" onClose={setSidebarOpen}>
-                        <Transition.Child
-                            as={Fragment}
-                            enter="transition-opacity ease-linear duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="transition-opacity ease-linear duration-300"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                        >
-                            <div className="fixed inset-0 bg-gray-900/80" />
-                        </Transition.Child>
-
-                        <div className="fixed inset-0 flex">
-                            <Transition.Child
-                                as={Fragment}
-                                enter="transition ease-in-out duration-300 transform"
-                                enterFrom="-translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transition ease-in-out duration-300 transform"
-                                leaveFrom="translate-x-0"
-                                leaveTo="-translate-x-full"
-                            >
-                                <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                                    <Transition.Child
-                                        as={Fragment}
-                                        enter="ease-in-out duration-300"
-                                        enterFrom="opacity-0"
-                                        enterTo="opacity-100"
-                                        leave="ease-in-out duration-300"
-                                        leaveFrom="opacity-100"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                                            <button type="button" className="-m-2.5 p-2.5" onClick={() => setSidebarOpen(false)}>
-                                                <span className="sr-only">Close sidebar</span>
-                                                <XMarkIcon className="h-6 w-6 text-black" aria-hidden="true" />
-                                            </button>
-                                        </div>
-                                    </Transition.Child>
-
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </Dialog>
-                </Transition.Root>
-
-                <Sidebar navigation={navigation} content={content} setContent={setContentHandler} setLogin={setLogin} />
+                <Sidebar
+                    navigation={navigation}
+                    content={content}
+                    setContent={setContentHandler}
+                    setLogin={setLogin}
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                />
 
                 {/* Workspace Navbar */}
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
                 <div className="md:pl-28">
+                    {/* Compact one-time Guest Banner */}
+                    {isGuest && showGuestAlert && (
+                        <div className="fixed top-16 left-0 right-0 z-40 px-4 md:pl-28">
+                            <div className="max-w-3xl mx-auto mt-2 animate-fade-in">
+                                <div className="flex items-center gap-3 rounded-xl border border-blue-200 dark:border-blue-700 bg-white/90 dark:bg-blue-900/40 backdrop-blur px-4 py-2 shadow">
+                                    <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
+                                        <SparklesIcon className="h-5 w-5" />
+                                    </div>
+                                    <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-100 flex-1">
+                                        Guest Mode: limited features. Sign in to track applications & resumes.
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setShowGuestAlert(false);
+                                            logout();
+                                            navigate('/login');
+                                        }}
+                                        className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                                    >
+                                        Sign In
+                                    </button>
+                                    <button
+                                        onClick={() => setShowGuestAlert(false)}
+                                        aria-label="Dismiss guest banner"
+                                        className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800/50"
+                                    >
+                                        <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <main className="min-h-screen bg-[#fafafa] dark:bg-gray-950 pt-20 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :

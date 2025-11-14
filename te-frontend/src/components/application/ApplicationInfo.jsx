@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext'
 import { FormInput } from '../_custom/FormInputs'
 import SelectCombobox from '../_custom/SelectCombobox'
 import { setNestedPropertyValue } from '../../utils'
-import { countries } from '../../data/data'
+import { countries } from '../../data/jobData'
 
 export const jobStatuses = {
     "Offer": 'text-emerald-700 bg-emerald-50 ring-emerald-600/20 border border-emerald-200',

@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 import time
+from fastapi.middleware.gzip import GZipMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -58,14 +59,51 @@ def enable_cors(app):
             CORSMiddleware,
             allow_origins=allow_origins,
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+            allow_methods=["*"],  # Allow all methods including OPTIONS
             allow_headers=["*"],
             expose_headers=["*"],
+            max_age=3600,  # Cache preflight response for 1 hour
         )
 
 
 app = create_app()
 enable_cors(app)
+
+# Enable gzip compression for large HTML (documentation) to speed up mobile loads
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+
+# Perform a MongoDB connectivity check on startup for observability
+@app.on_event("startup")
+async def verify_mongodb_connection():
+    try:
+        from app.database.session import client  # reuse existing client
+
+        client.admin.command("ping")
+        logger.info("MongoDB ping successful on startup")
+    except Exception as e:
+        logger.error(f"MongoDB ping failed on startup: {e}")
+
+
+# Middleware to handle OPTIONS requests before they hit authentication
+@app.middleware("http")
+async def options_handler(request: Request, call_next):
+    """Handle OPTIONS preflight requests directly to avoid authentication issues."""
+    if request.method == "OPTIONS":
+        return JSONResponse(
+            content={"status": "ok"},
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "3600",
+            },
+        )
+    return await call_next(request)
+
+
 app.include_router(api_router, prefix=settings.API_STR)
 
 
@@ -80,6 +118,54 @@ async def health_check():
     - Monitoring and uptime checks
     """
     return {"status": "healthy", "service": "te-backend", "version": "1.0.0"}
+
+
+@app.get("/debug/db", tags=["Health"])
+async def debug_database():
+    """
+    Database diagnostic endpoint - helps debug MongoDB connection issues
+    Returns collection counts and connection status
+    """
+    from app.database.session import mongodb
+
+    try:
+        # Test connection
+        mongodb.command("ping")
+
+        # Get collection counts
+        collections_info = {}
+        for collection_name in [
+            "member_users",
+            "privileged_users",
+            "companies",
+            "applications",
+            "referrals",
+            "referral_companies",
+        ]:
+            try:
+                count = mongodb[collection_name].count_documents({})
+                collections_info[collection_name] = count
+            except Exception as e:
+                collections_info[collection_name] = f"Error: {str(e)}"
+
+        return {
+            "status": "connected",
+            "database_name": mongodb.name,
+            "collections": collections_info,
+            "mongodb_uri_configured": bool(settings.MONGODB_URI),
+            "mongodb_uri_prefix": settings.MONGODB_URI[:20] + "..."
+            if settings.MONGODB_URI
+            else "NOT SET",
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "database_name": settings.MONGODB_DB_NAME
+            if hasattr(settings, "MONGODB_DB_NAME")
+            else "NOT SET",
+            "mongodb_uri_configured": bool(getattr(settings, "MONGODB_URI", None)),
+        }
 
 
 # Error Handlers

@@ -13,7 +13,7 @@ import {
 import { useDarkMode } from '../../context/DarkModeContext';
 
 const Login = () => {
-    const { login } = useAuth();
+    const { login, loginAsGuest } = useAuth();
     const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -106,6 +106,14 @@ const Login = () => {
         setLoginData({ ...loginData, [name]: value });
     };
 
+    const handleGuestLogin = () => {
+        loginAsGuest();
+        // Use setTimeout to ensure localStorage is written and state is updated
+        setTimeout(() => {
+            navigate('/workspace', { replace: true });
+        }, 100);
+    };
+
     // Compact single Google button (others hidden until implemented)
     const GoogleIcon = (
         <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -127,9 +135,11 @@ const Login = () => {
             <div className="relative max-w-md w-full">
                 {/* Logo + Dark Mode Toggle */}
                 <div className="flex items-center justify-center mb-8 relative">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl select-none">
-                        <span className="text-white font-bold text-3xl tracking-wide">TE</span>
-                    </div>
+                    <img
+                        src="/te-logo.png"
+                        alt="TechElevate Logo"
+                        className="h-20 w-20 select-none"
+                    />
                     <button
                         type="button"
                         onClick={toggleDarkMode}
@@ -158,6 +168,18 @@ const Login = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* Guest Login Button - Small and at top */}
+                    <div className="mb-4">
+                        <button
+                            type="button"
+                            onClick={handleGuestLogin}
+                            className="group relative w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <span>Continue as Guest</span>
+                            <ArrowRightIcon className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    </div>
 
                     {/* Compact Google OAuth button */}
                     <div className="mb-6">
@@ -298,6 +320,15 @@ const Login = () => {
                         </div>
                         <div className="mt-4 flex items-center justify-center gap-6">
                             <button
+                                onClick={() => navigate('/referrer-login')}
+                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
+                            >
+                                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Referrer Login
+                            </button>
+                            <button
                                 onClick={() => navigate('/lead-login')}
                                 className="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                             >
@@ -305,15 +336,6 @@ const Login = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                                 Management Login
-                            </button>
-                            <button
-                                onClick={() => navigate('/referrer-login')}
-                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
-                            >
-                                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                Company Referrer Access
                             </button>
                         </div>
                     </div>

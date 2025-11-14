@@ -1,10 +1,12 @@
 import { Fragment, useState, useEffect, useRef } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import {
     XMarkIcon,
     ChevronRightIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    ArrowLeftOnRectangleIcon
 } from '@heroicons/react/24/outline'
 import {
     RocketLaunchIcon
@@ -14,9 +16,9 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-const Sidebar = ({ navigation, content, setContent, setLogin }) => {
+const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const { logout, userRole, isGuest } = useAuth();
     const [isExpanded, setIsExpanded] = useState(false)
     const [showScrollIndicator, setShowScrollIndicator] = useState(false)
     const sidebarContentRef = useRef(null)
@@ -132,7 +134,48 @@ const Sidebar = ({ navigation, content, setContent, setLogin }) => {
                                                     </ul>
                                                 </li>
 
+                                                {/* Role Badge and Logout - Mobile Only */}
+                                                <li className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                    {/* Role Badge */}
+                                                    {isGuest ? (
+                                                        <div className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-3">
+                                                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                                                Guest Mode
+                                                            </span>
+                                                        </div>
+                                                    ) : userRole && (() => {
+                                                        const roleNum = parseInt(userRole);
+                                                        if (roleNum >= 2) {
+                                                            let roleInfo;
+                                                            if (roleNum >= 5) roleInfo = { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
+                                                            else if (roleNum >= 4) roleInfo = { label: 'Mentor', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+                                                            else if (roleNum >= 3) roleInfo = { label: 'Lead', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
+                                                            else roleInfo = { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
 
+                                                            return (
+                                                                <div className={`${roleInfo.bgColor} px-4 py-2 rounded-lg border border-current/20 mb-3`}>
+                                                                    <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                                                        {roleInfo.label} Access
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
+
+                                                    {/* Logout Button */}
+                                                    <button
+                                                        onClick={() => {
+                                                            logout();
+                                                            navigate(isGuest ? '/login' : '/');
+                                                            setSidebarOpen(false);
+                                                        }}
+                                                        className="group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
+                                                    >
+                                                        <ArrowLeftOnRectangleIcon className="h-5 w-5 text-red-600 dark:text-red-500" />
+                                                        <span className="flex-1 text-left">{isGuest ? 'Exit Guest Mode' : 'Logout'}</span>
+                                                    </button>
+                                                </li>
                                             </ul>
                                         </nav>
                                     </div>

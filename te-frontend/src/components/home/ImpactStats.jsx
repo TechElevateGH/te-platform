@@ -11,54 +11,27 @@ import { ChartBarIcon } from '@heroicons/react/24/solid';
 
 const stats = [
     {
-        id: 1,
-        name: 'Active Mentees',
-        value: 500,
-        suffix: '+',
-        icon: UserGroupIcon,
-        color: 'from-blue-500 to-cyan-500',
-        description: 'Students and professionals in our program',
-    },
-    {
-        id: 2,
+        id: 0,
         name: 'Success Stories',
-        value: 250,
+        value: 50,
         suffix: '+',
         icon: TrophyIcon,
         color: 'from-purple-500 to-pink-500',
-        description: 'Mentees who landed their dream jobs',
+        description: 'Our people who landed their dream jobs',
     },
     {
-        id: 3,
-        name: 'Partner Companies',
-        value: 50,
-        suffix: '+',
-        icon: BriefcaseIcon,
-        color: 'from-green-500 to-emerald-500',
-        description: 'Tech companies offering opportunities',
-    },
-    {
-        id: 4,
-        name: 'Countries Reached',
-        value: 30,
+        id: 1,
+        name: 'Nationalities',
+        value: 5,
         suffix: '+',
         icon: GlobeAltIcon,
         color: 'from-orange-500 to-red-500',
         description: 'Global presence across continents',
     },
     {
-        id: 5,
-        name: 'Learning Resources',
-        value: 200,
-        suffix: '+',
-        icon: AcademicCapIcon,
-        color: 'from-cyan-500 to-blue-500',
-        description: 'Workshops, courses, and tutorials',
-    },
-    {
-        id: 6,
+        id: 2,
         name: 'Community Members',
-        value: 1000,
+        value: 100,
         suffix: '+',
         icon: HeartIcon,
         color: 'from-rose-500 to-pink-500',
@@ -139,7 +112,7 @@ const ImpactStats = () => {
                         </span>
                     </h2>
                     <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                        Our platform has empowered thousands of talented individuals to achieve their dreams in the tech industry.
+                        Our platform empowers talented individuals to achieve their dreams in the tech industry.
                     </p>
                 </div>
 

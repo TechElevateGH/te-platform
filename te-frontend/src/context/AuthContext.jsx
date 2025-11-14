@@ -27,10 +27,37 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Use sessionStorage for tab-independent auth (allows multiple accounts in different tabs)
-    const accessToken = sessionStorage.getItem('accessToken');
-    const userId = sessionStorage.getItem('userId');
-    const userRole = sessionStorage.getItem('userRole');
+    // Check if we're on the OAuth callback page without params (stale redirect from browser restore)
+    if (window.location.pathname === '/auth/callback') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasParams = urlParams.has('token') || urlParams.has('error') || urlParams.has('user_id');
+
+      if (!hasParams) {
+        // This is a stale OAuth callback URL (browser restore after close)
+        console.warn('[AuthContext] Detected stale OAuth callback - browser was reopened');
+        const accessToken = localStorage.getItem('accessToken');
+        const lastLogin = localStorage.getItem('lastSuccessfulLogin');
+
+        // Check if user was recently logged in (within last 30 days)
+        const recentlyLoggedIn = lastLogin && (Date.now() - parseInt(lastLogin)) < 30 * 24 * 60 * 60 * 1000;
+
+        if (accessToken && recentlyLoggedIn) {
+          // User is authenticated and login is recent, go to workspace
+          console.log('[AuthContext] User authenticated, redirecting to workspace');
+          window.location.replace('/workspace');
+        } else {
+          // Not authenticated or login is stale, go to login
+          console.log('[AuthContext] Not authenticated or stale login, redirecting to login');
+          window.location.replace('/login');
+        }
+        return;
+      }
+    }
+
+    // Use localStorage for persistent auth across tabs
+    const accessToken = localStorage.getItem('accessToken');
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
 
     if (accessToken) {
       dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
@@ -39,14 +66,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (accessToken, userId, userRole) => {
-    // Use sessionStorage for tab-independent auth
-    sessionStorage.setItem('accessToken', accessToken);
-    sessionStorage.setItem('userId', userId);
-    sessionStorage.setItem('userRole', userRole);
+    // Use localStorage for persistent auth across tabs
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('userId', userId);
+    localStorage.setItem('userRole', userRole);
 
     // Track if this is a privileged user (role >= 2) for redirect after session expiry
     const isPrivileged = parseInt(userRole) >= 2;
-    sessionStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
+    localStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
 
     dispatch({ type: 'login', payload: { userId, userRole, accessToken } });
 
@@ -57,18 +84,44 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const loginAsGuest = () => {
+    // Guest mode: userRole=0, no token, guest userId
+    const guestUserId = 'guest';
+    const guestRole = '0';
+    const guestToken = 'guest-mode';
+
+    // Set localStorage first - this is synchronous and immediate
+    localStorage.setItem('accessToken', guestToken);
+    localStorage.setItem('userId', guestUserId);
+    localStorage.setItem('userRole', guestRole);
+    localStorage.setItem('isGuestMode', 'true');
+
+    // Then dispatch the state update
+    dispatch({ type: 'login', payload: { userId: guestUserId, userRole: guestRole, accessToken: guestToken } });
+
+    // Track guest session in PostHog
+    posthog.identify(guestUserId, {
+      role: guestRole,
+      isGuest: true,
+    });
+  };
+
   const logout = () => {
-    sessionStorage.removeItem('accessToken');
-    sessionStorage.removeItem('userId');
-    sessionStorage.removeItem('userRole');
-    sessionStorage.removeItem('wasPrivilegedUser');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('wasPrivilegedUser');
+    localStorage.removeItem('isGuestMode');
     dispatch({ type: 'logout' });
 
     // Reset PostHog user
     posthog.reset();
   };
 
-  const isAuthenticated = !!state.accessToken;
+  // Treat guest mode with a localStorage access token as authenticated for UI routing purposes
+  const isGuest = localStorage.getItem('isGuestMode') === 'true';
+  const storageToken = localStorage.getItem('accessToken');
+  const isAuthenticated = !!state.accessToken || (isGuest && !!storageToken);
 
 
   return (
@@ -79,7 +132,9 @@ export const AuthProvider = ({ children }) => {
         accessToken: state.accessToken,
         isAuthenticated,
         isLoading,
+        isGuest,
         login,
+        loginAsGuest,
         logout,
       }}
     >

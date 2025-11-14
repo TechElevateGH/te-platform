@@ -1,0 +1,76 @@
+services:
+  - type: web
+    name: te-backend
+    runtime: python
+    region: oregon
+    plan: free
+    branch: deployment
+    rootDir: te-backend
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: API_STR
+        sync: false
+      - key: PROJECT_NAME
+        value: TechElevate Platform
+      - key: SERVER_HOST
+        value: 0.0.0.0
+      - key: DOMAIN
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AUTHJWT_SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 60
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: EMAILS_ENABLED
+        value: false
+      - key: EMAILS_FROM_NAME
+        value: TechElevate
+      - key: EMAILS_FROM_EMAIL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        sync: false
+      - key: FIRST_SUPERUSER_EMAIL
+        sync: false
+      - key: FIRST_SUPERUSER_FIRST_NAME
+        value: Admin
+      - key: FIRST_SUPERUSER_LAST_NAME
+        value: User
+      - key: FIRST_SUPERUSER_PASSWORD
+        generateValue: true
+      - key: USERS_OPEN_REGISTRATION
+        value: false
+      - key: GDRIVE_RESUMES
+        sync: false
+      - key: GDRIVE_OTHER_FILES
+        sync: false
+      - key: GDRIVE_LESSONS
+        sync: false
+      - key: GOOGLE_PROJECT_ID
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY_ID
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_EMAIL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_X509_CERT_URL
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_REDIRECT_URI
+        sync: false

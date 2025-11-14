@@ -34,8 +34,10 @@ const FilesManagement = () => {
     const isLeadOrAbove = userRoleInt >= 4; // Lead or Admin
     const isVolunteerOrAbove = userRoleInt >= 3; // Volunteer, Lead, or Admin
 
-    // Default tab: Resumes for Lead+, Reviews for Volunteer
-    const [activeTab, setActiveTab] = useState(userRoleInt >= 4 ? 'resumes' : 'reviews');
+    // Default tab: Resumes for Lead+, Reviews for Volunteer - persist across refreshes
+    const [activeTab, setActiveTab] = useState(() => {
+        return localStorage.getItem('filesManagementActiveTab') || (userRoleInt >= 4 ? 'resumes' : 'reviews');
+    });
     const [searchQuery, setSearchQuery] = useState('');
     const [fileTypeFilter, setFileTypeFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
@@ -128,6 +130,11 @@ const FilesManagement = () => {
     };
 
     const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
+
+    // Persist activeTab to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('filesManagementActiveTab', activeTab);
+    }, [activeTab]);
 
     // Fetch all users with their files
     const fetchAllUsersFiles = useCallback(async () => {

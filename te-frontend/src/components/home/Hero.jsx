@@ -160,10 +160,8 @@ const Hero = () => {
           {/* Stats */}
           <div className="mt-16 sm:mt-20 grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 animate-fade-in px-4" style={{ animationDelay: '0.6s' }}>
             {[
-              { label: 'Active Mentees', value: '500+' },
-              { label: 'Success Stories', value: '250+' },
-              { label: 'Partner Companies', value: '50+' },
-              { label: 'Countries Reached', value: '30+' },
+              { label: 'Success Stories', value: '50+' },
+              { label: 'Nationalities', value: '4+' },
             ].map((stat, idx) => (
               <div key={idx} className="group">
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">

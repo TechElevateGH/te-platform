@@ -1,10 +1,9 @@
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import Features from "./Features";
-import Members from "./Members";
+import Companies from "./Companies";
 import ImpactStats from "./ImpactStats";
 import Testimonials from "./Testimonials";
-import CTASection from "./CTASection";
 import Footer from "./Footer";
 import { useAuth } from '../../context/AuthContext';
 import { useMemo } from 'react';
@@ -150,10 +149,9 @@ const Home = () => {
                 </section>
             )}
             <Features />
+            <Companies />
             <ImpactStats />
-            <Members />
             <Testimonials />
-            <CTASection />
             <Footer />
         </div>
     );

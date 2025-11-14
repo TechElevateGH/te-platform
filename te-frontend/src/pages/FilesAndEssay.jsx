@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import ReferralEssay from "../components/file/ReferralEssay";
 import ResumeReviews from "./ResumeReviews";
-import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon, ChevronDownIcon, ClipboardIcon, UserIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, DocumentTextIcon, PencilSquareIcon, ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +14,7 @@ import { trackEvent } from "../analytics/events";
 
 const Files = () => {
     const { userId, accessToken, userRole } = useAuth();
-    const { resumes, setFetchFiles } = useData();
+    const { resumes, setFetchFiles, userInfo } = useData();
 
     // UserRoles: Guest=0, Member=1, Referrer=2, Volunteer=3, Lead=4, Admin=5
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -33,6 +32,14 @@ const Files = () => {
     const [editingResumeId, setEditingResumeId] = useState(null);
     const [editedResumeName, setEditedResumeName] = useState('');
     const [updatingResumeId, setUpdatingResumeId] = useState(null);
+
+    // Essay expansion state
+    const [expandedCoverLetter, setExpandedCoverLetter] = useState(false);
+    const [expandedReferralEssay, setExpandedReferralEssay] = useState(false);
+
+    // Resume details modal
+    const [selectedResume, setSelectedResume] = useState(null);
+    const [showResumeModal, setShowResumeModal] = useState(false);
 
     // Resume Review Form Data
     const [reviewFormData, setReviewFormData] = useState({
@@ -227,15 +234,8 @@ const Files = () => {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                 <div className="lg:grid lg:grid-cols-12 lg:gap-6">
-                    {/* Referral Essay Section */}
-                    <div className="lg:col-span-5 mb-6 lg:mb-0">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 p-6 transition-colors">
-                            <ReferralEssay isMember={isMember} />
-                        </div>
-                    </div>
-
-                    {/* Main Content Section with Tabs */}
-                    <div className="lg:col-span-7">
+                    {/* Main Content Section with Tabs - now on the left */}
+                    <div className="lg:col-span-7 mb-6 lg:mb-0">
                         {/* Tab Content */}
                         {activeTab === 'resumes' ? (
                             <div className="space-y-4">
@@ -298,9 +298,6 @@ const Files = () => {
                                                 </span>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 max-w-md">
-                                            Keep your workspace tidy by archiving older versions. You can restore them anytime from the archived view.
-                                        </p>
                                     </div>
 
                                     {displayedResumes.length === 0 ? (
@@ -353,7 +350,13 @@ const Files = () => {
                                                         return (
                                                             <tr
                                                                 key={file.id}
-                                                                className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group"
+                                                                onClick={() => {
+                                                                    if (!isEditing) {
+                                                                        setSelectedResume(file);
+                                                                        setShowResumeModal(true);
+                                                                    }
+                                                                }}
+                                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group ${!isEditing ? 'cursor-pointer' : ''}`}
                                                             >
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex items-start gap-3">
@@ -407,6 +410,7 @@ const Files = () => {
                                                                                             href={file.link}
                                                                                             target="_blank"
                                                                                             rel="noopener noreferrer"
+                                                                                            onClick={(e) => e.stopPropagation()}
                                                                                             className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                                                                                         >
                                                                                             {file.name}
@@ -427,7 +431,7 @@ const Files = () => {
                                                                         </div>
                                                                     </div>
                                                                 </td>
-                                                                <td className="px-6 py-4">
+                                                                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                                                     {canDelete && (
                                                                         <div className="flex flex-wrap items-center gap-2">
                                                                             {!isEditing && (
@@ -502,6 +506,157 @@ const Files = () => {
                                 <ResumeReviews />
                             </div>
                         )}
+                    </div>
+
+                    {/* Essays Section - now on the right with compact expandable cards */}
+                    <div className="lg:col-span-5 space-y-4">
+                        {/* Cover Letter Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                            <button
+                                onClick={() => setExpandedCoverLetter(!expandedCoverLetter)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                        <DocumentTextIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cover Letter</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {userInfo?.cover_letter ? 'First person - for job applications' : 'No cover letter added'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronDownIcon
+                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedCoverLetter ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+
+                            {expandedCoverLetter && (
+                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="pt-4">
+                                        {userInfo?.cover_letter && userInfo.cover_letter !== "" ? (
+                                            <div className="space-y-3">
+                                                <div className="max-h-60 overflow-y-auto">
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                                        {userInfo.cover_letter}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2 pt-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(userInfo.cover_letter);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                                                    >
+                                                        <ClipboardIcon className="h-4 w-4" />
+                                                        Copy
+                                                    </button>
+                                                    {isMember && (
+                                                        <button
+                                                            onClick={() => setExpandedCoverLetter(false)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        >
+                                                            <PencilSquareIcon className="h-4 w-4" />
+                                                            Edit
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                    Write in first person (I, me, my)
+                                                </p>
+                                                {isMember && (
+                                                    <button
+                                                        onClick={() => setExpandedCoverLetter(false)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                    >
+                                                        <PencilSquareIcon className="h-4 w-4" />
+                                                        Add Cover Letter
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Referral Essay Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                            <button
+                                onClick={() => setExpandedReferralEssay(!expandedReferralEssay)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                                        <UserIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <div className="text-left">
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Referral Essay</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {userInfo?.essay ? 'Third person - used for referral requests' : 'No referral essay added'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <ChevronDownIcon
+                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedReferralEssay ? 'rotate-180' : ''}`}
+                                />
+                            </button>
+
+                            {expandedReferralEssay && (
+                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                    <div className="pt-4">
+                                        {userInfo?.essay && userInfo.essay !== "" ? (
+                                            <div className="space-y-3">
+                                                <div className="max-h-60 overflow-y-auto">
+                                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                                        {userInfo.essay}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2 pt-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(userInfo.essay);
+                                                        }}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                                                    >
+                                                        <ClipboardIcon className="h-4 w-4" />
+                                                        Copy
+                                                    </button>
+                                                    {isMember && (
+                                                        <button
+                                                            onClick={() => setExpandedReferralEssay(false)}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        >
+                                                            <PencilSquareIcon className="h-4 w-4" />
+                                                            Edit
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-6">
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                    Write in third person (he, she, they)
+                                                </p>
+                                                {isMember && (
+                                                    <button
+                                                        onClick={() => setExpandedReferralEssay(false)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                    >
+                                                        <PencilSquareIcon className="h-4 w-4" />
+                                                        Add Referral Essay
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -644,6 +799,138 @@ const Files = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Resume Details Modal */}
+            {selectedResume && showResumeModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowResumeModal(false)}>
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                                        <PaperClipIcon className="h-7 w-7" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">{selectedResume.name}</h2>
+                                        <p className="text-sm text-blue-100">Resume Details</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowResumeModal(false)}
+                                    className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                                >
+                                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-6">
+                            {/* File Information */}
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <DocumentTextIcon className="h-5 w-5" />
+                                    File Information
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">File Name</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white break-all">{selectedResume.name}</p>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Upload Date</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedResume.date || 'Not available'}</p>
+                                    </div>
+                                    {selectedResume.role && (
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Target Role</p>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedResume.role}</p>
+                                        </div>
+                                    )}
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Status</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                            {selectedResume.archived ? (
+                                                <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-1 text-xs font-semibold">
+                                                    Archived
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200 px-2 py-1 text-xs font-semibold">
+                                                    Active
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Notes */}
+                            {selectedResume.notes && (
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Notes</h3>
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedResume.notes}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                                <a
+                                    href={selectedResume.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg"
+                                >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                    Open Resume
+                                </a>
+                                {canDelete && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => {
+                                                handleArchiveToggle(selectedResume);
+                                                setShowResumeModal(false);
+                                            }}
+                                            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${selectedResume.archived
+                                                    ? 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                                                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50'
+                                                }`}
+                                        >
+                                            {selectedResume.archived ? (
+                                                <>
+                                                    <ArrowUturnLeftIcon className="h-4 w-4" />
+                                                    Restore
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ArchiveBoxIcon className="h-4 w-4" />
+                                                    Archive
+                                                </>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleDeleteClick(selectedResume.id, selectedResume.name);
+                                                setShowResumeModal(false);
+                                            }}
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-all"
+                                        >
+                                            <TrashIcon className="h-4 w-4" />
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

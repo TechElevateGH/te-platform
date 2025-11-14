@@ -35,6 +35,9 @@ const OAuthCallback = () => {
                 error: error
             });
 
+            // Mark that OAuth is in progress
+            sessionStorage.setItem('oauthInProgress', 'true');
+
             if (error) {
                 console.error('OAuth error from backend:', error);
                 setStatus('error');
@@ -55,35 +58,40 @@ const OAuthCallback = () => {
                 console.log('User ID:', userId);
                 console.log('Role:', role);
 
-                // IMPORTANT: Save to sessionStorage IMMEDIATELY and SYNCHRONOUSLY
-                console.log('Saving credentials to sessionStorage...');
-                sessionStorage.setItem('accessToken', token);
-                sessionStorage.setItem('userId', userId);
-                sessionStorage.setItem('userRole', role);
+                // IMPORTANT: Save to localStorage IMMEDIATELY and SYNCHRONOUSLY
+                console.log('Saving credentials to localStorage...');
+                localStorage.setItem('accessToken', token);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('userRole', role);
 
                 // Set privileged user flag for proper redirect after session expiry
                 const isPrivileged = parseInt(role) >= 2;
-                sessionStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
+                localStorage.setItem('wasPrivilegedUser', isPrivileged.toString());
 
                 // Clear any stale redirect paths that might cause premature navigation
-                sessionStorage.removeItem('oauthRedirectPath');
-                sessionStorage.removeItem('redirectAfterLogin');
-                sessionStorage.removeItem('prevPage');
-                sessionStorage.removeItem('sessionExpired');
+                localStorage.removeItem('oauthRedirectPath');
+                localStorage.removeItem('redirectAfterLogin');
+                localStorage.removeItem('prevPage');
+                localStorage.removeItem('sessionExpired');
+
+                // Mark OAuth as complete
+                sessionStorage.removeItem('oauthInProgress');
+                localStorage.setItem('lastSuccessfulLogin', Date.now().toString());
 
                 // Verify it was saved
-                const savedToken = sessionStorage.getItem('accessToken');
-                console.log('Verification - Token in sessionStorage:', savedToken ? 'YES (' + savedToken.substring(0, 20) + '...)' : 'NO');
+                const savedToken = localStorage.getItem('accessToken');
+                console.log('Verification - Token in localStorage:', savedToken ? 'YES (' + savedToken.substring(0, 20) + '...)' : 'NO');
 
                 setStatus('success');
-                console.log('OAuth Login successful! Redirecting in 800ms...');
+                console.log('OAuth Login successful! Redirecting in 300ms...');
 
                 // Use window.location.replace to avoid keeping the callback URL in history
+                // Reduced delay for faster mobile experience
                 setTimeout(() => {
                     console.log('=== REDIRECTING NOW ===');
-                    console.log('Final sessionStorage check - accessToken:', sessionStorage.getItem('accessToken') ? 'present' : 'MISSING');
+                    console.log('Final localStorage check - accessToken:', localStorage.getItem('accessToken') ? 'present' : 'MISSING');
                     window.location.replace('/workspace');
-                }, 800);
+                }, 300);
             } else {
                 console.error('Missing required OAuth parameters');
                 console.error('Received - token:', !!token, 'userId:', !!userId, 'role:', !!role);

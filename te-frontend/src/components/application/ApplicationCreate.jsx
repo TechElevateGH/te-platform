@@ -4,7 +4,7 @@ import { jobStatuses } from './ApplicationInfo'
 
 import SlideOverForm from '../_custom/SlideOver/SlideOverCreate'
 import { setNestedPropertyValue } from '../../utils'
-import { countries, jobLevels, jobTitles } from '../../data/data'
+import { countries, jobLevels, jobTitles } from '../../data/jobData'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import SuccessFeedback from '../_custom/Alert/SuccessFeedback'

@@ -617,7 +617,11 @@ const ReferralsManagement = () => {
                                     sortedReferrals.map((ref) => (
                                         <tr
                                             key={ref.id}
-                                            className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
+                                            onClick={() => {
+                                                setSelectedReferral(ref);
+                                                setIsManagementModalOpen(true);
+                                            }}
+                                            className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
                                         >
                                             {visibleColumns.company && (
                                                 <td className="px-4 py-3">
@@ -769,7 +773,7 @@ const ReferralsManagement = () => {
                                                 </td>
                                             )}
                                             {visibleColumns.actions && (
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                                     <div className="flex items-center justify-end gap-2">
                                                         <button
                                                             onClick={() => {

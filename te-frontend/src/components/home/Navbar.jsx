@@ -9,7 +9,6 @@ import NotificationBell from './NotificationBell';
 const navigation = [
     { name: 'Home', href: '#home' },
     { name: 'Features', href: '#features' },
-    { name: 'Team', href: '#team' },
     { name: 'Impact', href: '#impact' },
     { name: 'Testimonials', href: '#testimonials' },
 ];
@@ -86,9 +85,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
     const handleMobileMenuToggle = () => {
         if (onMobileMenuOpen) {
+            // For workspace, use the callback
             onMobileMenuOpen();
         } else {
-            setMobileMenuOpen(true);
+            // For home page, toggle local state
+            setMobileMenuOpen(!mobileMenuOpen);
         }
     };
 
@@ -138,214 +139,219 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         ))}
                     </div>
 
-                    {/* Right section: Auth Buttons */}
-                    <div className="hidden lg:flex lg:items-center lg:gap-x-3 flex-shrink-0">
-                        {/* Notification Bell - Show only when authenticated */}
-                        {isAuthenticated && <NotificationBell />}
-
-                        <button
-                            onClick={() => navigate('/documentation')}
-                            className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                        >
-                            Docs
-                        </button>
-
-                        {/* Role Badge - Show for privileged users */}
-                        {isAuthenticated && roleInfo && (
-                            <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
-                                <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
-                                    {roleInfo.label}
-                                </span>
-                            </div>
+                    {/* Right section: Mobile workspace controls + Desktop Auth Buttons */}
+                    <div className="flex items-center gap-x-2 lg:gap-x-3 flex-shrink-0">
+                        {/* Mobile-only controls for workspace */}
+                        {isWorkspace && (
+                            <>
+                                {/* Role Badge - Mobile */}
+                                {roleInfo && (
+                                    <div className={`lg:hidden ${roleInfo.bgColor} px-2 py-1 rounded-full border border-current/20`}>
+                                        <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                            {roleInfo.label}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
                         )}
 
-                        {/* Dark Mode Toggle */}
+                        {/* Dark Mode Toggle - Mobile (for all pages) */}
                         <button
                             onClick={toggleDarkMode}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
+                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                             title={darkMode ? 'Light Mode' : 'Dark Mode'}
                         >
                             {darkMode ? (
-                                <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-amber-500 transition-colors" />
+                                <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                             ) : (
-                                <MoonIcon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                                <MoonIcon className="h-5 w-5 text-gray-600" />
                             )}
                         </button>
 
-                        {!isAuthenticated ? (
-                            <>
-                                <button
-                                    onClick={() => navigate('/login')}
-                                    className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                                >
-                                    Log in
-                                </button>
-                                <button
-                                    onClick={() => navigate('/register')}
-                                    className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
-                                >
-                                    Get Started
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => navigate('/workspace')}
-                                    className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                                >
-                                    Workspace
-                                </button>
+                        {/* Desktop controls */}
+                        <div className="hidden lg:flex lg:items-center lg:gap-x-3">
+                            {/* Notification Bell - Show only when authenticated */}
+                            {isAuthenticated && <NotificationBell />}
 
-                                {/* Profile icon */}
-                                <button
-                                    onClick={() => {
-                                        sessionStorage.setItem('content', 'Profile');
-                                        if (location.pathname === '/workspace') {
-                                            // If already on workspace, dispatch a custom event to trigger content change
-                                            window.dispatchEvent(new CustomEvent('workspaceContentChange', { detail: 'Profile' }));
-                                        } else {
-                                            navigate('/workspace');
-                                        }
-                                    }}
-                                    className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
-                                    title="Profile"
-                                >
-                                    <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                                </button>
+                            <button
+                                onClick={() => navigate('/documentation')}
+                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                            >
+                                Docs
+                            </button>
 
-                                {/* Sign out icon */}
-                                <button
-                                    onClick={handleLogoutClick}
-                                    className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
-                                    title="Sign Out"
-                                >
-                                    <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
-                                </button>
-                            </>
-                        )}
+                            {/* Role Badge - Show for privileged users */}
+                            {isAuthenticated && roleInfo && (
+                                <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
+                                    <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                        {roleInfo.label}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
+                                title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                            >
+                                {darkMode ? (
+                                    <SunIcon className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-amber-500 transition-colors" />
+                                ) : (
+                                    <MoonIcon className="h-5 w-5 text-gray-600 group-hover:text-indigo-600 transition-colors" />
+                                )}
+                            </button>
+
+                            {!isAuthenticated ? (
+                                <>
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                                    >
+                                        Log in
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/register')}
+                                        className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
+                                    >
+                                        Get Started
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => navigate('/workspace')}
+                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                                    >
+                                        Workspace
+                                    </button>
+
+                                    {/* Profile icon */}
+                                    <button
+                                        onClick={() => {
+                                            sessionStorage.setItem('content', 'Profile');
+                                            if (location.pathname === '/workspace') {
+                                                // If already on workspace, dispatch a custom event to trigger content change
+                                                window.dispatchEvent(new CustomEvent('workspaceContentChange', { detail: 'Profile' }));
+                                            } else {
+                                                navigate('/workspace');
+                                            }
+                                        }}
+                                        className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
+                                        title="Profile"
+                                    >
+                                        <UserCircleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                                    </button>
+
+                                    {/* Sign out icon */}
+                                    <button
+                                        onClick={handleLogoutClick}
+                                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
+                                        title="Sign Out"
+                                    >
+                                        <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </nav>
+            </header>
 
-                {/* Mobile menu - only for home page */}
-                {!isWorkspace && (
-                    <div className={`lg:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
-                        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-                        <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
-                            <div className="flex items-center justify-between">
-                                <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                                    <img
-                                        src="/logo.png"
-                                        alt="TechElevate"
-                                        className="h-10 w-10 rounded-xl shadow-lg"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'flex';
+            {/* Mobile menu - only for home page - Outside header for proper layering */}
+            {!isWorkspace && mobileMenuOpen && (
+                <div className="lg:hidden">
+                    <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                    <div className="fixed inset-y-0 right-0 z-[70] w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
+                        <div className="flex items-center justify-between">
+                            <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
+                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
+                                </div>
+                                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
+                                    TechElevate
+                                </span>
+                            </a>
+                            <button
+                                type="button"
+                                className="-m-2.5 rounded-lg p-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                <span className="sr-only">Close menu</span>
+                                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                            </button>
+                        </div>
+                        <div className="mt-6 flow-root">
+                            <div className="-my-6 divide-y divide-gray-500/10">
+                                <div className="space-y-2 py-6">
+                                    {navigation.map((item) => (
+                                        <button
+                                            key={item.name}
+                                            onClick={() => scrollToSection(item.href)}
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                        >
+                                            {item.name}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => {
+                                            navigate('/documentation');
+                                            setMobileMenuOpen(false);
                                         }}
-                                    />
-                                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-blue-500 hidden items-center justify-center shadow-lg">
-                                        <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18.5c-3.86-.96-6.5-4.58-6.5-8.5V8.42l6.5-3.25 6.5 3.25V12c0 3.92-2.64 7.54-6.5 8.5z" />
-                                            <path d="M10.5 14.5l-2-2-1.5 1.5 3.5 3.5 6-6-1.5-1.5z" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                                        TechElevate
-                                    </span>
-                                </a>
-                                <button
-                                    type="button"
-                                    className="-m-2.5 rounded-lg p-2.5 text-gray-700 hover:bg-gray-100"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    <span className="sr-only">Close menu</span>
-                                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                                </button>
-                            </div>
-                            <div className="mt-6 flow-root">
-                                <div className="-my-6 divide-y divide-gray-500/10">
-                                    <div className="space-y-2 py-6">
-                                        {navigation.map((item) => (
-                                            <button
-                                                key={item.name}
-                                                onClick={() => scrollToSection(item.href)}
-                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                            >
-                                                {item.name}
-                                            </button>
-                                        ))}
-                                        <button
-                                            onClick={() => {
-                                                navigate('/documentation');
-                                                setMobileMenuOpen(false);
-                                            }}
-                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-blue-600 hover:bg-blue-50"
-                                        >
-                                            Docs
-                                        </button>
-                                    </div>
-                                    <div className="py-6 space-y-2">
-                                        {/* Dark Mode Toggle - Mobile */}
-                                        <button
-                                            onClick={toggleDarkMode}
-                                            className="-mx-3 flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-                                        >
-                                            <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                                            {darkMode ? (
-                                                <SunIcon className="h-5 w-5 text-amber-500" />
-                                            ) : (
-                                                <MoonIcon className="h-5 w-5 text-indigo-600" />
-                                            )}
-                                        </button>
-
-                                        {/* Role Badge - Mobile */}
-                                        {isAuthenticated && roleInfo && (
-                                            <div className="-mx-3 px-3 py-2.5">
-                                                <div className={`inline-flex ${roleInfo.bgColor} px-4 py-2 rounded-full border border-current/20`}>
-                                                    <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
-                                                        {roleInfo.label}
-                                                    </span>
-                                                </div>
+                                        className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                    >
+                                        Docs
+                                    </button>
+                                </div>
+                                <div className="py-6 space-y-2">
+                                    {/* Role Badge - Mobile */}
+                                    {isAuthenticated && roleInfo && (
+                                        <div className="-mx-3 px-3 py-2.5">
+                                            <div className={`inline-flex ${roleInfo.bgColor} px-4 py-2 rounded-full border border-current/20`}>
+                                                <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
+                                                    {roleInfo.label}
+                                                </span>
                                             </div>
-                                        )}
+                                        </div>
+                                    )}
 
-                                        {!isAuthenticated ? (
-                                            <>
-                                                <button
-                                                    onClick={() => navigate('/login')}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                                >
-                                                    Log in
-                                                </button>
-                                                <button
-                                                    onClick={() => navigate('/register')}
-                                                    className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
-                                                >
-                                                    Get Started
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button
-                                                    onClick={() => navigate('/workspace')}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                                                >
-                                                    Workspace
-                                                </button>
-                                                <button
-                                                    onClick={handleLogoutClick}
-                                                    className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 hover:bg-red-50"
-                                                >
-                                                    Logout
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
+                                    {!isAuthenticated ? (
+                                        <>
+                                            <button
+                                                onClick={() => navigate('/login')}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                            >
+                                                Log in
+                                            </button>
+                                            <button
+                                                onClick={() => navigate('/register')}
+                                                className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
+                                            >
+                                                Get Started
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => navigate('/workspace')}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                            >
+                                                Workspace
+                                            </button>
+                                            <button
+                                                onClick={handleLogoutClick}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            >
+                                                Logout
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
-                )}
-            </header>
+                </div>
+            )}
 
             {/* Logout Confirmation Modal - Outside header for proper centering */}
             {showLogoutConfirm && (

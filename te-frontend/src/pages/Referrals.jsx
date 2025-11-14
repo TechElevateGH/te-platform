@@ -96,8 +96,10 @@ const Referrals = () => {
     const isMember = userRole && parseInt(userRole) === 1; // Only Members can request referrals
     const isReferrer = userRole && parseInt(userRole) === 2; // Referrer role
 
-    // State for view toggle
-    const [viewMode, setViewMode] = useState('companies'); // 'companies', 'my-requests', or 'all-requests'
+    // State for view toggle - persist across page refreshes
+    const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem('referralsViewMode') || 'companies';
+    });
     const [allReferrals, setAllReferrals] = useState([]);
     const [loadingAllReferrals, setLoadingAllReferrals] = useState(false);
     const [selectedReferral, setSelectedReferral] = useState(null);
@@ -121,6 +123,11 @@ const Referrals = () => {
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
     const [companyFilter, setCompanyFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
+
+    // Persist viewMode to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('referralsViewMode', viewMode);
+    }, [viewMode]);
 
     // Check if user is authenticated
     useEffect(() => {
@@ -499,7 +506,13 @@ const Referrals = () => {
                                                 {filteredCompanies.map((company, index) => (
                                                     <tr
                                                         key={company.id}
-                                                        className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group"
+                                                        onClick={() => {
+                                                            if (!isMember) return;
+                                                            setSelectedCompany(company);
+                                                            setReferralCompanyId(company.id);
+                                                        }}
+                                                        className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                        title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
                                                     >
                                                         <td className="px-6 py-4 whitespace-nowrap">
                                                             <div className="flex items-center gap-3">
@@ -547,7 +560,7 @@ const Referrals = () => {
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                        <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                                                             <button
                                                                 onClick={() => {
                                                                     if (!isMember) return;
