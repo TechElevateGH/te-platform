@@ -665,53 +665,132 @@
         <section id="personas">
           <h2>User Personas</h2>
 
-          <h3>Member (Job Seeker)</h3>
+          <h3>Guest (role=0)</h3>
+          <p>Unauthenticated visitors to the platform with limited access.</p>
+          <div class="note">
+            <strong>Access</strong>: Public learning content only (view-only
+            mode for lessons and practice problems)
+          </div>
+
+          <h3>Member (role=1)</h3>
           <p>
             The primary user of the platform. Members are tech professionals or
-            aspiring professionals looking for job opportunities.
+            aspiring professionals looking for job opportunities. Stored in
+            <code>member_users</code> collection.
           </p>
           <div class="note">
             <strong>Key Capabilities</strong>
-            Members can upload and manage multiple versions of their resume,
-            track job applications, request referrals from company insiders,
-            access learning content, and receive feedback from the TechElevate
-            team.
+            Members can upload and manage multiple versions of their resume
+            (stored as embedded documents in <code>resumes[]</code> array),
+            track job applications (stored in
+            <code>applications[]</code> array), request referrals from company
+            insiders, access all learning content with progress tracking,
+            request resume reviews, manage referral essay and cover letter, and
+            update their own profile. Requires email verification before first
+            login.
+          </div>
+          <div class="note">
+            <strong>Authentication</strong>: Email/password via
+            <code>/auth/login</code> or Google OAuth via
+            <code>/auth/google</code>
           </div>
 
-          <h3>Referrer</h3>
+          <h3>Referrer (role=2)</h3>
           <p>
             Employees at tech companies who are willing to provide internal
-            referrals to qualified members.
+            referrals to qualified members. Stored in
+            <code>privileged_users</code> collection with
+            <code>company_id</code>.
           </p>
           <ul>
-            <li>Review incoming referral requests</li>
-            <li>Evaluate candidate profiles and resumes</li>
-            <li>Provide or decline referrals</li>
-            <li>Track referral status and outcomes</li>
+            <li>View referral requests filtered by their assigned company</li>
+            <li>Access resumes and essays from members</li>
+            <li>Approve or decline requests with feedback notes</li>
+            <li>Update referral status through the workflow</li>
+            <li>Track outcomes of provided referrals</li>
           </ul>
+          <div class="note">
+            <strong>Authentication</strong>: Token-only via
+            <code>/auth/referrer-login</code> (matches <code>password</code> or
+            <code>lead_token</code> field)
+          </div>
 
-          <h3>Lead</h3>
+          <h3>Volunteer (role=3)</h3>
+          <p>
+            TechElevate volunteers who provide resume reviews and create
+            learning content.
+          </p>
+          <ul>
+            <li>Review member resumes and provide detailed feedback</li>
+            <li>Create and publish learning lessons</li>
+            <li>Create other Volunteer accounts</li>
+            <li>All Member capabilities (can use platform as member)</li>
+          </ul>
+          <div class="note">
+            <strong>Creation</strong>: Leads+ can create via
+            <code>POST /users/privileged/volunteers</code>
+          </div>
+
+          <h3>Lead (role=4)</h3>
           <p>
             TechElevate staff members who manage the platform's content and
-            operations.
+            operations. Stored in <code>privileged_users</code> collection.
           </p>
           <ul>
-            <li>Curate and maintain company database</li>
-            <li>Review member applications and resumes</li>
-            <li>Manage learning content</li>
-            <li>Oversee referral workflows</li>
+            <li>
+              Curate and maintain company database via
+              <code>/referrals/companies</code>
+            </li>
+            <li>Access simplified company list for creating Referrers</li>
+            <li>View all member data and applications</li>
+            <li>Assign resume reviews to Volunteers</li>
+            <li>Create Volunteer and Referrer accounts</li>
+            <li>Manage all referral requests across companies</li>
+            <li>Oversee learning content and user progress</li>
+            <li>All lower role permissions</li>
           </ul>
+          <div class="note">
+            <strong>Authentication</strong>: Username/password via
+            <code>/auth/management-login</code>
+          </div>
 
-          <h3>Admin</h3>
+          <h3>Admin (role=5)</h3>
           <p>
             Platform administrators with full access to all system capabilities.
+            Stored in <code>privileged_users</code> collection.
           </p>
           <ul>
-            <li>User management and role assignment</li>
-            <li>System configuration</li>
-            <li>Analytics and reporting</li>
-            <li>Content moderation</li>
+            <li>
+              User management: Create Lead/Admin accounts via
+              <code>POST /users/privileged/leads</code>
+            </li>
+            <li>Delete any data (users, referrals, reviews)</li>
+            <li>System configuration and settings</li>
+            <li>Full analytics and reporting access</li>
+            <li>Content moderation across all entities</li>
+            <li>Override all permission checks</li>
+            <li>All lower role permissions</li>
           </ul>
+          <div class="note">
+            <strong>Authentication</strong>: Username/password via
+            <code>/auth/management-login</code>
+          </div>
+
+          <div class="note">
+            <strong>User Model Separation</strong>
+            The platform uses two MongoDB collections for users:
+            <ul>
+              <li>
+                <code>member_users</code>: Members (role=1) with email-based
+                auth, embedded applications/resumes, OAuth support
+              </li>
+              <li>
+                <code>privileged_users</code>: Referrers/Volunteers/Leads/Admins
+                (roles 2-5) with username-based auth, company_id for Referrers,
+                token authentication support
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section id="stack">
@@ -870,15 +949,19 @@
 │   ├── session.py      # MongoDB connection
 │   └── init_db.py      # Database initialization
 ├── ents/               # Domain entities (modules)
-│   ├── home/           # Auth & public endpoints
-│   ├── user/           # User management
-│   ├── application/    # Job applications
-│   ├── referral/       # Referral system
-│   ├── company/        # Company data
-│   └── learning/       # Learning content
+│   ├── home/           # Public home page content
+│   ├── user/           # User management & authentication
+│   ├── application/    # Job application tracking
+│   ├── referral/       # Referral system (companies & requests)
+│   ├── resume/         # Resume uploads & review system
+│   ├── learning/       # Learning content & progress
+│   ├── verification/   # Email verification codes
+│   ├── problem/        # Practice problems (legacy)
+│   └── documentation/  # Platform documentation
 └── utilities/          # Shared utilities
     ├── email.py        # Email sending
     ├── errors.py       # Custom exceptions
+    ├── endpoints.py    # Endpoint utilities
     └── constants.py    # Constants</code></pre>
 
           <h3>Domain Module Pattern</h3>
@@ -927,38 +1010,70 @@
             <tbody>
               <tr>
                 <td><code>member_users</code></td>
-                <td>User accounts & profiles</td>
-                <td>email, hashed_password, role, profile_data</td>
+                <td>
+                  Member accounts (role=1) with embedded applications & resumes
+                </td>
+                <td>
+                  email, password, full_name, contact, university,
+                  applications[], resumes[], referral_essay, cover_letter,
+                  google_id
+                </td>
+              </tr>
+              <tr>
+                <td><code>privileged_users</code></td>
+                <td>Management accounts (Referrer, Volunteer, Lead, Admin)</td>
+                <td>
+                  username, password, lead_token, role (2-5), company_id (for
+                  Referrers)
+                </td>
               </tr>
               <tr>
                 <td><code>companies</code></td>
-                <td>Company database</td>
-                <td>name, industry, size, locations, job_boards</td>
-              </tr>
-              <tr>
-                <td><code>applications</code></td>
-                <td>Job applications tracking</td>
-                <td>user_id, company_id, status, applied_date</td>
+                <td>Companies available for referrals</td>
+                <td>
+                  name, domain, image, can_refer, locations[] (subdocuments),
+                  referral_materials{}, metadata{}
+                </td>
               </tr>
               <tr>
                 <td><code>referrals</code></td>
-                <td>Referral requests</td>
-                <td>member_id, referrer_id, company_id, status</td>
+                <td>Referral requests from members</td>
+                <td>
+                  user_id, company_name, job_title, job_id, role, status, resume
+                  (GDrive link), essay (URL), referral_date, feedback_date
+                </td>
               </tr>
               <tr>
-                <td><code>referral_companies</code></td>
-                <td>Companies available for referrals</td>
-                <td>name, referrer_id, active</td>
+                <td><code>resume_reviews</code></td>
+                <td>Resume review requests & feedback</td>
+                <td>
+                  user_id, user_name, user_email, resume_link, job_title, level,
+                  status, reviewed_by, reviewer_name, feedback
+                </td>
               </tr>
               <tr>
-                <td><code>files</code></td>
-                <td>File metadata (resumes, etc.)</td>
-                <td>user_id, drive_id, filename, file_type</td>
+                <td><code>lessons</code></td>
+                <td>Learning content (DSA, algorithms)</td>
+                <td>
+                  title, category, topic, description, video_id, content_type,
+                  difficulty, tags, resources[], code_examples[]
+                </td>
               </tr>
               <tr>
-                <td><code>learning_modules</code></td>
-                <td>Learning content</td>
-                <td>title, category, content, difficulty</td>
+                <td><code>user_progress</code></td>
+                <td>Learning progress tracking</td>
+                <td>
+                  user_id, completed_topics[], bookmarked_topics[],
+                  topic_notes{}
+                </td>
+              </tr>
+              <tr>
+                <td><code>verification_codes</code></td>
+                <td>Email verification codes</td>
+                <td>
+                  email, code (6-digit), verification_type, user_id, new_email,
+                  expires_at, is_used, attempts
+                </td>
               </tr>
             </tbody>
           </table>
@@ -967,16 +1082,28 @@
           <p>MongoDB uses embedded documents and references:</p>
           <ul>
             <li>
-              <strong>Embedded</strong>: User profiles embed contact info and
-              preferences
+              <strong>Embedded Documents</strong>: Applications and resumes are
+              stored as arrays directly within
+              <code>member_users</code> documents for fast access. Each has a
+              UUID for identification.
             </li>
             <li>
-              <strong>Referenced</strong>: Applications reference user_id and
-              company_id
+              <strong>Referenced Collections</strong>: Referrals reference
+              <code>user_id</code> (member_users._id) and
+              <code>company_name</code> (companies.name). Resume reviews
+              reference <code>user_id</code> and optionally
+              <code>reviewed_by</code>.
             </li>
             <li>
-              <strong>Denormalized</strong>: Company names cached in
-              applications for performance
+              <strong>Denormalized Data</strong>: Company names and user
+              information are cached in referrals and reviews for query
+              performance. Locations are embedded subdocuments in companies.
+            </li>
+            <li>
+              <strong>Two User Collections</strong>:
+              <code>member_users</code> (role=1) and
+              <code>privileged_users</code> (roles 2-5) are separate collections
+              to optimize queries and enforce different validation rules.
             </li>
           </ul>
         </section>
@@ -1030,19 +1157,56 @@
           <h2>Authentication & Authorization</h2>
           <p>
             The platform uses JWT (JSON Web Tokens) for stateless authentication
-            with role-based access control.
+            with role-based access control. Three separate login endpoints serve
+            different user types.
           </p>
 
           <h3>Authentication Flow</h3>
+          <p><strong>For Members (role=1):</strong></p>
           <ol>
-            <li>User submits email/password credentials</li>
-            <li>Backend validates credentials against MongoDB</li>
+            <li>
+              User submits email/password to <code>POST /auth/login</code> or
+              uses Google OAuth
+            </li>
+            <li>
+              Email verification required before first login (6-digit code sent
+              via email)
+            </li>
+            <li>
+              Backend validates credentials against
+              <code>member_users</code> collection
+            </li>
             <li>If valid, JWT token is generated with user ID and role</li>
             <li>Frontend stores token in localStorage</li>
             <li>
               Token included in Authorization header for subsequent requests
             </li>
-            <li>Backend validates token and extracts user information</li>
+          </ol>
+
+          <p><strong>For Volunteer/Lead/Admin (roles 3-5):</strong></p>
+          <ol>
+            <li>
+              User submits username/password to
+              <code>POST /auth/management-login</code>
+            </li>
+            <li>
+              Backend validates against <code>privileged_users</code> collection
+              with role &gt;= 3
+            </li>
+            <li>Token generated and stored (same flow as Members)</li>
+          </ol>
+
+          <p><strong>For Referrers (role=2):</strong></p>
+          <ol>
+            <li>
+              User submits token only to <code>POST /auth/referrer-login</code>
+            </li>
+            <li>
+              Backend matches token against
+              <code>privileged_users.password</code> or
+              <code>privileged_users.lead_token</code>
+            </li>
+            <li>Token generated with company_id for scoped access</li>
           </ol>
 
           <h3>Roles & Permissions</h3>
@@ -1050,33 +1214,74 @@
             <thead>
               <tr>
                 <th>Role</th>
+                <th>Value</th>
                 <th>Permissions</th>
-                <th>Routes</th>
+                <th>Login Endpoint</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code>member</code></td>
-                <td>View own data, submit applications/referrals</td>
-                <td>/applications, /referrals, /learning</td>
+                <td><code>Guest</code></td>
+                <td>0</td>
+                <td>View public learning content only</td>
+                <td>No auth required</td>
               </tr>
               <tr>
-                <td><code>referrer</code></td>
-                <td>View referral requests, approve/decline</td>
-                <td>/referrer-portal</td>
+                <td><code>Member</code></td>
+                <td>1</td>
+                <td>
+                  Submit applications/referrals, upload resumes, request
+                  reviews, access all learning content, manage own profile
+                </td>
+                <td><code>/auth/login</code> or <code>/auth/google</code></td>
               </tr>
               <tr>
-                <td><code>lead</code></td>
-                <td>Manage companies, view all member data</td>
-                <td>/admin/companies, /admin/files</td>
+                <td><code>Referrer</code></td>
+                <td>2</td>
+                <td>
+                  View referral requests for assigned company, approve/decline
+                  requests, provide feedback
+                </td>
+                <td><code>/auth/referrer-login</code></td>
               </tr>
               <tr>
-                <td><code>admin</code></td>
-                <td>Full system access, user management</td>
-                <td>/admin/*</td>
+                <td><code>Volunteer</code></td>
+                <td>3</td>
+                <td>
+                  Review resumes, create learning content, create other
+                  Volunteers, all Member permissions
+                </td>
+                <td><code>/auth/management-login</code></td>
+              </tr>
+              <tr>
+                <td><code>Lead</code></td>
+                <td>4</td>
+                <td>
+                  Manage companies, view all member data, create
+                  Volunteers/Referrers, assign resume reviews, all lower
+                  permissions
+                </td>
+                <td><code>/auth/management-login</code></td>
+              </tr>
+              <tr>
+                <td><code>Admin</code></td>
+                <td>5</td>
+                <td>
+                  Full system access, create any user type including
+                  Leads/Admins, delete data, system configuration
+                </td>
+                <td><code>/auth/management-login</code></td>
               </tr>
             </tbody>
           </table>
+
+          <div class="note">
+            <strong>Permission Hierarchy:</strong> Higher roles inherit all
+            permissions from lower roles. The platform enforces this via
+            <code>require_member()</code>, <code>require_volunteer()</code>,
+            <code>require_lead()</code>, and
+            <code>require_admin()</code> dependency functions.
+          </div>
 
           <h3>Token Structure</h3>
           <pre><code>{
@@ -1085,6 +1290,140 @@
   "role": "member",
   "exp": 1699824000
 }</code></pre>
+        </section>
+
+        <section id="email-verification">
+          <h2>Email Verification System</h2>
+          <p>
+            Required for new Member accounts before first login. Ensures email
+            ownership and reduces spam accounts. Stored in
+            <code>verification_codes</code> collection.
+          </p>
+
+          <h3>Verification Flow</h3>
+          <ol>
+            <li>
+              <strong>User registers</strong> via <code>POST /users</code> -
+              account created with <code>email_verified: false</code>
+            </li>
+            <li>
+              <strong>Request code</strong> via
+              <code>POST /verification/send-code</code> - 6-digit code sent to
+              email, expires in 15 minutes
+            </li>
+            <li><strong>User receives email</strong> with verification code</li>
+            <li>
+              <strong>Submit code</strong> via
+              <code>POST /verification/verify-email</code> - validates code and
+              sets <code>email_verified: true</code>
+            </li>
+            <li>
+              <strong>User can now login</strong> via
+              <code>POST /auth/login</code>
+            </li>
+          </ol>
+
+          <h3>Verification Code Model</h3>
+          <div class="note">
+            <strong>EmailVerification Document</strong>
+            <ul>
+              <li><code>email</code>: Email address being verified</li>
+              <li>
+                <code>code</code>: 6-digit verification code (randomly
+                generated)
+              </li>
+              <li>
+                <code>verification_type</code>: "registration" or "email_change"
+              </li>
+              <li>
+                <code>user_id</code>: Reference to user (for email change
+                requests)
+              </li>
+              <li>
+                <code>new_email</code>: New email address (for email change
+                verification)
+              </li>
+              <li>
+                <code>created_at</code>: Timestamp when code was generated
+              </li>
+              <li>
+                <code>expires_at</code>: Expiration time (15 minutes from
+                creation)
+              </li>
+              <li>
+                <code>is_used</code>: Boolean indicating if code has been
+                successfully used
+              </li>
+              <li>
+                <code>attempts</code>: Number of failed verification attempts
+                (max 5)
+              </li>
+            </ul>
+          </div>
+
+          <h3>Email Change Flow</h3>
+          <p>For existing members changing their email address:</p>
+          <ol>
+            <li>
+              <strong>Request change</strong> via
+              <code>POST /verification/send-code-for-email-change</code> with
+              new email
+            </li>
+            <li><strong>Receive code</strong> at new email address</li>
+            <li>
+              <strong>Verify code</strong> via
+              <code>POST /verification/verify-email-change</code>
+            </li>
+            <li><strong>Email updated</strong> in member_users collection</li>
+          </ol>
+
+          <h3>Verification API Endpoints</h3>
+          <ul>
+            <li>
+              <code>POST /verification/send-code</code> - Send verification code
+              to email (registration)
+            </li>
+            <li>
+              <code>POST /verification/verify-email</code> - Verify email with
+              6-digit code
+            </li>
+            <li>
+              <code>POST /verification/resend-code</code> - Resend code if
+              expired or lost
+            </li>
+            <li>
+              <code>POST /verification/send-code-for-email-change</code> -
+              Request email change (Member+)
+            </li>
+            <li>
+              <code>POST /verification/verify-email-change</code> - Complete
+              email change (Member+)
+            </li>
+          </ul>
+
+          <h3>Security Features</h3>
+          <div class="note">
+            <ul>
+              <li>
+                <strong>Rate limiting:</strong> Max 5 code requests per email
+                per hour
+              </li>
+              <li>
+                <strong>Attempt tracking:</strong> Max 5 failed verification
+                attempts per code
+              </li>
+              <li>
+                <strong>Expiration:</strong> Codes expire after 15 minutes
+              </li>
+              <li>
+                <strong>One-time use:</strong> Codes marked as used after
+                successful verification
+              </li>
+              <li>
+                <strong>Email validation:</strong> Valid email format required
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section id="resumes">
@@ -1316,51 +1655,124 @@
           <h2>Referral System</h2>
           <p>
             Connect members with employees at target companies to request
-            internal referrals.
+            internal referrals. Managed through the <code>referral</code> entity
+            (previously <code>referral_company</code>).
           </p>
 
           <h3>How It Works</h3>
           <div class="note">
             <strong>For Members</strong>
-            Browse companies where TechElevate has referrer connections. Submit
-            a referral request with your resume and a personalized note. Track
-            the status of your request and receive notifications when reviewed.
+            Browse companies via <code>GET /referrals/companies</code> where
+            TechElevate has referrer connections. Submit a referral request with
+            your resume and a personalized note. Track the status of your
+            request via <code>GET /referrals/mine</code> and receive
+            notifications when reviewed.
           </div>
 
           <div class="note">
             <strong>For Referrers</strong>
-            Review incoming referral requests from qualified members. Download
-            resumes, evaluate fit, and approve or decline with feedback. Track
-            outcomes of referrals provided.
+            View incoming referral requests for your company via
+            <code>GET /referrals/all</code> (filtered by company_id). Download
+            resumes, evaluate fit, and approve or decline with feedback via
+            <code>PATCH /referrals/{id}</code>. Track outcomes of referrals
+            provided.
+          </div>
+
+          <div class="note">
+            <strong>For Leads/Admins</strong>
+            Access simplified company list via
+            <code>GET /referrals/companies/list</code> (id and name only) for
+            dropdown selection when creating Referrer accounts. Create new
+            referral-enabled companies via
+            <code>POST /referrals/companies</code>.
           </div>
 
           <h3>Referral Request Flow</h3>
           <ol>
             <li>
-              <strong>Member discovers company</strong> with available referrer
+              <strong>Member discovers company</strong> with
+              <code>can_refer: true</code> via companies endpoint
             </li>
             <li>
-              <strong>Member submits request</strong> with resume and message
+              <strong>Member submits request</strong> via
+              <code>POST /referrals</code> with resume link, job details, and
+              essay
             </li>
             <li>
-              <strong>Referrer receives notification</strong> and reviews
-              request
+              <strong>Referrer receives notification</strong> and views pending
+              requests filtered by their <code>company_id</code>
             </li>
-            <li><strong>Referrer makes decision</strong> (approve/decline)</li>
-            <li><strong>Member receives notification</strong> of decision</li>
+            <li>
+              <strong>Referrer makes decision</strong> via
+              <code>PATCH /referrals/{id}</code> with status and feedback
+            </li>
+            <li>
+              <strong>Member receives notification</strong> of decision and
+              feedback
+            </li>
             <li>
               <strong>If approved, referrer submits</strong> internal referral
+              to their company
             </li>
-            <li><strong>Member applies</strong> to job posting</li>
+            <li>
+              <strong>Member applies</strong> to job posting and tracks via
+              Applications
+            </li>
           </ol>
 
           <h3>Referral States</h3>
           <ul>
-            <li><code>pending</code> - Awaiting referrer review</li>
-            <li><code>approved</code> - Referrer will provide referral</li>
-            <li><code>declined</code> - Referrer declined with reason</li>
-            <li><code>submitted</code> - Referral submitted to company</li>
-            <li><code>hired</code> - Member was hired</li>
+            <li>
+              <code>Pending</code> - Awaiting referrer review (default state)
+            </li>
+            <li><code>Under Review</code> - Referrer is actively reviewing</li>
+            <li><code>Approved</code> - Referrer will provide referral</li>
+            <li>
+              <code>Declined</code> - Referrer declined with feedback in
+              <code>review_note</code>
+            </li>
+            <li><code>Submitted</code> - Referral submitted to company HR</li>
+            <li>
+              <code>Completed</code> - Process completed (hired or closed)
+            </li>
+          </ul>
+
+          <h3>API Endpoints</h3>
+          <ul>
+            <li>
+              <code>GET /referrals/companies</code> - List all referral-enabled
+              companies with materials (All authenticated users)
+            </li>
+            <li>
+              <code>GET /referrals/companies/list</code> - Simplified company
+              list for dropdowns (Lead+ only)
+            </li>
+            <li>
+              <code>POST /referrals/companies</code> - Create new company
+              (Volunteer+ required)
+            </li>
+            <li>
+              <code>GET /referrals/mine</code> - Get current user's referral
+              requests (Member+)
+            </li>
+            <li>
+              <code>GET /referrals/all</code> - Get all referrals (Lead+) or
+              company-filtered (Referrer)
+            </li>
+            <li>
+              <code>POST /referrals</code> - Create referral request (Member+)
+            </li>
+            <li>
+              <code>GET /referrals/{id}</code> - Get specific referral (Owner or
+              Lead+)
+            </li>
+            <li>
+              <code>PATCH /referrals/{id}</code> - Update referral
+              status/feedback (Referrer for own company, Lead+ for all)
+            </li>
+            <li>
+              <code>DELETE /referrals/{id}</code> - Delete referral (Admin only)
+            </li>
           </ul>
         </section>
 
@@ -1368,7 +1780,8 @@
           <h2>Company Database</h2>
           <p>
             Curated database of tech companies with detailed information to help
-            members target their applications.
+            members target their applications. Stored in the
+            <code>companies</code> collection.
           </p>
 
           <h3>Company Information</h3>
@@ -1418,8 +1831,46 @@
           <h2>Learning Modules</h2>
           <p>
             Curated learning content to help members improve technical skills
-            and interview preparation.
+            and interview preparation. Content stored in
+            <code>lessons</code> collection with progress tracked in
+            <code>user_progress</code>.
           </p>
+
+          <h3>Content Structure</h3>
+          <div class="note">
+            <strong>Lesson Model</strong>
+            Each lesson has:
+            <ul>
+              <li><code>title</code>: Lesson name</li>
+              <li>
+                <code>category</code>: Main category (e.g., "Arrays & Strings",
+                "Dynamic Programming")
+              </li>
+              <li>
+                <code>topic</code>: Specific topic within category (e.g., "Two
+                Pointers", "0/1 Knapsack")
+              </li>
+              <li>
+                <code>description</code>: Lesson summary and learning objectives
+              </li>
+              <li><code>video_id</code>: YouTube video ID for video content</li>
+              <li>
+                <code>content_type</code>: "video", "article", "interactive", or
+                "mixed"
+              </li>
+              <li>
+                <code>difficulty</code>: "Beginner", "Easy", "Medium", "Hard",
+                or "Advanced"
+              </li>
+              <li>
+                <code>tags[]</code>: Keywords for search/filtering (e.g.,
+                ["sliding-window", "two-pointers"])
+              </li>
+              <li><code>resources[]</code>: Additional links with titles</li>
+              <li><code>code_examples[]</code>: Code snippets by language</li>
+              <li><code>duration_minutes</code>: Estimated completion time</li>
+            </ul>
+          </div>
 
           <h3>Content Categories</h3>
           <table>
@@ -1432,40 +1883,92 @@
             </thead>
             <tbody>
               <tr>
-                <td>Data Structures</td>
-                <td>Arrays, Trees, Graphs, Hash Tables</td>
-                <td>Interactive tutorials</td>
+                <td>Arrays & Strings</td>
+                <td>
+                  Two Pointers, Sliding Window, Prefix Sum, Kadane's Algorithm
+                </td>
+                <td>Video tutorials + code examples</td>
               </tr>
               <tr>
-                <td>Algorithms</td>
-                <td>Sorting, Searching, DP, Greedy</td>
-                <td>Problem sets</td>
+                <td>Linked Lists</td>
+                <td>Fast & Slow Pointers, Reversal, Cycle Detection</td>
+                <td>Interactive visualizations</td>
               </tr>
               <tr>
-                <td>System Design</td>
-                <td>Scalability, Databases, APIs</td>
-                <td>Case studies</td>
+                <td>Trees & Graphs</td>
+                <td>
+                  DFS, BFS, Binary Trees, Graph Traversal, Topological Sort
+                </td>
+                <td>Video + problem sets</td>
               </tr>
               <tr>
-                <td>Behavioral</td>
-                <td>STAR method, Leadership, Conflict</td>
-                <td>Video guides</td>
+                <td>Dynamic Programming</td>
+                <td>0/1 Knapsack, LCS, LIS, Matrix DP, State Machines</td>
+                <td>Step-by-step breakdowns</td>
               </tr>
               <tr>
-                <td>Python</td>
-                <td>Language features, Best practices</td>
-                <td>Code examples</td>
+                <td>Recursion & Backtracking</td>
+                <td>Combinations, Permutations, N-Queens, Sudoku</td>
+                <td>Video guides + templates</td>
+              </tr>
+              <tr>
+                <td>Python Fundamentals</td>
+                <td>Data Structures, Comprehensions, Decorators, Generators</td>
+                <td>Code examples + best practices</td>
               </tr>
             </tbody>
           </table>
 
           <h3>Progress Tracking</h3>
-          <p>Members can track their learning progress with:</p>
+          <p>Stored in <code>user_progress</code> collection per user:</p>
+          <div class="note">
+            <strong>UserProgress Model</strong>
+            <ul>
+              <li><code>user_id</code>: Reference to member_users._id</li>
+              <li>
+                <code>completed_topics[]</code>: Array of {topic_key:
+                "category::topic", completed_at: datetime, count: number}
+              </li>
+              <li>
+                <code>bookmarked_topics[]</code>: Array of "category::topic"
+                strings for saved lessons
+              </li>
+              <li>
+                <code>topic_notes{}</code>: Dictionary mapping "category::topic"
+                to user's personal notes
+              </li>
+              <li>
+                <code>last_updated</code>: Timestamp of last progress update
+              </li>
+            </ul>
+          </div>
+
+          <h3>Learning API Endpoints</h3>
           <ul>
-            <li>Completed modules counter</li>
-            <li>Time spent learning</li>
-            <li>Skill proficiency indicators</li>
-            <li>Recommended next topics</li>
+            <li>
+              <code>GET /learning/lessons</code> - List all published lessons
+              (Guest+ access)
+            </li>
+            <li>
+              <code>GET /learning/lessons/by-category</code> - Get lessons
+              grouped by category
+            </li>
+            <li>
+              <code>GET /learning/progress</code> - Get current user's learning
+              progress (Member+ required)
+            </li>
+            <li>
+              <code>POST /learning/progress/complete</code> - Mark topic as
+              completed (Member+)
+            </li>
+            <li>
+              <code>POST /learning/progress/bookmark</code> - Bookmark a topic
+              (Member+)
+            </li>
+            <li>
+              <code>POST /learning/lessons</code> - Create new lesson
+              (Volunteer+ required)
+            </li>
           </ul>
         </section>
 
@@ -1516,54 +2019,137 @@ Development: http://localhost:8000/v1</code></pre>
         <section id="api-auth">
           <h2>Authentication APIs</h2>
 
-          <h3>Login</h3>
+          <h3>Member Login</h3>
           <pre><code>POST /v1/auth/login
 
 Request:
 {
-  "email": "member@example.com",
+  "username": "member@example.com",  // email field, but parameter name is username
   "password": "securepassword123"
 }
 
 Response:
 {
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
-  "token_type": "bearer",
   "user": {
-    "id": "user_123",
+    "id": "507f1f77bcf86cd799439011",
     "email": "member@example.com",
-    "role": "member"
-  }
-}</code></pre>
+    "full_name": "John Doe",
+    "role": 1,
+    "email_verified": true
+  },
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer"
+}
 
-          <h3>Register</h3>
-          <pre><code>POST /v1/auth/register
+Errors:
+- 403: Email not verified (must verify via /verification/send-code first)
+- 401: Invalid credentials
+- 400: User not active</code></pre>
+
+          <h3>Management Login (Volunteer/Lead/Admin)</h3>
+          <pre><code>POST /v1/auth/management-login
 
 Request:
 {
-  "email": "newuser@example.com",
-  "password": "securepassword123",
-  "full_name": "John Doe"
+  "username": "john_lead",
+  "password": "hashed_token_or_password"
 }
 
 Response:
 {
-  "id": "user_456",
-  "email": "newuser@example.com",
-  "message": "Registration successful"
-}</code></pre>
+  "user": {
+    "id": "507f1f77bcf86cd799439012",
+    "username": "john_lead",
+    "role": 4,  // Lead
+    "is_active": true
+  },
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer"
+}
 
-          <h3>Get Current User</h3>
-          <pre><code>GET /v1/auth/me
-Headers: Authorization: Bearer &lt;token&gt;
+Access: Requires role &gt;= 3 (Volunteer+)
+Errors:
+- 403: Role insufficient (role &lt; 3)
+- 401: Invalid credentials</code></pre>
+
+          <h3>Referrer Login</h3>
+          <pre><code>POST /v1/auth/referrer-login
+
+Request:
+{
+  "password": "referrer_token_here"  // matches privileged_users.password or .lead_token
+}
 
 Response:
 {
-  "id": "user_123",
-  "email": "member@example.com",
-  "role": "member",
-  "profile": { ... }
-}</code></pre>
+  "user": {
+    "id": "507f1f77bcf86cd799439013",
+    "username": "google_referrer",
+    "role": 2,
+    "company_id": "507f1f77bcf86cd799439020"
+  },
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer"
+}
+
+Access: Referrers (role=2) only
+Errors:
+- 401: Invalid token</code></pre>
+
+          <h3>Google OAuth</h3>
+          <pre><code>POST /v1/auth/google
+
+Request:
+{
+  "token": "google_id_token_here",
+  "user_info": {
+    "email": "user@gmail.com",
+    "name": "John Doe",
+    "given_name": "John",
+    "family_name": "Doe"
+  }
+}
+
+Response:
+{
+  "user": { ... },
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer"
+}
+
+Notes:
+- Auto-creates member account if email not exists
+- Sets google_id and oauth_provider fields
+- Password is optional for OAuth users</code></pre>
+
+          <h3>Register New Member</h3>
+          <pre><code>POST /v1/users
+
+Request:
+{
+  "email": "newuser@example.com",
+  "password": "securepassword123",  // optional for OAuth users
+  "first_name": "John",
+  "last_name": "Doe",
+  "university": "MIT",
+  "contact": "+1234567890"
+}
+
+Response:
+{
+  "user": {
+    "id": "507f1f77bcf86cd799439014",
+    "email": "newuser@example.com",
+    "full_name": "John Doe",
+    "role": 1,
+    "email_verified": false
+  }
+}
+
+Notes:
+- Must verify email via /verification/send-code before logging in
+- Password is hashed automatically
+- full_name computed from first/middle/last names</code></pre>
         </section>
 
         <section id="api-users">
@@ -1823,169 +2409,220 @@ Response:
           <h3>Create Referral Request</h3>
           <pre><code>POST /v1/referrals
 Headers: Authorization: Bearer &lt;token&gt;
+Access: Member+
 
 Request:
 {
-  "company_id": "company_123",
-  "position_title": "Senior Software Engineer",
-  "resume_id": "file_789",
-  "message": "I'm very interested in this role..."
+  "company_name": "Google",
+  "job_title": "Senior Software Engineer",
+  "job_id": "123456",
+  "role": "Backend",
+  "resume": "https://drive.google.com/file/d/...",  // Google Drive link
+  "essay": "https://docs.google.com/document/d/...",  // Google Docs link
+  "request_note": "I'm very interested in this role...",
+  "contact": "john@example.com"
 }
 
 Response:
 {
-  "id": "referral_456",
-  "status": "pending",
-  "created_at": "2025-11-12T10:30:00Z",
-  "company": { ... }
+  "referral": {
+    "id": "507f1f77bcf86cd799439015",
+    "user_id": "507f1f77bcf86cd799439011",
+    "company_name": "Google",
+    "job_title": "Senior Software Engineer",
+    "status": "Pending",
+    "referral_date": "2025-01-15T10:30:00"
+  }
 }</code></pre>
 
           <h3>Get My Referrals</h3>
           <pre><code>GET /v1/referrals/mine
 Headers: Authorization: Bearer &lt;token&gt;
+Access: Member+
 
 Response:
 {
   "referrals": [
     {
-      "id": "referral_456",
-      "company": "Google",
-      "position": "Senior SWE",
-      "status": "pending",
-      "created_at": "2025-11-12T10:30:00Z"
+      "id": "507f1f77bcf86cd799439015",
+      "company_name": "Google",
+      "job_title": "Senior Software Engineer",
+      "status": "Pending",
+      "referral_date": "2025-01-15T10:30:00",
+      "review_note": null,
+      "feedback_date": null
     }
   ]
 }</code></pre>
 
-          <h3>Get Referral Requests (Referrer)</h3>
-          <pre><code>GET /v1/referrals/requests
+          <h3>Get All Referral Requests</h3>
+          <pre><code>GET /v1/referrals/all
 Headers: Authorization: Bearer &lt;token&gt;
-Role: referrer
+Access: Referrer (filtered by company_id) or Lead+
 
 Response:
 {
-  "requests": [
+  "referrals": [
     {
-      "id": "referral_456",
-      "member": {
-        "name": "John Doe",
-        "email": "john@example.com"
-      },
-      "position": "Senior SWE",
-      "resume_url": "https://...",
-      "message": "I'm very interested...",
-      "status": "pending"
+      "id": "507f1f77bcf86cd799439015",
+      "user_id": "507f1f77bcf86cd799439011",
+      "company_name": "Google",
+      "job_title": "Senior Software Engineer",
+      "role": "Backend",
+      "resume": "https://drive.google.com/...",
+      "essay": "https://docs.google.com/...",
+      "contact": "john@example.com",
+      "status": "Pending",
+      "request_note": "Very interested...",
+      "review_note": null
     }
   ]
-}</code></pre>
+}
+
+Notes:
+- Referrers only see requests for their company
+- Leads/Admins see all requests</code></pre>
 
           <h3>Update Referral Status</h3>
           <pre><code>PATCH /v1/referrals/{referral_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: referrer
+Access: Referrer (own company) or Lead+
 
 Request:
 {
-  "status": "approved",
-  "feedback": "Great profile, will submit referral"
+  "status": "Approved",
+  "review_note": "Great profile, will submit referral internally"
 }
 
 Response:
 {
-  "message": "Referral updated successfully",
+  "referral": {
+    "id": "507f1f77bcf86cd799439015",
+    "status": "Approved",
+    "review_note": "Great profile...",
+    "feedback_date": "2025-01-16T14:20:00"
+  }
+}</code></pre>
+
+          <h3>Get Referral by ID</h3>
+          <pre><code>GET /v1/referrals/{referral_id}
+Headers: Authorization: Bearer &lt;token&gt;
+Access: Owner or Lead+
+
+Response:
+{
   "referral": { ... }
 }</code></pre>
 
-          <h3>Create Referral Company</h3>
-          <pre><code>POST /v1/referrals/companies
+          <h3>Delete Referral</h3>
+          <pre><code>DELETE /v1/referrals/{referral_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: referrer
-
-Request:
-{
-  "name": "Google",
-  "description": "Can provide referrals for SWE roles",
-  "active": true
-}
+Access: Admin only
 
 Response:
 {
-  "id": "refcompany_789",
-  "name": "Google",
-  "referrer_id": "user_123",
-  "active": true
+  "message": "Referral deleted successfully"
 }</code></pre>
         </section>
 
         <section id="api-companies">
           <h2>Company APIs</h2>
 
-          <h3>List Companies</h3>
-          <pre><code>GET /v1/companies
+          <h3>List Companies (For Referrals)</h3>
+          <pre><code>GET /v1/referrals/companies?skip=0&limit=100
 Headers: Authorization: Bearer &lt;token&gt;
-
-Query Parameters:
-  - search: string (search by name)
-  - industry: string (filter by industry)
-  - size: string (startup|midsize|enterprise)
-  - page: integer (pagination)
-  - limit: integer (results per page)
+Access: All authenticated users
 
 Response:
 {
   "companies": [
     {
-      "id": "company_123",
+      "id": "507f1f77bcf86cd799439020",
       "name": "Google",
-      "industry": "Technology",
-      "size": "enterprise",
-      "locations": ["Mountain View, CA"],
-      "careers_url": "https://careers.google.com",
-      "has_referrer": true
+      "domain": "google.com",
+      "image": "https://logo.clearbit.com/google.com",
+      "can_refer": true,
+      "locations": [
+        {
+          "country": "USA",
+          "city": "Mountain View",
+          "state": "CA"
+        }
+      ],
+      "referral_materials": {
+        "resume_tips": "Focus on impact...",
+        "requirements": "3+ years experience...",
+        "process": "Submit resume, I'll review within 48 hours"
+      },
+      "metadata": {
+        "industry": "Technology",
+        "size": "10000+"
+      },
+      "user_has_referred": false  // Computed for current user
     }
-  ],
-  "total": 150,
-  "page": 1,
-  "pages": 15
-}</code></pre>
+  ]
+}
 
-          <h3>Get Company Details</h3>
-          <pre><code>GET /v1/companies/{company_id}
+Notes:
+- Returns companies with can_refer=true
+- Includes user-specific referral status</code></pre>
+
+          <h3>List Companies (Simplified for Dropdowns)</h3>
+          <pre><code>GET /v1/referrals/companies/list?skip=0&limit=1000
 Headers: Authorization: Bearer &lt;token&gt;
+Access: Lead+ only
 
 Response:
 {
-  "id": "company_123",
-  "name": "Google",
-  "industry": "Technology",
-  "size": "enterprise",
-  "founded": 1998,
-  "description": "Leading tech company...",
-  "locations": ["Mountain View, CA", "New York, NY"],
-  "tech_stack": ["Python", "Go", "C++"],
-  "careers_url": "https://careers.google.com",
-  "has_referrer": true
-}</code></pre>
+  "companies": [
+    {
+      "id": "507f1f77bcf86cd799439020",
+      "name": "Google"
+    },
+    {
+      "id": "507f1f77bcf86cd799439021",
+      "name": "Microsoft"
+    }
+  ]
+}
 
-          <h3>Create Company (Lead/Admin)</h3>
-          <pre><code>POST /v1/companies
+Usage: Dropdown selection when creating Referrer accounts</code></pre>
+
+          <h3>Create Company</h3>
+          <pre><code>POST /v1/referrals/companies
 Headers: Authorization: Bearer &lt;token&gt;
-Role: lead or admin
+Access: Volunteer+
 
 Request:
 {
   "name": "New Startup Inc",
-  "industry": "Fintech",
-  "size": "startup",
-  "locations": ["San Francisco, CA"],
-  "careers_url": "https://newstartup.com/careers"
+  "domain": "newstartup.com",
+  "image": "https://logo.clearbit.com/newstartup.com",
+  "can_refer": true,
+  "locations": [
+    {
+      "country": "USA",
+      "city": "San Francisco",
+      "state": "CA"
+    }
+  ],
+  "referral_materials": {
+    "requirements": "Looking for senior engineers...",
+    "process": "Upload resume and brief intro"
+  },
+  "metadata": {
+    "industry": "Fintech",
+    "size": "50-200"
+  }
 }
 
 Response:
 {
-  "id": "company_456",
-  "name": "New Startup Inc",
-  "message": "Company created successfully"
+  "company": {
+    "id": "507f1f77bcf86cd799439022",
+    "name": "New Startup Inc",
+    ...
+  }
 }</code></pre>
         </section>
 

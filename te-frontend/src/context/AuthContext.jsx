@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('userId', userId);
     localStorage.setItem('userRole', userRole);
     localStorage.removeItem('isGuestMode');
+    localStorage.setItem('lastSuccessfulLogin', Date.now().toString());
 
     // Track if this is a privileged user (role >= 2) for redirect after session expiry
     const isPrivileged = parseInt(userRole) >= 2;
@@ -96,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('userId', guestUserId);
     localStorage.setItem('userRole', guestRole);
     localStorage.setItem('isGuestMode', 'true');
+    localStorage.setItem('lastSuccessfulLogin', Date.now().toString());
 
     // Then dispatch the state update
     dispatch({ type: 'login', payload: { userId: guestUserId, userRole: guestRole, accessToken: guestToken } });
@@ -113,6 +115,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('wasPrivilegedUser');
     localStorage.removeItem('isGuestMode');
+    localStorage.removeItem('lastSuccessfulLogin');
     dispatch({ type: 'logout' });
 
     // Reset PostHog user
@@ -123,10 +126,15 @@ export const AuthProvider = ({ children }) => {
   const storageIsGuest = localStorage.getItem('isGuestMode') === 'true';
   const storageToken = localStorage.getItem('accessToken');
 
-  // isGuest should only be true if BOTH the flag is set AND we have the guest token
-  // If we have a real token in state, we're NOT a guest regardless of the flag
-  const isGuest = storageIsGuest && storageToken === 'guest-mode' && !state.accessToken;
-  const isAuthenticated = !!state.accessToken || (isGuest && !!storageToken);
+  // Guest mode is active when the guest flag is set and the stored token matches the guest token
+  // We also consider the in-memory state so immediate navigation after guest login works reliably
+  const isGuestToken = storageIsGuest && storageToken === 'guest-mode';
+  const stateIndicatesGuest = state.accessToken === 'guest-mode' && state.userRole === '0';
+  const isGuest = isGuestToken || stateIndicatesGuest;
+
+  // Treat guest token as an authenticated session for routing purposes
+  const hasValidToken = !!state.accessToken || (isGuest && !!storageToken);
+  const isAuthenticated = hasValidToken;
 
 
   return (

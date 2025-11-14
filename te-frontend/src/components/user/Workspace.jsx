@@ -3,7 +3,6 @@ import {
     FolderIcon,
     UserGroupIcon,
     UserCircleIcon,
-    XMarkIcon,
     SparklesIcon,
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
@@ -35,8 +34,7 @@ const Workspace = ({ setLogin }) => {
     const navigate = useNavigate();
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    // Show compact guest banner only once per guest session
-    const [showGuestAlert, setShowGuestAlert] = useState(false)
+    const [showGuestPrompt, setShowGuestPrompt] = useState(false)
 
     // Set default content based on role - Guests and Referrers have special defaults
     const userRoleInt = userRole ? parseInt(userRole) : 0;
@@ -163,11 +161,14 @@ const Workspace = ({ setLogin }) => {
 
 
     useEffect(() => {
-        let prevContent = sessionStorage.getItem('content');
-        if (prevContent) {
+        const prevContent = sessionStorage.getItem('content');
+        if (prevContent && navigation.some((item) => item.name === prevContent)) {
             setContent(prevContent);
+        } else {
+            sessionStorage.setItem('content', defaultContent);
+            setContent(defaultContent);
         }
-    }, [location.pathname]);
+    }, [location.pathname, navigation, defaultContent]);
 
     // Handle URL-based navigation (e.g., /workspace/account-management)
     useEffect(() => {
@@ -179,6 +180,23 @@ const Workspace = ({ setLogin }) => {
             sessionStorage.setItem('content', 'Learning Analytics');
         }
     }, [location]);
+
+    useEffect(() => {
+        if (!location.search) return;
+
+        const params = new URLSearchParams(location.search);
+        const sectionParam = params.get('section');
+        if (!sectionParam) return;
+
+        const normalizedSection = sectionParam.trim().toLowerCase();
+        const targetNavItem = navigation.find((item) => item.name.toLowerCase() === normalizedSection);
+
+        if (targetNavItem) {
+            setContentHandler(targetNavItem.name);
+        }
+
+        navigate(location.pathname, { replace: true });
+    }, [location.search, location.pathname, navigation, navigate]);
 
     // Listen for custom workspace content change events (e.g., from Navbar)
     useEffect(() => {
@@ -204,18 +222,27 @@ const Workspace = ({ setLogin }) => {
     }, [accessToken, getUserInfoRequest, isGuest])
 
     // One-time guest banner display logic
+
     useEffect(() => {
         if (isGuest) {
-            const shown = localStorage.getItem('guestWelcomeShown') === 'true';
-            if (!shown) {
-                setShowGuestAlert(true);
-                localStorage.setItem('guestWelcomeShown', 'true');
-            }
+            const acknowledged = sessionStorage.getItem('guestPromptAcknowledged') === 'true';
+            setShowGuestPrompt(!acknowledged);
         } else {
-            // Reset flag when not in guest mode so future guest sessions see it again
-            localStorage.removeItem('guestWelcomeShown');
+            setShowGuestPrompt(false);
+            sessionStorage.removeItem('guestPromptAcknowledged');
         }
     }, [isGuest]);
+
+    const handleGuestContinue = () => {
+        sessionStorage.setItem('guestPromptAcknowledged', 'true');
+        setShowGuestPrompt(false);
+    };
+
+    const handleGuestSignIn = () => {
+        sessionStorage.removeItem('guestPromptAcknowledged');
+        logout();
+        navigate('/login');
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -237,6 +264,42 @@ const Workspace = ({ setLogin }) => {
         sessionStorage.setItem('content', value);
     }
 
+    if (isGuest && showGuestPrompt) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center px-4">
+                <div className="max-w-xl w-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-8 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center shadow-lg">
+                            <SparklesIcon className="h-8 w-8" />
+                        </div>
+                        <div>
+                            <p className="text-sm uppercase tracking-wide text-blue-500 font-semibold">Guest Mode</p>
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to TechElevate Workspace</h2>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                        You&apos;re exploring the workspace in guest mode. You can preview Learning and Practice resources,
+                        but core career features (Applications, Resumes, Referrals, Opportunities) require a full account.
+                    </p>
+                    <div className="space-y-4">
+                        <button
+                            onClick={handleGuestSignIn}
+                            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold py-3 shadow-lg hover:opacity-95 transition"
+                        >
+                            Sign in to unlock everything
+                        </button>
+                        <button
+                            onClick={handleGuestContinue}
+                            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 font-semibold py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                        >
+                            Continue as Guest
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
             <div className="bg-[#fafafa] dark:bg-gray-950 transition-colors">
@@ -253,39 +316,6 @@ const Workspace = ({ setLogin }) => {
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
                 <div className="md:pl-28">
-                    {/* Compact one-time Guest Banner */}
-                    {isGuest && showGuestAlert && (
-                        <div className="fixed top-16 left-0 right-0 z-40 px-4 md:pl-28">
-                            <div className="max-w-3xl mx-auto mt-2 animate-fade-in">
-                                <div className="flex items-center gap-3 rounded-xl border border-blue-200 dark:border-blue-700 bg-white/90 dark:bg-blue-900/40 backdrop-blur px-4 py-2 shadow">
-                                    <div className="h-8 w-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
-                                        <SparklesIcon className="h-5 w-5" />
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-100 flex-1">
-                                        Guest Mode: limited features. Sign in to track applications & resumes.
-                                    </p>
-                                    <button
-                                        onClick={() => {
-                                            setShowGuestAlert(false);
-                                            logout();
-                                            navigate('/login');
-                                        }}
-                                        className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
-                                    >
-                                        Sign In
-                                    </button>
-                                    <button
-                                        onClick={() => setShowGuestAlert(false)}
-                                        aria-label="Dismiss guest banner"
-                                        className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800/50"
-                                    >
-                                        <XMarkIcon className="h-4 w-4 text-gray-500 dark:text-gray-300" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     <main className="min-h-screen bg-[#fafafa] dark:bg-gray-950 pt-20 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :

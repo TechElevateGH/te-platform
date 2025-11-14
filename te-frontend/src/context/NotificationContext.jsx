@@ -164,7 +164,7 @@ export const NotificationProvider = ({ children }) => {
                         type: 'new_request',
                         title: 'New Resume Review Request',
                         message: `${review.user_name} requested review for "${review.job_title}"`,
-                        link: '/admin/files',
+                        link: '/workspace?section=Resume%20and%20Essays',
                         timestamp: review.submitted_date,
                         read: false
                     }))
