@@ -67,6 +67,7 @@ class ReferrerCreate(BaseModel):
     username: str  # For admin reference only (not used for login)
     token: str  # Used for login (referrers authenticate with token only)
     company_id: str  # MongoDB ObjectId as string - assigned company
+    company_name: str  # Company name for quick access (denormalized)
 
 
 class PrivilegedUserUpdate(BaseModel):

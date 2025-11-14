@@ -196,6 +196,7 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
         "password": security.get_password_hash(data.token),  # Hash token as password
         "lead_token": data.token,  # Store plain token for Referrer login
         "company_id": ObjectId(data.company_id),  # Store company they manage
+        "company_name": data.company_name,  # Store company name from request
         "role": user_schema.UserRoles.referrer,  # Always Referrer role
         "is_active": True,
     }
@@ -213,7 +214,7 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
         "username": user.username,
         "role": user.role,
         "company_id": data.company_id,
-        "company_name": company.get("name", ""),
+        "company_name": user.company_name,  # Use company_name from user object
         "token": data.token,  # Return provided token for reference
     }
 
