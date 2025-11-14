@@ -20,7 +20,8 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
     const { darkMode, toggleDarkMode } = useDarkMode();
     const navigate = useNavigate();
     const location = useLocation();
-    const { isAuthenticated, logout, userRole } = useAuth();
+    const { isAuthenticated, logout, userRole, isGuest } = useAuth();
+    const isSignedIn = isAuthenticated && !isGuest;
 
     // Define role labels and styling
     const getRoleInfo = (role) => {
@@ -36,6 +37,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
     const handleLogoutClick = () => {
         setShowLogoutConfirm(true);
+    };
+
+    const exitGuestMode = () => {
+        logout();
+        navigate('/login');
     };
 
     const confirmLogout = () => {
@@ -170,8 +176,8 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                         {/* Desktop controls */}
                         <div className="hidden lg:flex lg:items-center lg:gap-x-3">
-                            {/* Notification Bell - Show only when authenticated */}
-                            {isAuthenticated && <NotificationBell />}
+                            {/* Notification Bell - Show only when fully signed in */}
+                            {isSignedIn && <NotificationBell />}
 
                             <button
                                 onClick={() => navigate('/documentation')}
@@ -181,7 +187,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                             </button>
 
                             {/* Role Badge - Show for privileged users */}
-                            {isAuthenticated && roleInfo && (
+                            {isSignedIn && roleInfo && (
                                 <div className={`${roleInfo.bgColor} px-3 py-1.5 rounded-full border border-current/20`}>
                                     <span className={`text-xs font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
                                         {roleInfo.label}
@@ -202,22 +208,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                 )}
                             </button>
 
-                            {!isAuthenticated ? (
-                                <>
-                                    <button
-                                        onClick={() => navigate('/login')}
-                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
-                                    >
-                                        Log in
-                                    </button>
-                                    <button
-                                        onClick={() => navigate('/register')}
-                                        className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
-                                    >
-                                        Get Started
-                                    </button>
-                                </>
-                            ) : (
+                            {isSignedIn ? (
                                 <>
                                     <button
                                         onClick={() => navigate('/workspace')}
@@ -250,6 +241,34 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                         title="Sign Out"
                                     >
                                         <ArrowLeftOnRectangleIcon className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {isGuest && (
+                                        <div className="flex items-center gap-2 pr-3">
+                                            <span className="rounded-full border border-blue-200 dark:border-blue-500/40 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-300">
+                                                Guest Mode
+                                            </span>
+                                            <button
+                                                onClick={exitGuestMode}
+                                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                            >
+                                                Exit
+                                            </button>
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
+                                    >
+                                        Log in
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/register')}
+                                        className="text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transform duration-200"
+                                    >
+                                        Get Started
                                     </button>
                                 </>
                             )}
@@ -288,7 +307,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                         <button
                                             key={item.name}
                                             onClick={() => scrollToSection(item.href)}
-                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                            className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                                         >
                                             {item.name}
                                         </button>
@@ -298,14 +317,14 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                             navigate('/documentation');
                                             setMobileMenuOpen(false);
                                         }}
-                                        className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                        className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
                                         Docs
                                     </button>
                                 </div>
                                 <div className="py-6 space-y-2">
                                     {/* Role Badge - Mobile */}
-                                    {isAuthenticated && roleInfo && (
+                                    {isSignedIn && roleInfo && (
                                         <div className="-mx-3 px-3 py-2.5">
                                             <div className={`inline-flex ${roleInfo.bgColor} px-4 py-2 rounded-full border border-current/20`}>
                                                 <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
@@ -315,34 +334,60 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                         </div>
                                     )}
 
-                                    {!isAuthenticated ? (
+                                    {isGuest && (
+                                        <div className="-mx-3 px-3 py-2.5">
+                                            <div className="flex items-center justify-between rounded-lg border border-blue-200 dark:border-blue-500/40 px-4 py-3">
+                                                <span className="text-sm font-semibold text-blue-600 dark:text-blue-300">Guest Mode</span>
+                                                <button
+                                                    onClick={() => {
+                                                        exitGuestMode();
+                                                        setMobileMenuOpen(false);
+                                                    }}
+                                                    className="text-sm font-semibold text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200"
+                                                >
+                                                    Exit
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {isSignedIn ? (
                                         <>
                                             <button
-                                                onClick={() => navigate('/login')}
-                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                onClick={() => navigate('/workspace')}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                                             >
-                                                Log in
+                                                Workspace
                                             </button>
                                             <button
-                                                onClick={() => navigate('/register')}
-                                                className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
+                                                onClick={() => {
+                                                    handleLogoutClick();
+                                                    setMobileMenuOpen(false);
+                                                }}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                             >
-                                                Get Started
+                                                Logout
                                             </button>
                                         </>
                                     ) : (
                                         <>
                                             <button
-                                                onClick={() => navigate('/workspace')}
-                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                onClick={() => {
+                                                    navigate('/login');
+                                                    setMobileMenuOpen(false);
+                                                }}
+                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                                             >
-                                                Workspace
+                                                Log in
                                             </button>
                                             <button
-                                                onClick={handleLogoutClick}
-                                                className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                onClick={() => {
+                                                    navigate('/register');
+                                                    setMobileMenuOpen(false);
+                                                }}
+                                                className="w-full text-center text-sm font-semibold leading-6 text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all px-5 py-3 rounded-full shadow-lg"
                                             >
-                                                Logout
+                                                Get Started
                                             </button>
                                         </>
                                     )}
@@ -354,7 +399,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
             )}
 
             {/* Logout Confirmation Modal - Outside header for proper centering */}
-            {showLogoutConfirm && (
+            {isSignedIn && showLogoutConfirm && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={cancelLogout}>
                     {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
@@ -377,7 +422,7 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                         onClick={confirmLogout}
                                         className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
                                     >
-                                        Yes, Logout
+                                        Yes
                                     </button>
                                     <button
                                         onClick={cancelLogout}

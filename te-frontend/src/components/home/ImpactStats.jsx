@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-    UserGroupIcon,
-    AcademicCapIcon,
-    BriefcaseIcon,
     GlobeAltIcon,
     TrophyIcon,
     HeartIcon,
@@ -116,15 +113,15 @@ const ImpactStats = () => {
                     </p>
                 </div>
 
-                {/* Stats grid */}
-                <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Stats layout */}
+                <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-8">
                     {stats.map((stat, index) => (
                         <div
                             key={stat.id}
-                            className="group relative"
+                            className="group relative flex-1 min-w-[240px] max-w-xs"
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="relative h-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 hover:-translate-y-2">
+                            <div className="relative flex h-full w-full flex-col items-center justify-start bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 text-center hover:-translate-y-2">
                                 {/* Icon */}
                                 <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                                     <stat.icon className="h-8 w-8 text-white" />

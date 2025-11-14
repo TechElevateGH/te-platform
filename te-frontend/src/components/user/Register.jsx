@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../axiosConfig';
+import { useAuth } from '../../context/AuthContext';
 import {
     XCircleIcon,
     EnvelopeIcon,
@@ -12,6 +13,7 @@ import {
 
 const Register = () => {
     const navigate = useNavigate();
+    const { loginAsGuest } = useAuth();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // 1: Choose method, 2: Fill form
@@ -87,6 +89,13 @@ const Register = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGuestContinue = () => {
+        loginAsGuest();
+        setTimeout(() => {
+            navigate('/workspace', { replace: true });
+        }, 100);
     };
 
     const oauthProviders = [
@@ -175,6 +184,17 @@ const Register = () => {
                             <ArrowRightIcon className="h-5 w-5" />
                         </button>
 
+                        <div className="mt-4">
+                            <button
+                                type="button"
+                                onClick={handleGuestContinue}
+                                className="group relative w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                            >
+                                <span>Continue as Guest</span>
+                                <ArrowRightIcon className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+
                         {/* Sign in link */}
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
@@ -237,6 +257,14 @@ const Register = () => {
                         <p className="text-gray-600">
                             Fill in your details to get started
                         </p>
+                        <button
+                            type="button"
+                            onClick={handleGuestContinue}
+                            className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                            <span>Continue as Guest</span>
+                            <ArrowRightIcon className="h-4 w-4" />
+                        </button>
                     </div>
 
                     {error && (

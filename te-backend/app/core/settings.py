@@ -1,8 +1,10 @@
+import json
 from typing import Optional, Union
 
 from pydantic import (
     AnyHttpUrl,
     EmailStr,
+    SecretStr,
     field_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,19 +27,38 @@ class Settings(BaseSettings):
 
     BACKEND_CORS_ORIGINS: Union[str, list[AnyHttpUrl]] = "http://localhost:3000"
 
+    ADMIN_BOOTSTRAP_USERNAME: Optional[str] = None
+    ADMIN_BOOTSTRAP_TOKEN: Optional[SecretStr] = None
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, list]) -> Union[list[str], list]:
         if isinstance(v, str):
-            if not v or v.strip() == "":
-                # Return default if empty
+            cleaned = v.strip()
+            if not cleaned:
                 return ["http://localhost:3000"]
-            if not v.startswith("["):
-                # Split by comma and filter out empty strings
-                return [i.strip() for i in v.split(",") if i.strip()]
+
+            # Support JSON-style lists stored as env strings
+            if cleaned.startswith("[") and cleaned.endswith("]"):
+                try:
+                    parsed = json.loads(cleaned)
+                    if isinstance(parsed, list):
+                        return [
+                            origin.strip().rstrip("/") for origin in parsed if origin
+                        ]
+                except json.JSONDecodeError:
+                    # Fall through to comma parsing
+                    pass
+
+            # Comma separated list fallback
+            return [
+                item.strip().rstrip("/") for item in cleaned.split(",") if item.strip()
+            ]
+
         if isinstance(v, list):
-            return v
-        return [v]
+            return [str(origin).strip().rstrip("/") for origin in v if origin]
+
+        return [str(v).strip().rstrip("/")]
 
     # Email Configuration
     EMAILS_ENABLED: bool
@@ -78,7 +99,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_AUTH_URI: str = "https://accounts.google.com/o/oauth2/auth"
     GOOGLE_TOKEN_URI: str = "https://oauth2.googleapis.com/token"
-    GOOGLE_AUTH_PROVIDER_X509_CERT_URL: str = "https://www.googleapis.com/oauth2/v1/certs"
+    GOOGLE_AUTH_PROVIDER_X509_CERT_URL: str = (
+        "https://www.googleapis.com/oauth2/v1/certs"
+    )
     GOOGLE_CLIENT_X509_CERT_URL: Optional[str] = None
     GOOGLE_UNIVERSE_DOMAIN: str = "googleapis.com"
 

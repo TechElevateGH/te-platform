@@ -27,8 +27,9 @@ const Home = () => {
     if (!localStorage.getItem('prevPage')) {
         localStorage.setItem('prevPage', '/');
     }
-    const { isAuthenticated, userRole } = useAuth();
+    const { isAuthenticated, userRole, isGuest } = useAuth();
     const roleText = useMemo(() => roleLabels[userRole] ?? '', [userRole]);
+    const showQuickAccess = isAuthenticated && !isGuest;
 
     const quickAccessLinks = [
         {
@@ -65,7 +66,7 @@ const Home = () => {
         <div className="relative bg-white dark:bg-gray-900 transition-colors">
             <Navbar />
             <Hero />
-            {isAuthenticated && (
+            {showQuickAccess && (
                 <section aria-label="Quick access" className="relative mx-auto max-w-7xl -mt-16 px-4 sm:px-6 lg:px-8 z-10 mb-16">
                     <div className="rounded-3xl border border-blue-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl p-8">
                         {/* Header */}
