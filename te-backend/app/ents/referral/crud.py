@@ -50,6 +50,80 @@ def create_referral_company(
     return referral_models.ReferralCompany(**company_data)
 
 
+def update_referral_company(
+    db: Database, *, company_id: str, data: referral_schema.ReferralCompanyUpdate
+) -> referral_models.ReferralCompany:
+    """
+    Update a referral company (Lead+ only).
+    Only updates fields that are provided in the update request.
+    """
+    from bson import ObjectId
+
+    # Check if company exists
+    existing = db.companies.find_one({"_id": ObjectId(company_id)})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    # Build update dict with only provided fields
+    update_dict = {}
+
+    # Basic fields
+    if data.name is not None:
+        # Check if new name conflicts with another company
+        if data.name != existing.get("name"):
+            name_conflict = db.companies.find_one({"name": data.name})
+            if name_conflict:
+                raise HTTPException(
+                    status_code=400, detail=f"Company '{data.name}' already exists"
+                )
+        update_dict["name"] = data.name
+
+    if data.image is not None:
+        update_dict["image"] = data.image
+
+    if data.referral_link is not None:
+        update_dict["referral_link"] = data.referral_link
+
+    if data.website is not None:
+        update_dict["domain"] = data.website
+
+    # Metadata fields
+    metadata_updates = {}
+    if data.description is not None:
+        metadata_updates["description"] = data.description
+    if data.industry is not None:
+        metadata_updates["industry"] = data.industry
+    if data.size is not None:
+        metadata_updates["size"] = data.size
+    if data.headquarters is not None:
+        metadata_updates["headquarters"] = data.headquarters
+
+    if metadata_updates:
+        for key, value in metadata_updates.items():
+            update_dict[f"metadata.{key}"] = value
+
+    # Referral materials
+    materials_updates = {}
+    if data.requires_resume is not None:
+        materials_updates["resume"] = data.requires_resume
+    if data.requires_phone_number is not None:
+        materials_updates["phone_number"] = data.requires_phone_number
+    if data.requires_essay is not None:
+        materials_updates["essay"] = data.requires_essay
+
+    if materials_updates:
+        for key, value in materials_updates.items():
+            update_dict[f"referral_materials.{key}"] = value
+
+    # Perform update if there are changes
+    if update_dict:
+        db.companies.update_one({"_id": ObjectId(company_id)}, {"$set": update_dict})
+
+    # Fetch and return the updated company
+    company_data = db.companies.find_one({"_id": ObjectId(company_id)})
+    return referral_models.ReferralCompany(**company_data)
+
+
 def read_company_by_id(
     db: Database, *, company_id: int
 ) -> Optional[referral_models.ReferralCompany]:

@@ -252,7 +252,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Job ID(s)</p>
                                                     <div className="flex flex-wrap gap-2 mt-1">
                                                         {referral.job_id.split(/[,;\s]+/).filter(id => id.trim()).map((id, index) => (
-                                                            <span 
+                                                            <span
                                                                 key={index}
                                                                 className="inline-flex items-center px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-md border border-blue-200 dark:border-blue-700"
                                                             >

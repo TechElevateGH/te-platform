@@ -100,6 +100,26 @@ def add_referral_company(
     return {"company": referral_dependencies.parse_company_basic(company)}
 
 
+@referral_router.patch(
+    "/companies/{company_id}",
+    response_model=Dict[str, referral_schema.CompanyReadBase],
+)
+def update_referral_company(
+    company_id: str,
+    db: Database = Depends(session.get_db),
+    *,
+    data: referral_schema.ReferralCompanyUpdate,
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_lead
+    ),
+) -> Any:
+    """Update a referral company (Lead+ required)."""
+    company = referral_crud.update_referral_company(
+        db, company_id=company_id, data=data
+    )
+    return {"company": referral_dependencies.parse_company_basic(company)}
+
+
 @referral_router.post(
     "",
     response_model=Dict[str, referral_schema.ReferralRead],
