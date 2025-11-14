@@ -571,6 +571,7 @@
         <nav>
           <div class="section-title">Getting Started</div>
           <a href="#overview">Platform Overview</a>
+          <a href="#codebase-map">Codebase Map</a>
           <a href="#mission">Mission & Vision</a>
           <a href="#personas">User Personas</a>
 
@@ -603,6 +604,7 @@
           <a href="#setup">Environment Setup</a>
           <a href="#backend-dev">Backend Development</a>
           <a href="#frontend-dev">Frontend Development</a>
+          <a href="#tooling">Tooling & Automation</a>
           <a href="#testing">Testing</a>
           <a href="#deployment">Deployment</a>
 
@@ -610,6 +612,7 @@
           <a href="#monitoring">Monitoring</a>
           <a href="#security">Security</a>
           <a href="#troubleshooting">Troubleshooting</a>
+          <a href="#docs-delivery">Documentation Delivery</a>
         </nav>
       </aside>
 
@@ -629,6 +632,92 @@
             resume preparation and application tracking to internal referral
             requests and skill development through curated learning content.
           </p>
+        </section>
+
+        <section id="codebase-map">
+          <h2>Codebase Map</h2>
+          <p>
+            The repository is split into two first-class applications with
+            shared tooling at the root. Understanding the layout speeds up code
+            reviews and onboarding.
+          </p>
+
+          <div class="cards">
+            <div class="card">
+              <h4>Root / Tooling</h4>
+              <ul>
+                <li>
+                  <strong>Makefile</strong>: one-liner dev workflows such as
+                  <code>make dev</code>, <code>make frontend-dev</code>,
+                  <code>make clean</code>, and Docker helpers.
+                </li>
+                <li>
+                  <strong>render.yaml</strong>: production backend definition
+                  (Python runtime, <code>build.sh</code>,
+                  <code>start.sh</code>, <code>/health</code> probe, and
+                  declared environment variables).
+                </li>
+                <li>
+                  <strong>scripts/format.sh</strong>: battle-tested Ruff +
+                  isort formatter invoked by CI and <code>make format</code>.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>te-backend/</h4>
+              <ul>
+                <li>
+                  <strong>app/core</strong>: settings, security helpers, and
+                  role-based permissions (<code>permissions.py</code>).
+                </li>
+                <li>
+                  <strong>app/ents</strong>: feature modules (auth, users,
+                  resumes, applications, referrals, learning, documentation,
+                  etc.) with colocated CRUD + schemas.
+                </li>
+                <li>
+                  <strong>app/database</strong>: Mongo client factory and
+                  startup scripts (see <code>init_db.py</code> for index
+                  creation).
+                </li>
+                <li>
+                  <strong>docs/</strong>: Sphinx sources plus the built HTML
+                  mirrored into <code>app/ents/documentation/content.html</code>
+                  to keep the in-app docs evergreen.
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>te-frontend/</h4>
+              <ul>
+                <li>
+                  <strong>src/pages</strong>: route-level screens (e.g.,
+                  <code>Applications.jsx</code>,
+                  <code>Documentation.jsx</code>,
+                  <code>ResumeReviews.jsx</code>, admin consoles, etc.).
+                </li>
+                <li>
+                  <strong>src/components</strong>: feature widgets grouped by
+                  domain (learning, file uploads, referral flows, custom UI).
+                </li>
+                <li>
+                  <strong>src/context</strong>: global stores (Auth, Data,
+                  Notification, Dark Mode) plus PostHog provider and hooks.
+                </li>
+                <li>
+                  <strong>src/utils + src/hooks</strong>: shared Axios config,
+                  analytics helpers, and reusable React hooks.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="note">
+            <strong>Tip:</strong> When tracing a feature, start from
+            <code>app/ents/api.py</code> to discover which router exposes the
+            behavior, then jump into the matching frontend page to see how the
+            data is consumed.
+          </div>
         </section>
 
         <section id="mission">
@@ -1290,6 +1379,39 @@
   "role": "member",
   "exp": 1699824000
 }</code></pre>
+
+          <h3>Password Reset (Planned)</h3>
+          <p>
+            End-to-end password reset is rolling out next. The flow will reuse
+            the verification service—users request a reset link, verify a
+            short-lived token, and set a new password. Once complete, the
+            endpoints documented below will activate.
+          </p>
+          <ol>
+            <li>
+              <code>POST /auth/password-reset/request</code> &mdash; accepts an
+              email and sends a 6-digit code + secure token via email.
+            </li>
+            <li>
+              <code>POST /auth/password-reset/verify</code> &mdash; validates
+              the code/token combination (marks it used once confirmed).
+            </li>
+            <li>
+              <code>POST /auth/password-reset/complete</code> &mdash; updates
+              the hashed password after verification.
+            </li>
+          </ol>
+          <div class="note">
+            <strong>Security commitments</strong>
+            <ul>
+              <li>Tokens expire in 15 minutes and are single-use.</li>
+              <li>Rate limiting prevents repeated reset requests.</li>
+              <li>
+                Reset attempts reuse the same audit + attempt tracking logic as
+                email verification.
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section id="email-verification">
@@ -2857,6 +2979,52 @@ const createItem = async (itemData) =&gt; {
 };</code></pre>
         </section>
 
+        <section id="tooling">
+          <h2>Tooling &amp; Automation</h2>
+          <p>
+            Consistency matters. Formatting and linting are automated via Make
+            targets and shared shell helpers.
+          </p>
+
+          <div class="cards">
+            <div class="card">
+              <h4>Ruff &amp; isort</h4>
+              <p>
+                <code>scripts/format.sh</code> (also available via
+                <code>make format</code>) runs Ruff with <code>--fix</code>
+                followed by isort to keep backend imports tidy and modern.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Makefile Workflows</h4>
+              <p>
+                <code>make frontend-dev</code> forces the React app to use the
+                local API; <code>make frontend-prod</code> flips over to the
+                Render base URL. <code>make dev</code> launches both servers in
+                one terminal session.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Scripts</h4>
+              <p>
+                <code>te-backend/prestart.sh</code> primes Mongo indexes before
+                starting uvicorn, while <code>build.sh</code> +
+                <code>start.sh</code> are referenced by Render’s deploy hooks.
+              </p>
+            </div>
+          </div>
+
+          <h3>Daily Flow</h3>
+          <ol>
+            <li>Run <code>make frontend-dev</code> (or <code>make dev</code>).</li>
+            <li>Edit backend and frontend files—both hot-reload automatically.</li>
+            <li>
+              Before committing, run <code>make format</code> and the test steps
+              from the next section.
+            </li>
+          </ol>
+        </section>
+
         <section id="testing">
           <h2>Testing</h2>
 
@@ -3092,6 +3260,50 @@ docker-compose up -d</code></pre>
             <li>✅ Security headers set</li>
             <li>✅ Error tracking configured (e.g., Sentry)</li>
           </ul>
+        </section>
+
+        <section id="docs-delivery">
+          <h2>Documentation Delivery</h2>
+          <p>
+            The documentation you are reading lives both inside the backend and
+            on the static <code>/documentation</code> route inside the React
+            app. Keeping it fresh requires two quick steps whenever content
+            changes.
+          </p>
+
+          <ol>
+            <li>
+              <strong>Update source</strong>: edit
+              <code>app/ents/documentation/content.html</code> (or regenerate
+              from <code>te-backend/docs</code> via Sphinx) and ensure styles /
+              scripts match the desired experience.
+            </li>
+            <li>
+              <strong>Ship to frontend</strong>: the React
+              <code>Documentation.jsx</code> page fetches this HTML via
+              <code>GET /v1/documentation</code>, caches it in
+              <code>localStorage</code>, and hydrates scripts/inline styles at
+              runtime. Mobile users see cached copies if they’re offline.
+            </li>
+          </ol>
+
+          <div class="note">
+            <strong>Performance tips</strong>
+            <ul>
+              <li>
+                GZip is enabled server-side for the HTML payload
+                (<code>GZipMiddleware</code> in <code>app/main.py</code>).
+              </li>
+              <li>
+                The frontend automatically re-fetches in the background if the
+                cache is older than 12 hours or an error occurs.
+              </li>
+              <li>
+                Use the “Open full page” fallback button to debug the raw HTML
+                response if the embedded view misbehaves.
+              </li>
+            </ul>
+          </div>
         </section>
 
         <section id="monitoring">

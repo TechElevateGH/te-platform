@@ -41,6 +41,78 @@ const LIGHT_THEME_VARS = {
     '--code-bg': 'rgba(0, 0, 0, 0.05)',
 };
 
+const DOCS_CACHE_KEY = '__teDocsCache_v1';
+const DOCS_CACHE_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
+
+const canUseLocalStorage = () => {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+        return false;
+    }
+    try {
+        const testKey = '__teDocsTest';
+        window.localStorage.setItem(testKey, '1');
+        window.localStorage.removeItem(testKey);
+        return true;
+    } catch (err) {
+        return false;
+    }
+};
+
+const readCachedDocumentation = () => {
+    if (!canUseLocalStorage()) {
+        return null;
+    }
+    try {
+        const raw = window.localStorage.getItem(DOCS_CACHE_KEY);
+        if (!raw) {
+            return null;
+        }
+        const parsed = JSON.parse(raw);
+        if (!parsed?.html || typeof parsed.html !== 'string') {
+            return null;
+        }
+        return {
+            html: parsed.html,
+            timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : Date.now(),
+        };
+    } catch (err) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.warn('Unable to read cached documentation payload', err);
+        }
+        return null;
+    }
+};
+
+const writeCachedDocumentation = (html) => {
+    if (!canUseLocalStorage() || !html) {
+        return;
+    }
+    try {
+        window.localStorage.setItem(
+            DOCS_CACHE_KEY,
+            JSON.stringify({ html, timestamp: Date.now() })
+        );
+    } catch (err) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.warn('Unable to persist cached documentation payload', err);
+        }
+    }
+};
+
+const formatCacheTimestamp = (timestamp) => {
+    if (!timestamp) {
+        return '';
+    }
+    try {
+        return new Date(timestamp).toLocaleString(undefined, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        });
+    } catch (err) {
+        return '';
+    }
+};
+
 const buildDocumentationUrl = () => {
     const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/v1/';
 
@@ -86,25 +158,45 @@ const fetchWithTimeout = async (url, options = {}) => {
 };
 
 const Documentation = () => {
-    const [htmlContent, setHtmlContent] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const documentationUrl = useMemo(() => buildDocumentationUrl(), []);
+    const cacheSnapshot = useMemo(() => readCachedDocumentation(), []);
+    const [htmlContent, setHtmlContent] = useState(cacheSnapshot?.html || '');
+    const [cachedAt, setCachedAt] = useState(cacheSnapshot?.timestamp ?? null);
+    const [isCacheStale, setIsCacheStale] = useState(() => {
+        if (!cacheSnapshot?.timestamp) {
+            return false;
+        }
+        return Date.now() - cacheSnapshot.timestamp > DOCS_CACHE_TTL_MS;
+    });
+    const [isLoading, setIsLoading] = useState(!cacheSnapshot?.html);
+    const [isBackgroundRefresh, setIsBackgroundRefresh] = useState(false);
     const [error, setError] = useState(null);
     const [attempts, setAttempts] = useState(0);
-    const [docsTheme, setDocsTheme] = useState(() => document.documentElement.dataset.theme || 'dark');
+    const [docsTheme, setDocsTheme] = useState(() => {
+        if (typeof document === 'undefined') {
+            return 'dark';
+        }
+        return document.documentElement.dataset.theme || 'dark';
+    });
     const navigate = useNavigate();
     const contentRef = useRef(null);
+    const htmlRef = useRef(cacheSnapshot?.html || '');
 
-    const documentationUrl = useMemo(() => buildDocumentationUrl(), []);
+    useEffect(() => {
+        htmlRef.current = htmlContent;
+    }, [htmlContent]);
 
     const fetchDocumentation = useCallback(async () => {
-        setIsLoading(true);
+        const hasExistingContent = !!htmlRef.current;
+        setIsLoading(!hasExistingContent);
+        setIsBackgroundRefresh(hasExistingContent);
         setError(null);
 
         let aborted = false;
         try {
-            const isMobile = window.matchMedia('(max-width: 640px)').matches ||
-                (navigator?.userAgent || '').toLowerCase().includes('mobile');
-            const timeoutMs = isMobile ? 25000 : 40000;
+            const mediaMatch = typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false;
+            const uaMobile = typeof navigator !== 'undefined' ? (navigator?.userAgent || '').toLowerCase().includes('mobile') : false;
+            const timeoutMs = (mediaMatch || uaMobile) ? 25000 : 40000;
 
             const response = await fetchWithTimeout(documentationUrl, {
                 headers: { Accept: 'text/html' },
@@ -124,6 +216,10 @@ const Documentation = () => {
             }
 
             setHtmlContent(html);
+            setCachedAt(Date.now());
+            setIsCacheStale(false);
+            setAttempts(0);
+            writeCachedDocumentation(html);
         } catch (err) {
             console.error('Documentation error:', err);
 
@@ -144,6 +240,10 @@ const Documentation = () => {
 
             setError(errorMessage);
 
+            if (htmlRef.current) {
+                setIsCacheStale(true);
+            }
+
             setAttempts((prev) => {
                 const next = prev + 1;
                 if (next === 1 && (aborted || err?.name === 'AbortError')) {
@@ -153,6 +253,7 @@ const Documentation = () => {
             });
         } finally {
             setIsLoading(false);
+            setIsBackgroundRefresh(false);
         }
     }, [documentationUrl]);
 
@@ -468,6 +569,19 @@ const Documentation = () => {
     const errorCardClass = `rounded-xl border px-6 py-6 text-center shadow max-w-md w-full backdrop-blur ${isDarkTheme ? 'border-slate-800/80 bg-slate-900/80 text-white' : 'border-slate-200 bg-white/90 text-slate-900'
         }`;
     const errorTextClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
+    const inlineBannerClass = `mx-auto mb-4 w-full max-w-5xl rounded-xl border px-4 py-3 text-sm backdrop-blur ${isDarkTheme ? 'border-slate-800 bg-slate-900/70 text-slate-100' : 'border-slate-200 bg-white text-slate-900'}`;
+    const inlineBannerTextMuted = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
+    const inlineBannerAccent = isDarkTheme ? 'text-sky-300' : 'text-sky-600';
+    const inlineButtonClass = `rounded-lg border px-3 py-1 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-50'}`;
+    const inlinePrimaryButtonClass = 'rounded-lg bg-sky-500 px-3 py-1 text-xs font-semibold text-slate-900 hover:bg-sky-400';
+    const hasContent = Boolean(htmlContent);
+    const showSkeleton = isLoading && !hasContent;
+    const showBlockingError = Boolean(error) && !hasContent;
+    const showInlineError = Boolean(error) && hasContent;
+    const showStaleCopy = isCacheStale && hasContent;
+    const showRefreshNotice = isBackgroundRefresh && hasContent;
+    const shouldShowInlineBanner = showInlineError || showStaleCopy || showRefreshNotice;
+    const cacheLabel = cachedAt ? formatCacheTimestamp(cachedAt) : '';
 
     return (
         <div className={wrapperClass}>
@@ -523,7 +637,7 @@ const Documentation = () => {
             </header>
 
             <main className="flex-1" style={{ minHeight: 'calc(100vh - 73px)' }}>
-                {isLoading ? (
+                {showSkeleton ? (
                     <div className="flex h-full items-center justify-center px-4">
                         <div className="w-full max-w-md space-y-4">
                             <div className="flex items-center gap-3">
@@ -537,7 +651,7 @@ const Documentation = () => {
                             </div>
                         </div>
                     </div>
-                ) : error ? (
+                ) : showBlockingError ? (
                     <div className="flex h-full items-center justify-center px-4">
                         <div className={errorCardClass}>
                             <h2 className="text-base font-semibold">{attempts > 0 ? 'Retrying…' : 'Load issue'}</h2>
@@ -558,15 +672,69 @@ const Documentation = () => {
                                 >
                                     Back home
                                 </button>
+                                <a
+                                    href={documentationUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                                        }`}
+                                >
+                                    Open docs
+                                </a>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div
-                        ref={contentRef}
-                        dangerouslySetInnerHTML={{ __html: htmlContent }}
-                        className="w-full h-full"
-                    />
+                    <div className="flex h-full flex-col">
+                        {shouldShowInlineBanner && (
+                            <div className={inlineBannerClass}>
+                                <div className="flex flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="space-y-1">
+                                        {showInlineError && (
+                                            <p className="font-medium">{error}</p>
+                                        )}
+                                        {showStaleCopy && (
+                                            <p className={`text-xs ${inlineBannerTextMuted}`}>
+                                                Showing cached copy{cacheLabel ? ` from ${cacheLabel}` : ''}. We'll refresh automatically once your connection stabilizes.
+                                            </p>
+                                        )}
+                                        {showRefreshNotice && (
+                                            <p className={`text-xs font-semibold ${inlineBannerAccent}`}>
+                                                Refreshing latest documentation…
+                                            </p>
+                                        )}
+                                        {!showStaleCopy && !showInlineError && cacheLabel && (
+                                            <p className={`text-xs ${inlineBannerTextMuted}`}>
+                                                Last updated {cacheLabel}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={fetchDocumentation}
+                                            className={inlinePrimaryButtonClass}
+                                        >
+                                            Refresh now
+                                        </button>
+                                        <a
+                                            href={documentationUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={inlineButtonClass}
+                                        >
+                                            Open full page
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div
+                            ref={contentRef}
+                            dangerouslySetInnerHTML={{ __html: htmlContent }}
+                            className="w-full h-full"
+                        />
+                    </div>
                 )}
             </main>
         </div>
