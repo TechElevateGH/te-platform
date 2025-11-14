@@ -621,6 +621,16 @@ const ReferralsManagement = () => {
                                                 setSelectedReferral(ref);
                                                 setIsManagementModalOpen(true);
                                             }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setSelectedReferral(ref);
+                                                    setIsManagementModalOpen(true);
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                            role="button"
+                                            aria-label={`View referral request for ${ref.user_name || 'member'} at ${ref.company?.name || 'company'}`}
                                             className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
                                         >
                                             {visibleColumns.company && (

@@ -23,6 +23,9 @@ export const customInputMap = {
 const ApplicationCreate = ({ setAddApplication }) => {
     const { userId, accessToken } = useAuth();
     const { setFetchApplications, companies } = useData();
+    const companyOptions = (companies || [])
+        .map((company) => typeof company === 'string' ? company : company?.name)
+        .filter(Boolean);
 
     const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +114,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
                             Company Information
                         </h3>
                         <CompanyCombobox
-                            companies={companies.map(c => c.name)}
+                            companies={companyOptions}
                             value={appData.company}
                             onChange={(company) => handleInputChange({ field: 'company', value: company })}
                             required={true}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
+import ApplicationInfo from '../components/application/ApplicationInfo';
 import {
     MagnifyingGlassIcon,
     UserGroupIcon,
@@ -31,6 +32,8 @@ const ApplicationManagement = () => {
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [sortBy, setSortBy] = useState('date_desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
+    const [selectedApplication, setSelectedApplication] = useState(null);
+    const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
@@ -102,6 +105,30 @@ const ApplicationManagement = () => {
             setLoading(false);
         }
     }, [accessToken]);
+
+    const archiveApplications = useCallback(async (applicationIds) => {
+        try {
+            await axiosInstance.put('/applications/archive', applicationIds, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            fetchAllApplications();
+        } catch (error) {
+            console.error('Error archiving applications:', error);
+            alert('Failed to archive applications. Please try again.');
+        }
+    }, [accessToken, fetchAllApplications]);
+
+    const deleteApplications = useCallback(async (applicationIds) => {
+        try {
+            await axiosInstance.put('/applications/delete', applicationIds, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            fetchAllApplications();
+        } catch (error) {
+            console.error('Error deleting applications:', error);
+            alert('Failed to delete applications. Please try again.');
+        }
+    }, [accessToken, fetchAllApplications]);
 
     useEffect(() => {
         if (accessToken) {
@@ -631,6 +658,20 @@ const ApplicationManagement = () => {
                                     sortedApplications.map((app) => (
                                         <tr
                                             key={app.id}
+                                            onClick={() => {
+                                                setSelectedApplication(app);
+                                                setSelectedApplicationId(app.id);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setSelectedApplication(app);
+                                                    setSelectedApplicationId(app.id);
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                            role="button"
+                                            aria-label={`View details for application at ${app.company}`}
                                             className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                         >
                                             {visibleColumns.company && (
@@ -737,6 +778,18 @@ const ApplicationManagement = () => {
                     </div>
                 )}
             </div>
+
+            {selectedApplicationId && (
+                <ApplicationInfo
+                    applicationId={selectedApplicationId}
+                    setApplicationId={setSelectedApplicationId}
+                    application={selectedApplication}
+                    setApplication={setSelectedApplication}
+                    archiveUserApplicationRequest={archiveApplications}
+                    deleteUserApplicationRequest={deleteApplications}
+                    refreshApplications={fetchAllApplications}
+                />
+            )}
         </div>
     );
 };

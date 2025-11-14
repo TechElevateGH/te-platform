@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDarkMode } from '../../context/DarkModeContext';
-import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import NotificationBell from './NotificationBell';
 
@@ -160,15 +160,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                 )}
                             </>
                         )}
-
-                        {/* Home Shortcut - Mobile */}
-                        <button
-                            onClick={() => navigate('/')}
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                            title="Go to home"
-                        >
-                            <HomeIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                        </button>
 
                         {/* Dark Mode Toggle - Mobile (for all pages) */}
                         <button

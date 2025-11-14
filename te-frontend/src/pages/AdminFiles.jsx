@@ -33,6 +33,8 @@ const AdminFiles = () => {
     const [assigningReview, setAssigningReview] = useState(null);
     const [selectedReview, setSelectedReview] = useState(null);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [showMemberModal, setShowMemberModal] = useState(false);
     const [reviewFeedback, setReviewFeedback] = useState('');
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
@@ -40,8 +42,6 @@ const AdminFiles = () => {
     // Check user role - Lead (4) and Admin (5) can access
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const isAdmin = userRoleInt === 5;
-    const isLeadOrAbove = userRoleInt >= 4; // Lead or Admin
-
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
         member: true,
@@ -174,6 +174,16 @@ const AdminFiles = () => {
         setSelectedReview(null);
         setReviewFeedback('');
         setReviewStatus('');
+    };
+
+    const handleOpenMemberModal = (member) => {
+        setSelectedMember(member);
+        setShowMemberModal(true);
+    };
+
+    const handleCloseMemberModal = () => {
+        setSelectedMember(null);
+        setShowMemberModal(false);
     };
 
     // Submit review feedback
@@ -538,8 +548,79 @@ const AdminFiles = () => {
                             </div>
                         </div>
 
+                        {/* Mobile Member Cards */}
+                        <div className="space-y-3 md:hidden">
+                            {sortedUsers.length === 0 ? (
+                                <div className="border border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 p-6 text-center">
+                                    <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">No files found</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Try adjusting your filters</p>
+                                </div>
+                            ) : (
+                                sortedUsers.map(user => {
+                                    const resumeCount = user.resumes?.length || 0;
+                                    const essayCount = user.essays?.length || 0;
+                                    const totalFiles = resumeCount + essayCount;
+
+                                    return (
+                                            <div
+                                            key={user.id}
+                                            onClick={() => handleOpenMemberModal(user)}
+                                            className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 space-y-3 cursor-pointer transition hover:border-blue-300 dark:hover:border-blue-500"
+                                            role="button"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    handleOpenMemberModal(user);
+                                                }
+                                            }}
+                                            aria-label={`View files for ${user.full_name || 'member'}`}
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.full_name || 'Unnamed Member'}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email || 'No email provided'}</p>
+                                                </div>
+                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400">
+                                                    {totalFiles} file{totalFiles === 1 ? '' : 's'}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300">
+                                                    Resumes: {resumeCount}
+                                                </span>
+                                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                                                    Essays: {essayCount}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span className="text-gray-500 dark:text-gray-400">Tap to view details</span>
+                                                {resumeCount > 0 ? (
+                                                    <a
+                                                        href={user.resumes[0].url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-semibold"
+                                                    >
+                                                        <EyeIcon className="h-3.5 w-3.5" />
+                                                        Latest Resume
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-400 dark:text-gray-500">No resumes yet</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+
                         {/* Files Table */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+                        <div className="hidden md:block bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
@@ -579,7 +660,7 @@ const AdminFiles = () => {
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                         {sortedUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan={visibleColumnCount} className="px-3 py-6 text-center">
+                                                <td colSpan={Math.max(visibleColumnCount, 1)} className="px-3 py-6 text-center">
                                                     <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                                                     <p className="text-sm font-medium text-gray-900 dark:text-white">No files found</p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -593,7 +674,17 @@ const AdminFiles = () => {
                                             sortedUsers.map((user) => (
                                                 <tr
                                                     key={user.id}
-                                                    className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all"
+                                                    onClick={() => handleOpenMemberModal(user)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' || e.key === ' ') {
+                                                            e.preventDefault();
+                                                            handleOpenMemberModal(user);
+                                                        }
+                                                    }}
+                                                    tabIndex={0}
+                                                    role="button"
+                                                    aria-label={`View files for ${user.full_name || 'member'}`}
+                                                    className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                                 >
                                                     {visibleColumns.member && (
                                                         <td className="px-3 py-2">
@@ -631,13 +722,14 @@ const AdminFiles = () => {
                                                         </td>
                                                     )}
                                                     {visibleColumns.actions && (
-                                                        <td className="px-3 py-2">
+                                                        <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                                                             <div className="flex items-center gap-2">
                                                                 {user.resumes && user.resumes.length > 0 && (
                                                                     <a
                                                                         href={user.resumes[0].url}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
+                                                                        onClick={(e) => e.stopPropagation()}
                                                                         className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                                                                     >
                                                                         <EyeIcon className="h-3.5 w-3.5" />
@@ -812,6 +904,138 @@ const AdminFiles = () => {
                 )}
 
             </div>
+
+            {/* Member Detail Modal */}
+            {showMemberModal && selectedMember && (
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+                    onClick={handleCloseMemberModal}
+                >
+                    <div
+                        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900">
+                            <div>
+                                <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Member</p>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedMember.full_name || 'Member Details'}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{selectedMember.email}</p>
+                            </div>
+                            <button
+                                onClick={handleCloseMemberModal}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                aria-label="Close member details"
+                            >
+                                <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Resumes</p>
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedMember.resumes?.length || 0}</p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Essays</p>
+                                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{selectedMember.essays?.length || 0}</p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Files</p>
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                        {(selectedMember.resumes?.length || 0) + (selectedMember.essays?.length || 0)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                        <DocumentIcon className="h-4 w-4 text-blue-500" />
+                                        Resumes
+                                    </h4>
+                                    {selectedMember.resumes?.length ? (
+                                        <div className="space-y-2">
+                                            {selectedMember.resumes.map((resume, index) => (
+                                                <div
+                                                    key={resume.id || index}
+                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                                >
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            {resume.name || resume.file_name || `Resume ${index + 1}`}
+                                                        </p>
+                                                        {resume.uploaded_at && (
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">Uploaded {resume.uploaded_at}</p>
+                                                        )}
+                                                    </div>
+                                                    <a
+                                                        href={resume.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        <EyeIcon className="h-4 w-4" />
+                                                        View
+                                                    </a>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic">No resumes uploaded yet.</p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                        <DocumentTextIcon className="h-4 w-4 text-purple-500" />
+                                        Essays
+                                    </h4>
+                                    {selectedMember.essays?.length ? (
+                                        <div className="space-y-2">
+                                            {selectedMember.essays.map((essay, index) => (
+                                                <div
+                                                    key={essay.id || index}
+                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                                >
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            {essay.name || essay.file_name || `Essay ${index + 1}`}
+                                                        </p>
+                                                        {essay.uploaded_at && (
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400">Uploaded {essay.uploaded_at}</p>
+                                                        )}
+                                                    </div>
+                                                    <a
+                                                        href={essay.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                                    >
+                                                        <EyeIcon className="h-4 w-4" />
+                                                        View
+                                                    </a>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic">No essays uploaded yet.</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pt-2">
+                                <button
+                                    onClick={handleCloseMemberModal}
+                                    className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Resume Review Modal */}
             {showReviewModal && selectedReview && (

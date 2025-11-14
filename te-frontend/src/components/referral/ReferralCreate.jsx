@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     ExclamationTriangleIcon,
     BriefcaseIcon,
@@ -28,7 +28,29 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const hasContact = userInfo?.contact && userInfo.contact.trim() !== '';
 
     // Company requirements
-    const requirements = company.referral_materials || {};
+    const requirements = useMemo(() => company.referral_materials || {}, [company.referral_materials]);
+
+    const getMissingRequirements = useCallback(() => {
+        const missing = [];
+        if (requirements.resume && !hasResume) missing.push('resume');
+        if (requirements.referralEssay && !hasReferralEssay) missing.push('referral essay');
+        if (requirements.contact && !hasContact) missing.push('phone number');
+        return missing;
+    }, [requirements, hasResume, hasReferralEssay, hasContact]);
+
+    const missingRequirements = useMemo(() => getMissingRequirements(), [getMissingRequirements]);
+
+    const formatRequirementList = (items) => {
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+        return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+    };
+
+    const requirementWarningMessage = missingRequirements.length > 0
+        ? `Please add your ${formatRequirementList(missingRequirements)} before requesting a referral.`
+        : '';
+
+    const hasAllRequiredMaterials = missingRequirements.length === 0;
 
     const [selectedResumeId, setSelectedResumeId] = useState(
         hasResume ? availableResumes[0].id : null
@@ -79,8 +101,15 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const [submitError, setSubmitError] = useState("");
 
     const createReferralRequest = async () => {
-        setIsSubmitting(true);
         setSubmitError("");
+
+        const latestMissingRequirements = getMissingRequirements();
+        if (latestMissingRequirements.length > 0) {
+            setSubmitError(`Please add your ${formatRequirementList(latestMissingRequirements)} before requesting a referral.`);
+            return false;
+        }
+
+        setIsSubmitting(true);
 
         try {
             const response = await axiosInstance.post(`/referrals`, referralData, {
@@ -129,7 +158,8 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
             setHandler={setReferralCompanyId}
             requestHandler={createReferralRequest}
             isSubmitting={isSubmitting}
-            submitButtonText="Request Referral"
+            isSubmitDisabled={!hasAllRequiredMaterials}
+            submitButtonText={hasAllRequiredMaterials ? "Request Referral" : "Complete Requirements"}
             children={
                 !hasResume ? (
                     <div className="px-6 py-8">
@@ -207,12 +237,20 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                                     <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />
                                                 )}
                                                 <span className={`text-sm font-semibold ${hasContact ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'}`}>
-                                                    Contact
+                                                    Phone Number
                                                 </span>
                                             </div>
                                         )}
                                     </div>
                                 </div>
+                                {!hasAllRequiredMaterials && requirementWarningMessage && (
+                                    <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-100">
+                                        <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
+                                        <p className="text-xs font-semibold leading-snug">
+                                            {requirementWarningMessage}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
