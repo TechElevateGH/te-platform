@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('userId', userId);
     localStorage.setItem('userRole', userRole);
+    localStorage.removeItem('isGuestMode');
 
     // Track if this is a privileged user (role >= 2) for redirect after session expiry
     const isPrivileged = parseInt(userRole) >= 2;
@@ -118,9 +119,13 @@ export const AuthProvider = ({ children }) => {
     posthog.reset();
   };
 
-  // Treat guest mode with a localStorage access token as authenticated for UI routing purposes
-  const isGuest = localStorage.getItem('isGuestMode') === 'true';
+  // Check isGuest from localStorage but ensure it's false when we have real auth
+  const storageIsGuest = localStorage.getItem('isGuestMode') === 'true';
   const storageToken = localStorage.getItem('accessToken');
+
+  // isGuest should only be true if BOTH the flag is set AND we have the guest token
+  // If we have a real token in state, we're NOT a guest regardless of the flag
+  const isGuest = storageIsGuest && storageToken === 'guest-mode' && !state.accessToken;
   const isAuthenticated = !!state.accessToken || (isGuest && !!storageToken);
 
 

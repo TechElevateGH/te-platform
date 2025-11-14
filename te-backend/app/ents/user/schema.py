@@ -46,9 +46,9 @@ class UserRoles(int, Enum):
 
 class LeadCreate(BaseModel):
     """
-    Schema for creating a Lead/Admin account (Admin only).
+    Schema for creating a Management account (Admin only).
 
-    Leads authenticate with username + token at /auth/lead-login.
+    Management users (Volunteers, Leads, Admins) authenticate with username + token at /auth/management-login.
     """
 
     username: str  # Used for login

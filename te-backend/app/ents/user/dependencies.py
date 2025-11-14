@@ -22,6 +22,11 @@ def get_current_user(
     db: Database = Depends(session.get_db),
     token=Depends(reusable_oauth2),
 ) -> Union[user_models.MemberUser, user_models.PrivilegedUser]:
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
     try:
         payload = jwt.decode(
             token=token,
@@ -29,7 +34,7 @@ def get_current_user(
             algorithms=["HS256"],
         )
         token_data = security.TokenPayload(**payload)
-    except (JWTError, ValidationError):
+    except (JWTError, ValidationError, AttributeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",

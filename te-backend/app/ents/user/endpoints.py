@@ -43,18 +43,19 @@ def create_lead_account(
     _: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
 ) -> Any:
     """
-    Create a new Lead account (Admin only).
+    Create a new Management account (Admin only).
 
-    Leads authenticate using their username and token.
+    For Volunteers (role=3), Leads (role=4), and Admins (role=5).
+    These users authenticate using their username and token.
 
-    - **username**: Lead's username for login
+    - **username**: Username for login
     - **token**: Secure token for authentication
-    - **role**: Lead (4) or Admin (5)
+    - **role**: Volunteer (3), Lead (4), or Admin (5)
     - Returns: User info and token (visible only once)
 
-    **Authentication**: Lead users log in at `/auth/lead-login` with username + token.
+    **Authentication**: Management users log in at `/auth/management-login` with username + token.
 
-    **Important**: The token should be shared securely with the Lead user.
+    **Important**: The token should be shared securely with the user.
     It cannot be retrieved again after creation.
 
     **Requires**: Admin (role=5) access
@@ -62,7 +63,7 @@ def create_lead_account(
     result = user_crud.create_lead_user(db, data=data)
     return {
         "lead": result,
-        "message": "Lead account created successfully. Please share the token securely with the user.",
+        "message": "Management account created successfully. Please share the token securely with the user.",
     }
 
 
@@ -99,6 +100,45 @@ def create_referrer_account(
     return {
         "referrer": result,
         "message": "Referrer account created successfully. Please share the token securely with the user.",
+    }
+
+
+@router.post(
+    "/privileged/volunteers",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_volunteer_account(
+    *,
+    db: Database = Depends(session.get_db),
+    data: user_schema.LeadCreate,
+    _: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+) -> Any:
+    """
+    Create a new Volunteer account (Lead+ access).
+
+    Volunteers authenticate using their username and token.
+    Leads and Admins can create Volunteer accounts.
+
+    - **username**: Volunteer's username for login
+    - **token**: Secure token for authentication
+    - **role**: Must be Volunteer (3)
+    - Returns: User info and token (visible only once)
+
+    **Authentication**: Volunteers log in at `/auth/management-login` with username + token.
+
+    **Important**: The token should be shared securely with the Volunteer.
+    It cannot be retrieved again after creation.
+
+    **Requires**: Lead (role=4) or Admin (role=5) access
+    """
+    # Force role to be Volunteer
+    data.role = user_schema.UserRoles.volunteer
+    
+    result = user_crud.create_lead_user(db, data=data)
+    return {
+        "volunteer": result,
+        "message": "Volunteer account created successfully. Please share the token securely with the user.",
     }
 
 
@@ -143,7 +183,7 @@ def list_member_users(
 
     **Requires**: Admin (role=5) access
     """
-    users = user_crud.read_all_users(db)
+    users = user_crud.read_all_member_users(db)
     # Convert to dict format for JSON serialization
     result = []
     for user in users:

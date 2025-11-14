@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
 import {
@@ -7,20 +7,45 @@ import {
     XMarkIcon,
     ClipboardDocumentIcon,
     CheckCircleIcon,
-    ExclamationCircleIcon
+    ExclamationCircleIcon,
+    BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 
 const CreateLeadAdmin = ({ show, onClose }) => {
     const { accessToken } = useAuth();
+    const [accountType, setAccountType] = useState('lead'); // 'lead' or 'referrer'
+    const [companies, setCompanies] = useState([]);
     const [formData, setFormData] = useState({
         username: '',
         token: '',
         role: '3', // Default to Lead (3)
+        company_id: '', // For referrer accounts
     });
     const [createdCredentials, setCreatedCredentials] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [copied, setCopied] = useState(false);
+
+    // Fetch companies when modal opens and accountType is referrer
+    useEffect(() => {
+        if (show && accountType === 'referrer') {
+            fetchCompanies();
+        }
+    }, [show, accountType]);
+
+    const fetchCompanies = async () => {
+        try {
+            const response = await axiosInstance.get('/companies', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            setCompanies(response.data.companies || []);
+        } catch (err) {
+            console.error('Error fetching companies:', err);
+            setError('Failed to load companies');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,32 +53,60 @@ const CreateLeadAdmin = ({ show, onClose }) => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post(
-                '/users/leads',
-                {
-                    username: formData.username,
-                    token: formData.token,
-                    role: parseInt(formData.role),
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
+            let response;
+            if (accountType === 'referrer') {
+                // Create referrer account
+                response = await axiosInstance.post(
+                    '/users/privileged/referrers',
+                    {
+                        username: formData.username,
+                        token: formData.token,
+                        company_id: formData.company_id,
                     },
-                }
-            );
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
 
-            // Show the created credentials
-            setCreatedCredentials({
-                username: response.data.username,
-                token: formData.token, // Use the token from form
-                role: response.data.role === 5 ? 'Admin' : 'Lead',
-            });
+                // Show the created credentials
+                setCreatedCredentials({
+                    username: response.data.referrer.username,
+                    token: formData.token,
+                    role: 'Referrer',
+                    company: companies.find(c => c.id === formData.company_id)?.name || 'Unknown',
+                });
+            } else {
+                // Create lead/admin account
+                response = await axiosInstance.post(
+                    '/users/privileged/leads',
+                    {
+                        username: formData.username,
+                        token: formData.token,
+                        role: parseInt(formData.role),
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+
+                // Show the created credentials
+                setCreatedCredentials({
+                    username: response.data.lead.username,
+                    token: formData.token,
+                    role: response.data.lead.role === 5 ? 'Admin' : 'Lead',
+                });
+            }
 
             // Reset form
             setFormData({
                 username: '',
                 token: '',
                 role: '3',
+                company_id: '',
             });
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to create account');
@@ -64,7 +117,10 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
     const handleCopyCredentials = () => {
         if (createdCredentials) {
-            const text = `Username: ${createdCredentials.username}\nToken: ${createdCredentials.token}\nRole: ${createdCredentials.role}`;
+            let text = `Username: ${createdCredentials.username}\nToken: ${createdCredentials.token}\nRole: ${createdCredentials.role}`;
+            if (createdCredentials.company) {
+                text += `\nCompany: ${createdCredentials.company}`;
+            }
             navigator.clipboard.writeText(text);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
@@ -74,10 +130,12 @@ const CreateLeadAdmin = ({ show, onClose }) => {
     const handleClose = () => {
         setCreatedCredentials(null);
         setError('');
+        setAccountType('lead');
         setFormData({
             username: '',
             token: '',
             role: '3',
+            company_id: '',
         });
         onClose();
     };
@@ -86,12 +144,12 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <ShieldCheckIcon className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">Create Lead/Admin Account</h2>
+                        <h2 className="text-xl font-bold">Create Privileged Account</h2>
                     </div>
                     <button
                         onClick={handleClose}
@@ -103,41 +161,47 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
                 {/* Success Message - Show Created Credentials */}
                 {createdCredentials && (
-                    <div className="p-6 bg-green-50 border-b border-green-200">
+                    <div className="p-6 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
                         <div className="flex items-start gap-3 mb-4">
-                            <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+                            <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                             <div>
-                                <h3 className="font-bold text-green-900 mb-1">
+                                <h3 className="font-bold text-green-900 dark:text-green-300 mb-1">
                                     Account Created Successfully!
                                 </h3>
-                                <p className="text-sm text-green-700">
+                                <p className="text-sm text-green-700 dark:text-green-400">
                                     Save these credentials - the token won't be shown again.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg p-4 space-y-2 border border-green-300">
+                        <div className="bg-white dark:bg-gray-700 rounded-lg p-4 space-y-2 border border-green-300 dark:border-green-700">
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Username:</span>
-                                <p className="font-mono text-sm font-bold text-gray-900">
+                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Username:</span>
+                                <p className="font-mono text-sm font-bold text-gray-900 dark:text-white">
                                     {createdCredentials.username}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Token:</span>
-                                <p className="font-mono text-sm font-bold text-blue-600">
+                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Token:</span>
+                                <p className="font-mono text-sm font-bold text-blue-600 dark:text-blue-400">
                                     {createdCredentials.token}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Role:</span>
-                                <p className="text-sm text-gray-900">{createdCredentials.role}</p>
+                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Role:</span>
+                                <p className="text-sm text-gray-900 dark:text-white">{createdCredentials.role}</p>
                             </div>
+                            {createdCredentials.company && (
+                                <div>
+                                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Company:</span>
+                                    <p className="text-sm text-gray-900 dark:text-white">{createdCredentials.company}</p>
+                                </div>
+                            )}
                         </div>
 
                         <button
                             onClick={handleCopyCredentials}
-                            className="w-full mt-4 px-4 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            className="w-full mt-4 px-4 py-2.5 bg-green-600 dark:bg-green-700 text-white font-semibold rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
                         >
                             {copied ? (
                                 <>
@@ -154,7 +218,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
                         <button
                             onClick={() => setCreatedCredentials(null)}
-                            className="w-full mt-2 px-4 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                            className="w-full mt-2 px-4 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                         >
                             Create Another Account
                         </button>
@@ -163,10 +227,10 @@ const CreateLeadAdmin = ({ show, onClose }) => {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="p-4 bg-red-50 border-b border-red-200">
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
                         <div className="flex items-start gap-3">
-                            <ExclamationCircleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-700">{error}</p>
+                            <ExclamationCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
                         </div>
                     </div>
                 )}
@@ -174,8 +238,45 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                 {/* Form */}
                 {!createdCredentials && (
                     <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        {/* Account Type Selector */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                Account Type *
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setAccountType('lead');
+                                        setFormData({ ...formData, company_id: '' });
+                                    }}
+                                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'lead'
+                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                        }`}
+                                >
+                                    <ShieldCheckIcon className="h-5 w-5" />
+                                    Lead/Admin
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setAccountType('referrer');
+                                        setFormData({ ...formData, role: '2' });
+                                    }}
+                                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'referrer'
+                                        ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-md'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                        }`}
+                                >
+                                    <BuildingOfficeIcon className="h-5 w-5" />
+                                    Referrer
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                 Username *
                             </label>
                             <input
@@ -185,16 +286,19 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                 onChange={(e) =>
                                     setFormData({ ...formData, username: e.target.value })
                                 }
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 placeholder="e.g., love"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Username for login authentication
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {accountType === 'referrer' 
+                                    ? 'Internal identifier (not used for login)'
+                                    : 'Username for login authentication'
+                                }
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                 Token *
                             </label>
                             <input
@@ -202,33 +306,60 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                                 required
                                 value={formData.token}
                                 onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 placeholder="e.g., peace"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Access token for authentication (minimum 8 characters recommended)
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {accountType === 'referrer'
+                                    ? 'Referrers authenticate with token only'
+                                    : 'Access token for authentication (minimum 8 characters recommended)'
+                                }
                             </p>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Role *
-                            </label>
-                            <select
-                                value={formData.role}
-                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="3">Lead</option>
-                                <option value="5">Admin</option>
-                            </select>
-                        </div>
+                        {accountType === 'lead' ? (
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Role *
+                                </label>
+                                <select
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                                >
+                                    <option value="3">Lead</option>
+                                    <option value="5">Admin</option>
+                                </select>
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Assigned Company *
+                                </label>
+                                <select
+                                    value={formData.company_id}
+                                    onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
+                                    required
+                                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-cyan-500 dark:focus:border-cyan-400"
+                                >
+                                    <option value="">Select a company...</option>
+                                    {companies.map((company) => (
+                                        <option key={company.id} value={company.id}>
+                                            {company.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Referrer will manage referrals for this company
+                                </p>
+                            </div>
+                        )}
 
                         <div className="flex gap-3 pt-4">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
                                     <>
@@ -245,7 +376,7 @@ const CreateLeadAdmin = ({ show, onClose }) => {
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                                className="px-6 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
                             >
                                 Cancel
                             </button>

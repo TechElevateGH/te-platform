@@ -223,49 +223,49 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             )}
                                             <ul className="space-y-2">
                                                 {appItems.map((item, index) => {
-                                                const colors = [
-                                                    { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
-                                                    { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
-                                                    { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
-                                                    { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
-                                                ];
-                                                const color = colors[index % colors.length];
-                                                return (
-                                                    <li key={item.name}>
-                                                        <button
-                                                            onClick={() => setContent(item.name)}
-                                                            className={classNames(
-                                                                item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                isExpanded ? 'gap-x-3' : 'justify-center'
-                                                            )}
-                                                            title={!isExpanded ? item.name : ''}
-                                                        >
-                                                            <div className={classNames(
-                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                            )}>
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.name === content ? 'text-white' : color.icon,
-                                                                        'h-5 w-5 transition-colors'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                            </div>
-                                                            {isExpanded && (
-                                                                <>
-                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                    {item.name === content && (
-                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                );
+                                                    const colors = [
+                                                        { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
+                                                        { bg: 'bg-purple-500/10', hoverBg: 'hover:bg-purple-500/20', text: 'text-purple-700', icon: 'text-purple-600', activeBg: 'bg-gradient-to-r from-purple-500 to-pink-500', ring: 'ring-purple-500/20' },
+                                                        { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
+                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-teal-500', ring: 'ring-emerald-500/20' },
+                                                    ];
+                                                    const color = colors[index % colors.length];
+                                                    return (
+                                                        <li key={item.name}>
+                                                            <button
+                                                                onClick={() => setContent(item.name)}
+                                                                className={classNames(
+                                                                    item.name === content
+                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
+                                                                )}
+                                                                title={!isExpanded ? item.name : ''}
+                                                            >
+                                                                <div className={classNames(
+                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                                )}>
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.name === content ? 'text-white' : color.icon,
+                                                                            'h-5 w-5 transition-colors'
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </div>
+                                                                {isExpanded && (
+                                                                    <>
+                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                        {item.name === content && (
+                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                    );
                                                 })}
                                             </ul>
                                         </li>
@@ -280,47 +280,47 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             )}
                                             <ul className="space-y-2">
                                                 {learningItems.map((item, index) => {
-                                                const colors = [
-                                                    { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
-                                                    { bg: 'bg-rose-500/10', hoverBg: 'hover:bg-rose-500/20', text: 'text-rose-700', icon: 'text-rose-600', activeBg: 'bg-gradient-to-r from-rose-500 to-pink-500', ring: 'ring-rose-500/20' },
-                                                ];
-                                                const color = colors[index % colors.length];
-                                                return (
-                                                    <li key={item.name}>
-                                                        <button
-                                                            onClick={() => setContent(item.name)}
-                                                            className={classNames(
-                                                                item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                isExpanded ? 'gap-x-3' : 'justify-center'
-                                                            )}
-                                                            title={!isExpanded ? item.name : ''}
-                                                        >
-                                                            <div className={classNames(
-                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                            )}>
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.name === content ? 'text-white' : color.icon,
-                                                                        'h-5 w-5 transition-colors'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                            </div>
-                                                            {isExpanded && (
-                                                                <>
-                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                    {item.name === content && (
-                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                );
+                                                    const colors = [
+                                                        { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
+                                                        { bg: 'bg-rose-500/10', hoverBg: 'hover:bg-rose-500/20', text: 'text-rose-700', icon: 'text-rose-600', activeBg: 'bg-gradient-to-r from-rose-500 to-pink-500', ring: 'ring-rose-500/20' },
+                                                    ];
+                                                    const color = colors[index % colors.length];
+                                                    return (
+                                                        <li key={item.name}>
+                                                            <button
+                                                                onClick={() => setContent(item.name)}
+                                                                className={classNames(
+                                                                    item.name === content
+                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
+                                                                )}
+                                                                title={!isExpanded ? item.name : ''}
+                                                            >
+                                                                <div className={classNames(
+                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                                )}>
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.name === content ? 'text-white' : color.icon,
+                                                                            'h-5 w-5 transition-colors'
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </div>
+                                                                {isExpanded && (
+                                                                    <>
+                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                        {item.name === content && (
+                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                    );
                                                 })}
                                             </ul>
                                         </li>
@@ -386,43 +386,43 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             )}
                                             <ul className="space-y-2">
                                                 {accountItems.map((item) => {
-                                                const color = { bg: 'bg-indigo-500/10', hoverBg: 'hover:bg-indigo-500/20', text: 'text-indigo-700', icon: 'text-indigo-600', activeBg: 'bg-gradient-to-r from-indigo-500 to-purple-500', ring: 'ring-indigo-500/20' };
-                                                return (
-                                                    <li key={item.name}>
-                                                        <button
-                                                            onClick={() => setContent(item.name)}
-                                                            className={classNames(
-                                                                item.name === content
-                                                                    ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                    : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                isExpanded ? 'gap-x-3' : 'justify-center'
-                                                            )}
-                                                            title={!isExpanded ? item.name : ''}
-                                                        >
-                                                            <div className={classNames(
-                                                                item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                            )}>
-                                                                <item.icon
-                                                                    className={classNames(
-                                                                        item.name === content ? 'text-white' : color.icon,
-                                                                        'h-5 w-5 transition-colors'
-                                                                    )}
-                                                                    aria-hidden="true"
-                                                                />
-                                                            </div>
-                                                            {isExpanded && (
-                                                                <>
-                                                                    <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                    {item.name === content && (
-                                                                        <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    </li>
-                                                );
+                                                    const color = { bg: 'bg-indigo-500/10', hoverBg: 'hover:bg-indigo-500/20', text: 'text-indigo-700', icon: 'text-indigo-600', activeBg: 'bg-gradient-to-r from-indigo-500 to-purple-500', ring: 'ring-indigo-500/20' };
+                                                    return (
+                                                        <li key={item.name}>
+                                                            <button
+                                                                onClick={() => setContent(item.name)}
+                                                                className={classNames(
+                                                                    item.name === content
+                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
+                                                                )}
+                                                                title={!isExpanded ? item.name : ''}
+                                                            >
+                                                                <div className={classNames(
+                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                                )}>
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.name === content ? 'text-white' : color.icon,
+                                                                            'h-5 w-5 transition-colors'
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </div>
+                                                                {isExpanded && (
+                                                                    <>
+                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                        {item.name === content && (
+                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                    );
                                                 })}
                                             </ul>
                                         </li>

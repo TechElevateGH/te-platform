@@ -16,6 +16,30 @@ referral_router = APIRouter(prefix="/referrals")
 
 
 @referral_company_router.get(
+    "",
+    response_model=Dict[str, list[Dict[str, Any]]],
+)
+def get_all_companies(
+    db: Database = Depends(session.get_db),
+    skip: int = 0,
+    limit: int = 1000,
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_admin),
+) -> Any:
+    """
+    Get all companies (Admin only).
+    Returns list of all companies with id and name for dropdown selection.
+    """
+    companies_cursor = db.companies.find({}, {"_id": 1, "name": 1}).skip(skip).limit(limit)
+    companies = []
+    for company in companies_cursor:
+        companies.append({
+            "id": str(company["_id"]),
+            "name": company.get("name", ""),
+        })
+    return {"companies": companies}
+
+
+@referral_company_router.get(
     "/referrals",
     response_model=Dict[str, list[referral_company_schema.CompanyReadForReferrals]],
 )
