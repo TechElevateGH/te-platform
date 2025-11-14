@@ -33,7 +33,6 @@ const ReferralsManagement = () => {
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
     const [copiedField, setCopiedField] = useState(null);
     const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
-    const [referrerCompany, setReferrerCompany] = useState(null);
 
     // Check if user is a referrer (role = 2) - use sessionStorage as fallback for immediate availability
     const storedRole = sessionStorage.getItem('userRole');
@@ -66,32 +65,6 @@ const ReferralsManagement = () => {
             }
         }
     }, [isReferrer]);
-
-    // Fetch referrer's company data
-    useEffect(() => {
-        const fetchReferrerCompany = async () => {
-            if (isReferrer && userInfo?.company_id) {
-                try {
-                    // Fetch all companies and find the one matching company_id
-                    // OR fetch referrals for this company to get company info
-                    const response = await axiosInstance.get('/referrals/companies', {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                        },
-                    });
-                    // Find the company that matches the referrer's company_id
-                    const company = response.data?.companies?.find(c => c.id === userInfo.company_id);
-                    if (company) {
-                        setReferrerCompany(company);
-                    }
-                } catch (error) {
-                    console.error('Error fetching referrer company:', error);
-                }
-            }
-        };
-
-        fetchReferrerCompany();
-    }, [isReferrer, userInfo, accessToken]);
 
     // Advanced Features State
     const [sortField, setSortField] = useState('date');
@@ -488,42 +461,45 @@ const ReferralsManagement = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors pb-20 md:pb-4 overflow-x-hidden">
             {/* Compact Sticky Header */}
             <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
-                <div className="max-w-7xl mx-auto px-4 py-3">
+                <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-3">
                     {/* Title and Actions Row */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                         {/* Left: Title */}
                         <div className="flex-shrink-0">
-                            <div className="flex items-center gap-2">
-                                <h1 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <PaperAirplaneIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                                    Referral Management
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <PaperAirplaneIcon className="h-5 w-5 md:h-6 md:w-6 text-blue-600 dark:text-blue-400" />
+                                    <span className="hidden sm:inline">Referral Management</span>
+                                    <span className="sm:hidden">Referrals</span>
                                 </h1>
                                 {/* Company Pill for Referrers */}
-                                {isReferrer && referrerCompany && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-md">
-                                        <BuildingOfficeIcon className="h-4 w-4" />
-                                        <span className="text-sm font-semibold">{referrerCompany.name}</span>
+                                {isReferrer && userInfo?.company_name && (
+                                    <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-lg text-xs md:text-sm">
+                                        <BuildingOfficeIcon className="h-3 w-3 md:h-4 md:w-4" />
+                                        <span className="font-semibold">
+                                            {userInfo.company_name}
+                                        </span>
                                     </div>
                                 )}
                             </div>
-                            <p className="text-left text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="text-left text-[10px] md:text-xs text-gray-500 dark:text-gray-400 mt-0.5 hidden sm:block">
                                 {isReferrer ? 'View and manage referral requests for your company' : 'Process member referral requests and manage companies'}
                             </p>
                         </div>
 
                         {/* Right: Action Buttons */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0 overflow-x-auto">
                             {/* Column Selector */}
                             <div className="relative">
                                 <button
                                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
                                 >
-                                    <AdjustmentsHorizontalIcon className="h-3.5 w-3.5" />
-                                    Columns
+                                    <AdjustmentsHorizontalIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                    <span className="hidden sm:inline">Columns</span>
                                 </button>
                                 {showColumnSelector && (
                                     <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-50">
@@ -557,20 +533,21 @@ const ReferralsManagement = () => {
                             {/* Export CSV */}
                             <button
                                 onClick={exportToCSV}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                className="flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
                             >
-                                <ArrowDownTrayIcon className="h-3.5 w-3.5" />
-                                Export
+                                <ArrowDownTrayIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                <span className="hidden sm:inline">Export</span>
                             </button>
 
                             {/* Add Company Button - Only for non-referrers */}
                             {!isReferrer && (
                                 <button
                                     onClick={() => setShowAddCompany(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30"
+                                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[10px] md:text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 whitespace-nowrap"
                                 >
-                                    <PlusIcon className="h-3.5 w-3.5" />
-                                    Add Company
+                                    <PlusIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                    <span className="hidden sm:inline">Add Company</span>
+                                    <span className="sm:hidden">Add</span>
                                 </button>
                             )}
                         </div>
@@ -580,12 +557,12 @@ const ReferralsManagement = () => {
 
             {/* Welcome Message for Referrers */}
             {isReferrer && showWelcomeMessage && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-4 rounded-lg shadow-2xl border-2 border-blue-400 max-w-md pointer-events-auto">
-                        <div className="flex items-start gap-3">
+                <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none px-4">
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-lg shadow-2xl border-2 border-blue-400 max-w-md w-full pointer-events-auto">
+                        <div className="flex items-start gap-2 md:gap-3">
                             <div className="flex-1">
-                                <h3 className="font-bold text-lg mb-1">Thank You! 🎉</h3>
-                                <p className="text-sm text-blue-50">
+                                <h3 className="font-bold text-base md:text-lg mb-1">Thank You! 🎉</h3>
+                                <p className="text-xs md:text-sm text-blue-50">
                                     Thank you for referring members of our community. We greatly appreciate you!
                                 </p>
                             </div>
@@ -593,14 +570,14 @@ const ReferralsManagement = () => {
                                 onClick={() => setShowWelcomeMessage(false)}
                                 className="text-white/80 hover:text-white transition-colors flex-shrink-0"
                             >
-                                <XMarkIcon className="h-5 w-5" />
+                                <XMarkIcon className="h-4 w-4 md:h-5 md:w-5" />
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-3">
 
                 {/* Tabs - Only for Lead+ users */}
                 {(isLead || isAdmin) && (
@@ -632,120 +609,129 @@ const ReferralsManagement = () => {
 
                 {/* Stats + Filters for Member Referrals Tab */}
                 {activeTab === 'referrals' && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2.5 mb-3 transition-colors">
-                        <div className="flex items-end gap-4">
-                            {/* Stats Section - Left Side (Compact) */}
-                            <div className="flex items-center gap-2.5 text-xs flex-shrink-0 pb-1 min-w-fit">
+                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 md:p-2.5 mb-3 transition-colors">
+                        {/* Stats Section - Mobile: Full Width, Desktop: Side by Side */}
+                        <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
+                            {/* Stats - Horizontal scroll on mobile */}
+                            <div className="flex items-center gap-2 md:gap-2.5 text-[10px] md:text-xs flex-shrink-0 pb-1 overflow-x-auto">
                                 {!isReferrer && (
                                     <>
-                                        <div className="flex items-center gap-1.5">
-                                            <ChartBarIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                        <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
+                                            <ChartBarIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-gray-400 dark:text-gray-500" />
                                             <span className="text-gray-500 dark:text-gray-400">Total:</span>
                                             <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
                                         </div>
                                         <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
                                     </>
                                 )}
-                                <div className="flex items-center gap-1.5">
-                                    <ClockIcon className="h-3.5 w-3.5 text-yellow-500" />
+                                <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
+                                    <ClockIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-yellow-500" />
                                     <span className="text-gray-500 dark:text-gray-400">Pending:</span>
                                     <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
                                 </div>
                                 <div className="h-3 w-px bg-gray-300 dark:bg-gray-600"></div>
-                                <div className="flex items-center gap-1.5">
-                                    <CheckCircleIcon className="h-3.5 w-3.5 text-blue-500" />
+                                <div className="flex items-center gap-1 md:gap-1.5 whitespace-nowrap">
+                                    <CheckCircleIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-blue-500" />
                                     <span className="text-gray-500 dark:text-gray-400">Completed:</span>
                                     <span className="font-bold text-blue-600 dark:text-blue-400">{stats.completed}</span>
                                 </div>
                             </div>
 
-                            {/* Vertical Divider */}
-                            <div className="h-8 w-px bg-gray-300 dark:bg-gray-600 flex-shrink-0"></div>
+                            {/* Vertical Divider - Hidden on mobile and for referrers */}
+                            {!isReferrer && <div className="hidden md:block h-8 w-px bg-gray-300 dark:bg-gray-600 flex-shrink-0"></div>}
 
-                            {/* Filters Section - Right Side (Narrower) */}
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                {/* Status Filter */}
-                                <div className={isReferrer ? "md:col-span-2" : "md:col-span-2"}>
-                                    <select
-                                        value={statusFilter}
-                                        onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    >
-                                        <option value="">All Statuses</option>
-                                        <option value="Pending">Pending</option>
-                                        <option value="Approved">Approved</option>
-                                        {!isReferrer && <option value="Declined">Declined</option>}
-                                        <option value="Completed">Completed</option>
-                                        {!isReferrer && <option value="Cancelled">Cancelled</option>}
-                                    </select>
-                                </div>
+                            {/* Filters Section - Only for non-referrers */}
+                            {!isReferrer && (
+                                <div className="flex-1 grid grid-cols-2 md:grid-cols-12 gap-2 items-end">
+                                    {/* Status Filter */}
+                                    <div className="col-span-1 md:col-span-2">
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="w-full px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        >
+                                            <option value="">All Status</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Declined">Declined</option>
+                                            <option value="Completed">Completed</option>
+                                            <option value="Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
 
-                                {/* Member Filter */}
-                                <div className={isReferrer ? "md:col-span-5" : "md:col-span-4"}>
-                                    <input
-                                        type="text"
-                                        placeholder="Filter by member..."
-                                        value={memberFilter}
-                                        onChange={(e) => setMemberFilter(e.target.value)}
-                                        className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    />
-                                </div>
+                                    {/* Member Filter */}
+                                    <div className="col-span-1 md:col-span-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Member..."
+                                            value={memberFilter}
+                                            onChange={(e) => setMemberFilter(e.target.value)}
+                                            className="w-full px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                    </div>
 
-                                {/* Company Filter - Hidden for referrers */}
-                                {!isReferrer && (
-                                    <div className="md:col-span-3">
+                                    {/* Company Filter */}
+                                    <div className="col-span-1 md:col-span-3">
                                         <input
                                             type="text"
                                             placeholder="Company..."
                                             value={companyFilter}
                                             onChange={(e) => setCompanyFilter(e.target.value)}
-                                            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                            className="w-full px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
                                         />
                                     </div>
-                                )}
 
-                                {/* Sort Field Dropdown */}
-                                <div className="md:col-span-2">
-                                    <select
-                                        value={sortField}
-                                        onChange={(e) => setSortField(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
-                                    >
-                                        <option value="date">📅 Date</option>
-                                        <option value="company">🏢 Company</option>
-                                        <option value="member">👤 Member</option>
-                                        <option value="status">📊 Status</option>
-                                    </select>
-                                </div>
 
-                                {/* Sort Order Dropdown */}
-                                <div className="md:col-span-2">
-                                    <select
-                                        value={sortOrder}
-                                        onChange={(e) => setSortOrder(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm hover:border-gray-400 dark:hover:border-gray-500"
-                                    >
-                                        <option value="desc">↓ Desc</option>
-                                        <option value="asc">↑ Asc</option>
-                                    </select>
-                                </div>
 
-                                {/* Date Range Toggle - More Compact */}
-                                <div className={isReferrer ? "md:col-span-1" : "md:col-span-1"}>
-                                    <button
-                                        onClick={() => setShowDateFilter(!showDateFilter)}
-                                        className={`w-full px-3 py-2 text-sm border ${showDateFilter || dateRange.start || dateRange.end ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'} rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 shadow-sm`}
-                                        title="Date Range Filter"
-                                    >
-                                        <span>📅</span>
-                                        {(dateRange.start || dateRange.end) && <span className="text-xs">●</span>}
-                                    </button>
+
+                                    {/* Date Range Toggle */}
+                                    <div className="col-span-2 md:col-span-1">
+                                        <button
+                                            onClick={() => setShowDateFilter(!showDateFilter)}
+                                            className={`w-full px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-sm border ${showDateFilter || dateRange.start || dateRange.end ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'} rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1`}
+                                            title="Date Range Filter"
+                                        >
+                                            <span>📅</span>
+                                            <span className="hidden sm:inline text-xs">Date</span>
+                                            {(dateRange.start || dateRange.end) && <span className="text-xs">●</span>}
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Simple Filters for Referrers - Just Status and Member */}
+                            {isReferrer && (
+                                <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                                    {/* Status Filter */}
+                                    <div className="flex-1">
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        >
+                                            <option value="">All Status</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Approved">Approved</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Member Filter */}
+                                    <div className="flex-1">
+                                        <input
+                                            type="text"
+                                            placeholder="Search by member name..."
+                                            value={memberFilter}
+                                            onChange={(e) => setMemberFilter(e.target.value)}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Date Range - Collapsible Section */}
-                        {showDateFilter && (
+                        {/* Date Range - Collapsible Section - Only for non-referrers */}
+                        {!isReferrer && showDateFilter && (
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                 <div className="md:col-span-6">
                                     <label className="block text-left text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
@@ -771,9 +757,9 @@ const ReferralsManagement = () => {
                             </div>
                         )}
 
-                        {/* Active Filters & Clear */}
-                        {(searchQuery || statusFilter || memberFilter || (!isReferrer && companyFilter) || dateRange.start || dateRange.end) && (
-                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        {/* Active Filters & Clear - Simplified for referrers */}
+                        {(searchQuery || statusFilter || memberFilter || (!isReferrer && (companyFilter || dateRange.start || dateRange.end))) && (
+                            <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between flex-wrap gap-2">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="text-left text-xs text-gray-500 dark:text-gray-400">Active:</span>
                                     {statusFilter && (
@@ -791,7 +777,7 @@ const ReferralsManagement = () => {
                                             Company: {companyFilter}
                                         </span>
                                     )}
-                                    {(dateRange.start || dateRange.end) && (
+                                    {!isReferrer && (dateRange.start || dateRange.end) && (
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                                             Date: {dateRange.start || '...'} to {dateRange.end || '...'}
                                         </span>
@@ -809,253 +795,383 @@ const ReferralsManagement = () => {
                     </div>
                 )}
 
-                {/* Referrals Table */}
+                {/* Referrals Table - Desktop / Cards - Mobile */}
                 {activeTab === 'referrals' && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
-                                        {visibleColumns.company && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Company
-                                            </th>
-                                        )}
-                                        {visibleColumns.jobTitle && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Position
-                                            </th>
-                                        )}
-                                        {visibleColumns.member && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Member
-                                            </th>
-                                        )}
-                                        {visibleColumns.email && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Email
-                                            </th>
-                                        )}
-                                        {visibleColumns.phone_number && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Phone Number
-                                            </th>
-                                        )}
-                                        {visibleColumns.status && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                        )}
-                                        {visibleColumns.resume && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Resume
-                                            </th>
-                                        )}
-                                        {visibleColumns.essay && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Essay
-                                            </th>
-                                        )}
-                                        {visibleColumns.actions && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        )}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
-                                    {sortedReferrals.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="9" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-                                                No referral requests found
-                                            </td>
+                    <>
+                        {/* Desktop Table View - Hidden on mobile */}
+                        <div className="hidden md:block bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                            {visibleColumns.company && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Company
+                                                </th>
+                                            )}
+                                            {visibleColumns.jobTitle && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Position
+                                                </th>
+                                            )}
+                                            {visibleColumns.member && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Member
+                                                </th>
+                                            )}
+                                            {visibleColumns.email && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Email
+                                                </th>
+                                            )}
+                                            {visibleColumns.phone_number && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Phone Number
+                                                </th>
+                                            )}
+                                            {visibleColumns.status && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Status
+                                                </th>
+                                            )}
+                                            {visibleColumns.resume && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Resume
+                                                </th>
+                                            )}
+                                            {visibleColumns.essay && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Essay
+                                                </th>
+                                            )}
+                                            {visibleColumns.actions && (
+                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                    Actions
+                                                </th>
+                                            )}
                                         </tr>
-                                    ) : (
-                                        sortedReferrals.map((ref) => (
-                                            <tr
-                                                key={ref.id}
-                                                className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
-                                            >
-                                                {visibleColumns.company && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
-                                                                <img
-                                                                    src={getCompanyLogoUrl(ref.company?.name)}
-                                                                    alt={ref.company?.name}
-                                                                    className="h-full w-full object-contain"
-                                                                    onError={handleCompanyLogoError}
-                                                                />
-                                                            </div>
-                                                            <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
-                                                                {ref.company?.name}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.jobTitle && (
-                                                    <td className="px-4 py-3">
-                                                        <div>
-                                                            <div className="text-left font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
-                                                            <div className="text-left text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.member && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="space-y-1">
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                                        {sortedReferrals.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="9" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                    No referral requests found
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            sortedReferrals.map((ref) => (
+                                                <tr
+                                                    key={ref.id}
+                                                    className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
+                                                >
+                                                    {visibleColumns.company && (
+                                                        <td className="px-4 py-3">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
-                                                                <button
-                                                                    onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
-                                                                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                    title="Copy name"
-                                                                >
-                                                                    {copiedField === `name-${ref.id}` ? (
-                                                                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                    ) : (
-                                                                        <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                                    )}
-                                                                </button>
+                                                                <div className="h-8 w-8 rounded border border-gray-200 dark:border-gray-600 bg-white p-0.5 flex-shrink-0">
+                                                                    <img
+                                                                        src={getCompanyLogoUrl(ref.company?.name)}
+                                                                        alt={ref.company?.name}
+                                                                        className="h-full w-full object-contain"
+                                                                        onError={handleCompanyLogoError}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-left font-medium text-gray-900 dark:text-white text-sm">
+                                                                    {ref.company?.name}
+                                                                </span>
                                                             </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.jobTitle && (
+                                                        <td className="px-4 py-3">
+                                                            <div>
+                                                                <div className="text-left font-semibold text-gray-900 dark:text-white text-sm">{ref.job_title}</div>
+                                                                <div className="text-left text-xs text-gray-500 dark:text-gray-400">{ref.role}</div>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.member && (
+                                                        <td className="px-4 py-3">
+                                                            <div className="space-y-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy name"
+                                                                    >
+                                                                        {copiedField === `name-${ref.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy email"
+                                                                    >
+                                                                        {copiedField === `email-${ref.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.email && (
+                                                        <td className="px-4 py-3">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                                 <button
-                                                                    onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                    onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
                                                                     className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                     title="Copy email"
                                                                 >
-                                                                    {copiedField === `email-${ref.id}` ? (
+                                                                    {copiedField === `email-standalone-${ref.id}` ? (
                                                                         <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                                                                     ) : (
                                                                         <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                                                                     )}
                                                                 </button>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.email && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
-                                                            <button
-                                                                onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
-                                                                className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                title="Copy email"
-                                                            >
-                                                                {copiedField === `email-standalone-${ref.id}` ? (
-                                                                    <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                ) : (
-                                                                    <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                                )}
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.phone_number && (
-                                                    <td className="px-4 py-3">
-                                                        {ref.phone_number ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
-                                                                <button
-                                                                    onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
-                                                                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                                    title="Copy phone number"
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.phone_number && (
+                                                        <td className="px-4 py-3">
+                                                            {ref.phone_number ? (
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
+                                                                    <button
+                                                                        onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
+                                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+                                                                        title="Copy phone number"
+                                                                    >
+                                                                        {copiedField === `phone-${ref.id}` ? (
+                                                                            <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                        ) : (
+                                                                            <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-left text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
+                                                            )}
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.status && (
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex justify-start">
+                                                                <select
+                                                                    value={ref.status}
+                                                                    onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                                    className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
+                                                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
+                                                                        : ref.status === 'Pending'
+                                                                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
+                                                                            : ref.status === 'Declined'
+                                                                                ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
+                                                                                : ref.status === 'Cancelled'
+                                                                                    ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
+                                                                                    : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
+                                                                        }`}
                                                                 >
-                                                                    {copiedField === `phone-${ref.id}` ? (
-                                                                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                    ) : (
-                                                                        <ClipboardDocumentIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
-                                                                    )}
+                                                                    <option value="Pending">Pending</option>
+                                                                    <option value="Completed">Completed</option>
+                                                                    {!isReferrer && <option value="Declined">Declined</option>}
+                                                                    {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                                                </select>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.resume && (
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex justify-start">
+                                                                {ref.has_resume ? (
+                                                                    <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
+                                                                        Yes
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                        No
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.essay && (
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex justify-start">
+                                                                {ref.has_essay ? (
+                                                                    <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
+                                                                        Yes
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
+                                                                        No
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {visibleColumns.actions && (
+                                                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                                                            <div className="flex items-center justify-start gap-2">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedReferral(ref);
+                                                                        setIsManagementModalOpen(true);
+                                                                    }}
+                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                                >
+                                                                    <EyeIcon className="h-3.5 w-3.5" />
+                                                                    View
                                                                 </button>
                                                             </div>
-                                                        ) : (
-                                                            <span className="text-left text-xs text-gray-400 dark:text-gray-500 italic">Not provided</span>
-                                                        )}
-                                                    </td>
-                                                )}
-                                                {visibleColumns.status && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex justify-start">
-                                                            <select
-                                                                value={ref.status}
-                                                                onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
-                                                                className={`text-xs font-bold rounded-lg border-2 px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-all ${ref.status === 'Completed'
-                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 focus:ring-emerald-500'
-                                                                    : ref.status === 'Pending'
-                                                                        ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500'
-                                                                        : ref.status === 'Declined'
-                                                                            ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500'
-                                                                            : ref.status === 'Cancelled'
-                                                                                ? 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 focus:ring-gray-500'
-                                                                                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700 focus:ring-blue-500'
-                                                                    }`}
-                                                            >
-                                                                <option value="Pending">Pending</option>
-                                                                <option value="Completed">Completed</option>
-                                                                {!isReferrer && <option value="Declined">Declined</option>}
-                                                                {!isReferrer && <option value="Cancelled">Cancelled</option>}
-                                                            </select>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.resume && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex justify-start">
-                                                            {ref.has_resume ? (
-                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
-                                                                    Yes
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                                    No
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.essay && (
-                                                    <td className="px-4 py-3">
-                                                        <div className="flex justify-start">
-                                                            {ref.has_essay ? (
-                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 rounded">
-                                                                    Yes
-                                                                </span>
-                                                            ) : (
-                                                                <span className="inline-block px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 rounded">
-                                                                    No
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.actions && (
-                                                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center justify-start gap-2">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedReferral(ref);
-                                                                    setIsManagementModalOpen(true);
-                                                                }}
-                                                                className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
-                                                            >
-                                                                <EyeIcon className="h-3.5 w-3.5" />
-                                                                View
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                                        </td>
+                                                    )}
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                )}
 
-                {/* Companies Table - Only for Lead+ */}
+                        {/* Mobile Card View - Hidden on desktop */}
+                        <div className="md:hidden space-y-2.5">
+                            {sortedReferrals.length === 0 ? (
+                                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">No referral requests found</p>
+                                </div>
+                            ) : (
+                                sortedReferrals.map((ref) => (
+                                    <div
+                                        key={ref.id}
+                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                                    >
+                                        {/* Compact Header */}
+                                        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                            {visibleColumns.company && (
+                                                <div className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 flex-shrink-0">
+                                                    <img
+                                                        src={getCompanyLogoUrl(ref.company?.name)}
+                                                        alt={ref.company?.name}
+                                                        className="h-full w-full object-contain"
+                                                        onError={handleCompanyLogoError}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {ref.job_title}
+                                                </h3>
+                                                {visibleColumns.company && (
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                                        {ref.company?.name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {/* Compact Status Badge */}
+                                            {visibleColumns.status && (
+                                                <select
+                                                    value={ref.status}
+                                                    onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                    className={`text-[9px] font-bold rounded-md px-2 py-1 focus:outline-none border ${ref.status === 'Completed'
+                                                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700'
+                                                        : ref.status === 'Pending'
+                                                            ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700'
+                                                            : ref.status === 'Declined'
+                                                                ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700'
+                                                                : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700'
+                                                        }`}
+                                                >
+                                                    <option value="Pending">Pending</option>
+                                                    <option value="Completed">Completed</option>
+                                                    {!isReferrer && <option value="Declined">Declined</option>}
+                                                    {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                                </select>
+                                            )}
+                                        </div>
+
+                                        {/* Compact Body */}
+                                        <div className="px-3 py-2.5">
+                                            {/* Member Info - Condensed */}
+                                            {visibleColumns.member && (
+                                                <div className="space-y-1 mb-2.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Member</span>
+                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white truncate ml-2">
+                                                            {ref.user_name}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Email</span>
+                                                        <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate ml-2">
+                                                            {ref.user_email}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Phone & Materials - Compact */}
+                                            {(visibleColumns.phone_number || visibleColumns.resume || visibleColumns.essay) && (
+                                                <div className="flex items-center gap-3 py-2 mb-2.5 border-y border-gray-100 dark:border-gray-700">
+                                                    {visibleColumns.phone_number && ref.phone_number && (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-[10px] text-gray-500 dark:text-gray-400">📱</span>
+                                                            <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                                                                {ref.phone_number}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {visibleColumns.resume && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className={`text-xs ${ref.has_resume ? 'text-green-600 dark:text-green-400' : 'text-gray-300 dark:text-gray-600'}`}>
+                                                                📄
+                                                            </span>
+                                                            <span className="text-[9px] font-medium text-gray-500 dark:text-gray-400">
+                                                                {ref.has_resume ? 'Resume' : 'No Resume'}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    {visibleColumns.essay && (
+                                                        <div className="flex items-center gap-1">
+                                                            <span className={`text-xs ${ref.has_essay ? 'text-purple-600 dark:text-purple-400' : 'text-gray-300 dark:text-gray-600'}`}>
+                                                                ✍️
+                                                            </span>
+                                                            <span className="text-[9px] font-medium text-gray-500 dark:text-gray-400">
+                                                                {ref.has_essay ? 'Essay' : 'No Essay'}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Glassy View Button */}
+                                            {visibleColumns.actions && (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedReferral(ref);
+                                                        setIsManagementModalOpen(true);
+                                                    }}
+                                                    className="w-full px-3 py-2 bg-gradient-to-r from-blue-500/90 to-blue-600/90 backdrop-blur-sm text-white text-xs font-semibold rounded-md shadow-sm hover:shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-1.5 border border-blue-400/20"
+                                                >
+                                                    <EyeIcon className="h-3.5 w-3.5" />
+                                                    View Details
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </>
+                )}                {/* Companies Table - Only for Lead+ */}
                 {activeTab === 'companies' && (isLead || isAdmin) && (
                     <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                         <div className="overflow-x-auto">

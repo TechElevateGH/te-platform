@@ -49,12 +49,16 @@ const CreateReferrer = ({ show, onClose }) => {
         setLoading(true);
 
         try {
+            // Find the selected company to get its name
+            const selectedCompany = companies.find(c => c.id === formData.company_id);
+            
             const response = await axiosInstance.post(
                 '/users/privileged/referrers',
                 {
                     username: formData.username,
                     token: formData.token,
                     company_id: formData.company_id,
+                    company_name: selectedCompany?.name || '', // Include company name
                 },
                 {
                     headers: {

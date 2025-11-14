@@ -260,7 +260,7 @@ const ApplicationManagement = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
             {/* Header with Stats and Actions */}
             <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 py-3">
