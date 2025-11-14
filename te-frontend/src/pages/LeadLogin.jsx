@@ -18,18 +18,27 @@ const LeadLogin = () => {
         setLoading(true);
 
         try {
-            const response = await axiosInstance.post('/auth/lead-login', {
+            const response = await axiosInstance.post('/auth/management-login', {
                 username,
                 token
             });
 
+            console.log('[LeadLogin] Auth response:', response.data);
+
             if (response.data.access_token) {
                 // Store auth data
+                console.log('[LeadLogin] Calling login with:', {
+                    userId: response.data.user.id,
+                    role: response.data.user.role
+                });
+
                 login(
                     response.data.access_token,
                     response.data.user.id,
                     response.data.user.role
                 );
+
+                console.log('[LeadLogin] Login complete, navigating to workspace');
 
                 // Check if there's a redirect URL from session expiry
                 const redirectPath = sessionStorage.getItem('redirectAfterLogin');

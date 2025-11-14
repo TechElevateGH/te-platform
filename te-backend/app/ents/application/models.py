@@ -1,5 +1,5 @@
-from typing import Optional, Any
-from pydantic import BaseModel, Field, GetJsonSchemaHandler
+from typing import Any
+from pydantic import BaseModel, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
 from bson import ObjectId
@@ -57,35 +57,3 @@ class Application(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
-
-class Resume(BaseModel):
-    """Embedded Resume document - stored in MemberUser.resumes array"""
-
-    id: str  # UUID for identifying this resume
-    file_id: str  # Google Drive file ID
-    date: str
-    link: str  # Google Drive link
-    name: str
-    role: str = ""  # Target role for this resume
-    notes: str = ""  # Additional notes about this resume
-    archived: bool = False
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class ResumeReview(BaseModel):
-    """MongoDB Resume Review document model"""
-
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    requester_id: PyObjectId
-    reviewer_id: Optional[PyObjectId] = None
-    date: str
-    link: str
-    name: str
-
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}

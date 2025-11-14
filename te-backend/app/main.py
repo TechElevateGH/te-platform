@@ -53,7 +53,10 @@ def enable_cors(app):
             "http://localhost:3000",
         ]
         allow_origins = list(
-            {*(str(o) for o in settings.BACKEND_CORS_ORIGINS), *extra_dev_origins}
+            {
+                *(str(o).rstrip("/") for o in settings.BACKEND_CORS_ORIGINS),
+                *(origin.rstrip("/") for origin in extra_dev_origins),
+            }
         )
         app.add_middleware(
             CORSMiddleware,

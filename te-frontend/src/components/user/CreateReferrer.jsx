@@ -27,7 +27,7 @@ const CreateReferrer = ({ show, onClose }) => {
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const response = await axiosInstance.get('/companies/referrals', {
+                const response = await axiosInstance.get('/referrals/companies', {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },

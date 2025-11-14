@@ -40,16 +40,10 @@ services:
         sync: false
       - key: MONGODB_DB_NAME
         sync: false
-      - key: FIRST_SUPERUSER_EMAIL
+      - key: ADMIN_BOOTSTRAP_USERNAME
         sync: false
-      - key: FIRST_SUPERUSER_FIRST_NAME
+      - key: ADMIN_BOOTSTRAP_TOKEN
         value: Admin
-      - key: FIRST_SUPERUSER_LAST_NAME
-        value: User
-      - key: FIRST_SUPERUSER_PASSWORD
-        generateValue: true
-      - key: USERS_OPEN_REGISTRATION
-        value: false
       - key: GDRIVE_RESUMES
         sync: false
       - key: GDRIVE_OTHER_FILES

@@ -51,7 +51,7 @@ export const NotificationProvider = ({ children }) => {
         try {
             // For members: check their resume reviews for updates
             if (isMember) {
-                const response = await axiosInstance.get('/resume-reviews/my-requests', {
+                const response = await axiosInstance.get('/resumes/reviews/my-requests', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
@@ -146,7 +146,7 @@ export const NotificationProvider = ({ children }) => {
 
             // For volunteers+: check for new resume review requests and new referral requests
             if (isVolunteerOrAbove) {
-                const response = await axiosInstance.get('/resume-reviews/all', {
+                const response = await axiosInstance.get('/resumes/reviews/all', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
@@ -180,7 +180,7 @@ export const NotificationProvider = ({ children }) => {
                 });
 
                 // Check for new referral requests
-                const allReferralsResponse = await axiosInstance.get('/referralcompanies/all', {
+                const allReferralsResponse = await axiosInstance.get('/referrals/all', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 

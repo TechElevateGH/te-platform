@@ -16,45 +16,41 @@ const Footer = () => {
                 Footer
             </h2>
             <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
-                <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+                <div className="flex flex-col items-center text-center space-y-8">
                     {/* Brand section */}
-                    <div className="space-y-8">
-                        <div className="flex items-center space-x-2">
-                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
-                                <span className="text-white font-bold text-2xl">TE</span>
-                            </div>
-                            <span className="text-2xl font-bold text-white">TechElevate</span>
+                    <div className="flex flex-col items-center space-y-3">
+                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
+                            <span className="text-white font-bold text-2xl">TE</span>
                         </div>
-                        <p className="text-sm leading-6 text-gray-300">
+                        <span className="text-2xl font-bold text-white">TechElevate</span>
+                        <p className="max-w-2xl text-sm leading-6 text-gray-300">
                             Empowering marginalized talent worldwide to excel in tech careers through mentorship, resources, and opportunities.
                         </p>
-                        <div className="flex space-x-4">
-                            {socialLinks.map((item) => (
-                                <a
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`text-gray-400 ${item.color} transition-colors duration-300`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <span className="sr-only">{item.name}</span>
-                                    <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
-                                </a>
-                            ))}
-                        </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                        {socialLinks.map((item) => (
+                            <a
+                                key={item.name}
+                                href={item.href}
+                                className={`text-gray-400 ${item.color} transition-colors duration-300`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span className="sr-only">{item.name}</span>
+                                <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
+                            </a>
+                        ))}
                     </div>
                 </div>
 
                 {/* Bottom section */}
-                <div className="mt-8 border-t border-white/10 pt-8 md:flex md:items-center md:justify-between">
+                <div className="mt-12 border-t border-white/10 pt-8 flex flex-col items-center gap-4 text-center">
                     <p className="text-xs leading-5 text-gray-400">
-                        &copy; {new Date().getFullYear()} TechElevate. All rights reserved. <br /> Built with ❤️
+                        &copy; {new Date().getFullYear()} TechElevate. All rights reserved. <span className="block sm:inline">Built with ❤️</span>
                     </p>
-                    <div className="mt-4 flex space-x-6 md:mt-0">
-                        <span className="text-xs text-gray-400">
-                            Made by TechElevate
-                        </span>
-                    </div>
+                    <span className="text-xs text-gray-400">
+                        Made by TechElevate
+                    </span>
                 </div>
             </div>
         </footer>

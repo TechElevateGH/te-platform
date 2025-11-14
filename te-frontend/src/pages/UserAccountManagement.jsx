@@ -9,10 +9,12 @@ import {
     UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import axiosInstance from '../axiosConfig';
+import { useAuth } from '../context/AuthContext';
 import EditPrivilegedAccount from '../components/user/EditPrivilegedAccount';
 import CreateLeadAdmin from '../components/user/CreateLeadAdmin';
 
 const UserAccountManagement = () => {
+    const { userRole } = useAuth();
     const [activeTab, setActiveTab] = useState('privileged'); // 'privileged' or 'members'
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
     const [memberUsers, setMemberUsers] = useState([]);
@@ -20,9 +22,14 @@ const UserAccountManagement = () => {
     const [loading, setLoading] = useState(true);
     const [selectedAccount, setSelectedAccount] = useState(null);
     const [showEditPrivileged, setShowEditPrivileged] = useState(false);
-    const [showCreateLeadAdmin, setShowCreateLeadAdmin] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const [showMemberModal, setShowMemberModal] = useState(false);
+
+    // Check permissions - convert userRole to number for comparison
+    const roleNumber = parseInt(userRole);
+    const isAdmin = roleNumber === 5;
+    const isLead = roleNumber === 4;
 
     // Role mapping
     const getRoleName = (role) => {
@@ -105,6 +112,12 @@ const UserAccountManagement = () => {
 
     // Edit privileged account
     const handleEditPrivileged = (user) => {
+        // Leads cannot edit other Lead accounts (role 4) or Admin accounts (role 5)
+        if (isLead && user.role >= 4) {
+            alert('You do not have permission to edit this account');
+            return;
+        }
+
         setSelectedAccount({
             id: user._id || user.id,
             username: user.username,
@@ -125,6 +138,13 @@ const UserAccountManagement = () => {
         user.username?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Filter privileged users based on role
+    // Leads can only see Volunteers (role 3) and below
+    // Admins can see all
+    const visiblePrivilegedUsers = isAdmin
+        ? filteredPrivilegedUsers
+        : filteredPrivilegedUsers.filter(user => user.role <= 3);
+
     const filteredMemberUsers = memberUsers.filter(
         (user) =>
             user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -132,33 +152,39 @@ const UserAccountManagement = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                {/* Create Lead/Admin Modal */}
+                {/* Create Management Account Modal */}
                 <CreateLeadAdmin
-                    show={showCreateLeadAdmin}
-                    onClose={() => setShowCreateLeadAdmin(false)}
+                    show={showCreateModal}
+                    onClose={() => {
+                        setShowCreateModal(false);
+                        fetchPrivilegedUsers();
+                    }}
+                    userRole={roleNumber}
                 />
 
                 {/* Header */}
                 <div className="mb-4 sm:mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
                                 User Account Management
                             </h1>
-                            <p className="text-xs sm:text-sm text-gray-600">
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                 Manage all user accounts - privileged and member accounts
                             </p>
                         </div>
-                        {/* Create Privileged Account Button */}
-                        <button
-                            onClick={() => setShowCreateLeadAdmin(true)}
-                            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm w-full sm:w-auto"
-                        >
-                            <ShieldCheckIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                            <span>Create Privileged Account</span>
-                        </button>
+                        {/* Create Management Account Button */}
+                        {(isAdmin || isLead) && (
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm w-full sm:w-auto"
+                            >
+                                <ShieldCheckIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <span>Create Management Account</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Tabs */}
@@ -167,7 +193,7 @@ const UserAccountManagement = () => {
                             onClick={() => setActiveTab('privileged')}
                             className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${activeTab === 'privileged'
                                 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                                 }`}
                         >
                             <ShieldCheckIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -177,7 +203,7 @@ const UserAccountManagement = () => {
                             onClick={() => setActiveTab('members')}
                             className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${activeTab === 'members'
                                 ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                                 }`}
                         >
                             <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -187,7 +213,7 @@ const UserAccountManagement = () => {
 
                     {/* Search */}
                     <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                         <input
                             type="text"
                             placeholder={
@@ -197,7 +223,7 @@ const UserAccountManagement = () => {
                             }
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                         />
                     </div>
                 </div>
@@ -206,103 +232,113 @@ const UserAccountManagement = () => {
                 <div className="mt-4 sm:mt-6">
                     {loading ? (
                         <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent"></div>
+                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 dark:border-purple-400 border-t-transparent"></div>
                         </div>
                     ) : activeTab === 'privileged' ? (
                         /* Privileged Users Table */
-                        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[640px]">
-                                    <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-gray-200">
+                                    <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Username
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Role
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Status
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Actions
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {filteredPrivilegedUsers.length === 0 ? (
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                        {visiblePrivilegedUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="4" className="px-3 sm:px-6 py-8 sm:py-12 text-center text-sm sm:text-base text-gray-500">
+                                                <td colSpan="4" className="px-3 sm:px-6 py-8 sm:py-12 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
                                                     No privileged accounts found
                                                 </td>
                                             </tr>
                                         ) : (
-                                            filteredPrivilegedUsers.map((user) => (
-                                                <tr
-                                                    key={user._id || user.id}
-                                                    onClick={() => handleEditPrivileged(user)}
-                                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                                                >
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                        <div className="flex items-center gap-2 sm:gap-3">
-                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                                <ShieldCheckIcon className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600" />
+                                            visiblePrivilegedUsers.map((user) => {
+                                                const canEdit = isAdmin || (isLead && user.role < 4);
+                                                return (
+                                                    <tr
+                                                        key={user._id || user.id}
+                                                        onClick={() => canEdit && handleEditPrivileged(user)}
+                                                        className={`${canEdit ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer' : 'opacity-60'} transition-colors`}
+                                                    >
+                                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                            <div className="flex items-center gap-2 sm:gap-3">
+                                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0">
+                                                                    <ShieldCheckIcon className="h-4 w-4 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400" />
+                                                                </div>
+                                                                <span className="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
+                                                                    {user.username}
+                                                                </span>
                                                             </div>
-                                                            <span className="font-medium text-gray-900 text-xs sm:text-sm">
-                                                                {user.username}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                        <span
-                                                            className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border whitespace-nowrap ${getRoleBadgeColor(
-                                                                user.role
-                                                            )}`}
-                                                        >
-                                                            {getRoleName(user.role)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                        {user.is_active ? (
-                                                            <span className="flex items-center gap-1 sm:gap-2 text-green-600">
-                                                                <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                                                <span className="text-xs sm:text-sm font-medium">Active</span>
-                                                            </span>
-                                                        ) : (
-                                                            <span className="flex items-center gap-1 sm:gap-2 text-red-600">
-                                                                <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                                                <span className="text-xs sm:text-sm font-medium">Inactive</span>
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center justify-end gap-1 sm:gap-2">
-                                                            <button
-                                                                onClick={() => handleEditPrivileged(user)}
-                                                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-medium hover:from-amber-700 hover:to-orange-700 transition-all text-xs sm:text-sm whitespace-nowrap"
+                                                        </td>
+                                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                            <span
+                                                                className={`px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border whitespace-nowrap ${getRoleBadgeColor(
+                                                                    user.role
+                                                                )}`}
                                                             >
-                                                                <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                                                                <span className="hidden sm:inline">Edit</span>
-                                                            </button>
-                                                            <button
-                                                                onClick={() =>
-                                                                    toggleUserStatus(
-                                                                        user._id || user.id,
-                                                                        user.is_active,
-                                                                        true
-                                                                    )
-                                                                }
-                                                                className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${user.is_active
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                                    }`}
-                                                            >
-                                                                {user.is_active ? 'Deactivate' : 'Activate'}
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
+                                                                {getRoleName(user.role)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                            {user.is_active ? (
+                                                                <span className="flex items-center gap-1 sm:gap-2 text-green-600 dark:text-green-400">
+                                                                    <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                                                    <span className="text-xs sm:text-sm font-medium">Active</span>
+                                                                </span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1 sm:gap-2 text-red-600 dark:text-red-400">
+                                                                    <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                                                    <span className="text-xs sm:text-sm font-medium">Inactive</span>
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-3 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
+                                                            <div className="flex items-center justify-end gap-1 sm:gap-2">
+                                                                <button
+                                                                    onClick={() => handleEditPrivileged(user)}
+                                                                    disabled={!canEdit}
+                                                                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${canEdit
+                                                                            ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700'
+                                                                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                                        }`}
+                                                                >
+                                                                    <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                                                                    <span className="hidden sm:inline">Edit</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        toggleUserStatus(
+                                                                            user._id || user.id,
+                                                                            user.is_active,
+                                                                            true
+                                                                        )
+                                                                    }
+                                                                    disabled={!canEdit}
+                                                                    className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${!canEdit
+                                                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                                            : user.is_active
+                                                                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                                                                                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                                                                        }`}
+                                                                >
+                                                                    {user.is_active ? 'Deactivate' : 'Activate'}
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
                                         )}
                                     </tbody>
                                 </table>
@@ -310,32 +346,32 @@ const UserAccountManagement = () => {
                         </div>
                     ) : (
                         /* Member Users Table */
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[640px]">
-                                    <thead className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-gray-200">
+                                    <thead className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Member
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Email
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 University
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Status
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold text-gray-900">
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Actions
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                         {filteredMemberUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="5" className="px-3 sm:px-6 py-12 text-center text-gray-500 text-xs sm:text-sm">
+                                                <td colSpan="5" className="px-3 sm:px-6 py-12 text-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                                                     No member accounts found
                                                 </td>
                                             </tr>
@@ -344,32 +380,32 @@ const UserAccountManagement = () => {
                                                 <tr
                                                     key={user._id || user.id}
                                                     onClick={() => handleViewMember(user)}
-                                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
                                                 >
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         <div className="flex items-center gap-2 sm:gap-3">
-                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                                <UserCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600" />
+                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                                                                <UserCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
                                                             </div>
                                                             <div>
-                                                                <div className="font-medium text-gray-900 text-xs sm:text-sm">
+                                                                <div className="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
                                                                     {user.full_name}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">{user.email}</td>
-                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600">
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">{user.email}</td>
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                                         {user.university || 'N/A'}
                                                     </td>
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         {user.is_active ? (
-                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-green-600">
+                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-green-600 dark:text-green-400">
                                                                 <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                                                                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Active</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-red-600">
+                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-red-600 dark:text-red-400">
                                                                 <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                                                                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Inactive</span>
                                                             </span>
@@ -386,8 +422,8 @@ const UserAccountManagement = () => {
                                                                     )
                                                                 }
                                                                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${user.is_active
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                                                                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
                                                                     }`}
                                                             >
                                                                 {user.is_active ? 'Deactivate' : 'Activate'}
@@ -526,8 +562,8 @@ const UserAccountManagement = () => {
                                             setShowMemberModal(false);
                                         }}
                                         className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${selectedMember.is_active
-                                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                            : 'bg-green-100 text-green-700 hover:bg-green-200'
                                             }`}
                                     >
                                         {selectedMember.is_active ? 'Deactivate Account' : 'Activate Account'}

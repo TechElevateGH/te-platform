@@ -8,8 +8,8 @@ This module provides three distinct authentication flows:
    - Requires: email + password
    - Returns: Access token
 
-2. **Lead/Admin Login** (POST /auth/lead-login)
-   - For Leads (role=4) and Admins (role=5)
+2. **Management Login** (POST /auth/management-login)
+   - For Volunteers (role=3), Leads (role=4), and Admins (role=5)
    - Requires: username + token
    - Returns: Access token + user info
 
@@ -103,21 +103,21 @@ def login_access_token(
     }
 
 
-@auth_router.post("/lead-login")
-def lead_login_access_token(
+@auth_router.post("/management-login")
+def management_login_access_token(
     data: user_schema.LeadLogin,
     db: Database = Depends(session.get_db),
 ) -> Any:
     """
-    Lead/Admin login with username and token.
+    Management login with username and token.
 
-    For Lead (role=4) and Admin (role=5) users only.
+    For Volunteer (role=3), Lead (role=4), and Admin (role=5) users.
 
-    - **username**: Lead/Admin username
+    - **username**: Management user's username
     - **token**: Secure token provided during account creation
     - Returns: Access token and user information
     """
-    logger.info(f"Lead login attempt for user: {data.username}")
+    logger.info(f"Management login attempt for user: {data.username}")
 
     # Find user in privileged_users collection
     user_data = db.privileged_users.find_one({"username": data.username})
@@ -127,12 +127,17 @@ def lead_login_access_token(
         )
 
     user = user_models.PrivilegedUser(**user_data)
+    print(user)
 
-    # Only allow Lead (4) and Admin (5) to use this endpoint
-    if user.role not in [user_schema.UserRoles.lead, user_schema.UserRoles.admin]:
+    # Only allow Volunteer (3), Lead (4), and Admin (5) to use this endpoint
+    if user.role not in [
+        user_schema.UserRoles.volunteer,
+        user_schema.UserRoles.lead,
+        user_schema.UserRoles.admin,
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="This endpoint is for Lead/Admin users only. Referrers should use /auth/referrer-login",
+            detail="This endpoint is for management users only. Referrers should use /auth/referrer-login",
         )
 
     # Verify token matches
@@ -192,7 +197,7 @@ def referrer_login_access_token(
     if user.role != user_schema.UserRoles.referrer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="This endpoint is for Referrer users only. Lead/Admin should use /auth/lead-login",
+            detail="This endpoint is for Referrer users only. Management users should use /auth/management-login",
         )
 
     # Check if user is active

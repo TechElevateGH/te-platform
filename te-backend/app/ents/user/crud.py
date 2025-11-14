@@ -49,21 +49,15 @@ def read_users_by_role(
     return [user_models.MemberUser(**user) for user in users_data]
 
 
-def read_all_users(db: Database) -> list[user_models.MemberUser]:
-    """Read all users from MongoDB (Admin only)"""
+def read_all_member_users(db: Database) -> list[user_models.MemberUser]:
+    """Read all member users from MongoDB (Admin only)"""
     users_data = db.member_users.find({})
     return [user_models.MemberUser(**user) for user in users_data]
 
 
 def read_all_privileged_users(db: Database) -> list[dict]:
-    """
-    Read all privileged users (Volunteers and Leads) from MongoDB for assignment purposes.
-    Returns users with role 3 (Volunteer) and role 4 (Lead) with full_name and email.
-    """
-    # Query member_users for Volunteers (role=3) and Leads (role=4)
-    users_data = db.member_users.find(
-        {"role": {"$in": [3, 4]}, "is_active": True}
-    ).sort("full_name", 1)
+    """Read all privileged users from MongoDB (Admin only)"""
+    users_data = db.privileged_users.find({"is_active": True}).sort("full_name", 1)
 
     result = []
     for user in users_data:

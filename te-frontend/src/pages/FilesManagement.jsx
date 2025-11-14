@@ -160,7 +160,7 @@ const FilesManagement = () => {
     // Fetch resume review requests
     const fetchResumeReviews = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/resume-reviews/all', {
+            const response = await axiosInstance.get('/resumes/reviews/all', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setResumeReviews(response.data?.reviews || []);
@@ -190,7 +190,7 @@ const FilesManagement = () => {
         if (!isVolunteerOrAbove) return;
 
         try {
-            const response = await axiosInstance.get('/resume-reviews/my-assignments', {
+            const response = await axiosInstance.get('/resumes/reviews/my-assignments', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setMyAssignedReviews(response.data?.reviews || []);
@@ -204,7 +204,7 @@ const FilesManagement = () => {
         if (!isAdmin) return;
 
         try {
-            const response = await axiosInstance.get('/resume-reviews/assignments', {
+            const response = await axiosInstance.get('/resumes/reviews/assignments', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setAllAssignments(response.data?.assignments || []);
@@ -238,7 +238,7 @@ const FilesManagement = () => {
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
         setAssigningInProgress(true);
         try {
-            await axiosInstance.post(`/resume-reviews/${reviewId}/assign`, {
+            await axiosInstance.post(`/resumes/reviews/${reviewId}/assign`, {
                 reviewer_id: reviewerId,
                 reviewer_name: reviewerName
             }, {
@@ -289,7 +289,7 @@ const FilesManagement = () => {
 
         setSubmittingReview(true);
         try {
-            await axiosInstance.patch(`/resume-reviews/${selectedReview.id}`, {
+            await axiosInstance.patch(`/resumes/reviews/${selectedReview.id}`, {
                 feedback: reviewFeedback,
                 status: reviewStatus
             }, {

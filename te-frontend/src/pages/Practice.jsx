@@ -1,230 +1,255 @@
 import {
-    CodeBracketIcon,
-    AcademicCapIcon,
-    ChartBarIcon,
     ArrowTopRightOnSquareIcon,
     SparklesIcon,
-    CheckCircleIcon,
-    RocketLaunchIcon
+    CodeBracketIcon,
+    VideoCameraIcon,
+    DocumentMagnifyingGlassIcon,
+    ArrowsRightLeftIcon,
+    LightBulbIcon,
+    BookmarkIcon,
+    ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline'
 
-const platforms = [
+const resourceCategories = [
     {
-        id: 'neetcode',
-        name: 'NeetCode',
-        description: 'Curated list of 150 best LeetCode problems for coding interviews',
-        url: 'https://neetcode.io',
-        icon: '🎯',
-        color: 'from-blue-600 to-cyan-600',
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        features: [
-            'Roadmap for interview prep',
-            'Video explanations for each problem',
-            'Organized by patterns',
-            'Beginner-friendly approach'
+        id: 'foundation',
+        title: 'Learning Patterns',
+        description: 'Master the NeetCode 150 roadmap (Easy + Medium) to internalize every core pattern before touching harder sets.',
+        callouts: [
+            'Start with NeetCode 150 Easy + Medium. Repeat patterns until you can explain them without notes.',
+            'Graduate to NeetCode "All Easy + Medium" with a sprinkling of hard problems once you breeze through the 150 set.'
         ],
-        recommended: true
+        badge: 'Start here',
+        icon: SparklesIcon,
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
+        url: 'https://neetcode.io/roadmap',
+        actionLabel: 'Explore NeetCode roadmap',
+        chips: ['Array patterns', 'Two pointers', 'Sliding window', 'Graph traversal']
     },
     {
-        id: 'leetcode',
-        name: 'LeetCode',
-        description: 'The ultimate platform for practicing coding problems and preparing for technical interviews',
-        url: 'https://leetcode.com',
-        icon: '💻',
-        color: 'from-orange-600 to-amber-600',
-        bgColor: 'bg-orange-50',
-        borderColor: 'border-orange-200',
-        features: [
-            'Thousands of coding problems',
-            'Company-specific questions',
-            'Mock interviews',
-            'Global contest rankings'
+        id: 'revision',
+        title: 'Constant Revision',
+        description: 'Revision. Revision. Revision. Rebuild solutions from memory within 24 hours, 3 days, and 1 week.',
+        callouts: [
+            'Avoid grinding a single question for hours; if you are stuck, review the editorial or video quickly, understand blocks of logic, and then rewrite it from scratch.',
+            'Curate code blocks for common subroutines (reverse linked list, binary search template, BFS queue pattern) and drill them until they become second nature.'
         ],
-        recommended: true
+        badge: 'Critical habit',
+        icon: ClipboardDocumentCheckIcon,
+        iconBg: 'bg-emerald-100',
+        iconColor: 'text-emerald-600',
+        url: 'https://docs.google.com/spreadsheets/d/1Oe9pP9PracticeTemplate',
+        actionLabel: 'Download revision tracker',
+        chips: ['0-24-72 hour loop', 'Solution blocks', 'Notebook snapshots']
     },
     {
-        id: 'educative',
-        name: 'Educative',
-        description: 'Interactive courses and hands-on practice for mastering coding interviews',
-        url: 'https://www.educative.io',
-        icon: '📚',
-        color: 'from-purple-600 to-pink-600',
-        bgColor: 'bg-purple-50',
-        borderColor: 'border-purple-200',
-        features: [
-            'Interactive coding environment',
-            'Grokking the Coding Interview',
-            'System design courses',
-            'Text-based learning'
+        id: 'visual',
+        title: 'Visualize & Iterate',
+        description: 'See your code run step by step. Visual tools help you catch pointer mistakes and understand state transitions.',
+        callouts: [
+            'Use Python Tutor to step through recursion, pointer movement, and dynamic programming tables.',
+            'Keep a literal whiteboard or digital canvas open; diagram the input transformation before coding to cut down on trial-and-error.'
         ],
-        recommended: false
+        badge: 'Stay curious',
+        icon: DocumentMagnifyingGlassIcon,
+        iconBg: 'bg-purple-100',
+        iconColor: 'text-purple-600',
+        url: 'https://pythontutor.com/visualize.html#mode=edit',
+        actionLabel: 'Open Python Tutor',
+        chips: ['Pointer tracing', 'State diagrams', 'Recursion trees']
+    }
+];
+
+const companionTips = [
+    {
+        id: 'language',
+        title: 'Choose your language wisely',
+        description: 'Practice in the language you are most fluent in so that syntax never slows you down. We recommend Python because its expressive syntax lets you focus on the algorithm, but do not switch if another language already feels natural.',
+        icon: CodeBracketIcon,
+        iconBg: 'bg-slate-100',
+        iconColor: 'text-slate-700'
+    },
+    {
+        id: 'solutions',
+        title: 'Study solutions with intention',
+        description: 'Do not fear looking at official solutions or walkthrough videos. Most interview algorithms are classical. Study the answer quickly, note the core building blocks, and then rebuild them without peeking.',
+        icon: VideoCameraIcon,
+        iconBg: 'bg-orange-100',
+        iconColor: 'text-orange-600'
+    },
+    {
+        id: 'patterns',
+        title: 'Spot the shared patterns',
+        description: 'Group problems by technique. For every new question, ask yourself which pattern family it fits and which code block you can reuse. The goal is to reduce every problem to a familiar template.',
+        icon: ArrowsRightLeftIcon,
+        iconBg: 'bg-emerald-100',
+        iconColor: 'text-emerald-600'
+    },
+    {
+        id: 'notes',
+        title: 'Maintain a revision vault',
+        description: 'Bookmark solved problems, jot down the mistakes you made, and schedule a quick re-implementation session. Repeated exposure cements the knowledge far faster than grinding brand-new problems nonstop.',
+        icon: BookmarkIcon,
+        iconBg: 'bg-indigo-100',
+        iconColor: 'text-indigo-600'
     }
 ];
 
 const Practice = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
-            {/* Header */}
-            <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
-                            Practice
-                        </h1>
-                        <p className="text-xs sm:text-sm text-gray-600">
-                            Master coding interviews with these recommended platforms
-                        </p>
-                    </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+            <header className="bg-white/70 backdrop-blur border-b border-slate-200 dark:bg-slate-900/70 dark:border-slate-800">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+                    <span className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 dark:text-slate-400">Practice Vault</span>
+                    <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">Practice smarter, not harder</h1>
+                    <p className="mt-2 text-sm text-slate-600 max-w-2xl dark:text-slate-300">
+                        Focus on the exact resources we trust, revise relentlessly, and build confidence through patterns—not endless blind grinding.
+                    </p>
                 </div>
-            </div>
+            </header>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                {/* Hero Section */}
-                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-1 mb-12">
-                    <div className="bg-white rounded-3xl p-8 md:p-12">
-                        <div className="flex items-start gap-6">
-                            <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl">
-                                <RocketLaunchIcon className="h-12 w-12 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                                <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                                    Level Up Your Coding Skills
-                                </h2>
-                                <p className="text-lg text-gray-600 mb-4">
-                                    Consistent practice is the key to acing technical interviews. We've curated the best platforms
-                                    to help you master data structures, algorithms, and problem-solving patterns.
-                                </p>
-                                <div className="flex flex-wrap gap-4">
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-full border border-emerald-200">
-                                        <CheckCircleIcon className="h-5 w-5 text-emerald-600" />
-                                        <span className="text-sm font-semibold text-emerald-700">Trusted Resources</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-200">
-                                        <SparklesIcon className="h-5 w-5 text-blue-600" />
-                                        <span className="text-sm font-semibold text-blue-700">Interview-Focused</span>
-                                    </div>
-                                </div>
-                            </div>
+            <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-12 text-slate-900 dark:text-slate-100">
+                {resourceCategories.length > 0 && (
+                    <section className="space-y-6">
+                        <div>
+                            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Recommended path</span>
+                            <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Core resources we actually use</h2>
+                            <p className="mt-2 text-sm text-slate-600 max-w-3xl dark:text-slate-300">
+                                Every card is a focused starting point. Sprint through the NeetCode roadmap, revise aggressively, visualize your logic, and keep learning loops lightweight.
+                            </p>
                         </div>
-                    </div>
-                </div>
-
-                {/* Platforms Grid */}
-                <div className="space-y-8">
-                    {platforms.map((platform) => (
-                        <div
-                            key={platform.id}
-                            className={`relative bg-white rounded-3xl border-2 ${platform.borderColor} overflow-hidden hover:shadow-2xl transition-all duration-300 group`}
-                        >
-                            {/* Recommended Badge */}
-                            {platform.recommended && (
-                                <div className="absolute top-6 right-6 z-10">
-                                    <div className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${platform.color} text-white rounded-full shadow-lg`}>
-                                        <SparklesIcon className="h-4 w-4" />
-                                        <span className="text-sm font-bold">Highly Recommended</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="p-8 md:p-10">
-                                <div className="flex flex-col md:flex-row gap-8">
-                                    {/* Left: Icon and Info */}
-                                    <div className="flex-1">
-                                        <div className="flex items-start gap-4 mb-6">
-                                            <div className={`text-6xl`}>
-                                                {platform.icon}
+                        <div className="grid gap-5 md:grid-cols-2">
+                            {resourceCategories.map((category) => {
+                                const Icon = category.icon;
+                                return (
+                                    <article
+                                        key={category.id}
+                                        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80"
+                                    >
+                                        <div className="p-6 space-y-5">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${category.iconBg} dark:bg-slate-800/70`}>
+                                                    <Icon className={`h-6 w-6 ${category.iconColor} dark:text-slate-200`} />
+                                                </div>
+                                                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                                                    {category.badge}
+                                                </span>
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                                                    {platform.name}
-                                                </h3>
-                                                <p className="text-gray-600 text-lg">
-                                                    {platform.description}
+                                            <div>
+                                                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">{category.title}</h3>
+                                                <p className="mt-2 text-sm text-slate-600 leading-relaxed dark:text-slate-300">
+                                                    {category.description}
                                                 </p>
                                             </div>
-                                        </div>
-
-                                        {/* Features List */}
-                                        <div className={`${platform.bgColor} rounded-2xl p-6 mb-6`}>
-                                            <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                                <ChartBarIcon className="h-5 w-5" />
-                                                Key Features
-                                            </h4>
                                             <ul className="space-y-3">
-                                                {platform.features.map((feature, index) => (
+                                                {category.callouts.map((callout, index) => (
                                                     <li key={index} className="flex items-start gap-3">
-                                                        <CheckCircleIcon className={`h-5 w-5 flex-shrink-0 mt-0.5 bg-gradient-to-r ${platform.color} bg-clip-text text-transparent`} style={{ WebkitTextFillColor: 'transparent' }} />
-                                                        <span className="text-gray-700">{feature}</span>
+                                                        <div className="mt-1 flex h-2.5 w-2.5 flex-shrink-0 items-center justify-center rounded-full bg-slate-400 dark:bg-slate-500" />
+                                                        <p className="text-sm text-slate-700 leading-relaxed dark:text-slate-200">{callout}</p>
                                                     </li>
                                                 ))}
                                             </ul>
+                                            <div className="flex flex-wrap gap-2">
+                                                {category.chips.map((chip) => (
+                                                    <span key={chip} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800/80 dark:text-slate-300">
+                                                        {chip}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div>
+                                                <a
+                                                    href={category.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:text-white"
+                                                >
+                                                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                                                    {category.actionLabel}
+                                                </a>
+                                            </div>
                                         </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )}
 
-                                        {/* CTA Button */}
-                                        <a
-                                            href={platform.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r ${platform.color} text-white rounded-xl font-bold hover:shadow-lg transition-all duration-200 group-hover:scale-105 text-lg`}
-                                        >
-                                            <CodeBracketIcon className="h-6 w-6" />
-                                            <span>Start Practicing on {platform.name}</span>
-                                            <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-                                        </a>
-                                    </div>
-
-                                    {/* Right: Visual Element */}
-                                    <div className="md:w-64 flex items-center justify-center">
-                                        <div className={`w-48 h-48 bg-gradient-to-br ${platform.color} rounded-3xl flex items-center justify-center transform rotate-6 group-hover:rotate-12 transition-transform duration-300 shadow-xl`}>
-                                            <span className="text-8xl transform -rotate-6">
-                                                {platform.icon}
-                                            </span>
+                {companionTips.length > 0 && (
+                    <section className="space-y-6">
+                        <div>
+                            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Practice principles</span>
+                            <h2 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">Keep these mindsets in rotation</h2>
+                            <p className="mt-2 text-sm text-slate-600 max-w-3xl dark:text-slate-300">
+                                Use these reminders to prevent burnout, stay confident, and learn faster than the average grinder.
+                            </p>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                            {companionTips.map((tip) => {
+                                const Icon = tip.icon;
+                                return (
+                                    <div
+                                        key={tip.id}
+                                        className="flex gap-4 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80"
+                                    >
+                                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${tip.iconBg} dark:bg-slate-800/70`}>
+                                            <Icon className={`h-6 w-6 ${tip.iconColor} dark:text-slate-200`} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{tip.title}</h3>
+                                            <p className="mt-1 text-sm text-slate-600 leading-relaxed dark:text-slate-300">
+                                                {tip.description}
+                                            </p>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Decorative gradient border bottom */}
-                            <div className={`h-2 bg-gradient-to-r ${platform.color}`}></div>
+                                );
+                            })}
                         </div>
-                    ))}
-                </div>
+                    </section>
+                )}
 
-                {/* Tips Section */}
-                <div className="mt-16 grid md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-2xl border border-blue-200 p-6 hover:shadow-lg transition-all">
-                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                            <ChartBarIcon className="h-6 w-6 text-blue-600" />
+                <section className="rounded-2xl border border-slate-200 bg-slate-900 text-white p-8 shadow-lg dark:border-slate-800">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <LightBulbIcon className="h-6 w-6 text-amber-300" />
+                            <h2 className="text-xl font-semibold text-white">Revision is everything</h2>
                         </div>
-                        <h3 className="font-bold text-gray-900 mb-2">Start with Patterns</h3>
-                        <p className="text-sm text-gray-600">
-                            Focus on learning problem-solving patterns rather than memorizing individual solutions. NeetCode's roadmap is perfect for this.
+                        <p className="text-sm text-slate-200 leading-relaxed">
+                            The strongest candidates are shamelessly efficient learners. When a problem stalls you, peek at the editorial, learn the blocks, and rebuild them from scratch later. Use Python Tutor to visualize recursion and pointer movement. Track every revisit with a simple spreadsheet so nothing slips.
                         </p>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-purple-200 p-6 hover:shadow-lg transition-all">
-                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                            <AcademicCapIcon className="h-6 w-6 text-purple-600" />
+                        <div className="flex flex-wrap gap-3">
+                            <a
+                                href="https://neetcode.io/roadmap"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+                            >
+                                <SparklesIcon className="h-4 w-4" />
+                                NeetCode Easy + Medium first
+                            </a>
+                            <a
+                                href="https://pythontutor.com/visualize.html#mode=edit"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+                            >
+                                <DocumentMagnifyingGlassIcon className="h-4 w-4" />
+                                Visualize every tricky run
+                            </a>
+                            <a
+                                href="https://docs.google.com/spreadsheets/d/1Oe9pP9PracticeTemplate"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+                            >
+                                <ClipboardDocumentCheckIcon className="h-4 w-4" />
+                                Use the revision tracker
+                            </a>
                         </div>
-                        <h3 className="font-bold text-gray-900 mb-2">Consistency Over Intensity</h3>
-                        <p className="text-sm text-gray-600">
-                            Solve 1-2 problems daily rather than cramming. Regular practice builds muscle memory and pattern recognition.
-                        </p>
                     </div>
-
-                    <div className="bg-white rounded-2xl border border-emerald-200 p-6 hover:shadow-lg transition-all">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
-                            <RocketLaunchIcon className="h-6 w-6 text-emerald-600" />
-                        </div>
-                        <h3 className="font-bold text-gray-900 mb-2">Track Your Progress</h3>
-                        <p className="text-sm text-gray-600">
-                            Keep a log of problems solved and revisit difficult ones. LeetCode's tracking features help you stay organized.
-                        </p>
-                    </div>
-                </div>
-            </div>
+                </section>
+            </main>
         </div>
     )
 }

@@ -1,18 +1,56 @@
 from typing import Optional
+
 from pydantic import BaseModel
 
 
+class ResumeBase(BaseModel):
+    name: str
+    date: str
+    role: str = ""
+    notes: str = ""
+    archived: bool = False
+
+
+class Resume(ResumeBase):
+    file_id: str
+
+
+class ResumeRead(ResumeBase):
+    id: str
+    file_id: str
+    link: str
+
+
+class ResumesRead(BaseModel):
+    """Response container for multiple resumes."""
+
+    resumes: list[ResumeRead]
+
+
+class ResumeUpdate(BaseModel):
+    name: str | None = None
+    role: str | None = None
+    notes: str | None = None
+    archived: bool | None = None
+
+
+class FileUpload(BaseModel):
+    file_id: str
+    name: str
+    link: str
+
+
 class ResumeReviewCreate(BaseModel):
-    """Schema for creating a resume review request"""
+    """Payload for creating a resume review request."""
 
     resume_link: str
     job_title: str
-    level: str  # Entry Level, Mid Level, Senior Level, etc.
+    level: str
     notes: str = ""
 
 
 class ResumeReviewUpdate(BaseModel):
-    """Schema for updating a resume review request"""
+    """Payload for updating resume review request details."""
 
     status: Optional[str] = None
     feedback: Optional[str] = None
@@ -20,14 +58,14 @@ class ResumeReviewUpdate(BaseModel):
 
 
 class ResumeReviewAssign(BaseModel):
-    """Schema for assigning a resume review to a reviewer"""
+    """Payload for assigning a resume review to a reviewer."""
 
     reviewer_id: str
     reviewer_name: str
 
 
 class BulkResumeReviewAssign(BaseModel):
-    """Schema for bulk assigning resume reviews"""
+    """Payload for bulk assigning resume reviews."""
 
     review_ids: list[str]
     reviewer_id: str
@@ -35,7 +73,7 @@ class BulkResumeReviewAssign(BaseModel):
 
 
 class ResumeReviewRead(BaseModel):
-    """Schema for reading resume review data"""
+    """Response model for resume review data."""
 
     id: str
     user_id: str

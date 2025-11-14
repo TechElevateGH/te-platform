@@ -84,7 +84,7 @@ const Files = () => {
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axiosInstance.post('/resume-reviews', reviewFormData, {
+            await axiosInstance.post('/resumes/reviews', reviewFormData, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
 
@@ -901,8 +901,8 @@ const Files = () => {
                                                 setShowResumeModal(false);
                                             }}
                                             className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${selectedResume.archived
-                                                    ? 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60'
-                                                    : 'text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50'
+                                                ? 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60'
+                                                : 'text-blue-700 bg-blue-50 hover:bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50'
                                                 }`}
                                         >
                                             {selectedResume.archived ? (
