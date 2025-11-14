@@ -19,9 +19,11 @@ const Footer = () => {
                 <div className="flex flex-col items-center text-center space-y-8">
                     {/* Brand section */}
                     <div className="flex flex-col items-center space-y-3">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
-                            <span className="text-white font-bold text-2xl">TE</span>
-                        </div>
+                        <img
+                            src="/te-logo.png"
+                            alt="TechElevate Logo"
+                            className="h-12 w-12 rounded-xl shadow-lg"
+                        />
                         <span className="text-2xl font-bold text-white">TechElevate</span>
                         <p className="max-w-2xl text-sm leading-6 text-gray-300">
                             Empowering marginalized talent worldwide to excel in tech careers through mentorship, resources, and opportunities.
@@ -46,10 +48,10 @@ const Footer = () => {
                 {/* Bottom section */}
                 <div className="mt-12 border-t border-white/10 pt-8 flex flex-col items-center gap-4 text-center">
                     <p className="text-xs leading-5 text-gray-400">
-                        &copy; {new Date().getFullYear()} TechElevate. All rights reserved. <span className="block sm:inline">Built with ❤️</span>
+                        &copy; {new Date().getFullYear()} TechElevate. All rights reserved.
                     </p>
                     <span className="text-xs text-gray-400">
-                        Made by TechElevate
+                        Built with ❤️
                     </span>
                 </div>
             </div>

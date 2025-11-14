@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useDarkMode } from '../../context/DarkModeContext';
 import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import NotificationBell from './NotificationBell';
 
 const navigation = [
@@ -117,9 +116,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
 
                         {/* Logo */}
                         <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <RocketLaunchIcon className="h-6 w-6 text-white" />
-                            </div>
+                            <img
+                                src="/te-logo.png"
+                                alt="TechElevate Logo"
+                                className="h-10 w-10 rounded-xl shadow-lg shadow-blue-500/20"
+                            />
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
                                 TechElevate
                             </span>
@@ -266,9 +267,11 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                     <div className="fixed inset-y-0 right-0 z-[70] w-full overflow-y-auto bg-white dark:bg-slate-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-slate-700/50">
                         <div className="flex items-center justify-between">
                             <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
-                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
-                                </div>
+                                <img
+                                    src="/te-logo.png"
+                                    alt="TechElevate Logo"
+                                    className="h-10 w-10 rounded-xl shadow-lg shadow-blue-500/20"
+                                />
                                 <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
                                     TechElevate
                                 </span>

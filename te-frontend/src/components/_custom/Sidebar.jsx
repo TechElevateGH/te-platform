@@ -8,9 +8,6 @@ import {
     ChevronDownIcon,
     ArrowLeftOnRectangleIcon
 } from '@heroicons/react/24/outline'
-import {
-    RocketLaunchIcon
-} from '@heroicons/react/24/solid'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -97,9 +94,11 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                                 onClick={() => navigate('/')}
                                                 className="flex items-center gap-3 group"
                                             >
-                                                <div className="h-11 w-11 rounded-xl bg-te-gradient flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                                                    <RocketLaunchIcon className="h-6 w-6 text-white" />
-                                                </div>
+                                                <img
+                                                    src="/te-logo.png"
+                                                    alt="TechElevate Logo"
+                                                    className="h-11 w-11 rounded-xl shadow-md group-hover:shadow-lg transition-all"
+                                                />
                                                 <div>
                                                     <h1 className="text-lg font-bold text-gray-900 dark:text-white transition-colors">TechElevate</h1>
                                                     <p className="text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">Career Platform</p>
