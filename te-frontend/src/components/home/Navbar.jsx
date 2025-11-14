@@ -245,19 +245,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                 </>
                             ) : (
                                 <>
-                                    {isGuest && (
-                                        <div className="flex items-center gap-2 pr-3">
-                                            <span className="rounded-full border border-blue-200 dark:border-blue-500/40 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-300">
-                                                Guest Mode
-                                            </span>
-                                            <button
-                                                onClick={exitGuestMode}
-                                                className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                            >
-                                                Exit
-                                            </button>
-                                        </div>
-                                    )}
                                     <button
                                         onClick={() => navigate('/login')}
                                         className="text-sm font-semibold leading-6 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-4 py-2"
@@ -330,23 +317,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                                 <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
                                                     {roleInfo.label}
                                                 </span>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {isGuest && (
-                                        <div className="-mx-3 px-3 py-2.5">
-                                            <div className="flex items-center justify-between rounded-lg border border-blue-200 dark:border-blue-500/40 px-4 py-3">
-                                                <span className="text-sm font-semibold text-blue-600 dark:text-blue-300">Guest Mode</span>
-                                                <button
-                                                    onClick={() => {
-                                                        exitGuestMode();
-                                                        setMobileMenuOpen(false);
-                                                    }}
-                                                    className="text-sm font-semibold text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200"
-                                                >
-                                                    Exit
-                                                </button>
                                             </div>
                                         </div>
                                     )}

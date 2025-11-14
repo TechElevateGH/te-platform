@@ -162,9 +162,7 @@ def delete_resume(
             detail="Insufficient permissions to delete resumes",
         )
 
-    success = resume_crud.delete_resume(
-        db, resume_id=resume_id, user_id=target_user_id
-    )
+    success = resume_crud.delete_resume(db, resume_id=resume_id, user_id=target_user_id)
 
     if not success:
         raise HTTPException(
@@ -175,9 +173,7 @@ def delete_resume(
     return {"message": "Resume deleted successfully"}
 
 
-@user_resumes_router.get(
-    "", response_model=Dict[str, resume_schema.ResumesRead]
-)
+@user_resumes_router.get("", response_model=Dict[str, resume_schema.ResumesRead])
 def list_user_resumes(
     db: Database = Depends(session.get_db),
     *,
@@ -291,9 +287,7 @@ def create_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
     data: resume_schema.ResumeReviewCreate,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Create a new resume review request (members only)."""
     review = resume_crud.create_review_request(
@@ -312,9 +306,7 @@ def create_resume_review_request(
 @resume_reviews_router.get("/all", response_model=Dict[str, Any])
 def get_all_resume_review_requests(
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Get all resume review requests (Volunteers and above only)."""
     require_volunteer(current_user)
@@ -325,9 +317,7 @@ def get_all_resume_review_requests(
 @resume_reviews_router.get("/my-requests", response_model=Dict[str, Any])
 def get_my_resume_review_requests(
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Get resume review requests for the current user."""
     reviews = resume_crud.read_user_review_requests(db, user_id=str(current_user.id))
@@ -340,9 +330,7 @@ def update_resume_review_request(
     db: Database = Depends(session.get_db),
     review_id: str,
     data: resume_schema.ResumeReviewUpdate,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Update a resume review request (Volunteers and above only)."""
     require_volunteer(current_user)
@@ -365,9 +353,7 @@ def cancel_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
     review_id: str,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Cancel a resume review request (members can cancel their own)."""
     review = resume_crud.get_review_by_id(db, review_id=review_id)
@@ -396,9 +382,7 @@ def delete_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
     review_id: str,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Delete a resume review request (Admin only - hard delete)."""
     user_role = get_user_role(current_user)
@@ -420,9 +404,7 @@ def assign_resume_review(
     db: Database = Depends(session.get_db),
     review_id: str,
     data: resume_schema.ResumeReviewAssign,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Assign a resume review to a specific reviewer (Lead and above only)."""
     user_role = get_user_role(current_user)
@@ -450,9 +432,7 @@ def bulk_assign_resume_reviews(
     *,
     db: Database = Depends(session.get_db),
     data: resume_schema.BulkResumeReviewAssign,
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Bulk assign multiple resume reviews to a specific reviewer (Lead and above only)."""
     user_role = get_user_role(current_user)
@@ -476,9 +456,7 @@ def bulk_assign_resume_reviews(
 def get_my_assigned_reviews(
     *,
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Get all resume reviews assigned to the current user (Volunteers and above)."""
     user_role = get_user_role(current_user)
@@ -496,9 +474,7 @@ def get_my_assigned_reviews(
 def get_all_assignments(
     *,
     db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(
-        user_dependencies.get_current_user
-    ),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Get all assignment records (Admin only)."""
     user_role = get_user_role(current_user)

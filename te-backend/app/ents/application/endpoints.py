@@ -250,5 +250,3 @@ def archive_applications(
             )
 
     return {"message": f"Successfully archived {len(application_ids)} application(s)"}
-
-

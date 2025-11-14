@@ -318,16 +318,14 @@ const Documentation = () => {
     const wrapperClass = `min-h-screen flex flex-col ${isDarkTheme ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`;
     const headerClass = `border-b backdrop-blur ${isDarkTheme ? 'border-slate-800 bg-slate-900/80' : 'border-slate-200 bg-white/90'}`;
     const subtitleClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
-    const navButtonClass = `flex h-10 w-10 items-center justify-center rounded-lg border border-transparent transition-colors ${
-        isDarkTheme ? 'text-slate-300 hover:border-slate-700 hover:text-white' : 'text-slate-500 hover:border-slate-300 hover:text-slate-900'
-    }`;
+    const navButtonClass = `flex h-10 w-10 items-center justify-center rounded-lg border border-transparent transition-colors ${isDarkTheme ? 'text-slate-300 hover:border-slate-700 hover:text-white' : 'text-slate-500 hover:border-slate-300 hover:text-slate-900'
+        }`;
     const loaderTextClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
     const skeletonBaseClass = isDarkTheme ? 'bg-slate-800/60' : 'bg-slate-200';
     const skeletonMidClass = isDarkTheme ? 'bg-slate-800/50' : 'bg-slate-200/90';
     const skeletonLowClass = isDarkTheme ? 'bg-slate-800/40' : 'bg-slate-200/80';
-    const errorCardClass = `rounded-xl border px-6 py-6 text-center shadow max-w-md w-full backdrop-blur ${
-        isDarkTheme ? 'border-slate-800/80 bg-slate-900/80 text-white' : 'border-slate-200 bg-white/90 text-slate-900'
-    }`;
+    const errorCardClass = `rounded-xl border px-6 py-6 text-center shadow max-w-md w-full backdrop-blur ${isDarkTheme ? 'border-slate-800/80 bg-slate-900/80 text-white' : 'border-slate-200 bg-white/90 text-slate-900'
+        }`;
     const errorTextClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
 
     return (
@@ -409,9 +407,8 @@ const Documentation = () => {
                                 <button
                                     type="button"
                                     onClick={() => navigate('/')}
-                                    className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${
-                                        isDarkTheme ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
-                                    }`}
+                                    className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                                        }`}
                                 >
                                     Back home
                                 </button>

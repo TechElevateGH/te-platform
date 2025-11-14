@@ -251,7 +251,9 @@ def update_review_request(
             update_data["reviewed_by"] = ObjectId(reviewer_id)
             update_data["reviewer_name"] = reviewer_name
             if data.status == "In Review":
-                existing_review = db.resume_reviews.find_one({"_id": ObjectId(review_id)})
+                existing_review = db.resume_reviews.find_one(
+                    {"_id": ObjectId(review_id)}
+                )
                 if existing_review and not existing_review.get("assigned_date"):
                     update_data["assigned_date"] = date.today().strftime("%Y-%m-%d")
             if data.status == "Completed":
