@@ -175,25 +175,25 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-5">
+                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-3 sm:px-4 pb-4 pt-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-5">
                                 {application && (
                                     <>
                                         {/* Header */}
                                         <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="relative h-10 w-10 flex-shrink-0">
+                                            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                                                <div className="relative h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                                                     <img
                                                         src={getCompanyLogoUrl(application.company)}
                                                         alt={application.company}
-                                                        className="h-10 w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700"
+                                                        className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700"
                                                         onError={handleCompanyLogoError}
                                                     />
                                                 </div>
-                                                <div>
-                                                    <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                                                <div className="min-w-0 flex-1">
+                                                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
                                                         {application.company}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                                         {application.title}, {application.role}
                                                     </p>
                                                 </div>
@@ -201,7 +201,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                             {canEdit && (
                                                 <button
                                                     type="button"
-                                                    className="rounded-full bg-white dark:bg-gray-700 p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="rounded-full bg-white dark:bg-gray-700 p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                                                     onClick={isEditing ? handleCancel : handleEdit}
                                                 >
                                                     <PencilIcon className="h-4 w-4" aria-hidden="true" />
@@ -210,11 +210,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                         </div>
 
                                         {/* Content */}
-                                        <div className="mt-4 space-y-4">
+                                        <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
                                             {!isEditing ? (
                                                 // View Mode
                                                 <>
-                                                    <div className="grid grid-cols-2 gap-3">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         <div>
                                                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Location</label>
                                                             <p className="mt-1 text-sm text-gray-900 dark:text-white">
@@ -244,16 +244,16 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
                                                     <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                                                         <h4 className="text-xs font-medium text-gray-900 dark:text-white">Recruiter Information</h4>
-                                                        <div className="mt-2 grid grid-cols-2 gap-3">
+                                                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                             <div>
                                                                 <label className="block text-xs text-gray-500 dark:text-gray-400">Name</label>
-                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white">
+                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white break-words">
                                                                     {application.recruiter_name || 'Not provided'}
                                                                 </p>
                                                             </div>
                                                             <div>
                                                                 <label className="block text-xs text-gray-500 dark:text-gray-400">Email</label>
-                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white">
+                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white break-all">
                                                                     {application.recruiter_email || 'Not provided'}
                                                                 </p>
                                                             </div>
@@ -273,7 +273,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     {/* Location Section */}
                                                     <div>
                                                         <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Location</h4>
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Country"
                                                                 options={countries}
@@ -292,9 +292,9 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Status Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
                                                         <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Status</h4>
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Application Status"
                                                                 options={["Submitted", "OA", "Phone interview", "Final interview", "HR", "Offer", "Rejected"]}
@@ -313,9 +313,9 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Recruiter Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
                                                         <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Recruiter Information</h4>
-                                                        <div className="grid grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <FormInput
                                                                 field="recruiter_name"
                                                                 label="Recruiter Name"
@@ -333,11 +333,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Notes Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
                                                         <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Notes</h4>
                                                         <textarea
                                                             rows={4}
-                                                            className="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                            className="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                                                             value={updateData.notes || ''}
                                                             onChange={(e) => handleInputChange({ field: 'notes', value: e.target.value })}
                                                         />
@@ -347,11 +347,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="mt-4 flex justify-between gap-2 border-t border-gray-200 dark:border-gray-700 pt-3">
+                                        <div className="mt-3 sm:mt-4 flex flex-col-reverse sm:flex-row justify-between gap-2 border-t border-gray-200 dark:border-gray-700 pt-3">
                                             {isEditing ? (
                                                 <>
                                                     <div></div>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex flex-col-reverse sm:flex-row gap-2">
                                                         <button
                                                             type="button"
                                                             className="rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
@@ -371,10 +371,10 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                             ) : (
                                                 <>
                                                     {canEdit && (
-                                                        <div className="flex gap-2">
+                                                        <div className="flex flex-col sm:flex-row gap-2">
                                                             <button
                                                                 type="button"
-                                                                className="flex items-center gap-1.5 rounded-md bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all"
+                                                                className="flex items-center justify-center gap-1.5 rounded-md bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all"
                                                                 onClick={handleArchive}
                                                             >
                                                                 <ArchiveBoxIcon className="h-3.5 w-3.5" />
@@ -382,7 +382,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                className="flex items-center gap-1.5 rounded-md bg-rose-50 dark:bg-rose-900/30 px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
+                                                                className="flex items-center justify-center gap-1.5 rounded-md bg-rose-50 dark:bg-rose-900/30 px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
                                                                 onClick={handleDelete}
                                                             >
                                                                 <TrashIcon className="h-3.5 w-3.5" />

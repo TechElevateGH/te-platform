@@ -263,28 +263,30 @@ const ApplicationManagement = () => {
         <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
             {/* Header with Stats and Actions */}
             <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChartBarIcon className="h-5 w-5 text-blue-600 dark:text-blue-500" />
-                                Member Applications Dashboard
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500 flex-shrink-0" />
+                                <span className="truncate">Member Applications</span>
                             </h1>
-                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5 hidden sm:block">
                                 Monitor and manage all member job applications
                             </p>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
                             {/* Column Selector */}
                             <div className="relative">
                                 <button
                                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                    className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                                 >
-                                    <EyeIcon className="h-4 w-4" />
-                                    Columns ({visibleColumnCount}/{columnConfig.length})
+                                    <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">Columns</span>
+                                    <span className="sm:hidden">{visibleColumnCount}</span>
+                                    <span className="hidden sm:inline">({visibleColumnCount}/{columnConfig.length})</span>
                                 </button>
 
                                 {showColumnSelector && (
@@ -356,20 +358,20 @@ const ApplicationManagement = () => {
                             <button
                                 onClick={exportToCSV}
                                 disabled={sortedApplications.length === 0}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ArrowDownTrayIcon className="h-4 w-4" />
-                                Export CSV
+                                <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">Export CSV</span>
                             </button>
                             <button
                                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
+                                className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
                                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                                     : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                     }`}
                             >
-                                <AdjustmentsHorizontalIcon className="h-4 w-4" />
-                                Advanced Filters
+                                <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">Filters</span>
                                 {hasActiveFilters && (
                                     <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
                                         {[memberFilter, companyFilter, statusFilter, levelFilter, referredFilter, dateFrom, dateTo].filter(Boolean).length}
@@ -380,31 +382,31 @@ const ApplicationManagement = () => {
                     </div>
 
                     {/* Stats Bar */}
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-6 flex-wrap text-xs">
-                            <div className="flex items-center gap-2">
-                                <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                <span className="font-medium text-gray-600 dark:text-gray-400">Total:</span>
+                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-xs">
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <UserGroupIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                                <span className="font-medium text-gray-600 dark:text-gray-400 hidden sm:inline">Total:</span>
                                 <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                <span className="font-medium text-green-600 dark:text-green-400">Offers:</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <CheckCircleIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
+                                <span className="font-medium text-green-600 dark:text-green-400 hidden sm:inline">Offers:</span>
                                 <span className="font-bold text-green-700 dark:text-green-400">{stats.offered}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <ClockIcon className="h-4 w-4 text-blue-500" />
-                                <span className="font-medium text-blue-600 dark:text-blue-400">Interviewing:</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
+                                <span className="font-medium text-blue-600 dark:text-blue-400 hidden sm:inline">Interviewing:</span>
                                 <span className="font-bold text-blue-700 dark:text-blue-400">{stats.interviewing}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <ClockIcon className="h-4 w-4 text-amber-500" />
-                                <span className="font-medium text-amber-600 dark:text-amber-400">Pending:</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 flex-shrink-0" />
+                                <span className="font-medium text-amber-600 dark:text-amber-400 hidden sm:inline">Pending:</span>
                                 <span className="font-bold text-amber-700 dark:text-amber-400">{stats.submitted}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <XCircleIcon className="h-4 w-4 text-red-500" />
-                                <span className="font-medium text-red-600 dark:text-red-400">Rejected:</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                                <XCircleIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
+                                <span className="font-medium text-red-600 dark:text-red-400 hidden sm:inline">Rejected:</span>
                                 <span className="font-bold text-red-700 dark:text-red-400">{stats.rejected}</span>
                             </div>
                         </div>
@@ -591,7 +593,16 @@ const ApplicationManagement = () => {
 
                 {/* Applications Table */}
                 <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
-                    <div className="overflow-x-auto">
+                    {/* Desktop Table - Hidden on mobile */}
+                    <div className="hidden md:block">
+                        {/* Hint Text */}
+                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                💡 Click on any row to view details
+                            </p>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
@@ -763,6 +774,121 @@ const ApplicationManagement = () => {
                                 )}
                             </tbody>
                         </table>
+                        </div>
+                    </div>
+
+                    {/* Mobile Card View - Hidden on desktop */}
+                    <div className="md:hidden">
+                        {/* Hint Text */}
+                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                💡 Tap on any card to view details
+                            </p>
+                        </div>
+                        
+                        <div className="space-y-2.5 p-3">
+                        {sortedApplications.length === 0 ? (
+                            <div className="p-8 text-center">
+                                <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {applications.length === 0
+                                        ? 'No member applications yet'
+                                        : 'Try adjusting your filters'}
+                                </p>
+                            </div>
+                        ) : (
+                            sortedApplications.map((app) => (
+                                <div
+                                    key={app.id}
+                                    onClick={() => {
+                                        setSelectedApplication(app);
+                                        setSelectedApplicationId(app.id);
+                                    }}
+                                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                >
+                                    {/* Card Header */}
+                                    <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                        {visibleColumns.company && (
+                                            <div className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 flex-shrink-0">
+                                                <img
+                                                    src={getCompanyLogoUrl(app.company)}
+                                                    alt={app.company}
+                                                    className="h-full w-full object-contain"
+                                                    onError={handleCompanyLogoError}
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            {visibleColumns.company && (
+                                                <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {app.company}
+                                                </h3>
+                                            )}
+                                            {visibleColumns.position && (
+                                                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                                    {app.title}
+                                                </p>
+                                            )}
+                                        </div>
+                                        {visibleColumns.status && (
+                                            <span className={`text-[9px] font-bold rounded-md px-2 py-1 border ${getStatusColor(app.status)}`}>
+                                                {app.status}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Card Body */}
+                                    <div className="px-3 py-2.5">
+                                        {/* Member Info */}
+                                        {visibleColumns.member && (
+                                            <div className="space-y-1 mb-2.5">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Member</span>
+                                                    <span className="text-xs font-semibold text-gray-900 dark:text-white truncate ml-2">
+                                                        {app.user_name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Email</span>
+                                                    <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate ml-2">
+                                                        {app.user_email}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Details */}
+                                        <div className="flex items-center gap-3 py-2 mb-2.5 border-y border-gray-100 dark:border-gray-700">
+                                            {visibleColumns.level && (
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">🎯</span>
+                                                    <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                                                        {app.role}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {visibleColumns.applied && (
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">📅</span>
+                                                    <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                                                        {app.date}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {visibleColumns.referred && app.referred && (
+                                                <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                    Referred
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* View Button - Removed, click card to view */}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                        </div>
                     </div>
                 </div>
 

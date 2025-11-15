@@ -80,9 +80,6 @@ const FilesManagement = () => {
     // Resumes tab filters
     const [showAdvancedResumesFilters, setShowAdvancedResumesFilters] = useState(false);
 
-    // Resume Reviews tab filters
-    const [showAdvancedReviewsFilters, setShowAdvancedReviewsFilters] = useState(false);
-
     // Essays tab filters
     const [essaysSearch, setEssaysSearch] = useState('');
     const [essaysSortBy, setEssaysSortBy] = useState('name_asc');
@@ -667,30 +664,30 @@ const FilesManagement = () => {
     }
 
     return (
-        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors overflow-x-hidden">
             {/* Header with Stats and Actions */}
             <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <FolderIcon className="h-5 w-5 text-blue-600 dark:text-blue-500" />
-                                Resumes and Essays
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <FolderIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500 flex-shrink-0" />
+                                <span className="truncate">Resumes & Essays</span>
                             </h1>
-                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5 hidden sm:block">
                                 Manage member files, essays, and assign resume review requests
                             </p>
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
                             <button
                                 onClick={exportToCSV}
                                 disabled={sortedUsers.length === 0}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ArrowDownTrayIcon className="h-4 w-4" />
-                                Export CSV
+                                <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">Export CSV</span>
                             </button>
                         </div>
                     </div>
@@ -698,20 +695,20 @@ const FilesManagement = () => {
             </header>
 
             {/* Tabs */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[72px] z-10">
-                <div className="max-w-7xl mx-auto px-4">
-                    <nav className="flex gap-4">
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[56px] sm:top-[72px] z-10 overflow-x-auto scrollbar-hide">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4">
+                    <nav className="flex gap-2 sm:gap-4">
                         {/* Resumes Tab - Only Lead+ */}
                         {userRoleInt >= 4 && (
                             <button
                                 onClick={() => setActiveTab('resumes')}
-                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'resumes'
+                                className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'resumes'
                                     ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
-                                <div className="flex items-center gap-2">
-                                    <FolderIcon className="h-4 w-4" />
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <FolderIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     Resumes
                                 </div>
                             </button>
@@ -721,35 +718,20 @@ const FilesManagement = () => {
                         {userRoleInt >= 3 && (
                             <button
                                 onClick={() => setActiveTab('reviews')}
-                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'reviews'
+                                className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'reviews'
                                     ? 'border-purple-600 text-purple-600 dark:text-purple-400'
                                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
-                                <div className="flex items-center gap-2">
-                                    <DocumentTextIcon className="h-4 w-4" />
-                                    Resume Reviews
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <DocumentTextIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">Resume Reviews</span>
+                                    <span className="sm:hidden">Reviews</span>
                                     {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
-                                        <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
                                             {resumeReviews.filter(r => r.status === 'Pending').length}
                                         </span>
                                     )}
-                                </div>
-                            </button>
-                        )}
-
-                        {/* Essays Tab - Volunteer+ */}
-                        {userRoleInt >= 3 && (
-                            <button
-                                onClick={() => setActiveTab('essays')}
-                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'essays'
-                                    ? 'border-green-600 text-green-600 dark:text-green-400'
-                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4" />
-                                    Essays
                                 </div>
                             </button>
                         )}
@@ -758,16 +740,17 @@ const FilesManagement = () => {
                         {userRoleInt >= 3 && (
                             <button
                                 onClick={() => setActiveTab('myAssignments')}
-                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'myAssignments'
+                                className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'myAssignments'
                                     ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
                                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
-                                <div className="flex items-center gap-2">
-                                    <UserCircleIcon className="h-4 w-4" />
-                                    My Assignments
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <UserCircleIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">My Assignments</span>
+                                    <span className="sm:hidden">My Work</span>
                                     {myAssignedReviews.length > 0 && (
-                                        <span className="px-2 py-0.5 text-xs font-bold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">
                                             {myAssignedReviews.length}
                                         </span>
                                     )}
@@ -779,16 +762,17 @@ const FilesManagement = () => {
                         {isAdmin && (
                             <button
                                 onClick={() => setActiveTab('allAssignments')}
-                                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'allAssignments'
+                                className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'allAssignments'
                                     ? 'border-pink-600 text-pink-600 dark:text-pink-400'
                                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
-                                <div className="flex items-center gap-2">
-                                    <UserGroupIcon className="h-4 w-4" />
-                                    All Assignments
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <UserGroupIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">All Assignments</span>
+                                    <span className="sm:hidden">All Work</span>
                                     {allAssignments.length > 0 && (
-                                        <span className="px-2 py-0.5 text-xs font-bold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full">
                                             {allAssignments.length}
                                         </span>
                                     )}
@@ -799,144 +783,74 @@ const FilesManagement = () => {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3">
 
                 {activeTab === 'resumes' && (
                     <>
-                        {/* Compact Stats Bar */}
+                        {/* Unified Bar: Stats + Search + Sort + Filters */}
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
-                            <div className="flex items-center justify-between">
-                                {/* Compact Stats */}
-                                <div className="flex items-center gap-6 flex-wrap text-xs">
-                                    <div className="flex items-center gap-2">
-                                        <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                        <span className="font-medium text-gray-600 dark:text-gray-400">Members with Resumes:</span>
+                            <div className="flex items-center gap-2">
+                                {/* Stats */}
+                                <div className="flex items-center gap-3 text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                        <UserGroupIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
                                         <span className="font-bold text-gray-900 dark:text-white">{users.filter(u => u.resumes && u.resumes.length > 0).length}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <DocumentIcon className="h-4 w-4 text-blue-500" />
-                                        <span className="font-medium text-blue-600 dark:text-blue-400">Total Resumes:</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <DocumentIcon className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
                                         <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
                                     </div>
                                 </div>
+
+                                {/* Search */}
+                                <div className="flex-1 relative min-w-0">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    />
+                                </div>
+
+                                {/* Sort */}
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="px-2 sm:px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                >
+                                    <option value="name_asc">Name (A-Z)</option>
+                                    <option value="name_desc">Name (Z-A)</option>
+                                    <option value="email_asc">Email (A-Z)</option>
+                                    <option value="email_desc">Email (Z-A)</option>
+                                    <option value="files_desc">Files (Most)</option>
+                                    <option value="files_asc">Files (Least)</option>
+                                </select>
+
+                                {/* Filters Toggle */}
                                 <button
                                     onClick={() => setShowAdvancedResumesFilters(!showAdvancedResumesFilters)}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedResumesFilters
+                                    className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-2 text-xs font-medium rounded transition-colors whitespace-nowrap ${showAdvancedResumesFilters
                                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                                         : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                         }`}
                                 >
-                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
-                                    Advanced Filters
+                                    <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    <span className="hidden sm:inline">Filters</span>
                                     {(memberFilter || fileTypeFilter) && (
-                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                        <span className="px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
                                             {[memberFilter, fileTypeFilter].filter(Boolean).length}
                                         </span>
                                     )}
                                 </button>
-                            </div>
 
-
-                        </div>
-
-                        {/* Search and Sort Bar - Only show when Advanced Filters is closed */}
-                        {!showAdvancedResumesFilters && (
-                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    {/* Global Search */}
-                                    <div className="flex-1 relative">
-                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search members (name or email)..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        />
-                                    </div>
-
-                                    {/* Sort Dropdown */}
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            Sort by:
-                                        </label>
-                                        <select
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value)}
-                                            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                        >
-                                            <option value="name_asc">Name (A-Z)</option>
-                                            <option value="name_desc">Name (Z-A)</option>
-                                            <option value="email_asc">Email (A-Z)</option>
-                                            <option value="email_desc">Email (Z-A)</option>
-                                            <option value="files_desc">Files (Most)</option>
-                                            <option value="files_asc">Files (Least)</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Column Selector */}
-                                    <div className="relative">
-                                        <button
-                                            onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                                        >
-                                            <EyeIcon className="h-4 w-4" />
-                                            Columns ({Object.values(visibleColumns).filter(Boolean).length}/{Object.keys(visibleColumns).length})
-                                        </button>
-                                        {showColumnSelector && (
-                                            <>
-                                                <div
-                                                    className="fixed inset-0 z-10"
-                                                    onClick={() => setShowColumnSelector(false)}
-                                                />
-                                                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
-                                                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Manage Columns</h3>
-                                                    </div>
-                                                    <div className="p-2">
-                                                        {Object.entries(visibleColumns).map(([key, value]) => (
-                                                            <label
-                                                                key={key}
-                                                                className="flex items-center gap-2 px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
-                                                            >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={value}
-                                                                    onChange={() => toggleColumn(key)}
-                                                                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                                                                />
-                                                                <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
-                                                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                                                </span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                    <div className="flex gap-2 px-2 py-2 border-t border-gray-200 dark:border-gray-700">
-                                                        <button
-                                                            onClick={showAllColumns}
-                                                            className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                                                        >
-                                                            Show All
-                                                        </button>
-                                                        <button
-                                                            onClick={resetColumns}
-                                                            className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                                                        >
-                                                            Reset
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-
-                                    {/* Results Count */}
-                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                        {sortedUsers.length} of {users.length}
-                                    </div>
+                                {/* Count */}
+                                <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap hidden sm:block">
+                                    {sortedUsers.length} of {users.length}
                                 </div>
                             </div>
-                        )}
+                        </div>
 
                         {/* Advanced Filters Panel */}
                         {showAdvancedResumesFilters && (
@@ -1013,66 +927,38 @@ const FilesManagement = () => {
                                         />
                                     </div>
 
-                                    {/* File Type Filter */}
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            File Type
-                                        </label>
-                                        <select
-                                            value={fileTypeFilter}
-                                            onChange={(e) => setFileTypeFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        >
-                                            <option value="">All Files</option>
-                                            <option value="resume">Resumes Only</option>
-                                            <option value="essay">Essays Only</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        {/* Hint Text */}
+                        <div className="mb-2 px-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                💡 Click on any row to view member files
+                            </p>
+                        </div>
+
+                        {/* Desktop Table - Hidden on mobile */}
+                        <div className="hidden md:block bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-                                            {visibleColumns.member && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Member
-                                                </th>
-                                            )}
-                                            {visibleColumns.email && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Email
-                                                </th>
-                                            )}
-                                            {visibleColumns.resumes && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Resumes
-                                                </th>
-                                            )}
-                                            {visibleColumns.essays && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Essays
-                                                </th>
-                                            )}
-                                            {visibleColumns.totalFiles && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Total
-                                                </th>
-                                            )}
-                                            {visibleColumns.actions && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                    Actions
-                                                </th>
-                                            )}
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Member
+                                            </th>
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Email
+                                            </th>
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Resumes
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                         {sortedUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan={visibleColumnCount} className="px-3 py-6 text-center">
+                                                <td colSpan="3" className="px-3 py-6 text-center">
                                                     <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                                                     <p className="text-sm font-medium text-gray-900 dark:text-white">No files found</p>
                                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -1098,63 +984,21 @@ const FilesManagement = () => {
                                                     aria-label={`View file details for ${user.full_name || 'member'}`}
                                                     className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                                 >
-                                                    {visibleColumns.member && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <span className="text-xs font-semibold text-gray-900 dark:text-white">
-                                                                {user.full_name}
-                                                            </span>
-                                                        </td>
-                                                    )}
-                                                    {visibleColumns.email && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                                                                {user.email}
-                                                            </span>
-                                                        </td>
-                                                    )}
-                                                    {visibleColumns.resumes && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
-                                                                {user.resumes?.length || 0}
-                                                            </span>
-                                                        </td>
-                                                    )}
-                                                    {visibleColumns.essays && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400">
-                                                                {user.essays?.length || 0}
-                                                            </span>
-                                                        </td>
-                                                    )}
-                                                    {visibleColumns.totalFiles && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                                {(user.resumes?.length || 0) + (user.essays?.length || 0)}
-                                                            </span>
-                                                        </td>
-                                                    )}
-                                                    {visibleColumns.actions && (
-                                                        <td className="px-3 py-2 text-left">
-                                                            <div className="flex items-center gap-2">
-                                                                {user.resumes && user.resumes.length > 0 && (
-                                                                    <a
-                                                                        href={user.resumes[0].url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                                                                    >
-                                                                        <EyeIcon className="h-3.5 w-3.5" />
-                                                                        View
-                                                                    </a>
-                                                                )}
-                                                                {((user.resumes?.length || 0) + (user.essays?.length || 0)) > 0 && (
-                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        {(user.resumes?.length || 0) + (user.essays?.length || 0)} file{((user.resumes?.length || 0) + (user.essays?.length || 0)) !== 1 ? 's' : ''}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    )}
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                                                            {user.full_name}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                            {user.email}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                                                            {user.resumes?.length || 0}
+                                                        </span>
+                                                    </td>
                                                 </tr>
                                             ))
                                         )}
@@ -1162,168 +1006,147 @@ const FilesManagement = () => {
                                 </table>
                             </div>
                         </div>
+
+                        {/* Mobile Cards - Hidden on desktop */}
+                        <div className="md:hidden space-y-2.5">
+                            {sortedUsers.length === 0 ? (
+                                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
+                                    <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No files found</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {users.length === 0
+                                            ? 'No members have uploaded files yet'
+                                            : 'Try adjusting your filters'}
+                                    </p>
+                                </div>
+                            ) : (
+                                sortedUsers.map((user) => (
+                                    <div
+                                        key={user.id}
+                                        onClick={() => handleUserClick(user)}
+                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                    >
+                                        {/* Card Header */}
+                                        <div className="px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                            <div className="flex items-center justify-between">
+                                                <div className="min-w-0 flex-1">
+                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                        {user.full_name}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                                                        {user.resumes?.length || 0} resumes
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </>
                 )}
 
                 {/* Resume Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <>
-                        {/* Compact Stats Bar */}
+                        {/* Unified Stats, Search & Filters Bar */}
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
-                            <div className="flex items-center justify-between">
-                                {/* Compact Stats */}
-                                <div className="flex items-center gap-6 flex-wrap text-xs">
-                                    <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {/* Expanded Stats */}
+                                <div className="flex items-center gap-4 text-sm">
+                                    <div className="flex items-center gap-1.5">
                                         <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                        <span className="font-medium text-gray-600 dark:text-gray-400">Total Requests:</span>
+                                        <span className="text-gray-600 dark:text-gray-400 hidden sm:inline">Total:</span>
                                         <span className="font-bold text-gray-900 dark:text-white">{resumeReviews.length}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
                                         <ClockIcon className="h-4 w-4 text-yellow-500" />
-                                        <span className="font-medium text-yellow-600 dark:text-yellow-400">Pending:</span>
+                                        <span className="text-yellow-600 dark:text-yellow-400 hidden sm:inline">Pending:</span>
                                         <span className="font-bold text-yellow-700 dark:text-yellow-400">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
                                         <DocumentTextIcon className="h-4 w-4 text-blue-500" />
-                                        <span className="font-medium text-blue-600 dark:text-blue-400">In Review:</span>
+                                        <span className="text-blue-600 dark:text-blue-400 hidden sm:inline">In Review:</span>
                                         <span className="font-bold text-blue-700 dark:text-blue-400">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
                                         <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                        <span className="font-medium text-green-600 dark:text-green-400">Completed:</span>
+                                        <span className="text-green-600 dark:text-green-400 hidden sm:inline">Completed:</span>
                                         <span className="font-bold text-green-700 dark:text-green-400">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => setShowAdvancedReviewsFilters(!showAdvancedReviewsFilters)}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedReviewsFilters
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                        }`}
+
+                                {/* Search */}
+                                <div className="relative w-56 sm:w-80">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                                    />
+                                </div>
+
+                                {/* Status Filter Dropdown */}
+                                <select
+                                    value={resumeReviewStatusFilter}
+                                    onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
+                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent min-w-[120px]"
                                 >
-                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
-                                    Advanced Filters
-                                    {(levelFilter || resumeReviewStatusFilter !== 'active') && (
-                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
-                                            {[levelFilter, resumeReviewStatusFilter !== 'active' ? resumeReviewStatusFilter : ''].filter(Boolean).length}
-                                        </span>
-                                    )}
-                                </button>
+                                    <option value="active">Active</option>
+                                    <option value="">All</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Review">In Review</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Declined">Declined</option>
+                                </select>
+
+                                {/* Level Filter Dropdown */}
+                                <select
+                                    value={levelFilter}
+                                    onChange={(e) => setLevelFilter(e.target.value)}
+                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent min-w-[120px]"
+                                >
+                                    <option value="">All Levels</option>
+                                    <option value="Intern">Intern</option>
+                                    <option value="Entry">Entry</option>
+                                    <option value="Mid">Mid</option>
+                                    <option value="Senior">Senior</option>
+                                </select>
+
+                                {/* Clear Filters Button */}
+                                {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setLevelFilter('');
+                                            setResumeReviewStatusFilter('active');
+                                        }}
+                                        className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                    >
+                                        <XMarkIcon className="h-4 w-4" />
+                                    </button>
+                                )}
+
+                                {/* Results Count */}
+                                <div className="hidden sm:block text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                    {filteredResumeReviews.length} of {resumeReviews.length}
+                                </div>
                             </div>
-
-
                         </div>
 
-                        {/* Search and Sort Bar - Only show when Advanced Filters is closed */}
-                        {!showAdvancedReviewsFilters && (
-                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    {/* Global Search */}
-                                    <div className="flex-1 relative">
-                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Search resume reviews (member, email, job title)..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                        />
-                                    </div>
-
-                                    {/* Results Count */}
-                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                        {filteredResumeReviews.length} of {resumeReviews.length}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Advanced Filters Panel */}
-                        {showAdvancedReviewsFilters && (
-                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-blue-600 dark:text-blue-500" />
-                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {/* Results Count */}
-                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                            {filteredResumeReviews.length} of {resumeReviews.length}
-                                        </div>
-                                        {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
-                                            <button
-                                                onClick={() => {
-                                                    setSearchQuery('');
-                                                    setLevelFilter('');
-                                                    setResumeReviewStatusFilter('active');
-                                                }}
-                                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                            >
-                                                <XMarkIcon className="h-3.5 w-3.5" />
-                                                Clear All
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {/* Search Filter */}
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Search Reviews
-                                        </label>
-                                        <div className="relative">
-                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search by member, email, or job title..."
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Status Filter */}
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Status Filter
-                                        </label>
-                                        <select
-                                            value={resumeReviewStatusFilter}
-                                            onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        >
-                                            <option value="active">Active (Pending + In Review)</option>
-                                            <option value="">All Statuses</option>
-                                            <option value="Pending">Pending Only</option>
-                                            <option value="In Review">In Review Only</option>
-                                            <option value="Completed">Completed Only</option>
-                                            <option value="Declined">Declined Only</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Level Filter */}
-                                    <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Level
-                                        </label>
-                                        <select
-                                            value={levelFilter}
-                                            onChange={(e) => setLevelFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        >
-                                            <option value="">All Levels</option>
-                                            <option value="Intern">Intern</option>
-                                            <option value="Entry">Entry</option>
-                                            <option value="Mid">Mid</option>
-                                            <option value="Senior">Senior</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {/* Hint Text */}
+                        <div className="mb-2 px-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                💡 <strong>Click any row</strong> to view details {isLeadOrAbove && '• Use Assign button to assign reviewers'}
+                            </p>
+                        </div>
 
                         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 shadow-sm transition-colors overflow-visible">
                             <div className="overflow-x-auto">
@@ -1350,7 +1173,14 @@ const FilesManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredResumeReviews.map((review) => (
-                                                <tr key={review.id} className="hover:bg-purple-50/30 dark:hover:bg-purple-900/10 transition-colors">
+                                                <tr 
+                                                    key={review.id} 
+                                                    onClick={() => {
+                                                        console.log('Row clicked:', review);
+                                                        handleViewReview(review);
+                                                    }}
+                                                    className="hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors cursor-pointer border-b border-gray-100 dark:border-gray-700"
+                                                >
                                                     <td className="px-4 py-3 text-left">
                                                         <div>
                                                             <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
@@ -1390,158 +1220,21 @@ const FilesManagement = () => {
                                                     {isLeadOrAbove && (
                                                         <td className="px-4 py-3 text-left">
                                                             <div className="flex items-center justify-end gap-2">
-                                                                <button
-                                                                    onClick={() => handleViewReview(review)}
-                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
-                                                                >
-                                                                    <EyeIcon className="h-3.5 w-3.5" />
-                                                                    View
-                                                                </button>
-                                                                {review.status === 'Pending' && (
+                                                                {review.status !== 'Completed' && (
                                                                     <button
-                                                                        onClick={() => setAssigningReview(review)}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setAssigningReview(review);
+                                                                        }}
                                                                         className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
                                                                     >
                                                                         <UserCircleIcon className="h-3.5 w-3.5" />
-                                                                        Assign
+                                                                        {review.reviewer_id ? 'Re-assign' : 'Assign'}
                                                                     </button>
                                                                 )}
                                                             </div>
                                                         </td>
                                                     )}
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </>
-                )}
-
-                {/* Essays Tab */}
-                {activeTab === 'essays' && (
-                    <>
-                        {/* Search and Filters Bar */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
-                            <div className="flex items-center gap-3">
-                                {/* Search Bar */}
-                                <div className="flex-1 relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={essaysSearch}
-                                        onChange={(e) => setEssaysSearch(e.target.value)}
-                                        placeholder="Search by name or email..."
-                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    />
-                                </div>
-
-                                {/* Sort Dropdown */}
-                                <div className="flex items-center gap-2">
-                                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                        Sort by:
-                                    </label>
-                                    <select
-                                        value={essaysSortBy}
-                                        onChange={(e) => setEssaysSortBy(e.target.value)}
-                                        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    >
-                                        <option value="name_asc">Name (A-Z)</option>
-                                        <option value="name_desc">Name (Z-A)</option>
-                                        <option value="email_asc">Email (A-Z)</option>
-                                        <option value="email_desc">Email (Z-A)</option>
-                                    </select>
-                                </div>
-
-                                {/* Results Count */}
-                                <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                    {filteredEssays.length} of {users.filter(u => u.referral_essay || u.cover_letter).length}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Table */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Member Name
-                                            </th>
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Email
-                                            </th>
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Referral Essay
-                                            </th>
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Cover Letter
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                        {filteredEssays.length === 0 ? (
-                                            <tr>
-                                                <td colSpan="4" className="px-3 py-6 text-center">
-                                                    <DocumentIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {users.filter(u => u.referral_essay || u.cover_letter).length === 0
-                                                            ? 'No essays found'
-                                                            : 'No members match your search'}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                        {users.filter(u => u.referral_essay || u.cover_letter).length === 0
-                                                            ? 'No members have submitted essays yet'
-                                                            : 'Try adjusting your search terms'}
-                                                    </p>
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            filteredEssays.map((user) => (
-                                                <tr
-                                                    key={user.id}
-                                                    className="hover:bg-gradient-to-r hover:from-green-50/30 hover:to-emerald-50/30 dark:hover:from-green-900/20 dark:hover:to-emerald-900/20 transition-all"
-                                                >
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white">
-                                                            {user.full_name}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
-                                                            {user.email}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-2 text-left">
-                                                        {user.referral_essay ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                                    <DocumentTextIcon className="h-3.5 w-3.5 mr-1" />
-                                                                    Submitted
-                                                                </span>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                                                                —
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-3 py-2 text-left">
-                                                        {user.cover_letter ? (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
-                                                                    <DocumentTextIcon className="h-3.5 w-3.5 mr-1" />
-                                                                    Submitted
-                                                                </span>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                                                                —
-                                                            </span>
-                                                        )}
-                                                    </td>
                                                 </tr>
                                             ))
                                         )}
@@ -2204,39 +1897,70 @@ const FilesManagement = () => {
                             <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                                 <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Review & Feedback</h4>
 
-                                {/* Status Selector */}
-                                <div className="mb-4">
-                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Update Status
-                                    </label>
-                                    <select
-                                        value={reviewStatus}
-                                        onChange={(e) => setReviewStatus(e.target.value)}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    >
-                                        <option value="Pending">Pending</option>
-                                        <option value="In Review">In Review</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Declined">Declined</option>
-                                    </select>
-                                </div>
+                                {isLeadOrAbove ? (
+                                    <>
+                                        {/* Status Selector */}
+                                        <div className="mb-4">
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Update Status
+                                            </label>
+                                            <select
+                                                value={reviewStatus}
+                                                onChange={(e) => setReviewStatus(e.target.value)}
+                                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            >
+                                                <option value="Pending">Pending</option>
+                                                <option value="In Review">In Review</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Declined">Declined</option>
+                                            </select>
+                                        </div>
 
-                                {/* Feedback Textarea */}
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Feedback & Comments
-                                    </label>
-                                    <textarea
-                                        value={reviewFeedback}
-                                        onChange={(e) => setReviewFeedback(e.target.value)}
-                                        rows={8}
-                                        placeholder="Provide detailed feedback on the resume, including strengths, areas for improvement, formatting suggestions, content recommendations, etc."
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                                    />
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                        {reviewFeedback.length} characters
-                                    </p>
-                                </div>
+                                        {/* Feedback Textarea */}
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Feedback & Comments
+                                            </label>
+                                            <textarea
+                                                value={reviewFeedback}
+                                                onChange={(e) => setReviewFeedback(e.target.value)}
+                                                rows={8}
+                                                placeholder="Provide detailed feedback on the resume, including strengths, areas for improvement, formatting suggestions, content recommendations, etc."
+                                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                            />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                {reviewFeedback.length} characters
+                                            </p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    /* Read-only view for volunteers */
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Current Status
+                                            </label>
+                                            <div className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
+                                                {selectedReview.status}
+                                            </div>
+                                        </div>
+
+                                        {selectedReview.feedback && (
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Feedback & Comments
+                                                </label>
+                                                <div className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+                                                    {selectedReview.feedback}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                            Only Lead and Admin can edit review status and feedback
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -2246,25 +1970,27 @@ const FilesManagement = () => {
                                 onClick={handleCloseReviewModal}
                                 className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
-                                Cancel
+                                {isLeadOrAbove ? 'Cancel' : 'Close'}
                             </button>
-                            <button
-                                onClick={handleSubmitReview}
-                                disabled={submittingReview}
-                                className="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                {submittingReview ? (
-                                    <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <CheckCircleIcon className="h-4 w-4" />
-                                        Save Review
-                                    </>
-                                )}
-                            </button>
+                            {isLeadOrAbove && (
+                                <button
+                                    onClick={handleSubmitReview}
+                                    disabled={submittingReview}
+                                    className="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {submittingReview ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircleIcon className="h-4 w-4" />
+                                            Save Review
+                                        </>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
