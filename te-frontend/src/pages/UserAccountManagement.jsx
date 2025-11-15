@@ -237,7 +237,8 @@ const UserAccountManagement = () => {
                     ) : activeTab === 'privileged' ? (
                         /* Privileged Users Table */
                         <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div className="overflow-x-auto">
+                            {/* Desktop Table - Hidden on mobile */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full min-w-[640px]">
                                     <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
@@ -345,11 +346,91 @@ const UserAccountManagement = () => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Mobile Card View - Hidden on desktop */}
+                            <div className="md:hidden space-y-2.5 p-3">
+                                {visiblePrivilegedUsers.length === 0 ? (
+                                    <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        No privileged accounts found
+                                    </div>
+                                ) : (
+                                    visiblePrivilegedUsers.map((user) => {
+                                        const canEdit = isAdmin || (isLead && user.role < 4);
+                                        return (
+                                            <div
+                                                key={user._id || user.id}
+                                                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                                            >
+                                                {/* Card Header */}
+                                                <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
+                                                    <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center flex-shrink-0">
+                                                        <ShieldCheckIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                            {user.username}
+                                                        </h3>
+                                                    </div>
+                                                    <span className={`text-[9px] font-bold rounded-md px-2 py-1 border ${getRoleBadgeColor(user.role)}`}>
+                                                        {getRoleName(user.role)}
+                                                    </span>
+                                                </div>
+
+                                                {/* Card Body */}
+                                                <div className="px-3 py-2.5">
+                                                    {/* Status */}
+                                                    <div className="mb-2.5 py-2 border-b border-gray-100 dark:border-gray-700">
+                                                        {user.is_active ? (
+                                                            <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                                                                <CheckCircleIcon className="h-4 w-4" />
+                                                                <span className="text-xs font-medium">Active</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+                                                                <XCircleIcon className="h-4 w-4" />
+                                                                <span className="text-xs font-medium">Inactive</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Action Buttons */}
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleEditPrivileged(user)}
+                                                            disabled={!canEdit}
+                                                            className={`flex-1 px-4 py-1.5 rounded-md font-medium transition-all text-xs flex items-center justify-center gap-1.5 ${canEdit
+                                                                ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700'
+                                                                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                            }`}
+                                                        >
+                                                            <PencilIcon className="h-3.5 w-3.5" />
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => toggleUserStatus(user._id || user.id, user.is_active, true)}
+                                                            disabled={!canEdit}
+                                                            className={`flex-1 px-4 py-1.5 rounded-md font-medium transition-all text-xs ${!canEdit
+                                                                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                                : user.is_active
+                                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                                                                    : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                                                            }`}
+                                                        >
+                                                            {user.is_active ? 'Deactivate' : 'Activate'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
                         </div>
                     ) : (
                         /* Member Users Table */
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div className="overflow-x-auto">
+                            {/* Desktop Table - Hidden on mobile */}
+                            <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full min-w-[640px]">
                                     <thead className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
@@ -433,10 +514,88 @@ const UserAccountManagement = () => {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                            ))
+                                                ))
                                         )}
                                     </tbody>
                                 </table>
+                            </div>
+
+                            {/* Mobile Card View - Hidden on desktop */}
+                            <div className="md:hidden space-y-2.5 p-3">
+                                {filteredMemberUsers.length === 0 ? (
+                                    <div className="p-8 text-center text-xs text-gray-500 dark:text-gray-400">
+                                        No member accounts found
+                                    </div>
+                                ) : (
+                                    filteredMemberUsers.map((user) => (
+                                        <div
+                                            key={user._id || user.id}
+                                            className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                                        >
+                                            {/* Card Header */}
+                                            <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-gray-200 dark:border-gray-700">
+                                                <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+                                                    <UserCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                        {user.full_name}
+                                                    </h3>
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Card Body */}
+                                            <div className="px-3 py-2.5">
+                                                {/* Info */}
+                                                <div className="space-y-1 mb-2.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">University</span>
+                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate ml-2">
+                                                            {user.university || 'N/A'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Status</span>
+                                                        {user.is_active ? (
+                                                            <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                                                                <CheckCircleIcon className="h-4 w-4" />
+                                                                <span className="text-xs font-medium">Active</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                                                                <XCircleIcon className="h-4 w-4" />
+                                                                <span className="text-xs font-medium">Inactive</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Action Buttons */}
+                                                <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                                    <button
+                                                        onClick={() => handleViewMember(user)}
+                                                        className="group relative flex-1 px-6 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-300 ease-out flex items-center justify-center gap-2 overflow-hidden"
+                                                    >
+                                                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                                                        <span className="relative z-10">View</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleUserStatus(user._id || user.id, user.is_active, false)}
+                                                        className={`px-4 py-1.5 rounded-md font-medium transition-all text-xs ${user.is_active
+                                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                                                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                                                        }`}
+                                                    >
+                                                        {user.is_active ? 'Deactivate' : 'Activate'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     )}

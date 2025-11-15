@@ -11,7 +11,6 @@ import {
     ClockIcon,
     CheckCircleIcon,
     PaperAirplaneIcon,
-    EyeIcon,
     XMarkIcon,
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
@@ -66,9 +65,9 @@ const ReferralsManagement = () => {
         }
     }, [isReferrer]);
 
-    // Advanced Features State
-    const [sortField, setSortField] = useState('date');
-    const [sortOrder, setSortOrder] = useState('desc');
+    // Advanced Features State - Sort controls hidden for referrers but sorting logic still active with defaults
+    const [sortField] = useState('date'); // Default sort by date for referrers
+    const [sortOrder] = useState('desc'); // Default descending order for referrers
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
     const [showDateFilter, setShowDateFilter] = useState(false);
@@ -670,20 +669,6 @@ const ReferralsManagement = () => {
                                         />
                                     </div>
 
-                                    {/* Company Filter */}
-                                    <div className="col-span-1 md:col-span-3">
-                                        <input
-                                            type="text"
-                                            placeholder="Company..."
-                                            value={companyFilter}
-                                            onChange={(e) => setCompanyFilter(e.target.value)}
-                                            className="w-full px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
-                                        />
-                                    </div>
-
-
-
-
                                     {/* Date Range Toggle */}
                                     <div className="col-span-2 md:col-span-1">
                                         <button
@@ -772,11 +757,7 @@ const ReferralsManagement = () => {
                                             Member: {memberFilter}
                                         </span>
                                     )}
-                                    {!isReferrer && companyFilter && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                                            Company: {companyFilter}
-                                        </span>
-                                    )}
+
                                     {!isReferrer && (dateRange.start || dateRange.end) && (
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                                             Date: {dateRange.start || '...'} to {dateRange.end || '...'}
@@ -799,7 +780,15 @@ const ReferralsManagement = () => {
                 {activeTab === 'referrals' && (
                     <>
                         {/* Desktop Table View - Hidden on mobile */}
-                        <div className="hidden md:block bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        <div className="hidden md:block">
+                            {/* Hint Text */}
+                            <div className="mb-2 px-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    💡 Click on any row to view details
+                                </p>
+                            </div>
+                            
+                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
@@ -862,7 +851,11 @@ const ReferralsManagement = () => {
                                             sortedReferrals.map((ref) => (
                                                 <tr
                                                     key={ref.id}
-                                                    className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all"
+                                                    onClick={() => {
+                                                        setSelectedReferral(ref);
+                                                        setIsManagementModalOpen(true);
+                                                    }}
+                                                    className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
                                                 >
                                                     {visibleColumns.company && (
                                                         <td className="px-4 py-3">
@@ -895,7 +888,10 @@ const ReferralsManagement = () => {
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-left font-medium text-gray-900 dark:text-white text-sm">{ref.user_name}</span>
                                                                     <button
-                                                                        onClick={() => copyToClipboard(ref.user_name, `name-${ref.id}`)}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            copyToClipboard(ref.user_name, `name-${ref.id}`);
+                                                                        }}
                                                                         className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                         title="Copy name"
                                                                     >
@@ -909,7 +905,10 @@ const ReferralsManagement = () => {
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                                     <button
-                                                                        onClick={() => copyToClipboard(ref.user_email, `email-${ref.id}`)}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            copyToClipboard(ref.user_email, `email-${ref.id}`);
+                                                                        }}
                                                                         className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                         title="Copy email"
                                                                     >
@@ -928,7 +927,10 @@ const ReferralsManagement = () => {
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-left text-xs text-gray-600 dark:text-gray-400">{ref.user_email}</span>
                                                                 <button
-                                                                    onClick={() => copyToClipboard(ref.user_email, `email-standalone-${ref.id}`)}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        copyToClipboard(ref.user_email, `email-standalone-${ref.id}`);
+                                                                    }}
                                                                     className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                     title="Copy email"
                                                                 >
@@ -947,7 +949,10 @@ const ReferralsManagement = () => {
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-left text-sm text-gray-700 dark:text-gray-200">{ref.phone_number}</span>
                                                                     <button
-                                                                        onClick={() => copyToClipboard(ref.phone_number, `phone-${ref.id}`)}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            copyToClipboard(ref.phone_number, `phone-${ref.id}`);
+                                                                        }}
                                                                         className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                                                         title="Copy phone number"
                                                                     >
@@ -964,7 +969,7 @@ const ReferralsManagement = () => {
                                                         </td>
                                                     )}
                                                     {visibleColumns.status && (
-                                                        <td className="px-4 py-3">
+                                                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                                             <div className="flex justify-start">
                                                                 <select
                                                                     value={ref.status}
@@ -1021,16 +1026,7 @@ const ReferralsManagement = () => {
                                                     {visibleColumns.actions && (
                                                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                                             <div className="flex items-center justify-start gap-2">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSelectedReferral(ref);
-                                                                        setIsManagementModalOpen(true);
-                                                                    }}
-                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
-                                                                >
-                                                                    <EyeIcon className="h-3.5 w-3.5" />
-                                                                    View
-                                                                </button>
+                                                                {/* Actions column available for future use */}
                                                             </div>
                                                         </td>
                                                     )}
@@ -1040,10 +1036,19 @@ const ReferralsManagement = () => {
                                     </tbody>
                                 </table>
                             </div>
+                            </div>
                         </div>
 
                         {/* Mobile Card View - Hidden on desktop */}
-                        <div className="md:hidden space-y-2.5">
+                        <div className="md:hidden">
+                            {/* Hint Text */}
+                            <div className="mb-2 px-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    💡 Tap on any card to view details
+                                </p>
+                            </div>
+                            
+                            <div className="space-y-2.5">
                             {sortedReferrals.length === 0 ? (
                                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
                                     <p className="text-sm text-gray-500 dark:text-gray-400">No referral requests found</p>
@@ -1052,7 +1057,11 @@ const ReferralsManagement = () => {
                                 sortedReferrals.map((ref) => (
                                     <div
                                         key={ref.id}
-                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                                        onClick={() => {
+                                            setSelectedReferral(ref);
+                                            setIsManagementModalOpen(true);
+                                        }}
+                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                     >
                                         {/* Compact Header */}
                                         <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -1081,6 +1090,7 @@ const ReferralsManagement = () => {
                                                 <select
                                                     value={ref.status}
                                                     onChange={(e) => handleInlineStatusUpdate(ref.id, e.target.value)}
+                                                    onClick={(e) => e.stopPropagation()}
                                                     className={`text-[9px] font-bold rounded-md px-2 py-1 focus:outline-none border ${ref.status === 'Completed'
                                                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700'
                                                         : ref.status === 'Pending'
@@ -1152,24 +1162,12 @@ const ReferralsManagement = () => {
                                                 </div>
                                             )}
 
-                                            {/* View Button */}
-                                            {visibleColumns.actions && (
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedReferral(ref);
-                                                        setIsManagementModalOpen(true);
-                                                    }}
-                                                    className="group relative mx-auto px-8 py-2 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 text-white text-xs font-semibold rounded-full shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all duration-300 ease-out flex items-center justify-center gap-2 overflow-hidden"
-                                                >
-                                                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-                                                    <EyeIcon className="h-4 w-4 relative z-10" />
-                                                    <span className="relative z-10">View</span>
-                                                </button>
-                                            )}
+                                            {/* View Button - Removed, click card to view */}
                                         </div>
                                     </div>
                                 ))
                             )}
+                        </div>
                         </div>
                     </>
                 )}                {/* Companies Table - Only for Lead+ */}

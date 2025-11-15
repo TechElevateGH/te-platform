@@ -528,9 +528,11 @@ const Referrals = () => {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
+                                <>
+                                    {/* Desktop Table */}
+                                    <div className="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
                                             <thead>
                                                 <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700 transition-colors">
                                                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
@@ -627,11 +629,91 @@ const Referrals = () => {
                                         </table>
                                     </div>
                                 </div>
+
+                                {/* Mobile Cards */}
+                                <div className="md:hidden space-y-2.5">
+                                    {filteredCompanies.map((company) => {
+                                        const materials = company.referral_materials || {};
+                                        return (
+                                            <div
+                                                key={company.id}
+                                                className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow ${isMember ? 'cursor-pointer' : 'opacity-60'}`}
+                                            >
+                                                {/* Card Header */}
+                                                <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                                    <img
+                                                        src={getCompanyLogoUrl(company.name)}
+                                                        alt={company.name}
+                                                        className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 object-contain flex-shrink-0"
+                                                        onError={handleCompanyLogoError}
+                                                    />
+                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">
+                                                        {company.name}
+                                                    </h3>
+                                                </div>
+
+                                                {/* Card Body */}
+                                                <div className="px-3 py-2.5">
+                                                    {/* Requirements */}
+                                                    <div className="mb-2.5">
+                                                        <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase mb-1.5">Requirements</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {materials.resume && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {resumes.length !== 0 ? (
+                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                    ) : (
+                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                    )}
+                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Resume</span>
+                                                                </div>
+                                                            )}
+                                                            {materials.essay && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {userInfo?.essay && userInfo.essay.trim() !== '' ? (
+                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                    ) : (
+                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                    )}
+                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Essay</span>
+                                                                </div>
+                                                            )}
+                                                            {materials.phone_number && (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
+                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                    ) : (
+                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                    )}
+                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Contact</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Action Button */}
+                                                    <button
+                                                        onClick={() => handleReferralAction(company)}
+                                                        disabled={!isMember}
+                                                        className={`group relative mx-auto px-8 py-2 text-white text-xs font-semibold rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ${isMember
+                                                            ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95'
+                                                            : 'bg-gray-400 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        {isMember && (
+                                                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                                                        )}
+                                                        <span className="relative z-10">{company.referral_link ? 'Open Link' : 'Request'}</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                </>
                             )}
                         </div>
-                    )}
-
-                    {/* My Requests View (for all authenticated users) */}
+                    )}                    {/* My Requests View (for all authenticated users) */}
                     {viewMode === 'my-requests' && (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <MyReferrals onFeedbackCount={handleFeedbackCount} />

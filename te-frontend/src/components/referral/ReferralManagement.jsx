@@ -130,46 +130,46 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                         >
                             <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
                                 {/* Header */}
-                                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-6">
+                                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-3 sm:px-6 py-4 sm:py-6">
                                     <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                                                <DocumentTextIcon className="h-6 w-6 text-white" />
+                                        <div className="flex items-center gap-2 sm:gap-3">
+                                            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+                                                <DocumentTextIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                                             </div>
                                             <div>
-                                                <Dialog.Title className="text-xl font-bold text-white">
+                                                <Dialog.Title className="text-base sm:text-xl font-bold text-white">
                                                     Referral Request
                                                 </Dialog.Title>
-                                                <p className="text-sm text-blue-100 mt-1">
+                                                <p className="text-xs sm:text-sm text-blue-100 mt-0.5 sm:mt-1 hidden sm:block">
                                                     Review and manage this referral request
                                                 </p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => setIsOpen(false)}
-                                            className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                                            className="rounded-lg p-1.5 sm:p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors flex-shrink-0"
                                         >
-                                            <XMarkIcon className="h-6 w-6" />
+                                            <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Content */}
-                                <div className="px-6 py-6 space-y-6">
+                                <div className="px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
                                     {/* Member Information */}
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-4">
+                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4">
                                         <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                             <UserIcon className="h-4 w-4" />
                                             Member Information
                                         </h3>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Name</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="font-semibold text-gray-900 dark:text-white">{referral.user_name}</p>
+                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.user_name}</p>
                                                     <button
                                                         onClick={() => copyToClipboard(referral.user_name, 'name')}
-                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
                                                         title="Copy name"
                                                     >
                                                         {copiedField === 'name' ? (
@@ -183,10 +183,10 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="font-semibold text-gray-900 dark:text-white">{referral.user_email}</p>
+                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.user_email}</p>
                                                     <button
                                                         onClick={() => copyToClipboard(referral.user_email, 'email')}
-                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
                                                         title="Copy email"
                                                     >
                                                         {copiedField === 'email' ? (
@@ -198,14 +198,14 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                 </div>
                                             </div>
                                             {referral.phone_number && (
-                                                <div className="col-span-2">
+                                                <div className="sm:col-span-2">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Contact</p>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                        <p className="font-semibold text-gray-900 dark:text-white">{referral.phone_number}</p>
+                                                        <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                                        <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{referral.phone_number}</p>
                                                         <button
                                                             onClick={() => copyToClipboard(referral.phone_number, 'phone_number')}
-                                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
                                                             title="Copy contact"
                                                         >
                                                             {copiedField === 'phone_number' ? (
@@ -221,34 +221,34 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                     </div>
 
                                     {/* Position Details */}
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-4">
+                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4">
                                         <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                             <BriefcaseIcon className="h-4 w-4" />
                                             Position Details
                                         </h3>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Company</p>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <img
                                                         src={getCompanyLogoUrl(referral.company.name)}
                                                         alt={referral.company.name}
-                                                        className="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600"
+                                                        className="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600 flex-shrink-0"
                                                         onError={handleCompanyLogoError}
                                                     />
-                                                    <p className="font-semibold text-gray-900 dark:text-white">{referral.company.name}</p>
+                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.company.name}</p>
                                                 </div>
                                             </div>
                                             <div>
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Role</p>
-                                                <p className="font-semibold text-gray-900 dark:text-white mt-1">{referral.role}</p>
+                                                <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mt-1 truncate">{referral.role}</p>
                                             </div>
-                                            <div className="col-span-2">
+                                            <div className="sm:col-span-2">
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">Job Title</p>
-                                                <p className="font-semibold text-gray-900 dark:text-white mt-1">{referral.job_title}</p>
+                                                <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mt-1 break-words">{referral.job_title}</p>
                                             </div>
                                             {referral.job_id && (
-                                                <div className="col-span-2">
+                                                <div className="sm:col-span-2">
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">Job ID(s)</p>
                                                     <div className="flex flex-wrap gap-2 mt-1">
                                                         {referral.job_id.split(/[,;\s]+/).filter(id => id.trim()).map((id, index) => (
@@ -269,14 +269,14 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                     <div className="space-y-3">
                                         {referral.resume && (
                                             <div>
-                                                <div className="flex items-center justify-between mb-2">
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                                                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                                         Resume
                                                     </label>
                                                     <a
                                                         href={referral.resume}
                                                         download
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
                                                     >
                                                         <ArrowDownTrayIcon className="h-4 w-4" />
                                                         Download Resume
@@ -296,14 +296,14 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
 
                                         {referral.essay && (
                                             <div>
-                                                <div className="flex items-center justify-between mb-2">
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                                                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
                                                         <DocumentDuplicateIcon className="h-4 w-4" />
                                                         Referral Essay
                                                     </label>
                                                     <button
                                                         onClick={() => copyToClipboard(referral.essay, 'essay')}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
                                                     >
                                                         {copiedField === 'essay' ? (
                                                             <>
@@ -318,7 +318,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                         )}
                                                     </button>
                                                 </div>
-                                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 max-h-48 overflow-y-auto">
+                                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-4 max-h-48 overflow-y-auto">
                                                     <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                                                         {referral.essay}
                                                     </p>
@@ -331,7 +331,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                                 <ChatBubbleLeftRightIcon className="h-4 w-4" />
                                                 Request Note
                                             </label>
-                                            <div className="mt-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4">
+                                            <div className="mt-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 sm:p-4">
                                                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                                                     {referral.request_note || 'No note provided'}
                                                 </p>
@@ -348,7 +348,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                     </div>
 
                                     {/* Management Section */}
-                                    <div className="border-t dark:border-gray-700 pt-6 space-y-4">
+                                    <div className="border-t dark:border-gray-700 pt-4 sm:pt-6 space-y-4">
                                         <div>
                                             <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Review & Update Status</h3>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">Update the status and add feedback notes for this referral request</p>
@@ -383,7 +383,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex items-center justify-end gap-3">
+                                <div className="bg-gray-50 dark:bg-gray-700 px-3 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="px-6 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
@@ -394,7 +394,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                     <button
                                         onClick={handleSubmit}
                                         disabled={isSubmitting}
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isSubmitting ? (
                                             <>
@@ -404,7 +404,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                         ) : (
                                             <>
                                                 <CheckCircleIcon className="h-5 w-5" />
-                                                Update Referral
+                                                Update
                                             </>
                                         )}
                                     </button>
