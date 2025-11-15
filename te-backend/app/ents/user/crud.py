@@ -106,12 +106,7 @@ def create_user(
     if user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
-                "error": {
-                    "email": data.email,
-                    "message": "The user with this email already exists!",
-                }
-            },
+            detail=f"An account with email {data.email} already exists. Please sign in instead.",
         )
 
     # Hash the password

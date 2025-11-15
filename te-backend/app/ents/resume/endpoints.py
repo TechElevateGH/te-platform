@@ -316,12 +316,12 @@ def get_resume_review_requests(
     Get resume review requests.
     - If user_id is provided: Returns reviews for that specific user
     - If user_id is not provided: Returns all reviews (requires Volunteer+ role)
-    
+
     Members can only view their own reviews.
     Volunteers and above can view all reviews or filter by user_id.
     """
     user_role = get_user_role(current_user)
-    
+
     # If filtering by specific user
     if user_id:
         # Members can only view their own reviews
@@ -335,7 +335,7 @@ def get_resume_review_requests(
         # Viewing all reviews requires Volunteer+ role
         require_volunteer(current_user)
         reviews = resume_crud.read_all_review_requests(db)
-    
+
     return {"reviews": reviews}
 
 
@@ -483,7 +483,7 @@ def get_review_assignments(
     - If user_id is not provided: Returns all assignments (Admin only)
     """
     user_role = get_user_role(current_user)
-    
+
     # If filtering by specific user
     if user_id:
         # Volunteers and above can view their own assignments
@@ -499,7 +499,7 @@ def get_review_assignments(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Volunteers and above only",
             )
-        
+
         reviews = resume_crud.get_reviews_assigned_to_user(db, user_id=user_id)
         return {"reviews": reviews}
     else:
@@ -509,6 +509,6 @@ def get_review_assignments(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Admin access required",
             )
-        
+
         assignments = resume_crud.get_all_assigned_reviews(db)
         return {"assignments": assignments}
