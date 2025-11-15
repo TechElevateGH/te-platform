@@ -26,13 +26,13 @@ const classNames = (...classes) => {
 
 const ApplicationInfo = ({ applicationId, setApplicationId, application, setApplication,
     archiveUserApplicationRequest, deleteUserApplicationRequest, refreshApplications }) => {
-    const { accessToken, userRole } = useAuth();
+    const { accessToken, userRole, userId } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [updateData, setUpdateData] = useState({});
 
-    // Check user role - only Member (1) and Admin (5) can edit
+    // Check user role - Member (1), Lead (4), and Admin (5) can edit
     const userRoleInt = userRole ? parseInt(userRole) : 0;
-    const canEdit = userRoleInt === 1 || userRoleInt === 5;
+    const canEdit = userRoleInt === 1 || userRoleInt === 4 || userRoleInt === 5;
 
     const getUserApplicationRequest = useCallback(async () => {
         axiosInstance.get(`/applications/${applicationId}`,
@@ -105,7 +105,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
             referred: updateData.referred === "Yes" || updateData.referred === true
         };
 
-        axiosInstance.put(`/applications/${application.id}`,
+        axiosInstance.patch(`/users/${userId}/applications/${application.id}`,
             dataToSend,
             {
                 headers: {
@@ -113,7 +113,8 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                 },
             })
             .then((response) => {
-                setApplication(response.data.application);
+                // Fetch the updated application to get the latest data
+                getUserApplicationRequest();
                 setIsEditing(false);
                 // Trigger refresh of applications list
                 if (refreshApplications) {

@@ -141,16 +141,16 @@ const Referrals = () => {
     // Check if user has all required materials for a company
     const hasAllRequirements = useCallback((company) => {
         const materials = company.referral_materials || {};
-        
+
         // Check resume requirement
         if (materials.resume && resumes.length === 0) return false;
-        
+
         // Check essay requirement
         if (materials.essay && (!userInfo?.referral_essay || userInfo.referral_essay.trim() === '')) return false;
-        
+
         // Check phone number requirement
         if (materials.phone_number && (!userInfo?.phone_number || userInfo.phone_number.trim() === '')) return false;
-        
+
         return true;
     }, [resumes, userInfo]);    // Filters for All Requests view
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending

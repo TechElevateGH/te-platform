@@ -250,3 +250,31 @@ def archive_applications(
             )
 
     return {"message": f"Successfully archived {len(application_ids)} application(s)"}
+
+
+@applications_router.delete("/delete", status_code=status.HTTP_200_OK)
+def delete_applications(
+    db: Database = Depends(session.get_db),
+    *,
+    application_ids: list[str],  # List of application UUIDs
+    current_user=Depends(user_dependencies.get_current_member_only),
+):
+    """
+    Delete multiple applications permanently.
+
+    - **application_ids**: List of application UUIDs to delete
+    - Returns: Success message
+
+    Members can only delete their own applications.
+    """
+    user_id = str(current_user.id)
+
+    for app_id in application_ids:
+        if not application_crud.delete_application(
+            db, user_id=user_id, application_id=app_id
+        ):
+            raise HTTPException(
+                status_code=404, detail=f"Application {app_id} not found"
+            )
+
+    return {"message": f"Successfully deleted {len(application_ids)} application(s)"}
