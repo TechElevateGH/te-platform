@@ -1,13 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkedin, faGithub, faTwitter, faFacebook, faInstagram, faSlack } from '@fortawesome/free-brands-svg-icons';
+import { faLinkedin, faSlack } from '@fortawesome/free-brands-svg-icons';
 import { useAuth } from '../../context/AuthContext';
 
 const socialLinks = [
     { name: 'LinkedIn', icon: faLinkedin, href: 'https://www.linkedin.com/company/techelevategh/', color: 'hover:text-blue-500' },
-    { name: 'GitHub', icon: faGithub, href: 'https://github.com/TechElevateGH', color: 'hover:text-gray-900 dark:hover:text-gray-300' },
-    { name: 'Twitter', icon: faTwitter, href: 'https://twitter.com', color: 'hover:text-blue-400' },
-    { name: 'Facebook', icon: faFacebook, href: 'https://facebook.com', color: 'hover:text-blue-600' },
-    { name: 'Instagram', icon: faInstagram, href: 'https://instagram.com', color: 'hover:text-pink-600' },
 ];
 
 const Footer = () => {

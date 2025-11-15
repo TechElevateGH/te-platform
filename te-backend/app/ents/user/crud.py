@@ -19,8 +19,10 @@ PASSWORD_RESET_MAX_ATTEMPTS = 5
 
 
 def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.MemberUser]:
-    """Read user by email from MongoDB"""
-    user_data = db.member_users.find_one({"email": email})
+    """Read user by email from MongoDB (case-insensitive)"""
+    user_data = db.member_users.find_one(
+        {"email": {"$regex": f"^{email}$", "$options": "i"}}
+    )
     if user_data:
         return user_models.MemberUser(**user_data)
     return None
@@ -81,6 +83,7 @@ def read_all_privileged_users(db: Database) -> list[dict]:
                 "username": user.get("username"),
                 "role": user.get("role"),
                 "is_active": user.get("is_active", True),
+                "lead_token": user.get("lead_token", ""),  # Include token for edit
             }
         )
     return result
@@ -114,6 +117,7 @@ def create_user(
 
     # Create user data dict
     user_dict = data.dict()
+    user_dict["email"] = data.email.lower()  # Normalize email to lowercase
     user_dict["password"] = hashed_password
     user_dict["full_name"] = get_user_full_name(
         data.first_name, data.middle_name, data.last_name
@@ -131,8 +135,10 @@ def create_user(
 def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
     """Create a new Lead/Admin account (Admin only) - uses provided token"""
 
-    # Check if username already exists in privileged_users
-    existing_user = db.privileged_users.find_one({"username": data.username})
+    # Check if username already exists in privileged_users (case-insensitive)
+    existing_user = db.privileged_users.find_one(
+        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+    )
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
@@ -166,8 +172,10 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
 
 def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> dict:
     """Create a new Referrer account (Admin only) - uses provided token and company"""
-    # Check if username already exists in privileged_users
-    existing_user = db.privileged_users.find_one({"username": data.username})
+    # Check if username already exists in privileged_users (case-insensitive)
+    existing_user = db.privileged_users.find_one(
+        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+    )
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
@@ -319,10 +327,13 @@ def update_privileged_user(
     # Build update dictionary
     update_data = {}
 
-    # Check username uniqueness if updating username
+    # Check username uniqueness if updating username (case-insensitive)
     if data.username is not None:
         username_exists = db.privileged_users.find_one(
-            {"username": data.username, "_id": {"$ne": ObjectId(user_id)}}
+            {
+                "username": {"$regex": f"^{data.username}$", "$options": "i"},
+                "_id": {"$ne": ObjectId(user_id)},
+            }
         )
         if username_exists:
             raise HTTPException(

@@ -25,7 +25,7 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
         if (account) {
             setFormData({
                 username: account.username || '',
-                token: '', // Don't pre-fill token for security
+                token: account.lead_token || '',  // Pre-fill with current token
                 is_active: account.is_active !== false
             });
         }
@@ -193,7 +193,7 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                         {/* Token */}
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                New Access Token
+                                                Access Token
                                             </label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -204,11 +204,11 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                                     value={formData.token}
                                                     onChange={(e) => handleChange('token', e.target.value)}
                                                     className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                                                    placeholder="Enter new token (optional)"
+                                                    placeholder="Enter token"
                                                 />
                                             </div>
                                             <p className="mt-1.5 text-xs text-gray-500">
-                                                Leave blank to keep current token
+                                                Current token is shown. Modify to change or leave blank to keep current.
                                             </p>
                                         </div>
 

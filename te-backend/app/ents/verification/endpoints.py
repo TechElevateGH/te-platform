@@ -205,12 +205,12 @@ def verify_email_change(
     except HTTPException:
         raise
 
-    # Update user's email
+    # Update user's email (normalize to lowercase)
     db.member_users.update_one(
         {"_id": current_user.id},
         {
             "$set": {
-                "email": data.new_email,
+                "email": data.new_email.lower(),  # Normalize email to lowercase
                 "email_verified": True,  # New email is now verified
             }
         },

@@ -244,8 +244,10 @@ def management_login_access_token(
     """
     logger.info(f"Management login attempt for user: {data.username}")
 
-    # Find user in privileged_users collection
-    user_data = db.privileged_users.find_one({"username": data.username})
+    # Find user in privileged_users collection (case-insensitive)
+    user_data = db.privileged_users.find_one(
+        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+    )
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
@@ -507,8 +509,10 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
         existing_user = db.member_users.find_one({"google_id": google_user_id})
 
         if not existing_user:
-            # Check if user exists with this email (legacy google users may be in member_users)
-            existing_user = db.member_users.find_one({"email": email})
+            # Check if user exists with this email (case-insensitive for legacy users)
+            existing_user = db.member_users.find_one(
+                {"email": {"$regex": f"^{email}$", "$options": "i"}}
+            )
 
             if existing_user:
                 # Link Google account to existing user
@@ -529,7 +533,7 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
             else:
                 # Create new user
                 new_user_data = {
-                    "email": email,
+                    "email": email.lower(),  # Normalize email to lowercase
                     "first_name": first_name,
                     "last_name": last_name,
                     "full_name": f"{first_name} {last_name}".strip(),

@@ -123,6 +123,7 @@ const UserAccountManagement = () => {
             username: user.username,
             role: user.role,
             is_active: user.is_active,
+            lead_token: user.lead_token || '',  // Include current token
         });
         setShowEditPrivileged(true);
     };
