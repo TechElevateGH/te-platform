@@ -145,8 +145,8 @@ const MyReferrals = ({ onFeedbackCount }) => {
         const Icon = config.icon;
 
         return (
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${config.bg} ${config.text} ${config.border} ${config.pulse ? 'animate-pulse' : ''}`}>
-                <Icon className="h-4 w-4" />
+            <span className={`inline-flex flex-row items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border whitespace-nowrap ${config.bg} ${config.text} ${config.border} ${config.pulse ? 'animate-pulse' : ''}`}>
+                <Icon className="h-4 w-4 flex-shrink-0" />
                 {config.label}
             </span>
         );
