@@ -25,7 +25,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const hasResume = availableResumes.length > 0;
 
     // Check user's available materials
-    const hasReferralEssay = userInfo?.essay && userInfo.essay.trim() !== '';
+    const hasReferralEssay = userInfo?.referral_essay && userInfo.referral_essay.trim() !== '';
     const hasPhoneNumber = userInfo?.phone_number && userInfo.phone_number.trim() !== '';
 
     // Company requirements
@@ -94,7 +94,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
         phone_number: userInfo?.phone_number || "",
-        essay: userInfo?.essay || "",
+        essay: userInfo?.referral_essay || "",
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
 

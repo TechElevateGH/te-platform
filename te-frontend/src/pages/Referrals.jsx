@@ -138,7 +138,21 @@ const Referrals = () => {
         }
     }, [isMember, setReferralCompanyId, setSelectedCompany]);
 
-    // Filters for All Requests view
+    // Check if user has all required materials for a company
+    const hasAllRequirements = useCallback((company) => {
+        const materials = company.referral_materials || {};
+        
+        // Check resume requirement
+        if (materials.resume && resumes.length === 0) return false;
+        
+        // Check essay requirement
+        if (materials.essay && (!userInfo?.referral_essay || userInfo.referral_essay.trim() === '')) return false;
+        
+        // Check phone number requirement
+        if (materials.phone_number && (!userInfo?.phone_number || userInfo.phone_number.trim() === '')) return false;
+        
+        return true;
+    }, [resumes, userInfo]);    // Filters for All Requests view
     const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
     const [companyFilter, setCompanyFilter] = useState('');
     const [memberFilter, setMemberFilter] = useState('');
@@ -556,12 +570,13 @@ const Referrals = () => {
                                                 <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                                                     {filteredCompanies.map((company, index) => {
                                                         const materials = company.referral_materials || {};
+                                                        const canRequest = isMember && (company.referral_link || hasAllRequirements(company));
                                                         return (
                                                             <tr
                                                                 key={company.id}
-                                                                onClick={() => handleReferralAction(company)}
-                                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
-                                                                title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
+                                                                onClick={() => canRequest && handleReferralAction(company)}
+                                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${canRequest ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                                title={!isMember ? "Only Members can request referrals" : !canRequest ? "Complete requirements first" : "Click to request referral"}
                                                             >
                                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                                     <div className="flex items-center gap-3">
@@ -621,17 +636,18 @@ const Referrals = () => {
                                                                     </div>
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                                                                    <button
-                                                                        onClick={() => handleReferralAction(company)}
-                                                                        disabled={!isMember}
-                                                                        title={!isMember ? "Only Members can request referrals" : ""}
-                                                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
-                                                                            ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:via-red-500 hover:to-rose-500 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
-                                                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                            }`}
-                                                                    >
-                                                                        {company.referral_link ? 'Open Referral Link' : 'Request Referral'}
-                                                                    </button>
+                                                                    {isMember && (company.referral_link || hasAllRequirements(company)) ? (
+                                                                        <button
+                                                                            onClick={() => handleReferralAction(company)}
+                                                                            className="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white hover:shadow-lg active:scale-95 cursor-pointer"
+                                                                        >
+                                                                            {company.referral_link ? 'Open Referral Link' : 'Request Referral'}
+                                                                        </button>
+                                                                    ) : (
+                                                                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                                                            {!isMember ? 'Members only' : 'Complete requirements'}
+                                                                        </span>
+                                                                    )}
                                                                 </td>
                                                             </tr>
                                                         );
@@ -713,19 +729,21 @@ const Referrals = () => {
                                                         </div>
 
                                                         {/* Action Button */}
-                                                        <button
-                                                            onClick={() => handleReferralAction(company)}
-                                                            disabled={!isMember}
-                                                            className={`group relative mx-auto px-8 py-2 text-white text-xs font-semibold rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ${isMember
-                                                                ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 shadow-orange-500 shadow-lg/30 hover:shadow-md hover:shadow-orange-500 shadow-lg/40 hover:scale-105 active:scale-95'
-                                                                : 'bg-gray-400 cursor-not-allowed'
-                                                                }`}
-                                                        >
-                                                            {isMember && (
+                                                        {isMember && (company.referral_link || hasAllRequirements(company)) ? (
+                                                            <button
+                                                                onClick={() => handleReferralAction(company)}
+                                                                className="group relative w-full px-8 py-2 text-white text-xs font-semibold rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 hover:shadow-md hover:shadow-blue-500/40 hover:scale-105 active:scale-95"
+                                                            >
                                                                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-                                                            )}
-                                                            <span className="relative z-10">{company.referral_link ? 'Open Link' : 'Request'}</span>
-                                                        </button>
+                                                                <span className="relative z-10">{company.referral_link ? 'Open Link' : 'Request'}</span>
+                                                            </button>
+                                                        ) : (
+                                                            <div className="text-center py-2">
+                                                                <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                                                                    {!isMember ? 'Members only' : 'Complete requirements first'}
+                                                                </span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
