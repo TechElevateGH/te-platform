@@ -86,7 +86,7 @@ const Applications = () => {
     }, [userId, accessToken, setApplications, logout]);
 
     const archiveUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/applications/archive`, applicationIds, {
+        axiosInstance.patch(`/applications/archive`, { application_ids: applicationIds }, {
             headers: { Authorization: `Bearer ${accessToken}` },
         })
             .then(() => {
@@ -102,8 +102,9 @@ const Applications = () => {
     }, [userId, accessToken, setApplicationId, setFetchApplications, logout]);
 
     const deleteUserApplicationRequest = useCallback((applicationIds) => {
-        axiosInstance.put(`/applications/delete`, applicationIds, {
+        axiosInstance.delete(`/applications/delete`, {
             headers: { Authorization: `Bearer ${accessToken}` },
+            data: { application_ids: applicationIds }
         })
             .then(() => {
                 setFetchApplications(true);

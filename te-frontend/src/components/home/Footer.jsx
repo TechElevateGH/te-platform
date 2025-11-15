@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkedin, faGithub, faTwitter, faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 const socialLinks = [
-    { name: 'LinkedIn', icon: faLinkedin, href: 'https://linkedin.com', color: 'hover:text-blue-500' },
+    { name: 'LinkedIn', icon: faLinkedin, href: 'https://www.linkedin.com/company/techelevategh/', color: 'hover:text-blue-500' },
     { name: 'GitHub', icon: faGithub, href: 'https://github.com/TechElevateGH', color: 'hover:text-gray-900' },
     { name: 'Twitter', icon: faTwitter, href: 'https://twitter.com', color: 'hover:text-blue-400' },
     { name: 'Facebook', icon: faFacebook, href: 'https://facebook.com', color: 'hover:text-blue-600' },

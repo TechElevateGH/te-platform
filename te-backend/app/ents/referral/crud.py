@@ -249,6 +249,7 @@ def request_referral(
         "request_note": data.request_note,
         "resume": data.resume,
         "phone_number": data.phone_number or "",
+        "email": data.email or "",
         "essay": data.essay or "",
         "status": referral_schema.ReferralStatuses.pending.value,
         "referral_date": data.date,

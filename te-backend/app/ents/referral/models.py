@@ -82,6 +82,7 @@ class Referral(BaseModel):
     review_note: Optional[str] = ""
     resume: str = ""  # Google Drive link
     phone_number: str = ""  # User's phone number
+    email: str = ""  # User's email (can be different from account email)
     essay: str = ""  # Referral essay/cover letter URL
     referral_date: str
     feedback_date: Optional[str] = None  # Date when referrer provided feedback

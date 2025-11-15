@@ -94,6 +94,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
         request_note: "",
         resume: hasResume ? availableResumes[0].link || "" : "",
         phone_number: userInfo?.phone_number || "",
+        email: userInfo?.email || "",
         essay: userInfo?.referral_essay || "",
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
     });
@@ -256,7 +257,7 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                             </div>
                         )}
 
-                        {/* Personal Information - Auto-populated (Read-only display) */}
+                        {/* Personal Information - Auto-populated but editable */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Your Information</h3>
@@ -265,14 +266,25 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                                     From Profile
                                 </span>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
-                                <div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600">
                                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Name</p>
                                     <p className="text-sm font-bold text-gray-900 dark:text-white">{userInfo?.first_name} {userInfo?.last_name}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{userInfo?.email}</p>
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={referralData.email}
+                                        onChange={(e) => handleInputChange({ field: 'email', value: e.target.value })}
+                                        className="block w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder="your.email@example.com"
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        This email will be shared with the referrer
+                                    </p>
                                 </div>
                             </div>
                         </div>
