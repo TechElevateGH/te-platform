@@ -21,8 +21,8 @@ const INITIAL_FILE_DATA = {
 };
 
 const FileCreate = ({ setFileUpload }) => {
-    const { accessToken, userId } = useAuth();
-    const { setFetchFiles } = useData();
+    const { accessToken } = useAuth();
+    const { setFetchResumes } = useData();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [toast, setToast] = useState(null);
@@ -56,14 +56,14 @@ const FileCreate = ({ setFileUpload }) => {
         setIsSubmitting(true);
 
         try {
-            await axiosInstance.post(`/users/${userId}/resumes`, data, {
+            await axiosInstance.post(`/resumes`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
             setShowSuccessFeedback(true);
-            setFetchFiles(true);
+            setFetchResumes(true);
             setToast({ message: `${fileData.document_type} successfully uploaded.`, type: "success" });
 
             if (continueUploading) {

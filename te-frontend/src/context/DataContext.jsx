@@ -12,10 +12,6 @@ export const DataProvider = ({ children }) => {
 
     const [userInfo, setUserInfo] = useState({});
 
-    const [workshopLessons, setWorkshopLessons] = useState([]);
-    const [otherLessons, setOtherLessons] = useState([]);
-    const [fetchLessons, setFetchLessons] = useState(true);
-
     const [applications, setApplications] = useState([]);
     const [fetchApplications, setFetchApplications] = useState(true);
 
@@ -23,7 +19,7 @@ export const DataProvider = ({ children }) => {
     const [fetchReferralCompanies, setFetchReferralCompanies] = useState(true);
     const [referralCompanies, setReferralCompanies] = useState([]);
 
-    const [fetchFiles, setFetchFiles] = useState(true);
+    const [fetchResumes, setFetchResumes] = useState(true);
     const [resumes, setResumes] = useState([]);
     const [otherFiles, setOtherFiles] = useState([]);
 
@@ -38,12 +34,6 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             userInfo,
             setUserInfo,
-            fetchLessons,
-            setFetchLessons,
-            workshopLessons,
-            setWorkshopLessons,
-            otherLessons,
-            setOtherLessons,
             fetchCompanies,
             setFetchCompanies,
             companies,
@@ -58,8 +48,8 @@ export const DataProvider = ({ children }) => {
             setFetchReferralCompanies,
             referralCompanies,
             setReferralCompanies,
-            fetchFiles,
-            setFetchFiles,
+            fetchResumes,
+            setFetchResumes,
             resumes,
             setResumes,
             otherFiles,

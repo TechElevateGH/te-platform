@@ -224,8 +224,8 @@ const Applications = () => {
     const getStatusBadge = (status) => {
         const styles = {
             'Submitted': 'bg-gray-100 text-gray-700 border-gray-200',
-            'HR': 'bg-blue-100 text-blue-700 border-blue-200',
-            'Phone interview': 'bg-cyan-100 text-cyan-700 border-cyan-200',
+            'HR': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+            'Phone interview': 'bg-green-100 text-green-700 border-green-200',
             'OA': 'bg-purple-100 text-purple-700 border-purple-200',
             'Final interview': 'bg-indigo-100 text-indigo-700 border-indigo-200',
             'Offer': 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -235,9 +235,9 @@ const Applications = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100/50 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-blue-900/20 transition-colors">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
             {/* Premium Header */}
-            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b-2 border-blue-500 shadow-blue-500/30 dark:border-cyan-500 dark:shadow-cyan-500/30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
                     {/* Mobile Layout */}
                     <div className="md:hidden space-y-3">
@@ -249,7 +249,7 @@ const Applications = () => {
                             {!fetchApplications && isMember && (
                                 <button
                                     onClick={() => setAddApplication(true)}
-                                    className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md text-sm active:scale-95"
+                                    className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-medium hover:from-emerald-700 hover:to-green-700 transition-all shadow-md shadow-emerald-500/30 text-sm active:scale-95"
                                 >
                                     <PlusIcon className="h-5 w-5" />
                                     <span>New</span>
@@ -274,11 +274,11 @@ const Applications = () => {
                                         <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">{stats.offers}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                    <ClockIcon className="h-4 w-4 text-blue-600 dark:text-blue-500 flex-shrink-0" />
+                                <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                                    <ClockIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-500 flex-shrink-0" />
                                     <div className="min-w-0">
-                                        <p className="text-xs text-blue-600 dark:text-blue-500">Interview</p>
-                                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-400">{stats.interviewing}</p>
+                                        <p className="text-xs text-emerald-600 dark:text-emerald-500">Interview</p>
+                                        <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">{stats.interviewing}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
@@ -314,9 +314,9 @@ const Applications = () => {
                                         <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-400">{stats.offers}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <ClockIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-500" />
-                                        <span className="text-xs text-blue-600 dark:text-blue-500">Interviewing:</span>
-                                        <span className="text-xs font-semibold text-blue-900 dark:text-blue-400">{stats.interviewing}</span>
+                                        <ClockIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" />
+                                        <span className="text-xs text-emerald-600 dark:text-emerald-500">Interviewing:</span>
+                                        <span className="text-xs font-semibold text-emerald-900 dark:text-emerald-400">{stats.interviewing}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <ClockIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500" />
@@ -334,10 +334,10 @@ const Applications = () => {
                         {!fetchApplications && isMember && (
                             <button
                                 onClick={() => setAddApplication(true)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs"
+                                className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white rounded-lg font-medium hover:from-blue-800 hover:via-cyan-800 hover:to-blue-900 transition-all shadow-md shadow-blue-600 shadow-lg text-sm active:scale-95"
                             >
-                                <PlusIcon className="h-4 w-4" />
-                                <span>New Application</span>
+                                <PlusIcon className="h-5 w-5" />
+                                <span>New</span>
                             </button>
                         )}
                     </div>
@@ -366,7 +366,7 @@ const Applications = () => {
                                     placeholder="Search applications..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
+                                    className="w-full pl-10 pr-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-base"
                                 />
                             </div>
 
@@ -375,7 +375,7 @@ const Applications = () => {
                                 <select
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-sm font-medium"
                                 >
                                     <option value="All">All Status</option>
                                     <option value="Submitted">Submitted</option>
@@ -390,7 +390,7 @@ const Applications = () => {
                                 <select
                                     value={levelFilter}
                                     onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-sm font-medium"
                                 >
                                     {uniqueLevels.map(level => (
                                         <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
@@ -400,7 +400,7 @@ const Applications = () => {
                                 <select
                                     value={locationFilter}
                                     onChange={(e) => setLocationFilter(e.target.value)}
-                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium"
+                                    className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-sm font-medium"
                                 >
                                     {uniqueLocations.map(location => (
                                         <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
@@ -432,7 +432,7 @@ const Applications = () => {
                                     placeholder="Search applications..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                    className="w-full pl-9 pr-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-sm"
                                 />
                             </div>
 
@@ -440,7 +440,7 @@ const Applications = () => {
                             <select
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
-                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-xs font-medium"
                             >
                                 <option value="All">All Status</option>
                                 <option value="Submitted">Submitted</option>
@@ -455,7 +455,7 @@ const Applications = () => {
                             <select
                                 value={levelFilter}
                                 onChange={(e) => setLevelFilter(e.target.value)}
-                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-xs font-medium"
                             >
                                 {uniqueLevels.map(level => (
                                     <option key={level} value={level}>{level === 'All' ? 'All Levels' : level}</option>
@@ -465,7 +465,7 @@ const Applications = () => {
                             <select
                                 value={locationFilter}
                                 onChange={(e) => setLocationFilter(e.target.value)}
-                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs font-medium"
+                                className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-xs font-medium"
                             >
                                 {uniqueLocations.map(location => (
                                     <option key={location} value={location}>{location === 'All' ? 'All Locations' : location}</option>
@@ -515,9 +515,7 @@ const Applications = () => {
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {/* Premium Table */}
+                    )}                    {/* Premium Table */}
                     {sortedApplications.length === 0 ? (
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 p-16 text-center">
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -534,7 +532,7 @@ const Applications = () => {
                             {!searchQuery && statusFilter === 'All' && isMember && (
                                 <button
                                     onClick={() => setAddApplication(true)}
-                                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-xs font-medium rounded-full shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200"
+                                    className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-xs font-medium rounded-full shadow-lg hover:shadow-md active:scale-95 transition-all duration-200"
                                 >
                                     <PlusIcon className="h-4 w-4" />
                                     Add Your First Application
@@ -668,7 +666,7 @@ const Applications = () => {
                                                 <tr
                                                     key={app.id}
                                                     onClick={() => isMember && openApplicationModal(app)}
-                                                    className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                    className={`hover:bg-gradient-to-r hover:from-blue-100/50 hover:via-cyan-100/50 hover:to-blue-100/50 dark:hover:from-blue-900/50 dark:hover:via-cyan-900/50 dark:hover:to-blue-900/50 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                                                     title={!isMember ? "Only Members can edit applications" : ""}
                                                 >
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -748,7 +746,7 @@ const Applications = () => {
                                                         key={i + 1}
                                                         onClick={() => setCurrentPage(i + 1)}
                                                         className={`px-2.5 py-1 rounded-lg font-medium text-xs transition-all ${currentPage === i + 1
-                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-md'
                                                             : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                                             }`}
                                                     >
@@ -800,7 +798,7 @@ const Applications = () => {
                                                         key={pageNum}
                                                         onClick={() => setCurrentPage(pageNum)}
                                                         className={`px-3 py-1.5 rounded-lg font-medium text-sm transition-all active:scale-95 ${currentPage === pageNum
-                                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
+                                                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-md'
                                                             : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600'
                                                             }`}
                                                     >

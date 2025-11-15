@@ -119,7 +119,7 @@ class MemberUserRead(MemberUserBase): ...
 
 
 class Essay(BaseModel):
-    essay: str
+    referral_essay: str
 
 
 class CoverLetter(BaseModel):

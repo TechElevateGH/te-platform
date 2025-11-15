@@ -10,14 +10,14 @@ import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, Book
 import Applications from '../../pages/Applications'
 import Sidebar from '../_custom/Sidebar'
 import Navbar from '../home/Navbar'
-import FilesAndEssay from '../../pages/FilesAndEssay'
+import ResumesAndEssays from '../../pages/ResumesAndEssays'
 import Referrals from '../../pages/Referrals'
 import Opportunities from '../../pages/Opportunities'
 import Learning from '../../pages/Learning'
 import Practice from '../../pages/Practice'
-import ApplicationManagement from '../../pages/ApplicationManagement'
+import ApplicationManagement from '../../pages/ApplicationsManagement'
 import ReferralsManagement from '../../pages/ReferralsManagement'
-import FilesManagement from '../../pages/FilesManagement'
+import ResumesAndEssaysManagement from '../../pages/ResumesAndEssaysManagement'
 import UserAccountManagement from '../../pages/UserAccountManagement'
 import LearningAnalytics from '../../pages/LearningAnalytics'
 import { useData } from '../../context/DataContext'
@@ -29,7 +29,7 @@ import { useLocation } from 'react-router-dom'
 
 const Workspace = ({ setLogin }) => {
     const { userId, accessToken, logout, userRole, isGuest } = useAuth();
-    const { setUserInfo, setResumes, setOtherFiles, fetchFiles, setFetchFiles } = useData();
+    const { setUserInfo, setOtherFiles, fetchResumes, setFetchResumes } = useData();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -112,7 +112,6 @@ const Workspace = ({ setLogin }) => {
         }
 
         const endpoint = getUserEndpoint(effectiveRole, userId);
-        console.log('[DEBUG Workspace] getUserInfoRequest - userRole:', userRole, 'storedRole:', storedRole, 'effectiveRole:', effectiveRole, 'endpoint:', endpoint);
 
         axiosInstance.get(endpoint, {
             headers: {
@@ -130,22 +129,45 @@ const Workspace = ({ setLogin }) => {
             })
     }, [accessToken, logout, setUserInfo, userId, userRole]);
 
-    const getUserFilesRequest = useCallback(async () => {
-        // Only members (role=1) have resumes and essays
-        // Referrers, Volunteers, Leads, and Admins don't have these files
-        if (userRole !== 1) {
+    const getResumesOnly = useCallback(async () => {
+        // Only members (role=1) have resumes
+        if (parseInt(userRole) !== 1) {
             return;
         }
 
         try {
-            // Fetch resumes
-            const resumesResponse = await axiosInstance.get(`/users/${userId}/resumes`, {
+            const resumesResponse = await axiosInstance.get(`/resumes`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
+                params: {
+                    user_id: userId
+                }
             });
 
-            // Fetch essays and cover letters
+            // Update userInfo with the new resumes
+            // Backend returns { resumes: { resumes: [...] } }
+            setUserInfo(prevUserInfo => ({
+                ...prevUserInfo,
+                resumes: resumesResponse.data?.resumes?.resumes || []
+            }));
+        } catch (error) {
+            if (error.response?.status === 401) {
+                logout();
+            }
+            console.error('Error fetching resumes:', error);
+        }
+    }, [accessToken, logout, setUserInfo, userId, userRole]);
+
+    const getUserFilesRequest = useCallback(async () => {
+        // Only members (role=1) have essays and cover letters
+        // Referrers, Volunteers, Leads, and Admins don't have these files
+        if (parseInt(userRole) !== 1) {
+            return;
+        }
+
+        try {
+            // Fetch essays and cover letters (resumes come from userInfo.resumes)
             const essayResponse = await axiosInstance.get(`/users/${userId}/essay`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -158,19 +180,17 @@ const Workspace = ({ setLogin }) => {
                 },
             });
 
-            setResumes(resumesResponse.data?.resumes || []);
-
-            const otherFilesList = [];
-            if (essayResponse.data?.essay) {
-                otherFilesList.push({
-                    id: 'essay',
+            const essays = [];
+            if (essayResponse.data?.referral_essay) {
+                essays.push({
+                    id: 'referral-essay',
                     name: 'Referral Essay',
-                    type: 'essay',
-                    content: essayResponse.data.essay
+                    type: 'referral_essay',
+                    content: essayResponse.data.referral_essay
                 });
             }
             if (coverLetterResponse.data?.cover_letter) {
-                otherFilesList.push({
+                essays.push({
                     id: 'cover-letter',
                     name: 'Cover Letter',
                     type: 'cover_letter',
@@ -178,14 +198,14 @@ const Workspace = ({ setLogin }) => {
                 });
             }
 
-            setOtherFiles(otherFilesList);
+            setOtherFiles(essays);
         } catch (error) {
             if (error.response?.status === 401) {
                 logout();
             }
             console.error('Error fetching user files:', error);
         }
-    }, [accessToken, logout, setOtherFiles, setResumes, userId, userRole]);
+    }, [accessToken, logout, setOtherFiles, userId, userRole]);
 
 
     useEffect(() => {
@@ -242,12 +262,14 @@ const Workspace = ({ setLogin }) => {
     useEffect(() => {
         const fetchData = async () => {
             await getUserInfoRequest();
+            // Also fetch essays and cover letters on initial load
+            await getUserFilesRequest();
         }
         // Skip fetching user info for guest users
         if (accessToken && !isGuest) {
             fetchData();
         }
-    }, [accessToken, getUserInfoRequest, isGuest])
+    }, [accessToken, getUserInfoRequest, getUserFilesRequest, isGuest])
 
     // One-time guest banner display logic
 
@@ -274,14 +296,15 @@ const Workspace = ({ setLogin }) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            await getUserFilesRequest();
+            // Only fetch resumes using the lightweight endpoint
+            await getResumesOnly();
         }
-        // Skip fetching user files for guest users
-        if (accessToken && fetchFiles && !isGuest) {
+        // Skip fetching resumes for guest users
+        if (accessToken && fetchResumes && !isGuest) {
             fetchData();
-            setFetchFiles(false);
+            setFetchResumes(false);
         }
-    }, [accessToken, fetchFiles, getUserFilesRequest, setFetchFiles, isGuest])
+    }, [accessToken, fetchResumes, getResumesOnly, setFetchResumes, isGuest])
 
 
 
@@ -353,7 +376,7 @@ const Workspace = ({ setLogin }) => {
                                             isLeadOrAdmin ? <ApplicationManagement /> : <Applications />
                                         ) :
                                             content === "Resume and Essays" ? (
-                                                (isLeadOrAdmin || isVolunteer) ? <FilesManagement /> : <FilesAndEssay />
+                                                (isLeadOrAdmin || isVolunteer) ? <ResumesAndEssaysManagement /> : <ResumesAndEssays />
                                             ) :
                                                 content === "Referrals" ? (
                                                     (isLeadOrAdmin || isReferrer || isVolunteer) ? <ReferralsManagement /> : <Referrals />
