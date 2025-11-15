@@ -179,7 +179,7 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid company ID"
         )
 
-    company = db.companies.find_one({"_id": ObjectId(data.company_id)})
+    company = db.referral_companies.find_one({"_id": ObjectId(data.company_id)})
     if not company:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"

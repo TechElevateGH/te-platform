@@ -334,7 +334,7 @@ def referrer_login_access_token(
     # Get company information
     company_name = None
     if user.company_id:
-        company = db.companies.find_one({"_id": user.company_id})
+        company = db.referral_companies.find_one({"_id": user.company_id})
         if company:
             company_name = company.get("name", "")
 
@@ -547,6 +547,7 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
                     "university": "",
                     "start_date": "",
                     "end_date": "",
+                    "slack_joined": False,  # New user hasn't joined Slack yet
                     "referral_essay": "",
                     "cover_letter": "",
                     "resumes": [],

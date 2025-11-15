@@ -58,6 +58,7 @@ class MemberUser(BaseModel):
     end_date: str = ""
     is_active: bool = True
     email_verified: bool = False  # Email verification status
+    slack_joined: bool = False  # Whether user has joined Slack workspace
     role: int = 1  # Always Member (1) for this collection
     referral_essay: str = ""  # Referral essay text (stored in MongoDB)
     cover_letter: str = ""  # Cover letter text (stored in MongoDB)

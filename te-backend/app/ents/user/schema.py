@@ -95,6 +95,7 @@ class MemberUserBase(BaseModel):
     mentor_id: Optional[int] = None
     is_active: bool = True
     email_verified: bool = False  # Email verification status
+    slack_joined: bool = False  # Whether user has joined Slack workspace
     role: UserRoles = UserRoles.member
     start_date: str = date.today().strftime("%d-%m-%Y")
     end_date: str = ""
@@ -113,6 +114,7 @@ class MemberUserUpdate(BaseModel):
     address: Optional[str] = None
     university: Optional[str] = None
     image: Optional[str] = None
+    slack_joined: Optional[bool] = None  # Allow updating Slack join status
 
 
 class MemberUserRead(MemberUserBase): ...
