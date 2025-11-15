@@ -86,7 +86,7 @@ const Companies = () => {
                                         <img
                                             src={company.logo}
                                             alt={`${company.name} logo`}
-                                            className="w-full h-full object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                                            className="w-full h-full object-contain transition-all duration-300"
                                             onError={(e) => {
                                                 // Fallback to company name initial if logo fails to load
                                                 e.target.style.display = 'none';

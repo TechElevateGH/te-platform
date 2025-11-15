@@ -112,7 +112,7 @@ const AdminFiles = () => {
     // Fetch resume review requests
     const fetchResumeReviews = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/resumes/reviews/all', {
+            const response = await axiosInstance.get('/resumes/reviews', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setResumeReviews(response.data?.reviews || []);

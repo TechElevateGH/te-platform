@@ -22,7 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const ResumesAndEssaysManagement = () => {
-    const { accessToken, userRole } = useAuth();
+    const { accessToken, userRole, userId } = useAuth();
     const [users, setUsers] = useState([]);
     const [resumeReviews, setResumeReviews] = useState([]);
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
@@ -157,7 +157,7 @@ const ResumesAndEssaysManagement = () => {
     // Fetch resume review requests
     const fetchResumeReviews = useCallback(async () => {
         try {
-            const response = await axiosInstance.get('/resumes/reviews/all', {
+            const response = await axiosInstance.get('/resumes/reviews', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setResumeReviews(response.data?.reviews || []);
@@ -187,14 +187,15 @@ const ResumesAndEssaysManagement = () => {
         if (!isVolunteerOrAbove) return;
 
         try {
-            const response = await axiosInstance.get('/resumes/reviews/my-assignments', {
-                headers: { Authorization: `Bearer ${accessToken}` }
+            const response = await axiosInstance.get('/resumes/reviews/assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                params: { user_id: userId }
             });
             setMyAssignedReviews(response.data?.reviews || []);
         } catch (error) {
             console.error('Error fetching my assigned reviews:', error);
         }
-    }, [accessToken, isVolunteerOrAbove]);
+    }, [accessToken, isVolunteerOrAbove, userId]);
 
     // Fetch all assignments (for Admin)
     const fetchAllAssignments = useCallback(async () => {
@@ -235,11 +236,12 @@ const ResumesAndEssaysManagement = () => {
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
         setAssigningInProgress(true);
         try {
-            await axiosInstance.post(`/resumes/reviews/${reviewId}/assign`, {
+            await axiosInstance.post('/resumes/reviews/assign', {
                 reviewer_id: reviewerId,
                 reviewer_name: reviewerName
             }, {
-                headers: { Authorization: `Bearer ${accessToken}` }
+                headers: { Authorization: `Bearer ${accessToken}` },
+                params: { review_id: reviewId }
             });
             setToast({ message: `Review assigned to ${reviewerName}`, type: 'success' });
             fetchResumeReviews();

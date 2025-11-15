@@ -41,10 +41,7 @@ frontend-prod:
 	@cd te-frontend && npm start
 
 # Start frontend only (uses current configuration)
-frontend:
-	@echo "Starting frontend server..."
-	@$(MAKE) frontend-status
-	@cd te-frontend && npm start
+frontend: frontend-dev
 
 # Check current frontend backend configuration
 frontend-status:
@@ -73,10 +70,6 @@ dev:
 # Start both frontend and backend (legacy alias)
 start:
 	@$(MAKE) dev
-
-# Legacy aliases
-local-frontend: frontend
-local-backend: backend
 
 build:
 	@echo "Building Docker containers..."

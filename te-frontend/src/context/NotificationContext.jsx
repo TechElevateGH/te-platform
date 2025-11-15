@@ -51,8 +51,9 @@ export const NotificationProvider = ({ children }) => {
         try {
             // For members: check their resume reviews for updates
             if (isMember) {
-                const response = await axiosInstance.get('/resumes/reviews/my-requests', {
-                    headers: { Authorization: `Bearer ${accessToken}` }
+                const response = await axiosInstance.get('/resumes/reviews', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: { user_id: userId }
                 });
 
                 const myReviews = response.data?.reviews || [];
@@ -100,8 +101,9 @@ export const NotificationProvider = ({ children }) => {
                 });
 
                 // For members: check referral request updates
-                const referralsResponse = await axiosInstance.get('/referrals/mine', {
-                    headers: { Authorization: `Bearer ${accessToken}` }
+                const referralsResponse = await axiosInstance.get('/referrals', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: { user_id: userId }
                 });
 
                 const myReferrals = referralsResponse.data?.referrals || [];
@@ -146,7 +148,7 @@ export const NotificationProvider = ({ children }) => {
 
             // For volunteers+: check for new resume review requests and new referral requests
             if (isVolunteerOrAbove) {
-                const response = await axiosInstance.get('/resumes/reviews/all', {
+                const response = await axiosInstance.get('/resumes/reviews', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
@@ -212,7 +214,7 @@ export const NotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching notifications:', error);
         }
-    }, [accessToken, isMember, isVolunteerOrAbove, lastChecked, dismissedIds]);
+    }, [accessToken, isMember, isVolunteerOrAbove, lastChecked, dismissedIds, userId]);
 
     // Poll for notifications every 30 seconds
     useEffect(() => {

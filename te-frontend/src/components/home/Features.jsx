@@ -1,12 +1,12 @@
 import {
     AcademicCapIcon,
     UserGroupIcon,
-    BriefcaseIcon,
+    MicrophoneIcon,
     DocumentTextIcon,
     ChatBubbleLeftRightIcon,
-    ChartBarIcon,
     SparklesIcon,
     RocketLaunchIcon,
+    CodeBracketSquareIcon,
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -27,11 +27,18 @@ const features = [
         bgColor: 'bg-purple-50',
     },
     {
-        name: 'Application Tracking',
-        description: 'Organize and track all your job applications in one place with status updates and deadline reminders.',
-        icon: BriefcaseIcon,
+        name: 'Free Mock Interviews',
+        description: 'Practice behavioral and technical interviews with insights from professionals who have interviewed at top tech companies.',
+        icon: MicrophoneIcon,
         color: 'from-green-500 to-emerald-500',
         bgColor: 'bg-green-50',
+    },
+    {
+        name: 'Real-World Projects',
+        description: 'Build real-world projects with members and gain practical experience through partnerships with companies to strengthen your profile.',
+        icon: CodeBracketSquareIcon,
+        color: 'from-teal-500 to-green-500',
+        bgColor: 'bg-teal-50',
     },
     {
         name: 'Resume Reviews',
@@ -46,13 +53,6 @@ const features = [
         icon: ChatBubbleLeftRightIcon,
         color: 'from-cyan-500 to-blue-500',
         bgColor: 'bg-cyan-50',
-    },
-    {
-        name: 'Progress Analytics',
-        description: 'Track your growth with detailed analytics and insights on your job search and skill development.',
-        icon: ChartBarIcon,
-        color: 'from-indigo-500 to-purple-500',
-        bgColor: 'bg-indigo-50',
     },
 ];
 
@@ -103,22 +103,22 @@ const Features = () => {
                                 className="group relative"
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
-                                <div className="relative h-full p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                                <div className="relative h-full p-8 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 group-hover:bg-gradient-to-br group-hover:from-gray-900 group-hover:to-gray-800 group-hover:border-transparent">
                                     {/* Icon container */}
-                                    <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                                    <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${feature.color} mb-6 shadow-lg group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300`}>
                                         <feature.icon className="h-7 w-7 text-white" />
                                     </div>
 
                                     {/* Content */}
-                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-white group-hover:font-extrabold transition-all duration-300">
                                         {feature.name}
                                     </h3>
-                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed group-hover:text-gray-100 group-hover:font-semibold transition-all duration-300">
                                         {feature.description}
                                     </p>
 
                                     {/* Hover gradient border effect */}
-                                    <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${feature.color} -z-10 blur-xl`}></div>
+                                    <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 bg-gradient-to-br ${feature.color} -z-10 blur-2xl`}></div>
                                 </div>
                             </div>
                         ))}

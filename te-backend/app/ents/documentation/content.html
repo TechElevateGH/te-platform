@@ -624,7 +624,7 @@
             to streamline the job search and placement process. The platform
             serves as a centralized operating system connecting job seekers
             (members), company employees who can provide referrals (referrers),
-            and TechElevate staff (leads and admins).
+            and TechElevate staff (leads).
           </p>
 
           <p>
@@ -693,7 +693,7 @@
                 <li>
                   <strong>src/pages</strong>: route-level screens (e.g.,
                   <code>Applications.jsx</code>, <code>Documentation.jsx</code>,
-                  <code>ResumeReviews.jsx</code>, admin consoles, etc.).
+                  <code>ResumeReviews.jsx</code>, management consoles, etc.).
                 </li>
                 <li>
                   <strong>src/components</strong>: feature widgets grouped by
@@ -811,12 +811,11 @@
           <ul>
             <li>Review member resumes and provide detailed feedback</li>
             <li>Create and publish learning lessons</li>
-            <li>Create other Volunteer accounts</li>
             <li>All Member capabilities (can use platform as member)</li>
           </ul>
           <div class="note">
-            <strong>Creation</strong>: Leads+ can create via
-            <code>POST /users/privileged/volunteers</code>
+            <strong>Authentication</strong>: Username/password via
+            <code>/auth/management-login</code>
           </div>
 
           <h3>Lead</h3>
@@ -832,31 +831,8 @@
             <li>Access simplified company list for creating Referrers</li>
             <li>View all member data and applications</li>
             <li>Assign resume reviews to Volunteers</li>
-            <li>Create Volunteer and Referrer accounts</li>
             <li>Manage all referral requests across companies</li>
             <li>Oversee learning content and user progress</li>
-            <li>All lower role permissions</li>
-          </ul>
-          <div class="note">
-            <strong>Authentication</strong>: Username/password via
-            <code>/auth/management-login</code>
-          </div>
-
-          <h3>Admin</h3>
-          <p>
-            Platform administrators with full access to all system capabilities.
-            Stored in <code>privileged_users</code> collection.
-          </p>
-          <ul>
-            <li>
-              User management: Create Lead/Admin accounts via
-              <code>POST /users/privileged/leads</code>
-            </li>
-            <li>Delete any data (users, referrals, reviews)</li>
-            <li>System configuration and settings</li>
-            <li>Full analytics and reporting access</li>
-            <li>Content moderation across all entities</li>
-            <li>Override all permission checks</li>
             <li>All lower role permissions</li>
           </ul>
           <div class="note">
@@ -873,8 +849,8 @@
                 embedded applications/resumes, OAuth support
               </li>
               <li>
-                <code>privileged_users</code>: Referrers/Volunteers/Leads/Admins
-                (roles 2-5) with username-based auth, company_id for Referrers,
+                <code>privileged_users</code>: Referrers/Volunteers/Leads
+                (roles 2-4) with username-based auth, company_id for Referrers,
                 token authentication support
               </li>
             </ul>
@@ -1009,11 +985,6 @@
                 <td>Referrer portal</td>
                 <td>Referrer</td>
               </tr>
-              <tr>
-                <td><code>/admin/*</code></td>
-                <td>Admin dashboards</td>
-                <td>Lead/Admin</td>
-              </tr>
             </tbody>
           </table>
         </section>
@@ -1107,9 +1078,9 @@
               </tr>
               <tr>
                 <td><code>privileged_users</code></td>
-                <td>Management accounts (Referrer, Volunteer, Lead, Admin)</td>
+                <td>Management accounts (Referrer, Volunteer, Lead)</td>
                 <td>
-                  username, password, lead_token, role (2-5), company_id (for
+                  username, password, role (2-4), company_id (for
                   Referrers)
                 </td>
               </tr>
@@ -1269,7 +1240,7 @@
             </li>
           </ol>
 
-          <p><strong>For Volunteer/Lead/Admin (roles 3-5):</strong></p>
+          <p><strong>For Volunteer/Lead (roles 3-4):</strong></p>
           <ol>
             <li>
               User submits username/password to
@@ -1289,8 +1260,7 @@
             </li>
             <li>
               Backend matches token against
-              <code>privileged_users.password</code> or
-              <code>privileged_users.lead_token</code>
+              <code>privileged_users.password</code>
             </li>
             <li>Token generated with company_id for scoped access</li>
           </ol>
@@ -1334,8 +1304,7 @@
                 <td><code>Volunteer</code></td>
                 <td>3</td>
                 <td>
-                  Review resumes, create learning content, create other
-                  Volunteers, all Member permissions
+                  Review resumes, create learning content, all Member permissions
                 </td>
                 <td><code>/auth/management-login</code></td>
               </tr>
@@ -1343,18 +1312,8 @@
                 <td><code>Lead</code></td>
                 <td>4</td>
                 <td>
-                  Manage companies, view all member data, create
-                  Volunteers/Referrers, assign resume reviews, all lower
+                  Manage companies, view all member data, assign resume reviews, all lower
                   permissions
-                </td>
-                <td><code>/auth/management-login</code></td>
-              </tr>
-              <tr>
-                <td><code>Admin</code></td>
-                <td>5</td>
-                <td>
-                  Full system access, create any user type including
-                  Leads/Admins, delete data, system configuration
                 </td>
                 <td><code>/auth/management-login</code></td>
               </tr>
@@ -1365,8 +1324,7 @@
             <strong>Permission Hierarchy:</strong> Higher roles inherit all
             permissions from lower roles. The platform enforces this via
             <code>require_member()</code>, <code>require_volunteer()</code>,
-            <code>require_lead()</code>, and
-            <code>require_admin()</code> dependency functions.
+            and <code>require_lead()</code> dependency functions.
           </div>
 
           <h3>Token Structure</h3>
@@ -1610,8 +1568,8 @@
             <div class="card">
               <h4>Role Aware</h4>
               <p>
-                Members submit requests, volunteers add feedback, and leads or
-                admins manage assignments and bulk operations from one screen.
+                Members submit requests, volunteers add feedback, and leads
+                manage assignments and bulk operations from one screen.
               </p>
             </div>
             <div class="card">
@@ -1661,12 +1619,12 @@
               <tr>
                 <td><code>In Review</code></td>
                 <td>Reviewer actively working on feedback.</td>
-                <td>Assigned volunteer, lead, or admin</td>
+                <td>Assigned volunteer or lead</td>
               </tr>
               <tr>
                 <td><code>Completed</code></td>
                 <td>Feedback delivered to the member.</td>
-                <td>Assigned volunteer, lead, or admin</td>
+                <td>Assigned volunteer or lead</td>
               </tr>
               <tr>
                 <td><code>Cancelled</code></td>
@@ -1784,21 +1742,21 @@
             Browse companies via <code>GET /referrals/companies</code> where
             TechElevate has referrer connections. Submit a referral request with
             your resume and a personalized note. Track the status of your
-            request via <code>GET /referrals/mine</code> and receive
+            request via <code>GET /referrals?user_id={your_id}</code> and receive
             notifications when reviewed.
           </div>
 
           <div class="note">
             <strong>For Referrers</strong>
             View incoming referral requests for your company via
-            <code>GET /referrals/all</code> (filtered by company_id). Download
+            <code>GET /referrals</code> (automatically filtered by your company_id). Download
             resumes, evaluate fit, and approve or decline with feedback via
             <code>PATCH /referrals/{id}</code>. Track outcomes of referrals
             provided.
           </div>
 
           <div class="note">
-            <strong>For Leads/Admins</strong>
+            <strong>For Leads</strong>
             Access simplified company list via
             <code>GET /referrals/companies/list</code> (id and name only) for
             dropdown selection when creating Referrer accounts. Create new
@@ -1871,12 +1829,12 @@
               (Volunteer+ required)
             </li>
             <li>
-              <code>GET /referrals/mine</code> - Get current user's referral
-              requests (Member+)
+              <code>GET /referrals?user_id={id}</code> - Get user's referral
+              requests (Members: own only, Volunteers+: any user)
             </li>
             <li>
-              <code>GET /referrals/all</code> - Get all referrals (Lead+) or
-              company-filtered (Referrer)
+              <code>GET /referrals</code> - Get all referrals with role-based filtering
+              (Referrers: own company, Leads+: all referrals)
             </li>
             <li>
               <code>POST /referrals</code> - Create referral request (Member+)
@@ -1888,9 +1846,6 @@
             <li>
               <code>PATCH /referrals/{id}</code> - Update referral
               status/feedback (Referrer for own company, Lead+ for all)
-            </li>
-            <li>
-              <code>DELETE /referrals/{id}</code> - Delete referral (Admin only)
             </li>
           </ul>
         </section>
@@ -2165,7 +2120,7 @@ Errors:
 - 401: Invalid credentials
 - 400: User not active</code></pre>
 
-          <h3>Management Login (Volunteer/Lead/Admin)</h3>
+          <h3>Management Login (Volunteer/Lead)</h3>
           <pre><code>POST /v1/auth/management-login
 
 Request:
@@ -2196,7 +2151,7 @@ Errors:
 
 Request:
 {
-  "password": "referrer_token_here"  // matches privileged_users.password or .lead_token
+  "password": "referrer_token_here"  // matches privileged_users.password
 }
 
 Response:
@@ -2377,149 +2332,347 @@ Response:
         <section id="api-resume-reviews">
           <h2>Resume Review APIs</h2>
           <div class="info-box">
-            <strong>Roles &amp; Permissions</strong>
-            Members create and cancel their own requests, volunteers review and
-            update feedback, while leads/admins can assign, bulk assign, and
-            delete review objects.
+            <strong>Roles &amp; Permissions</strong><br>
+            • <strong>Members (1)</strong>: Create and cancel their own review requests<br>
+            • <strong>Volunteers (3)</strong>: Update review status and feedback, view their assignments<br>
+            • <strong>Leads (4)</strong>: Assign reviews, bulk assign, view all assignments<br><br>
+            <strong>API Design Pattern</strong><br>
+            All resume review endpoints use <strong>query parameters</strong> for filtering and identification, 
+            providing flexible access control and consistent API patterns across the platform.
           </div>
 
           <h3>Create Review Request</h3>
+          <p>Submit a new resume review request. Members can request feedback on their resumes for specific job applications.</p>
           <pre><code>POST /v1/resumes/reviews
 Headers: Authorization: Bearer &lt;token&gt;
-Role: member
+Role: Member (1) or higher
 
-Request:
+Request Body:
 {
-  "resume_link": "https://drive.google.com/file/...",
+  "resume_link": "https://drive.google.com/file/d/abc123/view",
   "job_title": "Senior Backend Engineer",
   "level": "Mid/Senior",
-  "notes": "Please focus on STAR stories"
+  "notes": "Please focus on STAR stories and quantifiable achievements"
 }
 
-Response:
+Response (201 Created):
 {
   "message": "Resume review request submitted successfully",
   "review_id": "65f7b1c7b8d9cbe7e5f1a4d2"
-}</code></pre>
+}
 
-          <h3>Get My Review Requests</h3>
-          <pre><code>GET /v1/resumes/reviews/my-requests
+Validation:
+• resume_link: Required, must be valid Google Drive URL
+• job_title: Required, max 200 characters
+• level: Optional (Entry, Mid, Mid/Senior, Senior, Staff+)
+• notes: Optional, max 1000 characters</code></pre>
+
+          <h3>Get Review Requests (Unified Endpoint)</h3>
+          <p>Retrieve resume review requests with flexible filtering. This unified endpoint replaces the deprecated <code>/my-requests</code> and <code>/all</code> endpoints.</p>
+          <pre><code>GET /v1/resumes/reviews?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: member
 
-Response:
+Query Parameters:
+• user_id (optional): Filter by specific user's reviews
+
+Permission Rules:
+1. WITH user_id parameter:
+   - Members (1): Can only view their own reviews (user_id must match current user)
+   - Volunteers+ (3+): Can view any user's reviews
+   
+2. WITHOUT user_id parameter (get all reviews):
+   - Members (1): Not allowed
+   - Volunteers+ (3+): Returns all reviews across platform
+
+Example: Get my own reviews (Member)
+GET /v1/resumes/reviews?user_id=507f1f77bcf86cd799439011
+Role: Member (1) - can only query own user_id
+
+Example: Get all reviews (Volunteer+)
+GET /v1/resumes/reviews
+Role: Volunteer (3) or higher
+
+Response (200 OK):
 {
   "reviews": [
     {
       "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+      "user_id": "507f1f77bcf86cd799439011",
+      "user_name": "John Doe",
+      "user_email": "john@example.com",
       "status": "Pending",
-      "resume_link": "https://drive.google.com/file/...",
+      "resume_link": "https://drive.google.com/file/d/abc123/view",
       "job_title": "Senior Backend Engineer",
       "level": "Mid/Senior",
       "feedback": "",
       "notes": "Please focus on STAR stories",
-      "submitted_date": "2025-11-06"
+      "submitted_date": "2025-11-15T14:30:00",
+      "reviewer_id": null,
+      "reviewer_name": null,
+      "feedback_date": null
+    },
+    {
+      "id": "65f7b28cb8d9cbe7e5f1a4d8",
+      "user_id": "507f1f77bcf86cd799439012",
+      "user_name": "Jane Smith",
+      "user_email": "jane@example.com",
+      "status": "In Review",
+      "resume_link": "https://drive.google.com/file/d/xyz789/view",
+      "job_title": "Product Manager",
+      "level": "Mid",
+      "feedback": "Working on detailed feedback for leadership examples",
+      "notes": "First PM role",
+      "submitted_date": "2025-11-14T09:15:00",
+      "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+      "reviewer_name": "Grace Hopper",
+      "feedback_date": "2025-11-14T16:45:00"
     }
   ]
-}</code></pre>
+}
 
-          <h3>List All Review Requests</h3>
-          <pre><code>GET /v1/resumes/reviews/all
-Headers: Authorization: Bearer &lt;token&gt;
-Role: volunteer (3) or higher
-
-Response:
-{
-  "reviews": [ ... ]
-}</code></pre>
+Status Values:
+• "Pending" - Awaiting review
+• "In Review" - Currently being reviewed
+• "Completed" - Review finished, feedback provided
+• "Cancelled" - Request cancelled by member</code></pre>
 
           <h3>Update Review Status / Feedback</h3>
-          <pre><code>PATCH /v1/resumes/reviews/{review_id}
+          <p>Update the status and feedback for a review. Volunteers update reviews they're working on.</p>
+          <pre><code>PATCH /v1/resumes/reviews?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: volunteer (3) or higher
+Role: Volunteer (3) or higher
 
-Request:
+Query Parameters:
+• review_id (required): ID of the review to update
+
+Request Body:
 {
   "status": "In Review",
-  "feedback": "Working on interview preparation notes"
+  "feedback": "Reviewed your STAR stories - excellent quantifiable results! 
+               Consider adding more leadership examples in the ML project section."
 }
 
-Response:
+Optional Fields:
+• status: "Pending" | "In Review" | "Completed" | "Cancelled"
+• feedback: Detailed review feedback (max 5000 characters)
+
+Response (200 OK):
 {
   "message": "Resume review request updated successfully",
-  "review": { ... }
-}</code></pre>
+  "review": {
+    "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+    "status": "In Review",
+    "feedback": "Reviewed your STAR stories...",
+    "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+    "reviewer_name": "Grace Hopper",
+    "feedback_date": "2025-11-15T15:30:00"
+  }
+}
+
+Notes:
+• Automatically records reviewer info and timestamp
+• Reviewer name derived from user's full_name, username, or email
+• Updates are audited with reviewer tracking</code></pre>
 
           <h3>Cancel Review Request</h3>
-          <pre><code>PATCH /v1/resumes/reviews/{review_id}/cancel
+          <p>Cancel your own review request. Members can cancel requests they submitted.</p>
+          <pre><code>PATCH /v1/resumes/reviews/cancel?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: member (request owner)
+Role: Member (1) - must be request owner
 
-Response:
+Query Parameters:
+• review_id (required): ID of the review to cancel
+
+Response (200 OK):
 {
   "message": "Resume review request cancelled successfully",
-  "review": { ... }
-}</code></pre>
+  "review": {
+    "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+    "status": "Cancelled",
+    "feedback_date": "2025-11-15T15:45:00"
+  }
+}
+
+Permission Check:
+• User can only cancel their own review requests
+• Returns 403 Forbidden if user doesn't own the review
+• Automatically sets status to "Cancelled"</code></pre>
 
           <h3>Assign a Review</h3>
-          <pre><code>POST /v1/resumes/reviews/{review_id}/assign
+          <p>Assign a specific review to a volunteer. Leads manage review assignments.</p>
+          <pre><code>POST /v1/resumes/reviews/assign?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: lead (4) or admin (5)
+Role: Lead (4)
 
-Request:
+Query Parameters:
+• review_id (required): ID of the review to assign
+
+Request Body:
 {
   "reviewer_id": "64fd0a9556abc8f72fa12d9c",
   "reviewer_name": "Grace Hopper"
 }
 
-Response:
+Response (200 OK):
 {
   "message": "Resume review assigned successfully",
-  "review": { ... }
-}</code></pre>
+  "review": {
+    "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+    "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+    "reviewer_name": "Grace Hopper",
+    "status": "Pending"
+  }
+}
+
+Notes:
+• Reviewer must have Volunteer (3) role or higher
+• Assignment doesn't automatically change status
+• Reviewer receives notification (if notifications enabled)
+• Can reassign by calling endpoint again with different reviewer</code></pre>
 
           <h3>Bulk Assign Reviews</h3>
+          <p>Assign multiple reviews to a single volunteer in one operation. Efficient for distributing workload.</p>
           <pre><code>POST /v1/resumes/reviews/bulk-assign
 Headers: Authorization: Bearer &lt;token&gt;
-Role: lead (4) or admin (5)
+Role: Lead (4)
 
-Request:
+Request Body:
 {
-  "review_ids": ["65f7b1c7b8d9cbe7e5f1a4d2", "65f7b28cb8d9cbe7e5f1a4d8"],
+  "review_ids": [
+    "65f7b1c7b8d9cbe7e5f1a4d2",
+    "65f7b28cb8d9cbe7e5f1a4d8",
+    "65f7b3a1b8d9cbe7e5f1a4e1"
+  ],
   "reviewer_id": "64fd0a9556abc8f72fa12d9c",
   "reviewer_name": "Grace Hopper"
 }
 
-Response:
+Validation:
+• review_ids: Required, array of valid review IDs
+• reviewer_id: Required, must be Volunteer (3) or higher
+• reviewer_name: Required for display purposes
+
+Response (200 OK):
+{
+  "message": "Successfully assigned 3 resume review(s)",
+  "assigned_count": 3,
+  "total_requested": 3,
+  "failed_ids": []
+}
+
+Partial Success Response:
 {
   "message": "Successfully assigned 2 resume review(s)",
   "assigned_count": 2,
-  "total_requested": 2
-}</code></pre>
+  "total_requested": 3,
+  "failed_ids": ["65f7b3a1b8d9cbe7e5f1a4e1"]
+}
 
-          <h3>Reviewer Assignment Views</h3>
-          <pre><code>GET /v1/resumes/reviews/my-assignments
+Use Cases:
+• Distribute new reviews evenly among volunteers
+• Reassign reviews from inactive volunteer to active one
+• Balance workload across review team</code></pre>
+
+          <h3>Get Review Assignments</h3>
+          <p>View review assignments. Volunteers see their own assignments, Leads see all assignments.</p>
+          <pre><code>GET /v1/resumes/reviews/assignments?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Role: volunteer (3) or higher
 
+Query Parameters:
+• user_id (optional): Filter by assigned user
+
+Permission Rules:
+1. WITH user_id parameter:
+   - Volunteers+ (3+): Can view their own assignments (user_id must match current user)
+   - Leads (4): Can view any user's assignments
+   
+2. WITHOUT user_id parameter (all assignments):
+   - Volunteers/Referrers: Not allowed
+   - Leads (4): Returns all assigned reviews
+
+Example: Get my assignments (Volunteer)
+GET /v1/resumes/reviews/assignments?user_id=64fd0a9556abc8f72fa12d9c
+Role: Volunteer (3) - must query own user_id
+
+Example: Get all assignments (Lead)
 GET /v1/resumes/reviews/assignments
-Headers: Authorization: Bearer &lt;token&gt;
-Role: admin (5)
+Role: Lead (4)
 
-Response:
+Response (200 OK) - With user_id:
 {
-  "assignments": [ ... ]
-}</code></pre>
+  "reviews": [
+    {
+      "id": "65f7b1c7b8d9cbe7e5f1a4d2",
+      "user_id": "507f1f77bcf86cd799439011",
+      "user_name": "John Doe",
+      "user_email": "john@example.com",
+      "status": "Pending",
+      "resume_link": "https://drive.google.com/file/d/abc123/view",
+      "job_title": "Senior Backend Engineer",
+      "level": "Mid/Senior",
+      "submitted_date": "2025-11-15T14:30:00",
+      "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+      "reviewer_name": "Grace Hopper"
+    }
+  ]
+}
 
-          <h3>Delete Review</h3>
-          <pre><code>DELETE /v1/resumes/reviews/{review_id}
-Headers: Authorization: Bearer &lt;token&gt;
-Role: admin (5)
-
-Response:
+Response (200 OK) - Without user_id (Lead):
 {
-  "message": "Resume review request permanently deleted successfully"
-}</code></pre>
+  "assignments": [
+    {
+      "reviewer_id": "64fd0a9556abc8f72fa12d9c",
+      "reviewer_name": "Grace Hopper",
+      "assigned_count": 5,
+      "pending_count": 2,
+      "in_review_count": 2,
+      "completed_count": 1,
+      "reviews": [ ... ]
+    },
+    {
+      "reviewer_id": "64fd0b1656abc8f72fa12e1a",
+      "reviewer_name": "Alan Turing",
+      "assigned_count": 3,
+      "pending_count": 1,
+      "in_review_count": 1,
+      "completed_count": 1,
+      "reviews": [ ... ]
+    }
+  ]
+}
+
+Use Cases:
+• Volunteers check their pending review queue
+• Leads monitor reviewer workload distribution
+• Identify bottlenecks in review pipeline</code></pre>
+
+          <div class="info-box" style="margin-top: 2rem;">
+            <strong>🔄 Migration Notes</strong><br><br>
+            <strong>Deprecated Endpoints (removed in v1.2):</strong><br>
+            • <code>GET /resumes/reviews/my-requests</code> → Use <code>GET /resumes/reviews?user_id={your_user_id}</code><br>
+            • <code>GET /resumes/reviews/all</code> → Use <code>GET /resumes/reviews</code> (no params)<br>
+            • <code>PATCH /resumes/reviews/{review_id}</code> → Use <code>PATCH /resumes/reviews?review_id={review_id}</code><br>
+            • <code>PATCH /resumes/reviews/{review_id}/cancel</code> → Use <code>PATCH /resumes/reviews/cancel?review_id={review_id}</code><br>
+            • <code>POST /resumes/reviews/{review_id}/assign</code> → Use <code>POST /resumes/reviews/assign?review_id={review_id}</code><br>
+            • <code>GET /resumes/reviews/my-assignments</code> → Use <code>GET /resumes/reviews/assignments?user_id={your_user_id}</code><br><br>
+            
+            <strong>Why Query Parameters?</strong><br>
+            • Consistent filtering pattern across all endpoints<br>
+            • Flexible access control based on user roles<br>
+            • Single endpoint handles multiple use cases<br>
+            • Easier to extend with additional filters (status, date range, etc.)<br>
+            • RESTful best practice for resource filtering<br><br>
+
+            <strong>Frontend Migration:</strong><br>
+            Use <code>params</code> object with axios for clean query parameter handling:<br>
+            <pre style="background: #1a1a1a; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"><code>// Old pattern (deprecated)
+await axios.get(`/resumes/reviews/my-requests`)
+await axios.patch(`/resumes/reviews/${reviewId}`, data)
+
+// New pattern (current)
+await axios.get('/resumes/reviews', { params: { user_id: userId } })
+await axios.patch('/resumes/reviews', data, { params: { review_id: reviewId } })</code></pre>
+          </div>
         </section>
 
         <section id="api-referrals">
@@ -2554,32 +2707,38 @@ Response:
   }
 }</code></pre>
 
-          <h3>Get My Referrals</h3>
-          <pre><code>GET /v1/referrals/mine
+          <h3>Get Referrals (Unified Endpoint)</h3>
+          <p>Retrieve referral requests with flexible filtering. This unified endpoint replaces the deprecated <code>/mine</code> and <code>/all</code> endpoints.</p>
+          <pre><code>GET /v1/referrals?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
-Access: Member+
 
-Response:
-{
-  "referrals": [
-    {
-      "id": "507f1f77bcf86cd799439015",
-      "company_name": "Google",
-      "job_title": "Senior Software Engineer",
-      "status": "Pending",
-      "referral_date": "2025-01-15T10:30:00",
-      "review_note": null,
-      "feedback_date": null
-    }
-  ]
-}</code></pre>
+Query Parameters:
+• user_id (optional): Filter by specific user's referrals
 
-          <h3>Get All Referral Requests</h3>
-          <pre><code>GET /v1/referrals/all
-Headers: Authorization: Bearer &lt;token&gt;
-Access: Referrer (filtered by company_id) or Lead+
+Permission Rules:
+1. WITH user_id parameter:
+   - Members (1): Can only view their own referrals (user_id must match current user)
+   - Referrers (2): Can only view their own referrals
+   - Volunteers+ (3+): Can view any user's referrals
+   
+2. WITHOUT user_id parameter (get all referrals):
+   - Members (1): Not allowed
+   - Referrers (2): Returns referrals for their assigned company only
+   - Volunteers/Leads (3-4): Returns all referrals
 
-Response:
+Example: Get my own referrals (Member)
+GET /v1/referrals?user_id=507f1f77bcf86cd799439011
+Role: Member (1) - can only query own user_id
+
+Example: Get all referrals (Volunteer+)
+GET /v1/referrals
+Role: Volunteer (3) or higher
+
+Example: Get company referrals (Referrer)
+GET /v1/referrals
+Role: Referrer (2) - automatically filtered to their company
+
+Response (200 OK):
 {
   "referrals": [
     {
@@ -2587,20 +2746,31 @@ Response:
       "user_id": "507f1f77bcf86cd799439011",
       "company_name": "Google",
       "job_title": "Senior Software Engineer",
+      "job_id": "123456",
       "role": "Backend",
-      "resume": "https://drive.google.com/...",
-      "essay": "https://docs.google.com/...",
+      "resume": "https://drive.google.com/file/d/...",
+      "essay": "https://docs.google.com/document/d/...",
       "contact": "john@example.com",
       "status": "Pending",
-      "request_note": "Very interested...",
-      "review_note": null
+      "request_note": "Very interested in this role...",
+      "review_note": null,
+      "referral_date": "2025-01-15T10:30:00",
+      "feedback_date": null
     }
   ]
 }
 
+Status Values:
+• "Pending" - Awaiting review
+• "Under Review" - Being reviewed by referrer
+• "Approved" - Referral approved, submitted internally
+• "Rejected" - Referral declined
+• "Submitted" - Application submitted to company
+
 Notes:
-- Referrers only see requests for their company
-- Leads/Admins see all requests</code></pre>
+• Referrers automatically see only their company's referrals
+• Leads see all referrals across companies
+• Members/Volunteers filtered by user_id when provided</code></pre>
 
           <h3>Update Referral Status</h3>
           <pre><code>PATCH /v1/referrals/{referral_id}
@@ -2633,15 +2803,27 @@ Response:
   "referral": { ... }
 }</code></pre>
 
-          <h3>Delete Referral</h3>
-          <pre><code>DELETE /v1/referrals/{referral_id}
-Headers: Authorization: Bearer &lt;token&gt;
-Access: Admin only
+          <div class="info-box" style="margin-top: 2rem;">
+            <strong>🔄 Referrals API Migration</strong><br><br>
+            <strong>Deprecated Endpoints (removed in v1.2):</strong><br>
+            • <code>GET /referrals/mine</code> → Use <code>GET /referrals?user_id={your_user_id}</code><br>
+            • <code>GET /referrals/all</code> → Use <code>GET /referrals</code> (no params, filtered by role)<br><br>
+            
+            <strong>Key Benefits:</strong><br>
+            • Consistent query parameter pattern across platform<br>
+            • Role-based automatic filtering (Referrers see their company)<br>
+            • Single endpoint reduces code duplication<br>
+            • Easier to extend with additional filters (status, company, date range)<br><br>
 
-Response:
-{
-  "message": "Referral deleted successfully"
-}</code></pre>
+            <strong>Frontend Example:</strong><br>
+            <pre style="background: #1a1a1a; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"><code>// Old pattern (deprecated)
+await axios.get('/referrals/mine')
+await axios.get('/referrals/all')
+
+// New pattern (current)
+await axios.get('/referrals', { params: { user_id: userId } })  // My referrals
+await axios.get('/referrals')  // All referrals (role-filtered)</code></pre>
+          </div>
         </section>
 
         <section id="api-companies">
@@ -3054,7 +3236,7 @@ npm test -- NewFeature.test.js</code></pre>
 
           <h3>Manual Testing Checklist</h3>
           <ul>
-            <li>Test all user roles (member, referrer, lead, admin)</li>
+            <li>Test all user roles (member, referrer, volunteer, lead)</li>
             <li>Verify authentication flows (login, logout, token refresh)</li>
             <li>Test file upload/download functionality</li>
             <li>Validate form submissions and error handling</li>

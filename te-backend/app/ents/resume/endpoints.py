@@ -303,32 +303,47 @@ def create_resume_review_request(
     }
 
 
-@resume_reviews_router.get("/all", response_model=Dict[str, Any])
-def get_all_resume_review_requests(
+@resume_reviews_router.get("", response_model=Dict[str, Any])
+def get_resume_review_requests(
     db: Database = Depends(session.get_db),
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    user_id: str | None = Query(
+        default=None,
+        description="Filter by user ID. If not provided, returns all reviews (Volunteers+ only).",
+    ),
 ) -> Dict[str, Any]:
-    """Get all resume review requests (Volunteers and above only)."""
-    require_volunteer(current_user)
-    reviews = resume_crud.read_all_review_requests(db)
+    """
+    Get resume review requests.
+    - If user_id is provided: Returns reviews for that specific user
+    - If user_id is not provided: Returns all reviews (requires Volunteer+ role)
+    
+    Members can only view their own reviews.
+    Volunteers and above can view all reviews or filter by user_id.
+    """
+    user_role = get_user_role(current_user)
+    
+    # If filtering by specific user
+    if user_id:
+        # Members can only view their own reviews
+        if user_role == 1 and str(current_user.id) != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Members can only view their own resume review requests",
+            )
+        reviews = resume_crud.read_user_review_requests(db, user_id=user_id)
+    else:
+        # Viewing all reviews requires Volunteer+ role
+        require_volunteer(current_user)
+        reviews = resume_crud.read_all_review_requests(db)
+    
     return {"reviews": reviews}
 
 
-@resume_reviews_router.get("/my-requests", response_model=Dict[str, Any])
-def get_my_resume_review_requests(
-    db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
-) -> Dict[str, Any]:
-    """Get resume review requests for the current user."""
-    reviews = resume_crud.read_user_review_requests(db, user_id=str(current_user.id))
-    return {"reviews": reviews}
-
-
-@resume_reviews_router.patch("/{review_id}", response_model=Dict[str, Any])
+@resume_reviews_router.patch("", response_model=Dict[str, Any])
 def update_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
-    review_id: str,
+    review_id: str = Query(..., description="ID of the review to update"),
     data: resume_schema.ResumeReviewUpdate,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
@@ -348,11 +363,11 @@ def update_resume_review_request(
     }
 
 
-@resume_reviews_router.patch("/{review_id}/cancel", response_model=Dict[str, Any])
+@resume_reviews_router.patch("/cancel", response_model=Dict[str, Any])
 def cancel_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
-    review_id: str,
+    review_id: str = Query(..., description="ID of the review to cancel"),
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Cancel a resume review request (members can cancel their own)."""
@@ -377,11 +392,11 @@ def cancel_resume_review_request(
     }
 
 
-@resume_reviews_router.delete("/{review_id}", response_model=Dict[str, Any])
+@resume_reviews_router.delete("", response_model=Dict[str, Any])
 def delete_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
-    review_id: str,
+    review_id: str = Query(..., description="ID of the review to delete"),
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
     """Delete a resume review request (Admin only - hard delete)."""
@@ -398,11 +413,11 @@ def delete_resume_review_request(
     return {"message": "Resume review request permanently deleted successfully"}
 
 
-@resume_reviews_router.post("/{review_id}/assign", response_model=Dict[str, Any])
+@resume_reviews_router.post("/assign", response_model=Dict[str, Any])
 def assign_resume_review(
     *,
     db: Database = Depends(session.get_db),
-    review_id: str,
+    review_id: str = Query(..., description="ID of the review to assign"),
     data: resume_schema.ResumeReviewAssign,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
@@ -452,37 +467,48 @@ def bulk_assign_resume_reviews(
     return result
 
 
-@resume_reviews_router.get("/my-assignments", response_model=Dict[str, Any])
-def get_my_assigned_reviews(
-    *,
-    db: Database = Depends(session.get_db),
-    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
-) -> Dict[str, Any]:
-    """Get all resume reviews assigned to the current user (Volunteers and above)."""
-    user_role = get_user_role(current_user)
-    if user_role < 3:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Volunteers and above only",
-        )
-
-    reviews = resume_crud.get_reviews_assigned_to_user(db, user_id=str(current_user.id))
-    return {"reviews": reviews}
-
-
 @resume_reviews_router.get("/assignments", response_model=Dict[str, Any])
-def get_all_assignments(
+def get_review_assignments(
     *,
     db: Database = Depends(session.get_db),
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+    user_id: str | None = Query(
+        default=None,
+        description="Filter by assigned user ID. If not provided, returns all assignments (Admin only).",
+    ),
 ) -> Dict[str, Any]:
-    """Get all assignment records (Admin only)."""
+    """
+    Get resume review assignments.
+    - If user_id is provided: Returns reviews assigned to that user (Volunteers+ can view their own)
+    - If user_id is not provided: Returns all assignments (Admin only)
+    """
     user_role = get_user_role(current_user)
-    if user_role < 5:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
-
-    assignments = resume_crud.get_all_assigned_reviews(db)
-    return {"assignments": assignments}
+    
+    # If filtering by specific user
+    if user_id:
+        # Volunteers and above can view their own assignments
+        if user_role >= 3 and str(current_user.id) != user_id:
+            # Only admins can view other users' assignments
+            if user_role < 5:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Can only view your own assignments unless you're an admin",
+                )
+        elif user_role < 3:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Volunteers and above only",
+            )
+        
+        reviews = resume_crud.get_reviews_assigned_to_user(db, user_id=user_id)
+        return {"reviews": reviews}
+    else:
+        # Viewing all assignments requires Admin role
+        if user_role < 5:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin access required",
+            )
+        
+        assignments = resume_crud.get_all_assigned_reviews(db)
+        return {"assignments": assignments}
