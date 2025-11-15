@@ -177,9 +177,9 @@ const Testimonials = () => {
                     {testimonials
                         .filter((_, index) => index !== currentIndex)
                         .slice(0, 3)
-                        .map((testimonial, index) => (
+                        .map((testimonial) => (
                             <div
-                                key={index}
+                                key={testimonial.name}
                                 className="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl p-6 border-2 border-white/10 hover:border-cyan-400/50 hover:bg-gradient-to-br hover:from-white/20 hover:to-white/10 transition-all duration-300 cursor-pointer hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/30"
                                 onClick={() => {
                                     setIsAutoPlaying(false);

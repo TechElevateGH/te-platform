@@ -24,7 +24,7 @@ import {
 import { trackEvent } from '../analytics/events';
 
 const ResumeReviews = () => {
-    const { accessToken, userRole } = useAuth();
+    const { accessToken, userRole, userId } = useAuth();
     const [reviews, setReviews] = useState([]);
     const [myRequests, setMyRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -131,15 +131,16 @@ const ResumeReviews = () => {
         setLoading(true);
         try {
             // Fetch user's own requests
-            const myResponse = await axiosInstance.get('/resumes/reviews/my-requests', {
-                headers: { Authorization: `Bearer ${accessToken}` }
+            const myResponse = await axiosInstance.get('/resumes/reviews', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                params: { user_id: userId }
             });
             const myReqs = myResponse.data?.reviews || [];
             setMyRequests(myReqs);
 
             // If volunteer or above, fetch all requests
             if (isVolunteerOrAbove) {
-                const allResponse = await axiosInstance.get('/resumes/reviews/all', {
+                const allResponse = await axiosInstance.get('/resumes/reviews', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
                 setReviews(allResponse.data?.reviews || []);
@@ -149,7 +150,7 @@ const ResumeReviews = () => {
         } finally {
             setLoading(false);
         }
-    }, [accessToken, isVolunteerOrAbove]);
+    }, [accessToken, isVolunteerOrAbove, userId]);
 
     useEffect(() => {
         if (accessToken) {
@@ -190,14 +191,15 @@ const ResumeReviews = () => {
         if (!isVolunteerOrAbove) return;
 
         try {
-            const response = await axiosInstance.get('/resumes/reviews/my-assignments', {
-                headers: { Authorization: `Bearer ${accessToken}` }
+            const response = await axiosInstance.get('/resumes/reviews/assignments', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                params: { user_id: userId }
             });
             setMyAssignedReviews(response.data?.reviews || []);
         } catch (error) {
             console.error('Error fetching my assigned reviews:', error);
         }
-    }, [accessToken, isVolunteerOrAbove]);
+    }, [accessToken, isVolunteerOrAbove, userId]);
 
     // Fetch all assignments (for Admin)
     const fetchAllAssignments = useCallback(async () => {
@@ -282,8 +284,9 @@ const ResumeReviews = () => {
             type: 'warning',
             onConfirm: async () => {
                 try {
-                    await axiosInstance.patch(`/resumes/reviews/${reviewId}/cancel`, {}, {
-                        headers: { Authorization: `Bearer ${accessToken}` }
+                    await axiosInstance.patch('/resumes/reviews/cancel', {}, {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                        params: { review_id: reviewId }
                     });
                     setToast({ message: 'Review request cancelled', type: 'success' });
                     fetchData();
@@ -317,11 +320,12 @@ const ResumeReviews = () => {
 
         try {
             if (assignMode === 'single') {
-                await axiosInstance.post(`/resumes/reviews/${reviewToAssign.id}/assign`, {
+                await axiosInstance.post('/resumes/reviews/assign', {
                     reviewer_id: assignee.id,
                     reviewer_name: assignee.name
                 }, {
-                    headers: { Authorization: `Bearer ${accessToken}` }
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: { review_id: reviewToAssign.id }
                 });
                 setToast({ message: `Assigned to ${assignee.name}`, type: 'success' });
             } else {

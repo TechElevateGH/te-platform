@@ -322,10 +322,23 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                                     {isSignedIn ? (
                                         <>
                                             <button
-                                                onClick={() => navigate('/workspace')}
+                                                onClick={() => {
+                                                    navigate('/workspace');
+                                                    setMobileMenuOpen(false);
+                                                }}
                                                 className="-mx-3 block w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                                             >
                                                 Workspace
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    navigate('/workspace#profile');
+                                                    setMobileMenuOpen(false);
+                                                }}
+                                                className="-mx-3 flex items-center gap-3 w-full text-left rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                            >
+                                                <UserCircleIcon className="h-6 w-6" />
+                                                Profile
                                             </button>
                                             <button
                                                 onClick={() => {
