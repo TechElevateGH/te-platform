@@ -103,6 +103,131 @@ def login_access_token(
     }
 
 
+@auth_router.post(
+    "/password/reset-request", response_model=user_schema.PasswordResetRequestResponse
+)
+def request_password_reset(
+    data: user_schema.PasswordResetRequest,
+    db: Database = Depends(session.get_db),
+) -> Any:
+    """
+    Request a password reset code.
+
+    Sends a 6-digit verification code to the user's email address.
+
+    **Note**: Users who signed up with Google OAuth and never set a password
+    can use this to create their first password and enable email/password login.
+
+    - **email**: User's email address
+    - Returns: Success message (code sent to email)
+    """
+    from app.utilities.email import send_password_reset_email
+
+    # Check if user exists
+    user = user_crud.read_user_by_email(db, email=data.email)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email address.",
+        )
+
+    # For OAuth users without password, allow them to set one
+    # No special handling needed - they can reset/set a password
+
+    # Create password reset request
+    reset, token = user_crud.create_password_reset_request(db, user=user)
+
+    # Send email with reset code
+    try:
+        frontend_url = settings.DOMAIN
+        reset_link = f"{frontend_url}/reset-password?token={token}"
+        send_password_reset_email(user.email, reset.code, reset_link)
+    except Exception as e:
+        logger.error(f"Failed to send password reset email: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send reset code. Please try again.",
+        )
+
+    return user_schema.PasswordResetRequestResponse(
+        success=True,
+        message="Password reset code sent to your email. Please check your inbox.",
+    )
+
+
+@auth_router.post(
+    "/password/verify-code", response_model=user_schema.PasswordResetVerifyResponse
+)
+def verify_password_reset_code(
+    data: user_schema.PasswordResetVerify,
+    db: Database = Depends(session.get_db),
+) -> Any:
+    """
+    Verify password reset code.
+
+    Validates the 6-digit code and returns a session token for password reset.
+
+    - **email**: User's email address
+    - **code**: 6-digit verification code
+    - **token**: Token from reset request
+    - Returns: Session token for completing password reset
+    """
+    try:
+        session_token = user_crud.verify_password_reset_code(
+            db,
+            email=data.email,
+            code=data.code,
+            token=data.token,
+        )
+    except HTTPException:
+        raise
+
+    return user_schema.PasswordResetVerifyResponse(
+        success=True,
+        message="Code verified successfully. You can now reset your password.",
+        session_token=session_token,
+    )
+
+
+@auth_router.post(
+    "/password/complete-reset", response_model=user_schema.PasswordResetCompleteResponse
+)
+def complete_password_reset(
+    data: user_schema.PasswordResetComplete,
+    db: Database = Depends(session.get_db),
+) -> Any:
+    """
+    Complete password reset with new password.
+
+    Sets the new password for the user account.
+
+    - **session_token**: Token from verified code step
+    - **new_password**: New password (min 8 characters)
+    - Returns: Success message
+    """
+    # Validate password strength
+    if len(data.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long.",
+        )
+
+    try:
+        user_crud.complete_password_reset(
+            db,
+            token=data.session_token,
+            new_password=data.new_password,
+        )
+    except HTTPException:
+        raise
+
+    return user_schema.PasswordResetCompleteResponse(
+        success=True,
+        message="Password reset successfully! You can now log in with your new password.",
+    )
+
+
 @auth_router.post("/management-login")
 def management_login_access_token(
     data: user_schema.LeadLogin,

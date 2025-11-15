@@ -849,9 +849,9 @@
                 embedded applications/resumes, OAuth support
               </li>
               <li>
-                <code>privileged_users</code>: Referrers/Volunteers/Leads
-                (roles 2-4) with username-based auth, company_id for Referrers,
-                token authentication support
+                <code>privileged_users</code>: Referrers/Volunteers/Leads (roles
+                2-4) with username-based auth, company_id for Referrers, token
+                authentication support
               </li>
             </ul>
           </div>
@@ -1080,8 +1080,7 @@
                 <td><code>privileged_users</code></td>
                 <td>Management accounts (Referrer, Volunteer, Lead)</td>
                 <td>
-                  username, password, role (2-4), company_id (for
-                  Referrers)
+                  username, password, role (2-4), company_id (for Referrers)
                 </td>
               </tr>
               <tr>
@@ -1304,7 +1303,8 @@
                 <td><code>Volunteer</code></td>
                 <td>3</td>
                 <td>
-                  Review resumes, create learning content, all Member permissions
+                  Review resumes, create learning content, all Member
+                  permissions
                 </td>
                 <td><code>/auth/management-login</code></td>
               </tr>
@@ -1312,8 +1312,8 @@
                 <td><code>Lead</code></td>
                 <td>4</td>
                 <td>
-                  Manage companies, view all member data, assign resume reviews, all lower
-                  permissions
+                  Manage companies, view all member data, assign resume reviews,
+                  all lower permissions
                 </td>
                 <td><code>/auth/management-login</code></td>
               </tr>
@@ -1323,8 +1323,8 @@
           <div class="note">
             <strong>Permission Hierarchy:</strong> Higher roles inherit all
             permissions from lower roles. The platform enforces this via
-            <code>require_member()</code>, <code>require_volunteer()</code>,
-            and <code>require_lead()</code> dependency functions.
+            <code>require_member()</code>, <code>require_volunteer()</code>, and
+            <code>require_lead()</code> dependency functions.
           </div>
 
           <h3>Token Structure</h3>
@@ -1742,17 +1742,17 @@
             Browse companies via <code>GET /referrals/companies</code> where
             TechElevate has referrer connections. Submit a referral request with
             your resume and a personalized note. Track the status of your
-            request via <code>GET /referrals?user_id={your_id}</code> and receive
-            notifications when reviewed.
+            request via <code>GET /referrals?user_id={your_id}</code> and
+            receive notifications when reviewed.
           </div>
 
           <div class="note">
             <strong>For Referrers</strong>
             View incoming referral requests for your company via
-            <code>GET /referrals</code> (automatically filtered by your company_id). Download
-            resumes, evaluate fit, and approve or decline with feedback via
-            <code>PATCH /referrals/{id}</code>. Track outcomes of referrals
-            provided.
+            <code>GET /referrals</code> (automatically filtered by your
+            company_id). Download resumes, evaluate fit, and approve or decline
+            with feedback via <code>PATCH /referrals/{id}</code>. Track outcomes
+            of referrals provided.
           </div>
 
           <div class="note">
@@ -1833,8 +1833,8 @@
               requests (Members: own only, Volunteers+: any user)
             </li>
             <li>
-              <code>GET /referrals</code> - Get all referrals with role-based filtering
-              (Referrers: own company, Leads+: all referrals)
+              <code>GET /referrals</code> - Get all referrals with role-based
+              filtering (Referrers: own company, Leads+: all referrals)
             </li>
             <li>
               <code>POST /referrals</code> - Create referral request (Member+)
@@ -2332,17 +2332,25 @@ Response:
         <section id="api-resume-reviews">
           <h2>Resume Review APIs</h2>
           <div class="info-box">
-            <strong>Roles &amp; Permissions</strong><br>
-            • <strong>Members (1)</strong>: Create and cancel their own review requests<br>
-            • <strong>Volunteers (3)</strong>: Update review status and feedback, view their assignments<br>
-            • <strong>Leads (4)</strong>: Assign reviews, bulk assign, view all assignments<br><br>
-            <strong>API Design Pattern</strong><br>
-            All resume review endpoints use <strong>query parameters</strong> for filtering and identification, 
-            providing flexible access control and consistent API patterns across the platform.
+            <strong>Roles &amp; Permissions</strong><br />
+            • <strong>Members (1)</strong>: Create and cancel their own review
+            requests<br />
+            • <strong>Volunteers (3)</strong>: Update review status and
+            feedback, view their assignments<br />
+            • <strong>Leads (4)</strong>: Assign reviews, bulk assign, view all
+            assignments<br /><br />
+            <strong>API Design Pattern</strong><br />
+            All resume review endpoints use
+            <strong>query parameters</strong> for filtering and identification,
+            providing flexible access control and consistent API patterns across
+            the platform.
           </div>
 
           <h3>Create Review Request</h3>
-          <p>Submit a new resume review request. Members can request feedback on their resumes for specific job applications.</p>
+          <p>
+            Submit a new resume review request. Members can request feedback on
+            their resumes for specific job applications.
+          </p>
           <pre><code>POST /v1/resumes/reviews
 Headers: Authorization: Bearer &lt;token&gt;
 Role: Member (1) or higher
@@ -2368,7 +2376,11 @@ Validation:
 • notes: Optional, max 1000 characters</code></pre>
 
           <h3>Get Review Requests (Unified Endpoint)</h3>
-          <p>Retrieve resume review requests with flexible filtering. This unified endpoint replaces the deprecated <code>/my-requests</code> and <code>/all</code> endpoints.</p>
+          <p>
+            Retrieve resume review requests with flexible filtering. This
+            unified endpoint replaces the deprecated
+            <code>/my-requests</code> and <code>/all</code> endpoints.
+          </p>
           <pre><code>GET /v1/resumes/reviews?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
 
@@ -2437,7 +2449,10 @@ Status Values:
 • "Cancelled" - Request cancelled by member</code></pre>
 
           <h3>Update Review Status / Feedback</h3>
-          <p>Update the status and feedback for a review. Volunteers update reviews they're working on.</p>
+          <p>
+            Update the status and feedback for a review. Volunteers update
+            reviews they're working on.
+          </p>
           <pre><code>PATCH /v1/resumes/reviews?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
 Role: Volunteer (3) or higher
@@ -2475,7 +2490,10 @@ Notes:
 • Updates are audited with reviewer tracking</code></pre>
 
           <h3>Cancel Review Request</h3>
-          <p>Cancel your own review request. Members can cancel requests they submitted.</p>
+          <p>
+            Cancel your own review request. Members can cancel requests they
+            submitted.
+          </p>
           <pre><code>PATCH /v1/resumes/reviews/cancel?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
 Role: Member (1) - must be request owner
@@ -2499,7 +2517,10 @@ Permission Check:
 • Automatically sets status to "Cancelled"</code></pre>
 
           <h3>Assign a Review</h3>
-          <p>Assign a specific review to a volunteer. Leads manage review assignments.</p>
+          <p>
+            Assign a specific review to a volunteer. Leads manage review
+            assignments.
+          </p>
           <pre><code>POST /v1/resumes/reviews/assign?review_id={review_id}
 Headers: Authorization: Bearer &lt;token&gt;
 Role: Lead (4)
@@ -2531,7 +2552,10 @@ Notes:
 • Can reassign by calling endpoint again with different reviewer</code></pre>
 
           <h3>Bulk Assign Reviews</h3>
-          <p>Assign multiple reviews to a single volunteer in one operation. Efficient for distributing workload.</p>
+          <p>
+            Assign multiple reviews to a single volunteer in one operation.
+            Efficient for distributing workload.
+          </p>
           <pre><code>POST /v1/resumes/reviews/bulk-assign
 Headers: Authorization: Bearer &lt;token&gt;
 Role: Lead (4)
@@ -2574,7 +2598,10 @@ Use Cases:
 • Balance workload across review team</code></pre>
 
           <h3>Get Review Assignments</h3>
-          <p>View review assignments. Volunteers see their own assignments, Leads see all assignments.</p>
+          <p>
+            View review assignments. Volunteers see their own assignments, Leads
+            see all assignments.
+          </p>
           <pre><code>GET /v1/resumes/reviews/assignments?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
 
@@ -2646,26 +2673,44 @@ Use Cases:
 • Leads monitor reviewer workload distribution
 • Identify bottlenecks in review pipeline</code></pre>
 
-          <div class="info-box" style="margin-top: 2rem;">
-            <strong>🔄 Migration Notes</strong><br><br>
-            <strong>Deprecated Endpoints (removed in v1.2):</strong><br>
-            • <code>GET /resumes/reviews/my-requests</code> → Use <code>GET /resumes/reviews?user_id={your_user_id}</code><br>
-            • <code>GET /resumes/reviews/all</code> → Use <code>GET /resumes/reviews</code> (no params)<br>
-            • <code>PATCH /resumes/reviews/{review_id}</code> → Use <code>PATCH /resumes/reviews?review_id={review_id}</code><br>
-            • <code>PATCH /resumes/reviews/{review_id}/cancel</code> → Use <code>PATCH /resumes/reviews/cancel?review_id={review_id}</code><br>
-            • <code>POST /resumes/reviews/{review_id}/assign</code> → Use <code>POST /resumes/reviews/assign?review_id={review_id}</code><br>
-            • <code>GET /resumes/reviews/my-assignments</code> → Use <code>GET /resumes/reviews/assignments?user_id={your_user_id}</code><br><br>
-            
-            <strong>Why Query Parameters?</strong><br>
-            • Consistent filtering pattern across all endpoints<br>
-            • Flexible access control based on user roles<br>
-            • Single endpoint handles multiple use cases<br>
-            • Easier to extend with additional filters (status, date range, etc.)<br>
-            • RESTful best practice for resource filtering<br><br>
+          <div class="info-box" style="margin-top: 2rem">
+            <strong>🔄 Migration Notes</strong><br /><br />
+            <strong>Deprecated Endpoints (removed in v1.2):</strong><br />
+            • <code>GET /resumes/reviews/my-requests</code> → Use
+            <code>GET /resumes/reviews?user_id={your_user_id}</code><br />
+            • <code>GET /resumes/reviews/all</code> → Use
+            <code>GET /resumes/reviews</code> (no params)<br />
+            • <code>PATCH /resumes/reviews/{review_id}</code> → Use
+            <code>PATCH /resumes/reviews?review_id={review_id}</code><br />
+            • <code>PATCH /resumes/reviews/{review_id}/cancel</code> → Use
+            <code>PATCH /resumes/reviews/cancel?review_id={review_id}</code
+            ><br />
+            • <code>POST /resumes/reviews/{review_id}/assign</code> → Use
+            <code>POST /resumes/reviews/assign?review_id={review_id}</code
+            ><br />
+            • <code>GET /resumes/reviews/my-assignments</code> → Use
+            <code>GET /resumes/reviews/assignments?user_id={your_user_id}</code
+            ><br /><br />
 
-            <strong>Frontend Migration:</strong><br>
-            Use <code>params</code> object with axios for clean query parameter handling:<br>
-            <pre style="background: #1a1a1a; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"><code>// Old pattern (deprecated)
+            <strong>Why Query Parameters?</strong><br />
+            • Consistent filtering pattern across all endpoints<br />
+            • Flexible access control based on user roles<br />
+            • Single endpoint handles multiple use cases<br />
+            • Easier to extend with additional filters (status, date range,
+            etc.)<br />
+            • RESTful best practice for resource filtering<br /><br />
+
+            <strong>Frontend Migration:</strong><br />
+            Use <code>params</code> object with axios for clean query parameter
+            handling:<br />
+            <pre
+              style="
+                background: #1a1a1a;
+                padding: 1rem;
+                border-radius: 4px;
+                margin-top: 0.5rem;
+              "
+            ><code>// Old pattern (deprecated)
 await axios.get(`/resumes/reviews/my-requests`)
 await axios.patch(`/resumes/reviews/${reviewId}`, data)
 
@@ -2708,7 +2753,11 @@ Response:
 }</code></pre>
 
           <h3>Get Referrals (Unified Endpoint)</h3>
-          <p>Retrieve referral requests with flexible filtering. This unified endpoint replaces the deprecated <code>/mine</code> and <code>/all</code> endpoints.</p>
+          <p>
+            Retrieve referral requests with flexible filtering. This unified
+            endpoint replaces the deprecated <code>/mine</code> and
+            <code>/all</code> endpoints.
+          </p>
           <pre><code>GET /v1/referrals?user_id={user_id}
 Headers: Authorization: Bearer &lt;token&gt;
 
@@ -2803,20 +2852,30 @@ Response:
   "referral": { ... }
 }</code></pre>
 
-          <div class="info-box" style="margin-top: 2rem;">
-            <strong>🔄 Referrals API Migration</strong><br><br>
-            <strong>Deprecated Endpoints (removed in v1.2):</strong><br>
-            • <code>GET /referrals/mine</code> → Use <code>GET /referrals?user_id={your_user_id}</code><br>
-            • <code>GET /referrals/all</code> → Use <code>GET /referrals</code> (no params, filtered by role)<br><br>
-            
-            <strong>Key Benefits:</strong><br>
-            • Consistent query parameter pattern across platform<br>
-            • Role-based automatic filtering (Referrers see their company)<br>
-            • Single endpoint reduces code duplication<br>
-            • Easier to extend with additional filters (status, company, date range)<br><br>
+          <div class="info-box" style="margin-top: 2rem">
+            <strong>🔄 Referrals API Migration</strong><br /><br />
+            <strong>Deprecated Endpoints (removed in v1.2):</strong><br />
+            • <code>GET /referrals/mine</code> → Use
+            <code>GET /referrals?user_id={your_user_id}</code><br />
+            • <code>GET /referrals/all</code> → Use
+            <code>GET /referrals</code> (no params, filtered by role)<br /><br />
 
-            <strong>Frontend Example:</strong><br>
-            <pre style="background: #1a1a1a; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;"><code>// Old pattern (deprecated)
+            <strong>Key Benefits:</strong><br />
+            • Consistent query parameter pattern across platform<br />
+            • Role-based automatic filtering (Referrers see their company)<br />
+            • Single endpoint reduces code duplication<br />
+            • Easier to extend with additional filters (status, company, date
+            range)<br /><br />
+
+            <strong>Frontend Example:</strong><br />
+            <pre
+              style="
+                background: #1a1a1a;
+                padding: 1rem;
+                border-radius: 4px;
+                margin-top: 0.5rem;
+              "
+            ><code>// Old pattern (deprecated)
 await axios.get('/referrals/mine')
 await axios.get('/referrals/all')
 

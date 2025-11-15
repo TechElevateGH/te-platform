@@ -85,7 +85,14 @@ const Register = () => {
                 }
             });
         } catch (error) {
-            setError(error.response?.data?.detail || 'Registration failed. Please try again.');
+            const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
+
+            // Check if it's a duplicate email error
+            if (errorMessage.includes('already exists') || errorMessage.includes('already used')) {
+                setError(errorMessage);
+            } else {
+                setError(errorMessage);
+            }
         } finally {
             setLoading(false);
         }
@@ -271,7 +278,17 @@ const Register = () => {
                         <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-200 animate-fade-in">
                             <div className="flex">
                                 <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0" />
-                                <p className="ml-3 text-sm text-red-800">{error}</p>
+                                <div className="ml-3">
+                                    <p className="text-sm text-red-800">{error}</p>
+                                    {error.includes('already exists') && (
+                                        <button
+                                            onClick={() => navigate('/login')}
+                                            className="mt-2 text-sm font-semibold text-blue-600 hover:text-blue-500 underline"
+                                        >
+                                            Go to Sign In
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
