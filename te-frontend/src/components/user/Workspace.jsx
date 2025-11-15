@@ -29,7 +29,7 @@ import { useLocation } from 'react-router-dom'
 
 const Workspace = ({ setLogin }) => {
     const { userId, accessToken, logout, userRole, isGuest } = useAuth();
-    const { setUserInfo, setOtherFiles, fetchResumes, setFetchResumes } = useData();
+    const { setUserInfo, setOtherFiles, fetchResumes, setFetchResumes, setResumes } = useData();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -145,19 +145,23 @@ const Workspace = ({ setLogin }) => {
                 }
             });
 
-            // Update userInfo with the new resumes
             // Backend returns { resumes: { resumes: [...] } }
+            const resumesData = resumesResponse.data?.resumes?.resumes || [];
+
+            // Update both userInfo and the resumes state in DataContext
             setUserInfo(prevUserInfo => ({
                 ...prevUserInfo,
-                resumes: resumesResponse.data?.resumes?.resumes || []
+                resumes: resumesData
             }));
+
+            setResumes(resumesData);
         } catch (error) {
             if (error.response?.status === 401) {
                 logout();
             }
             console.error('Error fetching resumes:', error);
         }
-    }, [accessToken, logout, setUserInfo, userId, userRole]);
+    }, [accessToken, logout, setUserInfo, setResumes, userId, userRole]);
 
     const getUserFilesRequest = useCallback(async () => {
         // Only members (role=1) have essays and cover letters

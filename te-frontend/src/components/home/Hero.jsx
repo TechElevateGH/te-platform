@@ -156,26 +156,11 @@ const Hero = () => {
               </>
             )}
           </div>
-
-          {/* Stats */}
-          <div className="mt-16 sm:mt-20 grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4 animate-fade-in px-4" style={{ animationDelay: '0.6s' }}>
-            {[
-              { label: 'Success Stories', value: '50+' },
-              { label: 'Nationalities', value: '4+' },
-            ].map((stat, idx) => (
-              <div key={idx} className="group">
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform">
-                  {stat.value}
-                </div>
-                <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 border-2 border-gray-400 dark:border-gray-600 rounded-full flex justify-center">
           <div className="w-1 h-3 bg-gray-400 dark:bg-gray-600 rounded-full mt-2 animate-scroll"></div>
         </div>

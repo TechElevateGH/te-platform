@@ -10,7 +10,7 @@ const stats = [
     {
         id: 0,
         name: 'Success Stories',
-        value: 50,
+        value: 60,
         suffix: '+',
         icon: TrophyIcon,
         color: 'from-purple-500 to-pink-500',
@@ -28,7 +28,7 @@ const stats = [
     {
         id: 2,
         name: 'Community Members',
-        value: 100,
+        value: 110,
         suffix: '+',
         icon: HeartIcon,
         color: 'from-rose-500 to-pink-500',
@@ -121,30 +121,30 @@ const ImpactStats = () => {
                             className="group relative flex-1 min-w-[240px] max-w-xs"
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="relative flex h-full w-full flex-col items-center justify-start bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 text-center hover:-translate-y-2">
+                            <div className="relative flex h-full w-full flex-col items-center justify-start bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 text-center hover:-translate-y-3 group-hover:bg-gradient-to-br group-hover:from-gray-900 group-hover:to-gray-800 group-hover:border-transparent">
                                 {/* Icon */}
-                                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300`}>
                                     <stat.icon className="h-8 w-8 text-white" />
                                 </div>
 
                                 {/* Number */}
-                                <div className={`text-5xl font-bold mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                                <div className={`text-5xl font-bold mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300`}>
                                     {isVisible && <AnimatedNumber value={stat.value} />}
                                     {stat.suffix}
                                 </div>
 
                                 {/* Label */}
-                                <div className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-white group-hover:font-extrabold transition-all duration-300">
                                     {stat.name}
                                 </div>
 
                                 {/* Description */}
-                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed group-hover:text-gray-100 group-hover:font-semibold transition-all duration-300">
                                     {stat.description}
                                 </p>
 
                                 {/* Decorative gradient border */}
-                                <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br ${stat.color} -z-10 blur-2xl`}></div>
+                                <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br ${stat.color} -z-10 blur-2xl`}></div>
                             </div>
                         </div>
                     ))}
