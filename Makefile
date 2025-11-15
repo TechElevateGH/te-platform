@@ -46,26 +46,6 @@ frontend:
 	@$(MAKE) frontend-status
 	@cd te-frontend && npm start
 
-# Switch frontend to use local backend (without starting server)
-frontend-use-local:
-	@echo "Switching frontend to LOCAL backend (http://localhost:8000/v1/)..."
-	@if [ -f te-frontend/.env.local.backup ]; then \
-		mv te-frontend/.env.local.backup te-frontend/.env.local; \
-		echo "✅ Switched to LOCAL backend"; \
-	else \
-		echo "✅ Already using LOCAL backend"; \
-	fi
-
-# Switch frontend to use production backend (without starting server)
-frontend-use-prod:
-	@echo "Switching frontend to PRODUCTION backend (https://te-platform.onrender.com/v1/)..."
-	@if [ -f te-frontend/.env.local ]; then \
-		mv te-frontend/.env.local te-frontend/.env.local.backup; \
-		echo "✅ Switched to PRODUCTION backend"; \
-	else \
-		echo "✅ Already using PRODUCTION backend"; \
-	fi
-
 # Check current frontend backend configuration
 frontend-status:
 	@if [ -f te-frontend/.env.local ]; then \

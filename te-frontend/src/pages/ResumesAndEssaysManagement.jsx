@@ -21,7 +21,7 @@ import {
     ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
-const FilesManagement = () => {
+const ResumesAndEssaysManagement = () => {
     const { accessToken, userRole } = useAuth();
     const [users, setUsers] = useState([]);
     const [resumeReviews, setResumeReviews] = useState([]);
@@ -36,7 +36,7 @@ const FilesManagement = () => {
 
     // Default tab: Resumes for Lead+, Reviews for Volunteer - persist across refreshes
     const [activeTab, setActiveTab] = useState(() => {
-        return localStorage.getItem('filesManagementActiveTab') || (userRoleInt >= 4 ? 'resumes' : 'reviews');
+        return localStorage.getItem('ResumesAndEssaysManagementActiveTab') || (userRoleInt >= 4 ? 'resumes' : 'reviews');
     });
     const [searchQuery, setSearchQuery] = useState('');
     const [fileTypeFilter, setFileTypeFilter] = useState('');
@@ -130,7 +130,7 @@ const FilesManagement = () => {
 
     // Persist activeTab to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('filesManagementActiveTab', activeTab);
+        localStorage.setItem('ResumesAndEssaysManagementActiveTab', activeTab);
     }, [activeTab]);
 
     // Fetch all users with their files
@@ -212,7 +212,7 @@ const FilesManagement = () => {
 
     useEffect(() => {
         if (accessToken) {
-            console.log('FilesManagement mounted, fetching data...');
+            console.log('ResumesAndEssaysManagement mounted, fetching data...');
             console.log('User role:', userRoleInt, 'isLeadOrAbove:', isLeadOrAbove);
             fetchAllUsersFiles();
             fetchResumeReviews();
@@ -1173,8 +1173,8 @@ const FilesManagement = () => {
                                             </tr>
                                         ) : (
                                             filteredResumeReviews.map((review) => (
-                                                <tr 
-                                                    key={review.id} 
+                                                <tr
+                                                    key={review.id}
                                                     onClick={() => {
                                                         console.log('Row clicked:', review);
                                                         handleViewReview(review);
@@ -2278,4 +2278,4 @@ const FilesManagement = () => {
     );
 };
 
-export default FilesManagement;
+export default ResumesAndEssaysManagement;

@@ -513,7 +513,7 @@ def get_referral_essay(
         )
 
     essay = user_crud.read_user_essay(db, user_id=user_id)
-    return user_schema.Essay(essay=essay)
+    return user_schema.Essay(referral_essay=essay)
 
 
 @router.post("/{user_id}/essay", response_model=user_schema.Essay)
@@ -544,7 +544,7 @@ def update_referral_essay(
         )
 
     essay = user_crud.add_user_essay(db, user_id=user_id, data=data)
-    return user_schema.Essay(essay=essay)
+    return user_schema.Essay(referral_essay=essay)
 
 
 @router.get("/{user_id}/cover-letter", response_model=user_schema.CoverLetter)

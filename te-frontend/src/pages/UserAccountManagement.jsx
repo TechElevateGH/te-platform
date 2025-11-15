@@ -401,7 +401,7 @@ const UserAccountManagement = () => {
                                                             className={`flex-1 px-4 py-1.5 rounded-md font-medium transition-all text-xs flex items-center justify-center gap-1.5 ${canEdit
                                                                 ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white hover:from-amber-700 hover:to-orange-700'
                                                                 : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <PencilIcon className="h-3.5 w-3.5" />
                                                             Edit
@@ -414,7 +414,7 @@ const UserAccountManagement = () => {
                                                                 : user.is_active
                                                                     ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
                                                                     : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {user.is_active ? 'Deactivate' : 'Activate'}
                                                         </button>
@@ -514,7 +514,7 @@ const UserAccountManagement = () => {
                                                         </div>
                                                     </td>
                                                 </tr>
-                                                ))
+                                            ))
                                         )}
                                     </tbody>
                                 </table>
@@ -587,7 +587,7 @@ const UserAccountManagement = () => {
                                                         className={`px-4 py-1.5 rounded-md font-medium transition-all text-xs ${user.is_active
                                                             ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
                                                             : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {user.is_active ? 'Deactivate' : 'Activate'}
                                                     </button>

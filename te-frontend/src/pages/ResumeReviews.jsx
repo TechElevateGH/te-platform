@@ -1239,7 +1239,7 @@ const ResumeReviews = () => {
 
                         <form onSubmit={handleSubmitRequest} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Google Docs Resume Link *
                                 </label>
                                 <input
@@ -1250,13 +1250,13 @@ const ResumeReviews = () => {
                                     placeholder="https://docs.google.com/document/d/..."
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                                 />
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-xs text-left text-gray-500 dark:text-gray-400">
                                     Make sure your resume is shared with "Anyone with the link can view"
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Target Job Title *
                                 </label>
                                 <input
@@ -1270,7 +1270,7 @@ const ResumeReviews = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Experience Level *
                                 </label>
                                 <select
@@ -1288,7 +1288,7 @@ const ResumeReviews = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Additional Notes (Optional)
                                 </label>
                                 <textarea
@@ -1310,7 +1310,7 @@ const ResumeReviews = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-blue-600 text-white font-semibold rounded-lg hover:from-emerald-600 hover:to-blue-700 transition-all shadow-lg"
+                                    className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors shadow-lg"
                                 >
                                     Submit Request
                                 </button>

@@ -601,179 +601,179 @@ const ApplicationManagement = () => {
                                 💡 Click on any row to view details
                             </p>
                         </div>
-                        
+
                         <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-                                    {visibleColumns.company && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Company
-                                        </th>
-                                    )}
-                                    {visibleColumns.member && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Member
-                                        </th>
-                                    )}
-                                    {visibleColumns.position && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Position
-                                        </th>
-                                    )}
-                                    {visibleColumns.level && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Level
-                                        </th>
-                                    )}
-                                    {visibleColumns.location && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Location
-                                        </th>
-                                    )}
-                                    {visibleColumns.referred && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Referred
-                                        </th>
-                                    )}
-                                    {visibleColumns.recruiter && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Recruiter
-                                        </th>
-                                    )}
-                                    {visibleColumns.status && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                    )}
-                                    {visibleColumns.applied && (
-                                        <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                            Applied
-                                        </th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {sortedApplications.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={visibleColumnCount} className="px-3 py-6 text-center">
-                                            <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                {applications.length === 0
-                                                    ? 'No member applications yet'
-                                                    : 'Try adjusting your filters'}
-                                            </p>
-                                        </td>
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                        {visibleColumns.company && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Company
+                                            </th>
+                                        )}
+                                        {visibleColumns.member && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Member
+                                            </th>
+                                        )}
+                                        {visibleColumns.position && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Position
+                                            </th>
+                                        )}
+                                        {visibleColumns.level && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Level
+                                            </th>
+                                        )}
+                                        {visibleColumns.location && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Location
+                                            </th>
+                                        )}
+                                        {visibleColumns.referred && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Referred
+                                            </th>
+                                        )}
+                                        {visibleColumns.recruiter && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Recruiter
+                                            </th>
+                                        )}
+                                        {visibleColumns.status && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                        )}
+                                        {visibleColumns.applied && (
+                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                Applied
+                                            </th>
+                                        )}
                                     </tr>
-                                ) : (
-                                    sortedApplications.map((app) => (
-                                        <tr
-                                            key={app.id}
-                                            onClick={() => {
-                                                setSelectedApplication(app);
-                                                setSelectedApplicationId(app.id);
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                    {sortedApplications.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={visibleColumnCount} className="px-3 py-6 text-center">
+                                                <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                                <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    {applications.length === 0
+                                                        ? 'No member applications yet'
+                                                        : 'Try adjusting your filters'}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        sortedApplications.map((app) => (
+                                            <tr
+                                                key={app.id}
+                                                onClick={() => {
                                                     setSelectedApplication(app);
                                                     setSelectedApplicationId(app.id);
-                                                }
-                                            }}
-                                            tabIndex={0}
-                                            role="button"
-                                            aria-label={`View details for application at ${app.company}`}
-                                            className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
-                                        >
-                                            {visibleColumns.company && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="relative h-5 w-5 flex-shrink-0">
-                                                            <img
-                                                                src={getCompanyLogoUrl(app.company)}
-                                                                alt={app.company}
-                                                                className="h-5 w-5 rounded object-cover border border-gray-200 dark:border-gray-700 bg-white"
-                                                                onError={handleCompanyLogoError}
-                                                            />
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        setSelectedApplication(app);
+                                                        setSelectedApplicationId(app.id);
+                                                    }
+                                                }}
+                                                tabIndex={0}
+                                                role="button"
+                                                aria-label={`View details for application at ${app.company}`}
+                                                className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
+                                            >
+                                                {visibleColumns.company && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="relative h-5 w-5 flex-shrink-0">
+                                                                <img
+                                                                    src={getCompanyLogoUrl(app.company)}
+                                                                    alt={app.company}
+                                                                    className="h-5 w-5 rounded object-cover border border-gray-200 dark:border-gray-700 bg-white"
+                                                                    onError={handleCompanyLogoError}
+                                                                />
+                                                            </div>
+                                                            <span className="font-semibold text-gray-900 dark:text-white text-xs">{app.company}</span>
                                                         </div>
-                                                        <span className="font-semibold text-gray-900 dark:text-white text-xs">{app.company}</span>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.member && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <div>
-                                                        <div className="font-semibold text-gray-900 dark:text-white text-xs">{app.user_name}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {visibleColumns.position && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <span className="text-xs text-gray-700 dark:text-gray-300">{app.title}</span>
-                                                </td>
-                                            )}
-                                            {visibleColumns.level && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <span className="text-xs text-gray-600 dark:text-gray-400">{app.role}</span>
-                                                </td>
-                                            )}
-                                            {visibleColumns.location && (
-                                                <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                    <p className="text-xs text-gray-700 dark:text-gray-300">
-                                                        {app.location?.city && app.location?.country
-                                                            ? `${app.location.city}, ${app.location.country}`
-                                                            : app.location?.country || app.location?.city || '—'}
-                                                    </p>
-                                                </td>
-                                            )}
-                                            {visibleColumns.referred && (
-                                                <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                    {app.referred ? (
-                                                        <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                            Yes
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
-                                                    )}
-                                                </td>
-                                            )}
-                                            {visibleColumns.recruiter && (
-                                                <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                    {app.recruiter_name ? (
-                                                        <div className="min-w-0">
-                                                            <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                                                                {app.recruiter_name}
-                                                            </p>
-                                                            {app.recruiter_email && (
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                                    {app.recruiter_email}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.member && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <div>
+                                                            <div className="font-semibold text-gray-900 dark:text-white text-xs">{app.user_name}</div>
+                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.position && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="text-xs text-gray-700 dark:text-gray-300">{app.title}</span>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.level && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{app.role}</span>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.location && (
+                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
+                                                        <p className="text-xs text-gray-700 dark:text-gray-300">
+                                                            {app.location?.city && app.location?.country
+                                                                ? `${app.location.city}, ${app.location.country}`
+                                                                : app.location?.country || app.location?.city || '—'}
+                                                        </p>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.referred && (
+                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
+                                                        {app.referred ? (
+                                                            <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                                Yes
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.recruiter && (
+                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
+                                                        {app.recruiter_name ? (
+                                                            <div className="min-w-0">
+                                                                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                                                                    {app.recruiter_name}
                                                                 </p>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
-                                                    )}
-                                                </td>
-                                            )}
-                                            {visibleColumns.status && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full border ${getStatusColor(app.status)}`}>
-                                                        {app.status}
-                                                    </span>
-                                                </td>
-                                            )}
-                                            {visibleColumns.applied && (
-                                                <td className="px-3 py-2 text-left">
-                                                    <span className="text-xs text-gray-600 dark:text-gray-400">{app.date}</span>
-                                                </td>
-                                            )}
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                                                {app.recruiter_email && (
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                                        {app.recruiter_email}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
+                                                        )}
+                                                    </td>
+                                                )}
+                                                {visibleColumns.status && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full border ${getStatusColor(app.status)}`}>
+                                                            {app.status}
+                                                        </span>
+                                                    </td>
+                                                )}
+                                                {visibleColumns.applied && (
+                                                    <td className="px-3 py-2 text-left">
+                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{app.date}</span>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -785,109 +785,109 @@ const ApplicationManagement = () => {
                                 💡 Tap on any card to view details
                             </p>
                         </div>
-                        
+
                         <div className="space-y-2.5 p-3">
-                        {sortedApplications.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {applications.length === 0
-                                        ? 'No member applications yet'
-                                        : 'Try adjusting your filters'}
-                                </p>
-                            </div>
-                        ) : (
-                            sortedApplications.map((app) => (
-                                <div
-                                    key={app.id}
-                                    onClick={() => {
-                                        setSelectedApplication(app);
-                                        setSelectedApplicationId(app.id);
-                                    }}
-                                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                >
-                                    {/* Card Header */}
-                                    <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                        {visibleColumns.company && (
-                                            <div className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 flex-shrink-0">
-                                                <img
-                                                    src={getCompanyLogoUrl(app.company)}
-                                                    alt={app.company}
-                                                    className="h-full w-full object-contain"
-                                                    onError={handleCompanyLogoError}
-                                                />
-                                            </div>
-                                        )}
-                                        <div className="flex-1 min-w-0">
+                            {sortedApplications.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {applications.length === 0
+                                            ? 'No member applications yet'
+                                            : 'Try adjusting your filters'}
+                                    </p>
+                                </div>
+                            ) : (
+                                sortedApplications.map((app) => (
+                                    <div
+                                        key={app.id}
+                                        onClick={() => {
+                                            setSelectedApplication(app);
+                                            setSelectedApplicationId(app.id);
+                                        }}
+                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                                    >
+                                        {/* Card Header */}
+                                        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
                                             {visibleColumns.company && (
-                                                <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                    {app.company}
-                                                </h3>
-                                            )}
-                                            {visibleColumns.position && (
-                                                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                                                    {app.title}
-                                                </p>
-                                            )}
-                                        </div>
-                                        {visibleColumns.status && (
-                                            <span className={`text-[9px] font-bold rounded-md px-2 py-1 border ${getStatusColor(app.status)}`}>
-                                                {app.status}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Card Body */}
-                                    <div className="px-3 py-2.5">
-                                        {/* Member Info */}
-                                        {visibleColumns.member && (
-                                            <div className="space-y-1 mb-2.5">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Member</span>
-                                                    <span className="text-xs font-semibold text-gray-900 dark:text-white truncate ml-2">
-                                                        {app.user_name}
-                                                    </span>
+                                                <div className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 flex-shrink-0">
+                                                    <img
+                                                        src={getCompanyLogoUrl(app.company)}
+                                                        alt={app.company}
+                                                        className="h-full w-full object-contain"
+                                                        onError={handleCompanyLogoError}
+                                                    />
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Email</span>
-                                                    <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate ml-2">
-                                                        {app.user_email}
-                                                    </span>
-                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                {visibleColumns.company && (
+                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                        {app.company}
+                                                    </h3>
+                                                )}
+                                                {visibleColumns.position && (
+                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
+                                                        {app.title}
+                                                    </p>
+                                                )}
                                             </div>
-                                        )}
-
-                                        {/* Details */}
-                                        <div className="flex items-center gap-3 py-2 mb-2.5 border-y border-gray-100 dark:border-gray-700">
-                                            {visibleColumns.level && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">🎯</span>
-                                                    <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
-                                                        {app.role}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {visibleColumns.applied && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[10px] text-gray-500 dark:text-gray-400">📅</span>
-                                                    <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
-                                                        {app.date}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {visibleColumns.referred && app.referred && (
-                                                <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                    Referred
+                                            {visibleColumns.status && (
+                                                <span className={`text-[9px] font-bold rounded-md px-2 py-1 border ${getStatusColor(app.status)}`}>
+                                                    {app.status}
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* View Button - Removed, click card to view */}
+                                        {/* Card Body */}
+                                        <div className="px-3 py-2.5">
+                                            {/* Member Info */}
+                                            {visibleColumns.member && (
+                                                <div className="space-y-1 mb-2.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Member</span>
+                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white truncate ml-2">
+                                                            {app.user_name}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Email</span>
+                                                        <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate ml-2">
+                                                            {app.user_email}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Details */}
+                                            <div className="flex items-center gap-3 py-2 mb-2.5 border-y border-gray-100 dark:border-gray-700">
+                                                {visibleColumns.level && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">🎯</span>
+                                                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                                                            {app.role}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {visibleColumns.applied && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">📅</span>
+                                                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                                                            {app.date}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {visibleColumns.referred && app.referred && (
+                                                    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                        Referred
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* View Button - Removed, click card to view */}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
-                        )}
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

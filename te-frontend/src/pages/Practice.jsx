@@ -98,10 +98,10 @@ const companionTips = [
 
 const Practice = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-red-100 dark:from-slate-950 dark:via-rose-950/30 dark:to-pink-950/30">
-            <header className="bg-white/70 backdrop-blur border-b border-rose-200 dark:bg-slate-900/70 dark:border-rose-800/30">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+            <header className="bg-white border-b border-gray-200 dark:bg-slate-900 dark:border-slate-800 shadow-sm">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 text-left">
-                    <span className="text-xs font-semibold uppercase tracking-[0.35em] text-rose-500 dark:text-rose-400">Practice Vault</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.35em] text-violet-600 dark:text-violet-400">Practice Vault</span>
                     <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">Practice smarter, not harder</h1>
                     <p className="mt-2 text-sm text-slate-600 max-w-2xl dark:text-slate-300">
                         Focus on the exact resources we trust, revise relentlessly, and build confidence through patterns—not endless blind grinding.
@@ -125,7 +125,7 @@ const Practice = () => {
                                 return (
                                     <article
                                         key={category.id}
-                                        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/80"
+                                        className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                                     >
                                         <div className="p-6 space-y-5">
                                             <div className="flex items-start justify-between gap-4">

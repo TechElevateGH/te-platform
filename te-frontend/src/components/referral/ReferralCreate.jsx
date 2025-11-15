@@ -18,9 +18,10 @@ import { trackEvent } from "../../analytics/events";
 
 const ReferralCreate = ({ company, setReferralCompanyId }) => {
     const { accessToken } = useAuth();
-    const { userInfo, resumes: contextResumes, setFetchReferralCompanies } = useData();
+    const { userInfo, setFetchReferralCompanies } = useData();
 
-    const availableResumes = (contextResumes || []).filter((resume) => !resume.archived);
+    // Resumes come from userInfo.resumes (part of user model)
+    const availableResumes = (userInfo?.resumes || []).filter((resume) => !resume.archived);
     const hasResume = availableResumes.length > 0;
 
     // Check user's available materials

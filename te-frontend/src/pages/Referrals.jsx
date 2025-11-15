@@ -321,7 +321,8 @@ const Referrals = () => {
         const requirements = [];
         // Check actual resumes from context, not displayResumes which includes mock data
         if (materials.resume) requirements.push(resumes.length !== 0);
-        if (materials.essay) requirements.push(userInfo?.essay && userInfo.essay.trim() !== '');
+        if (materials.essay) requirements.push(userInfo?.referral_essay && userInfo.referral_essay.trim() !== '');
+        if (materials.cover_letter) requirements.push(userInfo?.cover_letter && userInfo.cover_letter.trim() !== '');
         if (materials.phone_number) requirements.push(userInfo?.phone_number && userInfo.phone_number.trim() !== '');
 
         if (requirements.length === 0) return 'No Requirements';
@@ -340,7 +341,7 @@ const Referrals = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-cyan-100/50 dark:from-cyan-950/30 dark:via-blue-950/30 dark:to-cyan-900/20 transition-colors">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
             {/* Ultra Compact Header */}
             <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -363,7 +364,7 @@ const Referrals = () => {
                                 <button
                                     onClick={() => setViewMode('companies')}
                                     className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'companies'
-                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                        ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:via-red-500 hover:to-rose-500 text-white shadow-lg shadow-orange-500 shadow-lg/30 dark:shadow-orange-500 shadow-lg/20'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                         }`}
                                 >
@@ -372,13 +373,13 @@ const Referrals = () => {
                                 <button
                                     onClick={() => setViewMode('my-requests')}
                                     className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'my-requests'
-                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                        ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:via-red-500 hover:to-rose-500 text-white shadow-lg shadow-orange-500 shadow-lg/30 dark:shadow-orange-500 shadow-lg/20'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                         }`}
                                 >
                                     <span className="relative z-10">My Requests</span>
                                     {myReferralsFeedbackCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-800 shadow-sm">
+                                        <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border border-white dark:border-gray-800 shadow-sm">
                                             {myReferralsFeedbackCount}
                                         </span>
                                     )}
@@ -387,13 +388,13 @@ const Referrals = () => {
                                     <button
                                         onClick={() => setViewMode('all-requests')}
                                         className={`relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${viewMode === 'all-requests'
-                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20'
+                                            ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:via-red-500 hover:to-rose-500 text-white shadow-lg shadow-orange-500 shadow-lg/30 dark:shadow-orange-500 shadow-lg/20'
                                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
                                             }`}
                                     >
                                         <span className="relative z-10">All Requests</span>
                                         {pendingReferralsCount > 0 && (
-                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border-2 border-white dark:border-gray-800 shadow-sm">
+                                            <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-red-500 text-white rounded-full border border-white dark:border-gray-800 shadow-sm">
                                                 {pendingReferralsCount}
                                             </span>
                                         )}
@@ -402,7 +403,7 @@ const Referrals = () => {
                             </div>
 
                             {viewMode === 'all-requests' && !loadingAllReferrals && (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-md border border-blue-200 dark:border-blue-700/50 transition-colors">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/50 via-red-900/50 dark:to-rose-900/50 rounded-md border border-orange-400 dark:border-red-500/70 shadow-orange-500/20 transition-colors">
                                     <DocumentTextIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                     <div className="leading-none">
                                         <p className="text-[9px] font-semibold text-blue-600 dark:text-blue-400 uppercase mb-0.5 transition-colors">Total Requests</p>
@@ -533,183 +534,203 @@ const Referrals = () => {
                                     <div className="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-colors">
                                         <div className="overflow-x-auto">
                                             <table className="w-full">
-                                            <thead>
-                                                <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700 transition-colors">
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
-                                                        <div className="flex items-center gap-2">
-                                                            <BuildingOfficeIcon className="h-4 w-4" />
-                                                            Company
-                                                        </div>
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
-                                                        <div className="flex items-center gap-2">
-                                                            <DocumentTextIcon className="h-4 w-4" />
-                                                            Requirements
-                                                        </div>
-                                                    </th>
-                                                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                        Action
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                                {filteredCompanies.map((company, index) => {
-                                                    const materials = company.referral_materials || {};
-                                                    return (
-                                                        <tr
-                                                            key={company.id}
-                                                            onClick={() => handleReferralAction(company)}
-                                                            className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
-                                                            title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
-                                                        >
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <div className="flex items-center gap-3">
-                                                                    <img
-                                                                        src={getCompanyLogoUrl(company.name)}
-                                                                        alt={company.name}
-                                                                        className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
-                                                                        onError={handleCompanyLogoError}
-                                                                    />
-                                                                    <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                                        {company.name}
+                                                <thead>
+                                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800 dark:to-gray-900/50 border-b border-gray-200 dark:border-gray-700 transition-colors">
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
+                                                            <div className="flex items-center gap-2">
+                                                                <BuildingOfficeIcon className="h-4 w-4" />
+                                                                Company
+                                                            </div>
+                                                        </th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider transition-colors">
+                                                            <div className="flex items-center gap-2">
+                                                                <DocumentTextIcon className="h-4 w-4" />
+                                                                Requirements
+                                                            </div>
+                                                        </th>
+                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                            Action
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                                    {filteredCompanies.map((company, index) => {
+                                                        const materials = company.referral_materials || {};
+                                                        return (
+                                                            <tr
+                                                                key={company.id}
+                                                                onClick={() => handleReferralAction(company)}
+                                                                className={`hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 transition-all duration-150 group ${isMember ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+                                                                title={!isMember ? "Only Members can request referrals" : "Click to request referral"}
+                                                            >
+                                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <img
+                                                                            src={getCompanyLogoUrl(company.name)}
+                                                                            alt={company.name}
+                                                                            className="h-10 w-10 rounded-lg object-cover border border-gray-200 group-hover:shadow-md transition-shadow"
+                                                                            onError={handleCompanyLogoError}
+                                                                        />
+                                                                        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                                            {company.name}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4">
-                                                                <div className="flex flex-col gap-2">
-                                                                    {materials.resume && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {resumes.length !== 0 ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Resume</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {materials.essay && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {userInfo?.essay && userInfo.essay.trim() !== '' ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Referral Essay</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {materials.phone_number && (
-                                                                        <div className="flex items-center gap-2">
-                                                                            {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
-                                                                                <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-                                                                            ) : (
-                                                                                <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
-                                                                            )}
-                                                                            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Contact</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                                                                <button
-                                                                    onClick={() => handleReferralAction(company)}
-                                                                    disabled={!isMember}
-                                                                    title={!isMember ? "Only Members can request referrals" : ""}
-                                                                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
-                                                                        ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
-                                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                        }`}
-                                                                >
-                                                                    {company.referral_link ? 'Open Referral Link' : 'Request Referral'}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
+                                                                </td>
+                                                                <td className="px-6 py-4">
+                                                                    <div className="flex flex-col gap-2">
+                                                                        {materials.resume && (
+                                                                            <div className="flex items-center gap-2">
+                                                                                {resumes.length !== 0 ? (
+                                                                                    <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                                ) : (
+                                                                                    <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                                )}
+                                                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Resume</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {materials.essay && (
+                                                                            <div className="flex items-center gap-2">
+                                                                                {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? (
+                                                                                    <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                                ) : (
+                                                                                    <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                                )}
+                                                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Referral Essay</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {materials.cover_letter && (
+                                                                            <div className="flex items-center gap-2">
+                                                                                {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? (
+                                                                                    <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                                ) : (
+                                                                                    <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                                )}
+                                                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Cover Letter</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {materials.phone_number && (
+                                                                            <div className="flex items-center gap-2">
+                                                                                {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
+                                                                                    <CheckCircleIcon className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                                                                ) : (
+                                                                                    <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />
+                                                                                )}
+                                                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Contact</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                                                    <button
+                                                                        onClick={() => handleReferralAction(company)}
+                                                                        disabled={!isMember}
+                                                                        title={!isMember ? "Only Members can request referrals" : ""}
+                                                                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${isMember
+                                                                            ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:via-red-500 hover:to-rose-500 text-white hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 cursor-pointer'
+                                                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                            }`}
+                                                                    >
+                                                                        {company.referral_link ? 'Open Referral Link' : 'Request Referral'}
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Mobile Cards */}
-                                <div className="md:hidden space-y-2.5">
-                                    {filteredCompanies.map((company) => {
-                                        const materials = company.referral_materials || {};
-                                        return (
-                                            <div
-                                                key={company.id}
-                                                className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow ${isMember ? 'cursor-pointer' : 'opacity-60'}`}
-                                            >
-                                                {/* Card Header */}
-                                                <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                                    <img
-                                                        src={getCompanyLogoUrl(company.name)}
-                                                        alt={company.name}
-                                                        className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 object-contain flex-shrink-0"
-                                                        onError={handleCompanyLogoError}
-                                                    />
-                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">
-                                                        {company.name}
-                                                    </h3>
-                                                </div>
-
-                                                {/* Card Body */}
-                                                <div className="px-3 py-2.5">
-                                                    {/* Requirements */}
-                                                    <div className="mb-2.5">
-                                                        <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase mb-1.5">Requirements</p>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {materials.resume && (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {resumes.length !== 0 ? (
-                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
-                                                                    ) : (
-                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
-                                                                    )}
-                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Resume</span>
-                                                                </div>
-                                                            )}
-                                                            {materials.essay && (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {userInfo?.essay && userInfo.essay.trim() !== '' ? (
-                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
-                                                                    ) : (
-                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
-                                                                    )}
-                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Essay</span>
-                                                                </div>
-                                                            )}
-                                                            {materials.phone_number && (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
-                                                                        <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
-                                                                    ) : (
-                                                                        <XCircleIcon className="h-4 w-4 text-rose-600" />
-                                                                    )}
-                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Contact</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                    {/* Mobile Cards */}
+                                    <div className="md:hidden space-y-2.5">
+                                        {filteredCompanies.map((company) => {
+                                            const materials = company.referral_materials || {};
+                                            return (
+                                                <div
+                                                    key={company.id}
+                                                    className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow ${isMember ? 'cursor-pointer' : 'opacity-60'}`}
+                                                >
+                                                    {/* Card Header */}
+                                                    <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
+                                                        <img
+                                                            src={getCompanyLogoUrl(company.name)}
+                                                            alt={company.name}
+                                                            className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 object-contain flex-shrink-0"
+                                                            onError={handleCompanyLogoError}
+                                                        />
+                                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate flex-1">
+                                                            {company.name}
+                                                        </h3>
                                                     </div>
 
-                                                    {/* Action Button */}
-                                                    <button
-                                                        onClick={() => handleReferralAction(company)}
-                                                        disabled={!isMember}
-                                                        className={`group relative mx-auto px-8 py-2 text-white text-xs font-semibold rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ${isMember
-                                                            ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95'
-                                                            : 'bg-gray-400 cursor-not-allowed'
-                                                        }`}
-                                                    >
-                                                        {isMember && (
-                                                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-                                                        )}
-                                                        <span className="relative z-10">{company.referral_link ? 'Open Link' : 'Request'}</span>
-                                                    </button>
+                                                    {/* Card Body */}
+                                                    <div className="px-3 py-2.5">
+                                                        {/* Requirements */}
+                                                        <div className="mb-2.5">
+                                                            <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase mb-1.5">Requirements</p>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {materials.resume && (
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {resumes.length !== 0 ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                        )}
+                                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Resume</span>
+                                                                    </div>
+                                                                )}
+                                                                {materials.essay && (
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                        )}
+                                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Essay</span>
+                                                                    </div>
+                                                                )}
+                                                                {materials.cover_letter && (
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                        )}
+                                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Cover Letter</span>
+                                                                    </div>
+                                                                )}
+                                                                {materials.phone_number && (
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? (
+                                                                            <CheckCircleIcon className="h-4 w-4 text-emerald-600" />
+                                                                        ) : (
+                                                                            <XCircleIcon className="h-4 w-4 text-rose-600" />
+                                                                        )}
+                                                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Contact</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Action Button */}
+                                                        <button
+                                                            onClick={() => handleReferralAction(company)}
+                                                            disabled={!isMember}
+                                                            className={`group relative mx-auto px-8 py-2 text-white text-xs font-semibold rounded-full shadow-lg overflow-hidden flex items-center justify-center gap-2 transition-all duration-300 ${isMember
+                                                                ? 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 shadow-orange-500 shadow-lg/30 hover:shadow-md hover:shadow-orange-500 shadow-lg/40 hover:scale-105 active:scale-95'
+                                                                : 'bg-gray-400 cursor-not-allowed'
+                                                                }`}
+                                                        >
+                                                            {isMember && (
+                                                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+                                                            )}
+                                                            <span className="relative z-10">{company.referral_link ? 'Open Link' : 'Request'}</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </>
                             )}
                         </div>
@@ -796,7 +817,7 @@ const Referrals = () => {
                             {filteredAllReferrals.length > 0 && (
                                 <>
                                     {/* Tip Banner */}
-                                    <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-xl p-4 transition-colors">
+                                    <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border border-orange-400 dark:border-red-500/70 shadow-orange-500/20 rounded-xl p-4 transition-colors">
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0">
                                                 <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -832,7 +853,7 @@ const Referrals = () => {
                                             >
                                                 {isExporting ? (
                                                     <>
-                                                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                        <div className="animate-spin h-4 w-4 border border-white border-t-transparent rounded-full" />
                                                         Exporting...
                                                     </>
                                                 ) : (
