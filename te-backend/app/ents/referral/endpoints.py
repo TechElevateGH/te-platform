@@ -121,6 +121,22 @@ def request_referral(
         user_id=user.id,
         data=data,
     )
+
+    # Send email notification to admin
+    from app.utilities.email import send_referral_request_email
+
+    try:
+        send_referral_request_email(
+            member_name=f"{user.first_name} {user.last_name}",
+            member_email=user.email,
+            company_name=data.company_id,
+            position=data.job_title,
+            level=data.role,
+        )
+    except Exception as e:
+        # Log error but don't fail the request
+        print(f"Failed to send referral request email: {e}")
+
     return {"referral": referral_dependencies.parse_referral(referral)}
 
 
