@@ -11,6 +11,7 @@ import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
 import { useData } from "../../context/DataContext";
 import { FormTextArea } from "../_custom/FormInputs";
 import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } from "../../utils";
+import { countries } from '../../data/jobData';
 import { useAuth } from "../../context/AuthContext";
 import SelectCombobox from "../_custom/SelectCombobox";
 import { trackEvent } from "../../analytics/events";
@@ -23,6 +24,21 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
     // Resumes come from userInfo.resumes (part of user model)
     const availableResumes = (userInfo?.resumes || []).filter((resume) => !resume.archived);
     const hasResume = availableResumes.length > 0;
+
+    // Referral data matching backend schema
+    const [referralData, setReferralData] = useState({
+        company_id: company.name,  // Send company name instead of ID
+        job_title: "",
+        job_id: "",
+        role: "New grad",
+        request_note: "",
+        resume: hasResume ? availableResumes[0].link || "" : "",
+        phone_number: userInfo?.phone_number || "",
+        email: userInfo?.email || "",
+        essay: userInfo?.referral_essay || "",
+        country: "United States",
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
+    });
 
     // Check user's available materials
     const hasReferralEssay = userInfo?.referral_essay && userInfo.referral_essay.trim() !== '';
@@ -84,20 +100,6 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
         "QA Engineer",
         "Solutions Architect"
     ];
-
-    // Referral data matching backend schema
-    const [referralData, setReferralData] = useState({
-        company_id: company.name,  // Send company name instead of ID
-        job_title: "",
-        job_id: "",
-        role: "New grad",
-        request_note: "",
-        resume: hasResume ? availableResumes[0].link || "" : "",
-        phone_number: userInfo?.phone_number || "",
-        email: userInfo?.email || "",
-        essay: userInfo?.referral_essay || "",
-        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')
-    });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -292,6 +294,17 @@ const ReferralCreate = ({ company, setReferralCompanyId }) => {
                         {/* Job Information */}
                         <div className="space-y-4">
                             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Position Details</h3>
+
+                            <div className="relative">
+                                <SelectCombobox
+                                    label="Country/Location"
+                                    options={countries}
+                                    value={referralData.country}
+                                    onChange={(country) => handleInputChange({ field: 'country', value: country })}
+                                    placeholder="Type or select a country..."
+                                    required
+                                />
+                            </div>
 
                             <div className="relative">
                                 <SelectCombobox

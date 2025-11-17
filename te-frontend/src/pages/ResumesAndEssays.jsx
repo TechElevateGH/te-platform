@@ -227,7 +227,7 @@ const ResumesAndEssays = () => {
     const handleSaveReferralEssay = async () => {
         try {
             await axiosInstance.post(`/users/${userId}/essay`,
-                { "referral_essay": referralEssayText },
+                { "essay": referralEssayText },
                 { headers: { Authorization: `Bearer ${accessToken}` } }
             );
             setToast({ message: 'Referral essay saved successfully!', type: 'success' });

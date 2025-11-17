@@ -84,9 +84,10 @@ class ReferralRequest(BaseModel):
     role: str
     request_note: str
     resume: str
-    phone_number: str = ""  # User's phone number
-    email: str = ""  # User's email (can be different from account email)
-    essay: str = ""  # Referral essay/cover letter URL
+    phone_number: str = ""
+    email: str = ""
+    essay: str = ""
+    country: str = ""
     date: str = date.today().strftime("%d-%m-%Y")
 
 
@@ -109,9 +110,10 @@ class ReferralReadBase(BaseModel):
     feedback_date: Optional[str] = None
     status: ReferralStatuses
     resume: str = ""
-    phone_number: str = ""  # User's phone number
-    email: str = ""  # User's email (can be different from account email)
-    essay: str = ""  # Referral essay/cover letter URL
+    phone_number: str = ""
+    email: str = ""
+    essay: str = ""
+    country: str = ""
 
 
 class ReferralRead(ReferralReadBase):
