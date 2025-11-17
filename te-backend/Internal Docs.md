@@ -11,9 +11,10 @@ This document contains sensitive information about platform architecture, role-b
 2. [Administrative Functions](#administrative-functions)
 3. [Database Access & Credentials](#database-access--credentials)
 4. [Internal API Endpoints](#internal-api-endpoints)
-5. [Security Considerations](#security-considerations)
-6. [Deployment & Configuration](#deployment--configuration)
-7. [Monitoring & Analytics](#monitoring--analytics)
+5. [Email Notification System](#email-notification-system)
+6. [Security Considerations](#security-considerations)
+7. [Deployment & Configuration](#deployment--configuration)
+8. [Monitoring & Analytics](#monitoring--analytics)
 
 ---
 
@@ -235,8 +236,12 @@ GOOGLE_SERVICE_ACCOUNT_KEY=<path-to-credentials.json>
 # Email Service
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
+SMTP_TLS=True
 SMTP_USER=noreply@techelevate.org
 SMTP_PASSWORD=<app-password>
+EMAILS_ENABLED=True
+EMAILS_FROM_NAME=TechElevate
+EMAILS_FROM_EMAIL=noreply@techelevate.org
 
 # External Services
 POSTHOG_API_KEY=<analytics-key>
@@ -365,6 +370,260 @@ GET /v1/referrals/companies/list
 
 ---
 
+## Email Notification System
+
+### Overview
+
+The platform automatically sends email notifications to members and administrators for key events. All emails use modern, responsive HTML templates with branded styling.
+
+### Email Templates
+
+**Technology Stack:**
+- **Library**: `emails==0.6` with Jinja2 templating
+- **SMTP**: Configured via environment variables
+- **Templates**: Inline HTML with gradient designs
+- **From Address**: Configured in `EMAILS_FROM_EMAIL` and `EMAILS_FROM_NAME`
+
+### Automated Email Notifications
+
+#### 1. Resume Review Completed
+
+**Trigger**: When a reviewer adds feedback or marks status as "Completed"
+
+**Sent To**: Member who submitted the resume
+
+**Template Features**:
+- Green gradient header (success theme)
+- Displays reviewer name
+- Shows job title/position
+- Call-to-action button to view feedback
+- Member name personalization
+
+**Code Location**: `app/utilities/email.py::send_resume_review_completed_email()`
+
+**Implementation**:
+```python
+# Triggered in: app/ents/resume/endpoints.py::update_resume_review_request()
+# Conditions:
+# - Reviewer adds feedback (non-empty)
+# - OR status changed to "Completed"
+
+send_resume_review_completed_email(
+    email_to=member_email,
+    member_name="John Doe",
+    reviewer_name="Jane Smith",
+    job_title="Software Engineer"
+)
+```
+
+**Email Content**:
+- Subject: `TechElevate - Your Resume Review is Complete`
+- Header: "✓ Review Complete"
+- Body: Personalized message with reviewer details
+- CTA: Link to view feedback in dashboard
+
+---
+
+#### 2. Resume Review Requested
+
+**Trigger**: When a member submits a new resume review request
+
+**Sent To**: `info@techelevate.org` (admin notification)
+
+**Template Features**:
+- Orange gradient header (action required theme)
+- Member name and email
+- Job title and experience level
+- Call-to-action to assign reviewer
+- Admin-focused messaging
+
+**Code Location**: `app/utilities/email.py::send_resume_review_request_email()`
+
+**Implementation**:
+```python
+# Triggered in: app/ents/resume/endpoints.py::create_resume_review_request()
+
+send_resume_review_request_email(
+    member_name="John Doe",
+    member_email="john@example.com",
+    job_title="Software Engineer",
+    level="Mid-Level"
+)
+```
+
+**Email Content**:
+- Subject: `TechElevate - New Resume Review Request`
+- Header: "📝 New Resume Review"
+- Body: Member details and job information
+- CTA: Link to admin panel for assignment
+
+---
+
+#### 3. Referral Completed
+
+**Trigger**: When referral status is updated to "completed"
+
+**Sent To**: Member who submitted the referral
+
+**Template Features**:
+- Purple gradient header (celebration theme)
+- Company name and position
+- Congratulatory messaging
+- Call-to-action to view referrals
+- Member name personalization
+
+**Code Location**: `app/utilities/email.py::send_referral_completed_email()`
+
+**Implementation**:
+```python
+# Triggered in: app/ents/referral/endpoints.py::update_referral()
+# Condition: status.value.lower() == "completed"
+
+send_referral_completed_email(
+    email_to=member_email,
+    member_name="John Doe",
+    company_name="Google",
+    position="Senior Engineer"
+)
+```
+
+**Email Content**:
+- Subject: `TechElevate - Referral Complete`
+- Header: "🎉 Referral Complete!"
+- Body: Referral details and success message
+- CTA: Link to view referral history
+
+---
+
+### Email Configuration
+
+**Environment Variables**:
+```bash
+# Email Service Settings
+EMAILS_ENABLED=True
+EMAILS_FROM_NAME="TechElevate"
+EMAILS_FROM_EMAIL="noreply@techelevate.org"
+
+# SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_TLS=True
+SMTP_USER=noreply@techelevate.org
+SMTP_PASSWORD=<app-specific-password>
+
+# Server Configuration
+SERVER_HOST=https://techelevate.org  # Used for CTA links in emails
+PROJECT_NAME="TechElevate"
+```
+
+**Required Dependencies** (`requirements.txt`):
+```
+emails==0.6
+Jinja2==3.1.4
+```
+
+---
+
+### Email Template Design
+
+**Consistent Styling Across All Templates**:
+- Modern card-based layout
+- Gradient headers with emojis
+- Responsive design (mobile-friendly)
+- Inline CSS for email client compatibility
+- Branded color scheme
+- Clear call-to-action buttons
+- Professional footer with copyright
+
+**Color Schemes by Type**:
+- **Resume Review Complete**: Green (#10b981 → #047857)
+- **Resume Review Request**: Orange (#f59e0b → #b45309)
+- **Referral Complete**: Purple (#8b5cf6 → #6d28d9)
+- **Password Reset**: Blue (#3b82f6 → #1d4ed8)
+- **Email Verification**: Blue (#3b82f6 → #1d4ed8)
+
+---
+
+### Error Handling
+
+**Email Failures**:
+All email sending operations are wrapped in try-catch blocks to prevent API request failures:
+
+```python
+try:
+    send_resume_review_completed_email(...)
+except Exception as e:
+    print(f"Failed to send email: {e}")
+    # Request continues successfully
+```
+
+**Logging**:
+- Success/failure logged via `logging.info()` in `send_email()` function
+- SMTP response codes captured
+- Non-blocking: email failures don't break user requests
+
+---
+
+### Testing Email Notifications
+
+**Development Testing**:
+```python
+# Use test endpoint (if available)
+POST /v1/admin/test-email
+{
+  "email_to": "test@example.com",
+  "template": "resume_review_completed"
+}
+```
+
+**Manual Testing**:
+1. Create resume review request as member
+2. Assign review as lead
+3. Add feedback as volunteer → Email sent
+4. Mark as completed → Email sent (if not already sent)
+5. Update referral to "completed" → Email sent
+
+**SMTP Debugging**:
+```python
+# Enable SMTP debug logging
+import logging
+logging.getLogger('emails').setLevel(logging.DEBUG)
+```
+
+---
+
+### Email Analytics
+
+**Metrics to Track**:
+- Email delivery rate (successful sends)
+- Bounce rate
+- Open rate (if tracking enabled)
+- Click-through rate on CTAs
+- Failed send attempts
+
+**Monitoring**:
+- Check application logs for email send failures
+- Monitor SMTP service health
+- Review user reports of missing notifications
+
+---
+
+### Future Email Enhancements
+
+**Planned Features**:
+- Application status update notifications
+- Weekly digest emails for members
+- Reminder emails for pending reviews
+- Welcome email for new members
+- Batch email campaigns for announcements
+
+**Email Preferences**:
+- User opt-in/opt-out for notification types
+- Frequency settings (immediate vs. digest)
+- Preference management in user profile
+
+---
+
 ## Security Considerations
 
 ### Authentication Flow
@@ -426,15 +685,20 @@ Pre-Deployment:
 - [ ] Enable rate limiting
 - [ ] Set up error tracking (Sentry)
 - [ ] Configure backup automation
+- [ ] Test email SMTP configuration
+- [ ] Verify email templates render correctly
+- [ ] Set up email delivery monitoring
 
 Post-Deployment:
 - [ ] Verify all admin endpoints require authentication
 - [ ] Test role-based access control
 - [ ] Check audit logging functionality
-- [ ] Verify email notifications
+- [ ] Verify email notifications (all 3 types)
 - [ ] Test file upload to Google Drive
 - [ ] Monitor error rates
 - [ ] Review security headers
+- [ ] Check email delivery rates
+- [ ] Confirm CTA links in emails work
 ```
 
 ### Environment-Specific Settings
@@ -475,7 +739,9 @@ REQUIRE_HTTPS=True
 - Error rate (target: <0.1%)
 - Database query performance
 - File upload success rate
-- Email delivery rate
+- Email delivery rate (target: >99%)
+- Email send failures
+- SMTP connection health
 
 **User Engagement:**
 - Daily/Monthly active users
@@ -483,6 +749,8 @@ REQUIRE_HTTPS=True
 - Referral approval rate
 - Application submission rate
 - Learning module completion
+- Email open rates (if tracking enabled)
+- Email click-through rates
 
 **Admin Dashboards:**
 ```
@@ -501,12 +769,14 @@ REQUIRE_HTTPS=True
 - Disk space >90%
 - Security breach attempts
 - Admin unauthorized access attempts
+- Email service down (SMTP connection failure)
 
 **Warning Alerts (Email):**
 - API response time >500ms
 - Error rate >1%
 - Failed login attempts >10/min
 - Unusual data deletion patterns
+- Email delivery failures >5%
 
 ---
 
@@ -561,11 +831,12 @@ REQUIRE_HTTPS=True
 
 | Date | Version | Changes | Author |
 |------|---------|---------|--------|
+| 2025-11-17 | 1.1 | Added Email Notification System documentation | System |
 | 2025-11-15 | 1.0 | Initial internal documentation | System |
 
 ---
 
 **Document Classification: CONFIDENTIAL - INTERNAL ONLY**
 
-*Last Updated: November 15, 2025*
-*Next Review Date: December 15, 2025*
+*Last Updated: November 17, 2025*
+*Next Review Date: December 17, 2025*

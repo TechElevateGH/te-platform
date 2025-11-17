@@ -367,3 +367,525 @@ def send_verification_email(
             "code": code,
         },
     )
+
+
+def send_resume_review_completed_email(
+    email_to: str, member_name: str, reviewer_name: str, job_title: str
+) -> None:
+    """
+    Send notification when a resume review has been completed.
+
+    Args:
+        email_to: Member's email address
+        member_name: Name of the member who submitted the resume
+        reviewer_name: Name of the reviewer who completed the review
+        job_title: Job title the resume was for
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Your Resume Review is Complete"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+                background-color: #ffffff;
+            }}
+            .greeting {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 20px 0;
+            }}
+            .message {{
+                color: #4b5563;
+                margin: 0 0 20px 0;
+                font-size: 15px;
+                line-height: 1.7;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                border-left: 4px solid #10b981;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #065f46;
+                font-size: 14px;
+            }}
+            .info-box strong {{
+                color: #047857;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                text-align: center;
+            }}
+            .signature {{
+                margin: 30px 0 0 0;
+                color: #6b7280;
+                font-size: 14px;
+            }}
+            .signature strong {{
+                color: #1f2937;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+                line-height: 1.5;
+            }}
+            .divider {{
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+                margin: 30px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>✓ Review Complete</h1>
+                <p>Your resume has been reviewed</p>
+            </div>
+            <div class="content">
+                <p class="greeting">Hi {{{{ member_name }}}},</p>
+                <p class="message">Great news! Your resume review has been completed by {{{{ reviewer_name }}}}.</p>
+                
+                <div class="info-box">
+                    <p><strong>Position:</strong> {{{{ job_title }}}}</p>
+                    <p><strong>Reviewed by:</strong> {{{{ reviewer_name }}}}</p>
+                </div>
+                
+                <p class="message">Log in to your TechElevate account to view the detailed feedback and recommendations.</p>
+                
+                <a href="{settings.SERVER_HOST}/resumes" class="cta-button">View Your Feedback</a>
+                
+                <div class="divider"></div>
+                
+                <p class="signature">
+                    Best regards,<br>
+                    <strong>The {{{{ project_name }}}} Team</strong>
+                </p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>© 2025 {{{{ project_name }}}}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={
+            {
+                "project_name": settings.PROJECT_NAME,
+                "member_name": member_name,
+                "reviewer_name": reviewer_name,
+                "job_title": job_title,
+            }
+        },
+    )
+
+
+def send_resume_review_request_email(
+    member_name: str, member_email: str, job_title: str, level: str
+) -> None:
+    """
+    Send notification to info@techelevate.org when a new resume review is requested.
+
+    Args:
+        member_name: Name of the member requesting review
+        member_email: Email of the member
+        job_title: Job title for the resume
+        level: Experience level (entry, mid, senior)
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - New Resume Review Request"
+    admin_email = "info@techelevate.org"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+                background-color: #ffffff;
+            }}
+            .greeting {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 20px 0;
+            }}
+            .message {{
+                color: #4b5563;
+                margin: 0 0 20px 0;
+                font-size: 15px;
+                line-height: 1.7;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #78350f;
+                font-size: 14px;
+            }}
+            .info-box strong {{
+                color: #92400e;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+                color: white;
+                text-align: center;
+            }}
+            .signature {{
+                margin: 30px 0 0 0;
+                color: #6b7280;
+                font-size: 14px;
+            }}
+            .signature strong {{
+                color: #1f2937;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+                line-height: 1.5;
+            }}
+            .divider {{
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+                margin: 30px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📝 New Resume Review</h1>
+                <p>Action required</p>
+            </div>
+            <div class="content">
+                <p class="greeting">TechElevate Team,</p>
+                <p class="message">A new resume review request has been submitted and is waiting for assignment.</p>
+                
+                <div class="info-box">
+                    <p><strong>Member:</strong> {{{{ member_name }}}} ({{{{ member_email }}}})</p>
+                    <p><strong>Position:</strong> {{{{ job_title }}}}</p>
+                    <p><strong>Level:</strong> {{{{ level }}}}</p>
+                </div>
+                
+                <p class="message">Please log in to the admin panel to assign a reviewer.</p>
+                
+                <a href="{settings.SERVER_HOST}/admin/resumes" class="cta-button">Manage Reviews</a>
+                
+                <div class="divider"></div>
+                
+                <p class="signature">
+                    Best regards,<br>
+                    <strong>{{{{ project_name }}}} Automated System</strong>
+                </p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>© 2025 {{{{ project_name }}}}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=admin_email,
+        subject_template=subject,
+        html_template=html_template,
+        environment={
+            {
+                "project_name": settings.PROJECT_NAME,
+                "member_name": member_name,
+                "member_email": member_email,
+                "job_title": job_title,
+                "level": level,
+            }
+        },
+    )
+
+
+def send_referral_completed_email(
+    email_to: str, member_name: str, company_name: str, position: str
+) -> None:
+    """
+    Send notification when a referral status is marked as completed.
+
+    Args:
+        email_to: Member's email address
+        member_name: Name of the member
+        company_name: Company name
+        position: Position they were referred for
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Referral Complete"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+                background-color: #ffffff;
+            }}
+            .greeting {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 20px 0;
+            }}
+            .message {{
+                color: #4b5563;
+                margin: 0 0 20px 0;
+                font-size: 15px;
+                line-height: 1.7;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+                border-left: 4px solid #8b5cf6;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #5b21b6;
+                font-size: 14px;
+            }}
+            .info-box strong {{
+                color: #6d28d9;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                color: white;
+                text-align: center;
+            }}
+            .signature {{
+                margin: 30px 0 0 0;
+                color: #6b7280;
+                font-size: 14px;
+            }}
+            .signature strong {{
+                color: #1f2937;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+                line-height: 1.5;
+            }}
+            .divider {{
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+                margin: 30px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎉 Referral Complete!</h1>
+                <p>Your referral has been processed</p>
+            </div>
+            <div class="content">
+                <p class="greeting">Hi {{{{ member_name }}}},</p>
+                <p class="message">Congratulations! Your referral has been successfully completed.</p>
+                
+                <div class="info-box">
+                    <p><strong>Company:</strong> {{{{ company_name }}}}</p>
+                    <p><strong>Position:</strong> {{{{ position }}}}</p>
+                </div>
+                
+                <p class="message">Thank you for using TechElevate's referral network. We hope this connection leads to great opportunities!</p>
+                
+                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                
+                <div class="divider"></div>
+                
+                <p class="signature">
+                    Best regards,<br>
+                    <strong>The {{{{ project_name }}}} Team</strong>
+                </p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>© 2025 {{{{ project_name }}}}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={
+            {
+                "project_name": settings.PROJECT_NAME,
+                "member_name": member_name,
+                "company_name": company_name,
+                "position": position,
+            }
+        },
+    )

@@ -297,6 +297,21 @@ def create_resume_review_request(
         user_email=current_user.email,
         data=data,
     )
+
+    # Send email notification to admin
+    from app.utilities.email import send_resume_review_request_email
+
+    try:
+        send_resume_review_request_email(
+            member_name=current_user.full_name,
+            member_email=current_user.email,
+            job_title=data.job_title,
+            level=data.level,
+        )
+    except Exception as e:
+        # Log error but don't fail the request
+        print(f"Failed to send resume review request email: {e}")
+
     return {
         "message": "Resume review request submitted successfully",
         "review_id": str(review.id),
@@ -357,6 +372,32 @@ def update_resume_review_request(
         reviewer_name=_reviewer_name(current_user),
         data=data,
     )
+
+    # Send email notification when feedback is added or review is completed
+    should_send_email = False
+
+    # Send email if status is set to Completed
+    if data.status == "Completed":
+        should_send_email = True
+
+    # Send email if feedback is being added (and it's not empty)
+    if data.feedback and data.feedback.strip():
+        should_send_email = True
+
+    if should_send_email and updated_review.get("user_email"):
+        from app.utilities.email import send_resume_review_completed_email
+
+        try:
+            send_resume_review_completed_email(
+                email_to=updated_review["user_email"],
+                member_name=updated_review.get("user_name", "Member"),
+                reviewer_name=_reviewer_name(current_user),
+                job_title=updated_review.get("job_title", ""),
+            )
+        except Exception as e:
+            # Log error but don't fail the request
+            print(f"Failed to send resume review completed email: {e}")
+
     return {
         "message": "Resume review request updated successfully",
         "review": updated_review,
