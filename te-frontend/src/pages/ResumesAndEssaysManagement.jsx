@@ -236,16 +236,31 @@ const ResumesAndEssaysManagement = () => {
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
         setAssigningInProgress(true);
         try {
-            await axiosInstance.post('/resumes/reviews/assign', {
+            const response = await axiosInstance.post('/resumes/reviews/assign', {
                 reviewer_id: reviewerId,
                 reviewer_name: reviewerName
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` },
                 params: { review_id: reviewId }
             });
+
+            console.log('Assignment response:', response.data);
+
             setToast({ message: `Review assigned to ${reviewerName}`, type: 'success' });
-            fetchResumeReviews();
+
+            // Close modal first
             setAssigningReview(null);
+
+            // Refetch all review data
+            await fetchResumeReviews();
+
+            // Also refetch assignments if admin/volunteer
+            if (isVolunteerOrAbove) {
+                await fetchMyAssignedReviews();
+            }
+            if (isAdmin) {
+                await fetchAllAssignments();
+            }
         } catch (error) {
             console.error('Error assigning review:', error);
             setToast({ message: error.response?.data?.detail || 'Failed to assign review', type: 'error' });
@@ -286,9 +301,12 @@ const ResumesAndEssaysManagement = () => {
     const handleSubmitReview = async () => {
         if (!selectedReview) return;
 
+        const reviewId = selectedReview.id || selectedReview._id;
+        console.log('Submitting review update:', { reviewId, selectedReview, feedback: reviewFeedback, status: reviewStatus });
+
         setSubmittingReview(true);
         try {
-            await axiosInstance.patch(`/resumes/reviews/${selectedReview.id}`, {
+            await axiosInstance.patch(`/resumes/reviews?review_id=${reviewId}`, {
                 feedback: reviewFeedback,
                 status: reviewStatus
             }, {
@@ -299,7 +317,8 @@ const ResumesAndEssaysManagement = () => {
             handleCloseReviewModal();
         } catch (error) {
             console.error('Error updating review:', error);
-            setToast({ message: 'Failed to update review', type: 'error' });
+            console.error('Error details:', error.response?.data);
+            setToast({ message: `Failed to update review: ${error.response?.data?.detail || error.message}`, type: 'error' });
         } finally {
             setSubmittingReview(false);
         }
@@ -1226,6 +1245,9 @@ const ResumesAndEssaysManagement = () => {
                                                                     <button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
+                                                                            console.log('Opening assign modal, privilegedUsers:', privilegedUsers);
+                                                                            // Refetch privileged users to ensure we have latest data
+                                                                            fetchPrivilegedUsers();
                                                                             setAssigningReview(review);
                                                                         }}
                                                                         className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
@@ -1814,102 +1836,120 @@ const ResumesAndEssaysManagement = () => {
                     onClick={handleCloseReviewModal}
                 >
                     <div
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
+                        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="sticky top-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-10">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Resume Review Request</h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                        Submitted on {selectedReview.submitted_date}
+                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-700 dark:to-blue-700 px-6 py-5">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-bold text-white mb-1">Resume Review Request</h3>
+                                    <p className="text-sm text-white/90 font-medium">
+                                        Submitted {selectedReview.submitted_date}
                                     </p>
                                 </div>
                                 <button
                                     onClick={handleCloseReviewModal}
-                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    className="text-white/80 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-lg"
                                 >
-                                    <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                    <XMarkIcon className="h-6 w-6" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6 space-y-6">
-                            {/* Request Information */}
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Request Information</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Member</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.user_name}</p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">{selectedReview.user_email}</p>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50 dark:bg-gray-900/50">{/* Member Info Card */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                        <UserCircleIcon className="h-8 w-8 text-white" />
                                     </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Target Job Title</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.job_title}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Experience Level</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.level}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Current Status</label>
-                                        <div className="mt-1">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${selectedReview.status === 'Pending'
-                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                                : selectedReview.status === 'In Review'
-                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                                    : selectedReview.status === 'Completed'
-                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                                }`}>
-                                                {selectedReview.status}
-                                            </span>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{selectedReview.user_name}</h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{selectedReview.user_email}</p>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Position</p>
+                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">{selectedReview.job_title}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Level</p>
+                                                <span className="inline-block px-2.5 py-1 text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                    {selectedReview.level}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Status</p>
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full ${selectedReview.status === 'Pending'
+                                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                                    : selectedReview.status === 'In Review'
+                                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                        : selectedReview.status === 'Completed'
+                                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                    }`}>
+                                                    {selectedReview.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
+                                                    {selectedReview.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
+                                                    {selectedReview.status}
+                                                </span>
+                                            </div>
                                         </div>
+
+                                        {selectedReview.reviewer_name && (
+                                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Assigned Reviewer</p>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                                                        <UserCircleIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{selectedReview.reviewer_name}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    {selectedReview.reviewer_name && (
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Assigned To</label>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.reviewer_name}</p>
-                                        </div>
-                                    )}
-                                    {selectedReview.notes && (
-                                        <div className="col-span-2">
-                                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Member Notes</label>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{selectedReview.notes}</p>
-                                        </div>
-                                    )}
                                 </div>
+
+                                {selectedReview.notes && (
+                                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Member Notes</p>
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{selectedReview.notes}</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                     <a
                                         href={selectedReview.resume_link}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm"
                                     >
-                                        <DocumentIcon className="h-4 w-4" />
-                                        Open Resume
+                                        <DocumentIcon className="h-5 w-5" />
+                                        Open Resume in New Tab
                                     </a>
                                 </div>
                             </div>
 
-                            {/* Review Form */}
-                            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Review & Feedback</h4>
+                            {/* Review & Feedback Section */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                                <h4 className="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <DocumentTextIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                    Review & Feedback
+                                </h4>
 
                                 {isLeadOrAbove ? (
-                                    <>
+                                    <div className="space-y-4">
                                         {/* Status Selector */}
-                                        <div className="mb-4">
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                                 Update Status
                                             </label>
                                             <select
                                                 value={reviewStatus}
                                                 onChange={(e) => setReviewStatus(e.target.value)}
-                                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
                                             >
                                                 <option value="Pending">Pending</option>
                                                 <option value="In Review">In Review</option>
@@ -1920,57 +1960,62 @@ const ResumesAndEssaysManagement = () => {
 
                                         {/* Feedback Textarea */}
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                                 Feedback & Comments
                                             </label>
                                             <textarea
                                                 value={reviewFeedback}
                                                 onChange={(e) => setReviewFeedback(e.target.value)}
-                                                rows={8}
+                                                rows={10}
                                                 placeholder="Provide detailed feedback on the resume, including strengths, areas for improvement, formatting suggestions, content recommendations, etc."
-                                                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-shadow"
                                             />
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                                 {reviewFeedback.length} characters
                                             </p>
                                         </div>
-                                    </>
+                                    </div>
                                 ) : (
                                     /* Read-only view for volunteers */
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                                 Current Status
                                             </label>
-                                            <div className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
+                                            <div className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
                                                 {selectedReview.status}
                                             </div>
                                         </div>
 
                                         {selectedReview.feedback && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                                     Feedback & Comments
                                                 </label>
-                                                <div className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+                                                <div className="px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
                                                     {selectedReview.feedback}
                                                 </div>
                                             </div>
                                         )}
 
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                                            Only Lead and Admin can edit review status and feedback
-                                        </p>
+                                        <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                                            <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                            </svg>
+                                            <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                                                Only Lead and Admin can edit review status and feedback
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="sticky bottom-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-end gap-3">
+                        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-end gap-3">
                             <button
                                 onClick={handleCloseReviewModal}
-                                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                             >
                                 {isLeadOrAbove ? 'Cancel' : 'Close'}
                             </button>
@@ -1978,7 +2023,7 @@ const ResumesAndEssaysManagement = () => {
                                 <button
                                     onClick={handleSubmitReview}
                                     disabled={submittingReview}
-                                    className="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
                                 >
                                     {submittingReview ? (
                                         <>
@@ -1987,7 +2032,7 @@ const ResumesAndEssaysManagement = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <CheckCircleIcon className="h-4 w-4" />
+                                            <CheckCircleIcon className="h-5 w-5" />
                                             Save Review
                                         </>
                                     )}
@@ -2055,34 +2100,83 @@ const ResumesAndEssaysManagement = () => {
                                 Select Reviewer
                             </h3>
                             {privilegedUsers.length > 0 ? (
-                                <div className="space-y-2">
-                                    {privilegedUsers.map(user => (
-                                        <button
-                                            key={user.id}
-                                            onClick={() => handleAssignReview(assigningReview.id, user.id, user.full_name)}
-                                            disabled={assigningInProgress}
-                                            className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40 rounded-full flex items-center justify-center transition-colors">
-                                                    {assigningInProgress ? (
-                                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-600 dark:border-purple-400 border-t-transparent" />
-                                                    ) : (
-                                                        <UserCircleIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">
-                                                        {user.full_name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                                        {user.email}
-                                                    </p>
-                                                </div>
-                                                <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+                                <div className="space-y-4">
+                                    {/* Leads Section */}
+                                    {privilegedUsers.filter(u => u.role === 4).length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                Leads
+                                            </h4>
+                                            <div className="space-y-2">
+                                                {privilegedUsers
+                                                    .filter(user => user.role === 4)
+                                                    .map(user => (
+                                                        <button
+                                                            key={user.id || user._id}
+                                                            onClick={() => handleAssignReview(assigningReview.id, user.id || user._id, user.username || user.full_name)}
+                                                            disabled={assigningInProgress}
+                                                            className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-purple-50 dark:hover:bg-purple-900/20 border border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900/30 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/40 rounded-full flex items-center justify-center transition-colors">
+                                                                    {assigningInProgress ? (
+                                                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-600 dark:border-purple-400 border-t-transparent" />
+                                                                    ) : (
+                                                                        <UserCircleIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">
+                                                                        {user.full_name || user.username || 'No name'}
+                                                                    </p>
+                                                                </div>
+                                                                <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+                                                            </div>
+                                                        </button>
+                                                    ))}
                                             </div>
-                                        </button>
-                                    ))}
+                                        </div>
+                                    )}
+
+                                    {/* Volunteers Section */}
+                                    {privilegedUsers.filter(u => u.role === 3).length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
+                                                Volunteers
+                                            </h4>
+                                            <div className="space-y-2">
+                                                {privilegedUsers
+                                                    .filter(user => user.role === 3)
+                                                    .map(user => (
+                                                        <button
+                                                            key={user.id || user._id}
+                                                            onClick={() => handleAssignReview(assigningReview.id, user.id || user._id, user.username || user.full_name)}
+                                                            disabled={assigningInProgress}
+                                                            className="w-full text-left px-4 py-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/40 rounded-full flex items-center justify-center transition-colors">
+                                                                    {assigningInProgress ? (
+                                                                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 dark:border-blue-400 border-t-transparent" />
+                                                                    ) : (
+                                                                        <UserCircleIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                                                                        {user.full_name || user.username || 'No name'}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                                        {user.email || 'No email'}
+                                                                    </p>
+                                                                </div>
+                                                                <ChevronRightIcon className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="py-12">

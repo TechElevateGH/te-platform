@@ -241,9 +241,7 @@ def update_review_request(
     data: resume_schema.ResumeReviewUpdate,
 ) -> dict:
     """Update a resume review request."""
-    update_data: dict[str, object] = {
-        "updated_at": datetime.utcnow().isoformat(),
-    }
+    update_data: dict[str, object] = {}
 
     if data.status is not None:
         update_data["status"] = data.status
@@ -270,6 +268,9 @@ def update_review_request(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No fields to update",
         )
+
+    # Add updated_at timestamp after validation
+    update_data["updated_at"] = datetime.utcnow().isoformat()
 
     result = db.resume_reviews.update_one(
         {"_id": ObjectId(review_id)}, {"$set": update_data}

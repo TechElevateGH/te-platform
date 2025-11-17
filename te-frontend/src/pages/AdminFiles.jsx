@@ -146,7 +146,7 @@ const AdminFiles = () => {
     // Assign review to a reviewer
     const handleAssignReview = async (reviewId, reviewerId, reviewerName) => {
         try {
-            await axiosInstance.patch(`/resumes/reviews/${reviewId}`, {
+            await axiosInstance.patch(`/resumes/reviews?review_id=${reviewId}`, {
                 status: 'In Review'
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -192,7 +192,7 @@ const AdminFiles = () => {
 
         setSubmittingReview(true);
         try {
-            await axiosInstance.patch(`/resumes/reviews/${selectedReview.id}`, {
+            await axiosInstance.patch(`/resumes/reviews?review_id=${selectedReview.id}`, {
                 feedback: reviewFeedback,
                 status: reviewStatus
             }, {

@@ -256,7 +256,7 @@ const ResumeReviews = () => {
 
     const handleUpdateStatus = async (reviewId, newStatus, feedback = '') => {
         try {
-            await axiosInstance.patch(`/resumes/reviews/${reviewId}`, {
+            await axiosInstance.patch(`/resumes/reviews?review_id=${reviewId}`, {
                 status: newStatus,
                 feedback: feedback
             }, {

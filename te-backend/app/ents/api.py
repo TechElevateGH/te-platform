@@ -40,13 +40,15 @@ api_router.include_router(applications_router)  # Admin/Lead endpoints
 api_router.include_router(
     user_resumes_router
 )  # Has its own tags from router definition
+
+# Resume review management (must be before resumes_router to avoid path conflicts)
+api_router.include_router(resume_reviews_router)
+
+# Resume management
 api_router.include_router(resumes_router)
 
 # Referral management
 api_router.include_router(referral_router, tags=["Referrals"])
-
-# Resume review management
-api_router.include_router(resume_reviews_router)
 
 # Learning and practice
 api_router.include_router(learning_router, tags=["Learning"])

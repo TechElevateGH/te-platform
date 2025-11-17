@@ -142,9 +142,9 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-sm font-semibold text-gray-700">Current Account</span>
                                                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${account.role === 5 ? 'bg-purple-100 text-purple-700' :
-                                                        account.role === 4 ? 'bg-blue-100 text-blue-700' :
-                                                            account.role === 3 ? 'bg-green-100 text-green-700' :
-                                                                'bg-cyan-100 text-cyan-700'
+                                                    account.role === 4 ? 'bg-blue-100 text-blue-700' :
+                                                        account.role === 3 ? 'bg-green-100 text-green-700' :
+                                                            'bg-cyan-100 text-cyan-700'
                                                     }`}>
                                                     {getRoleName(account.role)}
                                                 </span>

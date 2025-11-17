@@ -30,6 +30,16 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
     const [isEditing, setIsEditing] = useState(false);
     const [updateData, setUpdateData] = useState({});
 
+    // Confirmation modal state
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        confirmText: 'Confirm',
+        confirmStyle: 'danger'
+    });
+
     // Check user role - Member (1), Lead (4), and Admin (5) can edit
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const canEdit = userRoleInt === 1 || userRoleInt === 4 || userRoleInt === 5;
@@ -137,17 +147,33 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
     };
 
     const handleDelete = () => {
-        if (window.confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
-            deleteUserApplicationRequest([application.id]);
-            closeModal();
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Delete Application',
+            message: 'Are you sure you want to delete this application? This action cannot be undone.',
+            onConfirm: () => {
+                deleteUserApplicationRequest([application.id]);
+                closeModal();
+                setConfirmDialog({ ...confirmDialog, isOpen: false });
+            },
+            confirmText: 'Delete',
+            confirmStyle: 'danger'
+        });
     };
 
     const handleArchive = () => {
-        if (window.confirm('Are you sure you want to archive this application?')) {
-            archiveUserApplicationRequest([application.id]);
-            closeModal();
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Archive Application',
+            message: 'Are you sure you want to archive this application?',
+            onConfirm: () => {
+                archiveUserApplicationRequest([application.id]);
+                closeModal();
+                setConfirmDialog({ ...confirmDialog, isOpen: false });
+            },
+            confirmText: 'Archive',
+            confirmStyle: 'primary'
+        });
     };
 
     return (
@@ -407,6 +433,41 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                         </Transition.Child>
                     </div>
                 </div>
+
+                {/* Confirmation Dialog */}
+                {confirmDialog.isOpen && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className={`px-6 py-4 ${confirmDialog.confirmStyle === 'danger' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-blue-50 dark:bg-blue-900/20'}`}>
+                                <h3 className={`text-lg font-bold ${confirmDialog.confirmStyle === 'danger' ? 'text-red-900 dark:text-red-100' : 'text-blue-900 dark:text-blue-100'}`}>
+                                    {confirmDialog.title}
+                                </h3>
+                            </div>
+                            <div className="px-6 py-5">
+                                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                    {confirmDialog.message}
+                                </p>
+                            </div>
+                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+                                <button
+                                    onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+                                    className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmDialog.onConfirm}
+                                    className={`px-5 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors shadow-sm ${confirmDialog.confirmStyle === 'danger'
+                                            ? 'bg-red-600 hover:bg-red-700'
+                                            : 'bg-blue-600 hover:bg-blue-700'
+                                        }`}
+                                >
+                                    {confirmDialog.confirmText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </Dialog>
         </Transition.Root>
     )
