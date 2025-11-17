@@ -9,6 +9,8 @@ import {
 import axiosInstance from "../../axiosConfig";
 import { useAuth } from "../../context/AuthContext";
 import { getCompanyLogoUrl, handleCompanyLogoError } from "../../utils";
+import ConfirmDialog from "../_custom/Alert/ConfirmDialog";
+import AlertDialog from "../_custom/Alert/AlertDialog";
 
 const MyReferrals = ({ onFeedbackCount }) => {
     const { accessToken, userId } = useAuth();
@@ -18,6 +20,9 @@ const MyReferrals = ({ onFeedbackCount }) => {
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [statusFilter, setStatusFilter] = useState('active'); // 'active' means Pending + In Review
     const [seenFeedback, setSeenFeedback] = useState(new Set());
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [referralToCancel, setReferralToCancel] = useState(null);
+    const [alertState, setAlertState] = useState({ show: false, message: '', type: 'error' });
 
     // Load seen feedback from localStorage on mount
     useEffect(() => {
@@ -74,14 +79,15 @@ const MyReferrals = ({ onFeedbackCount }) => {
     };
 
     const handleCancelReferral = async (referralId) => {
-        if (!window.confirm('Are you sure you want to cancel this referral request?')) {
-            return;
-        }
+        setReferralToCancel(referralId);
+        setShowCancelConfirm(true);
+    };
 
-        setCancellingId(referralId);
+    const confirmCancelReferral = async () => {
+        setCancellingId(referralToCancel);
         try {
             await axiosInstance.patch(
-                `/referrals/${referralId}/cancel`,
+                `/referrals/${referralToCancel}/cancel`,
                 {},
                 {
                     headers: {
@@ -102,7 +108,11 @@ const MyReferrals = ({ onFeedbackCount }) => {
             }
         } catch (error) {
             console.error("Error cancelling referral:", error);
-            alert(error.response?.data?.detail || "Failed to cancel referral request");
+            setAlertState({
+                show: true,
+                message: error.response?.data?.detail || "Failed to cancel referral request",
+                type: 'error'
+            });
         } finally {
             setCancellingId(null);
         }
@@ -442,6 +452,27 @@ const MyReferrals = ({ onFeedbackCount }) => {
                     </div>
                 </div>
             )}
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog
+                isOpen={showCancelConfirm}
+                onClose={() => setShowCancelConfirm(false)}
+                onConfirm={confirmCancelReferral}
+                title="Cancel Referral Request"
+                message="Are you sure you want to cancel this referral request?"
+                confirmText="OK"
+                cancelText="Cancel"
+                type="warning"
+            />
+
+            {/* Alert Dialog */}
+            <AlertDialog
+                isOpen={alertState.show}
+                onClose={() => setAlertState({ ...alertState, show: false })}
+                title={alertState.type === 'error' ? 'Error' : 'Success'}
+                message={alertState.message}
+                type={alertState.type}
+            />
         </div>
     );
 };

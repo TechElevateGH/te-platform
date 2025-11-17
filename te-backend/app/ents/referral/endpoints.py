@@ -446,6 +446,57 @@ def update_referral(
     return {"referral": referral_dependencies.parse_referral_with_user(referral)}
 
 
+@referral_router.patch(
+    "/{referral_id}/cancel",
+    response_model=Dict[str, referral_schema.ReferralRead],
+)
+def cancel_referral(
+    *,
+    db: Database = Depends(session.get_db),
+    referral_id: str,
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
+) -> Any:
+    """
+    Cancel a pending referral request (Members only).
+    Only the member who created the referral can cancel it, and only if it's pending.
+    """
+    from bson import ObjectId
+
+    # Get the referral first to check ownership and status
+    referral_data = db.referrals.find_one({"_id": ObjectId(referral_id)})
+    if not referral_data:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    # Verify the referral belongs to the current user
+    if str(referral_data.get("user_id")) != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only cancel your own referrals",
+        )
+
+    # Verify the referral is still pending
+    if referral_data.get("status") != "Pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only pending referrals can be cancelled",
+        )
+
+    # Update the status to Cancelled
+    update_data = referral_schema.ReferralUpdateStatus(
+        status=referral_schema.ReferralStatuses.cancelled,
+        review_note="Cancelled by user"
+    )
+
+    referral = referral_crud.update_referral_status(
+        db, referral_id=referral_id, data=update_data
+    )
+
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
+
+    return {"referral": referral_dependencies.parse_referral(referral)}
+
+
 @referral_router.post(
     "/{referral_id}/review",
     response_model=Dict[str, referral_schema.ReferralReadWithUser],

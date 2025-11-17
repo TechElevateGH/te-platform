@@ -6,6 +6,7 @@ import ReferralCreate from '../components/referral/ReferralCreate'
 import ReferralManagement from '../components/referral/ReferralManagement'
 import MyReferrals from '../components/referral/MyReferrals'
 import SignInPrompt from '../components/_custom/Alert/SignInPrompt'
+import AlertDialog from '../components/_custom/Alert/AlertDialog'
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -114,6 +115,7 @@ const Referrals = () => {
     const [selectedReferralIds, setSelectedReferralIds] = useState([]);
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
     const [copiedField, setCopiedField] = useState(null); // Track which field was copied
+    const [alertState, setAlertState] = useState({ show: false, message: '', type: 'info' });
 
     const [referralCompanyId, setReferralCompanyId] = useState(null);
     const [selectedCompany, setSelectedCompany] = useState(null);
@@ -261,11 +263,11 @@ const Referrals = () => {
             if (response.data.sheet_url) {
                 // Open the sheet in a new tab
                 window.open(response.data.sheet_url, '_blank');
-                alert('Referrals exported successfully!');
+                setAlertState({ show: true, message: 'Referrals exported successfully!', type: 'success' });
             }
         } catch (error) {
             console.error('Error exporting to Google Sheets:', error);
-            alert('Failed to export to Google Sheets. Please try again.');
+            setAlertState({ show: true, message: 'Failed to export to Google Sheets. Please try again.', type: 'error' });
         } finally {
             setIsExporting(false);
         }
@@ -299,7 +301,7 @@ const Referrals = () => {
             }
         } catch (error) {
             console.error('Error updating referral status:', error);
-            alert('Failed to update status. Please try again.');
+            setAlertState({ show: true, message: 'Failed to update status. Please try again.', type: 'error' });
         }
     };
 
@@ -1094,6 +1096,14 @@ const Referrals = () => {
             <SignInPrompt
                 isOpen={showSignInPrompt}
                 onClose={() => setShowSignInPrompt(false)}
+            />
+
+            <AlertDialog
+                isOpen={alertState.show}
+                onClose={() => setAlertState({ ...alertState, show: false })}
+                title={alertState.type === 'error' ? 'Error' : alertState.type === 'success' ? 'Success' : 'Info'}
+                message={alertState.message}
+                type={alertState.type}
             />
         </div>
     )
