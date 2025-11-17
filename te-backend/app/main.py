@@ -140,7 +140,6 @@ async def debug_database():
         for collection_name in [
             "member_users",
             "privileged_users",
-            "companies",
             "applications",
             "referrals",
             "referral_companies",

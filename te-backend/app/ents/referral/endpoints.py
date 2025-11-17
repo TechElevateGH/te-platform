@@ -28,7 +28,7 @@ def get_companies_list(
     Returns trimmed down list for dropdown selection when creating referrer accounts.
     """
     companies_cursor = (
-        db.companies.find({}, {"_id": 1, "name": 1}).skip(skip).limit(limit)
+        db.referral_companies.find({}, {"_id": 1, "name": 1}).skip(skip).limit(limit)
     )
     companies = []
     for company in companies_cursor:
@@ -220,7 +220,7 @@ def get_referrals(
         if isinstance(filter_company_id, str):
             filter_company_id = ObjectId(filter_company_id)
 
-        company = db.companies.find_one({"_id": filter_company_id})
+        company = db.referral_companies.find_one({"_id": filter_company_id})
         if not company:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -383,7 +383,7 @@ def update_referral(
                 detail="Referrer account has no assigned company",
             )
         # Get company name from company_id
-        company = db.companies.find_one({"_id": ObjectId(user.company_id)})
+        company = db.referral_companies.find_one({"_id": ObjectId(user.company_id)})
         if not company:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

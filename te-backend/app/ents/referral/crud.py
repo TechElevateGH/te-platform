@@ -14,7 +14,7 @@ def create_referral_company(
     Simplified creation with basic company information and referral requirements.
     """
     # Check if company with this name already exists
-    existing = db.companies.find_one({"name": data.name})
+    existing = db.referral_companies.find_one({"name": data.name})
     if existing:
         raise HTTPException(
             status_code=400, detail=f"Company '{data.name}' already exists"
@@ -43,10 +43,10 @@ def create_referral_company(
     }
 
     # Insert into MongoDB
-    result = db.companies.insert_one(company_dict)
+    result = db.referral_companies.insert_one(company_dict)
 
     # Fetch and return the created company
-    company_data = db.companies.find_one({"_id": result.inserted_id})
+    company_data = db.referral_companies.find_one({"_id": result.inserted_id})
     return referral_models.ReferralCompany(**company_data)
 
 
@@ -60,7 +60,7 @@ def update_referral_company(
     from bson import ObjectId
 
     # Check if company exists
-    existing = db.companies.find_one({"_id": ObjectId(company_id)})
+    existing = db.referral_companies.find_one({"_id": ObjectId(company_id)})
     if not existing:
         raise HTTPException(status_code=404, detail="Company not found")
 
@@ -71,7 +71,7 @@ def update_referral_company(
     if data.name is not None:
         # Check if new name conflicts with another company
         if data.name != existing.get("name"):
-            name_conflict = db.companies.find_one({"name": data.name})
+            name_conflict = db.referral_companies.find_one({"name": data.name})
             if name_conflict:
                 raise HTTPException(
                     status_code=400, detail=f"Company '{data.name}' already exists"
@@ -117,10 +117,12 @@ def update_referral_company(
 
     # Perform update if there are changes
     if update_dict:
-        db.companies.update_one({"_id": ObjectId(company_id)}, {"$set": update_dict})
+        db.referral_companies.update_one(
+            {"_id": ObjectId(company_id)}, {"$set": update_dict}
+        )
 
     # Fetch and return the updated company
-    company_data = db.companies.find_one({"_id": ObjectId(company_id)})
+    company_data = db.referral_companies.find_one({"_id": ObjectId(company_id)})
     return referral_models.ReferralCompany(**company_data)
 
 
@@ -128,7 +130,7 @@ def read_company_by_id(
     db: Database, *, company_id: int
 ) -> Optional[referral_models.ReferralCompany]:
     """Get company by integer ID from MongoDB"""
-    company_data = db.companies.find_one({"id": company_id})
+    company_data = db.referral_companies.find_one({"id": company_id})
     if not company_data:
         return None
     return referral_models.ReferralCompany(**company_data)
@@ -139,7 +141,9 @@ def read_referral_companies(
 ) -> list[referral_models.ReferralCompany]:
     """Return referral companies ordered alphabetically by name."""
 
-    companies_cursor = db.companies.find().sort("name", 1).skip(skip).limit(limit)
+    companies_cursor = (
+        db.referral_companies.find().sort("name", 1).skip(skip).limit(limit)
+    )
     return [referral_models.ReferralCompany(**company) for company in companies_cursor]
 
 

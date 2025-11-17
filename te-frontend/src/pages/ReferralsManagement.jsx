@@ -658,8 +658,19 @@ const ReferralsManagement = () => {
                                         </select>
                                     </div>
 
+                                    {/* Company Filter */}
+                                    <div className="col-span-1 md:col-span-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Company..."
+                                            value={companyFilter}
+                                            onChange={(e) => setCompanyFilter(e.target.value)}
+                                            className="w-full px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        />
+                                    </div>
+
                                     {/* Member Filter */}
-                                    <div className="col-span-1 md:col-span-4">
+                                    <div className="col-span-1 md:col-span-3">
                                         <input
                                             type="text"
                                             placeholder="Member..."
@@ -750,6 +761,11 @@ const ReferralsManagement = () => {
                                     {statusFilter && (
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                                             Status: {statusFilter}
+                                        </span>
+                                    )}
+                                    {!isReferrer && companyFilter && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            Company: {companyFilter}
                                         </span>
                                     )}
                                     {memberFilter && (
