@@ -424,13 +424,15 @@ def update_referral(
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
 
+    # Get member information for email notifications
+    from bson import ObjectId
+
+    member = db.member_users.find_one({"_id": ObjectId(referral.user_id)})
+
     # Send email notification when referral status is set to 'completed'
     if data.status.value.lower() == "completed":
-        from bson import ObjectId
         from app.utilities.email import send_referral_completed_email
 
-        # Get member information
-        member = db.member_users.find_one({"_id": ObjectId(referral.user_id)})
         if member and member.get("email"):
             try:
                 send_referral_completed_email(
@@ -442,6 +444,23 @@ def update_referral(
             except Exception as e:
                 # Log error but don't fail the request
                 print(f"Failed to send referral completed email: {e}")
+
+    # Send email notification when feedback is added (and not completed)
+    elif data.review_note and data.review_note.strip():
+        from app.utilities.email import send_referral_update_email
+
+        if member and member.get("email"):
+            try:
+                send_referral_update_email(
+                    email_to=member["email"],
+                    member_name=member.get("full_name", "Member"),
+                    company_name=referral.company_name or "the company",
+                    position=referral.job_title,
+                    feedback=data.review_note,
+                )
+            except Exception as e:
+                # Log error but don't fail the request
+                print(f"Failed to send referral update email: {e}")
 
     return {"referral": referral_dependencies.parse_referral_with_user(referral)}
 
@@ -484,7 +503,7 @@ def cancel_referral(
     # Update the status to Cancelled
     update_data = referral_schema.ReferralUpdateStatus(
         status=referral_schema.ReferralStatuses.cancelled,
-        review_note="Cancelled by user"
+        review_note="Cancelled by user",
     )
 
     referral = referral_crud.update_referral_status(
