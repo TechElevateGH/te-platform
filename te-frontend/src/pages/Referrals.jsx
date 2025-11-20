@@ -977,6 +977,9 @@ const Referrals = () => {
                                                             <div>
                                                                 <div className="font-semibold text-gray-900 dark:text-white">{referral.job_title}</div>
                                                                 <div className="text-xs text-gray-500 dark:text-gray-400">{referral.role}</div>
+                                                                {referral.job_id && (
+                                                                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 font-mono">ID: {referral.job_id}</div>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="px-6 py-4">

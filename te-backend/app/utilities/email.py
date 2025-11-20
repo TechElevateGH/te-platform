@@ -897,6 +897,199 @@ def send_referral_request_email(
     )
 
 
+def send_referral_update_email(
+    email_to: str, member_name: str, company_name: str, position: str, feedback: str
+) -> None:
+    """
+    Send notification when a referral has been updated with feedback.
+
+    Args:
+        email_to: Member's email address
+        member_name: Name of the member
+        company_name: Company name
+        position: Position they were referred for
+        feedback: Feedback/review note from the referrer
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Referral Update"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+                background-color: #ffffff;
+            }}
+            .greeting {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 20px 0;
+            }}
+            .message {{
+                color: #4b5563;
+                margin: 0 0 20px 0;
+                font-size: 15px;
+                line-height: 1.7;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border-left: 4px solid #3b82f6;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #1e40af;
+                font-size: 14px;
+            }}
+            .info-box strong {{
+                color: #1e3a8a;
+            }}
+            .feedback-box {{
+                background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .feedback-box p {{
+                margin: 0;
+                color: #78350f;
+                font-size: 14px;
+                font-style: italic;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                color: white;
+                text-align: center;
+            }}
+            .signature {{
+                margin: 30px 0 0 0;
+                color: #6b7280;
+                font-size: 14px;
+            }}
+            .signature strong {{
+                color: #1f2937;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+                line-height: 1.5;
+            }}
+            .divider {{
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+                margin: 30px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📝 Referral Update</h1>
+                <p>Your referral has been reviewed</p>
+            </div>
+            <div class="content">
+                <p class="greeting">Hi {{{{ member_name }}}},</p>
+                <p class="message">Great news! Your referral request has been reviewed and updated.</p>
+                
+                <div class="info-box">
+                    <p><strong>Company:</strong> {{{{ company_name }}}}</p>
+                    <p><strong>Position:</strong> {{{{ position }}}}</p>
+                </div>
+                
+                <div class="feedback-box">
+                    <p><strong>Feedback:</strong></p>
+                    <p>{{{{ feedback }}}}</p>
+                </div>
+                
+                <p class="message">Please check your referral dashboard for more details and next steps.</p>
+                
+                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                
+                <div class="divider"></div>
+                
+                <p class="signature">
+                    Best regards,<br>
+                    <strong>The {{{{ project_name }}}} Team</strong>
+                </p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>© 2025 {{{{ project_name }}}}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={
+            {
+                "project_name": settings.PROJECT_NAME,
+                "member_name": member_name,
+                "company_name": company_name,
+                "position": position,
+                "feedback": feedback,
+            }
+        },
+    )
+
+
 def send_referral_completed_email(
     email_to: str, member_name: str, company_name: str, position: str
 ) -> None:
