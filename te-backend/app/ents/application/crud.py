@@ -178,6 +178,27 @@ def delete_application(db: Database, *, user_id: str, application_id: str) -> bo
     return result.modified_count > 0
 
 
+def bulk_delete_applications(db: Database, *, application_ids: list[str]) -> dict:
+    """
+    Permanently delete multiple applications from the database (Admin only).
+    Removes applications from all users' embedded application arrays.
+    """
+    deleted_count = 0
+
+    for app_id in application_ids:
+        # Remove the application from any user's applications array
+        result = db.member_users.update_many(
+            {"applications.id": app_id}, {"$pull": {"applications": {"id": app_id}}}
+        )
+        deleted_count += result.modified_count
+
+    return {
+        "message": f"Successfully deleted {deleted_count} application(s)",
+        "deleted_count": deleted_count,
+        "total_requested": len(application_ids),
+    }
+
+
 # ============= Helper Functions =============
 
 

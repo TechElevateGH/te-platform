@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 // Import DSA topics for category/topic selection
@@ -11,6 +12,7 @@ const categories = dsaTopics.map(topic => topic.category);
 
 const LessonCreateDSA = ({ isOpen, onClose, onSuccess, editLesson = null, defaultCategory = null, defaultTopic = null }) => {
     const { accessToken } = useAuth();
+    const toast = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -159,7 +161,7 @@ const LessonCreateDSA = ({ isOpen, onClose, onSuccess, editLesson = null, defaul
             }, 1500);
         } catch (error) {
             console.error('Error saving lesson:', error);
-            alert('Failed to save lesson. Please try again.');
+            toast.error('Failed to save lesson. Please try again.');
         } finally {
             setIsSubmitting(false);
         }

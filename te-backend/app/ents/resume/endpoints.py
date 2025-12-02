@@ -9,6 +9,7 @@ import app.ents.user.models as user_models
 from app.core.permissions import get_user_role, require_volunteer
 from fastapi import (
     APIRouter,
+    Body,
     Depends,
     File,
     Form,
@@ -452,6 +453,25 @@ def delete_resume_review_request(
 
     resume_crud.delete_review_request(db, review_id=review_id)
     return {"message": "Resume review request permanently deleted successfully"}
+
+
+@resume_reviews_router.post("/bulk-delete", response_model=Dict[str, Any])
+def bulk_delete_resume_review_requests(
+    *,
+    db: Database = Depends(session.get_db),
+    review_ids: list[str] = Body(..., embed=True),
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Dict[str, Any]:
+    """Permanently delete multiple resume review requests (Admin only)."""
+    user_role = get_user_role(current_user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete resume review requests",
+        )
+
+    result = resume_crud.bulk_delete_review_requests(db, review_ids=review_ids)
+    return result
 
 
 @resume_reviews_router.post("/assign", response_model=Dict[str, Any])

@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pymongo.database import Database
 from bson import ObjectId
 
@@ -586,6 +586,65 @@ def cancel_interview(
         print(f"Failed to send cancellation email: {e}")
 
     return {"interview": interview_deps.parse_interview_request(request)}
+
+
+@interview_router.delete(
+    "/{request_id}",
+    response_model=Dict[str, str],
+)
+def delete_interview_request(
+    request_id: str,
+    db: Database = Depends(session.get_db),
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_user
+    ),
+) -> Any:
+    """
+    Permanently delete an interview request from the database (Admin only).
+    This action cannot be undone. Also makes the associated timeslot available again.
+    """
+    from app.core.permissions import get_user_role
+
+    # Only Admin (role 5) can delete
+    user_role = get_user_role(user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete interview requests",
+        )
+
+    interview_crud.delete_interview_request(db, request_id=request_id)
+    return {"message": "Interview request permanently deleted successfully"}
+
+
+@interview_router.post(
+    "/bulk-delete",
+    response_model=Dict[str, Any],
+)
+def bulk_delete_interview_requests(
+    db: Database = Depends(session.get_db),
+    *,
+    request_ids: list[str] = Body(..., embed=True),
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_user
+    ),
+) -> Any:
+    """
+    Permanently delete multiple interview requests from the database (Admin only).
+    This action cannot be undone. Also makes associated timeslots available again.
+    """
+    from app.core.permissions import get_user_role
+
+    # Only Admin (role 5) can delete
+    user_role = get_user_role(user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete interview requests",
+        )
+
+    result = interview_crud.bulk_delete_interview_requests(db, request_ids=request_ids)
+    return result
 
 
 @interview_router.patch(

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import {
@@ -18,6 +19,7 @@ import {
 
 const AdminFiles = () => {
     const { accessToken, userRole } = useAuth();
+    const toast = useToast();
     const [users, setUsers] = useState([]);
     const [resumeReviews, setResumeReviews] = useState([]);
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
@@ -151,12 +153,12 @@ const AdminFiles = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            alert(`Review assigned to ${reviewerName} successfully!`);
+            toast.success(`Review assigned to ${reviewerName} successfully!`);
             fetchResumeReviews();
             setAssigningReview(null);
         } catch (error) {
             console.error('Error assigning review:', error);
-            alert('Failed to assign review.');
+            toast.error('Failed to assign review.');
         }
     };
 
@@ -198,12 +200,12 @@ const AdminFiles = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            alert('Review updated successfully!');
+            toast.success('Review updated successfully!');
             fetchResumeReviews();
             handleCloseReviewModal();
         } catch (error) {
             console.error('Error updating review:', error);
-            alert('Failed to update review.');
+            toast.error('Failed to update review.');
         } finally {
             setSubmittingReview(false);
         }

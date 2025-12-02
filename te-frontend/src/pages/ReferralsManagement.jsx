@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
+import DeleteConfirmationModal from '../components/_custom/DeleteConfirmationModal';
 import ReferralManagement from '../components/referral/ReferralManagement';
 import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
 import {
@@ -15,23 +17,33 @@ import {
     AdjustmentsHorizontalIcon,
     ChartBarIcon,
     ArrowDownTrayIcon,
-    PencilIcon
+    PencilIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
 import { ClipboardDocumentIcon } from '@heroicons/react/20/solid';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const ReferralsManagement = () => {
     const { accessToken, userRole } = useAuth();
     const { userInfo } = useData();
+    const toast = useToast();
     const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddCompany, setShowAddCompany] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState(''); // Empty = show all statuses
+    const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending status
     const [memberFilter, setMemberFilter] = useState('');
     const [selectedReferral, setSelectedReferral] = useState(null);
     const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
     const [copiedField, setCopiedField] = useState(null);
     const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+
+    // Selection and bulk delete state
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     // Check if user is a referrer (role = 2) - use sessionStorage as fallback for immediate availability
     const storedRole = sessionStorage.getItem('userRole');
@@ -264,10 +276,10 @@ const ReferralsManagement = () => {
                 requires_essay: true,
             });
             setShowAddCompany(false);
-            alert('Referral company added successfully!');
+            toast.success('Referral company added successfully!');
         } catch (error) {
             console.error('Error adding referral company:', error);
-            alert('Failed to add referral company. Please try again.');
+            toast.error('Failed to add referral company. Please try again.');
         }
     };
 
@@ -304,10 +316,10 @@ const ReferralsManagement = () => {
             });
             setShowEditCompany(false);
             setEditingCompany(null);
-            alert('Company updated successfully!');
+            toast.success('Company updated successfully!');
         } catch (error) {
             console.error('Error updating company:', error);
-            alert(error.response?.data?.detail || 'Failed to update company. Please try again.');
+            toast.error(error.response?.data?.detail || 'Failed to update company. Please try again.');
         }
     };
 
@@ -340,7 +352,7 @@ const ReferralsManagement = () => {
             }
         } catch (error) {
             console.error('Error updating referral status:', error);
-            alert('Failed to update status. Please try again.');
+            toast.error('Failed to update status. Please try again.');
         }
     };
 
@@ -352,6 +364,60 @@ const ReferralsManagement = () => {
             setTimeout(() => setCopiedField(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
+        }
+    };
+
+    // Selection handlers
+    const toggleSelectItem = (id) => {
+        setSelectedItems(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedItems.length === filteredReferrals.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(filteredReferrals.map(ref => ref.id));
+        }
+    };
+
+    // Delete handlers
+    const handleDeleteClick = (referral = null) => {
+        if (referral) {
+            setItemToDelete(referral);
+        } else if (selectedItems.length > 0) {
+            setItemToDelete({ bulk: true, count: selectedItems.length });
+        }
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setDeleting(true);
+        try {
+            if (itemToDelete?.bulk) {
+                // Bulk delete
+                await axiosInstance.post('/referrals/bulk-delete',
+                    { referral_ids: selectedItems },
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                setSelectedItems([]);
+                toast.success(`Successfully deleted ${itemToDelete.count} referral(s)`);
+            } else {
+                // Single delete
+                await axiosInstance.delete(`/referrals/${itemToDelete.id}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                toast.success('Referral deleted successfully');
+            }
+            fetchAllReferrals();
+        } catch (error) {
+            console.error('Error deleting referral(s):', error);
+            toast.error(error.response?.data?.detail || 'Failed to delete');
+        } finally {
+            setDeleting(false);
+            setShowDeleteModal(false);
+            setItemToDelete(null);
         }
     };
 
@@ -537,6 +603,18 @@ const ReferralsManagement = () => {
                                 <ArrowDownTrayIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
                                 <span className="hidden sm:inline">Export</span>
                             </button>
+
+                            {/* Bulk Delete - Admin Only */}
+                            {isAdmin && selectedItems.length > 0 && (
+                                <button
+                                    onClick={() => handleDeleteClick()}
+                                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] md:text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-red-500/30 whitespace-nowrap"
+                                >
+                                    <TrashIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                    <span className="hidden sm:inline">Delete ({selectedItems.length})</span>
+                                    <span className="sm:hidden">Del ({selectedItems.length})</span>
+                                </button>
+                            )}
 
                             {/* Add Company Button - Only for non-referrers */}
                             {!isReferrer && (
@@ -809,6 +887,16 @@ const ReferralsManagement = () => {
                                     <table className="w-full">
                                         <thead>
                                             <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700 dark:to-gray-700/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                                {isAdmin && (
+                                                    <th className="px-4 py-3 w-12">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedItems.length === filteredReferrals.length && filteredReferrals.length > 0}
+                                                            onChange={toggleSelectAll}
+                                                            className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                        />
+                                                    </th>
+                                                )}
                                                 {visibleColumns.company && (
                                                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                         Company
@@ -873,6 +961,16 @@ const ReferralsManagement = () => {
                                                         }}
                                                         className="group hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-gray-700/30 dark:hover:to-gray-600/30 transition-all cursor-pointer"
                                                     >
+                                                        {isAdmin && (
+                                                            <td className="px-4 py-3 w-12" onClick={(e) => e.stopPropagation()}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={selectedItems.includes(ref.id)}
+                                                                    onChange={() => toggleSelectItem(ref.id)}
+                                                                    className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                                />
+                                                            </td>
+                                                        )}
                                                         {visibleColumns.company && (
                                                             <td className="px-4 py-3">
                                                                 <div className="flex items-center gap-2">
@@ -1690,6 +1788,24 @@ const ReferralsManagement = () => {
                     onUpdate={handleReferralUpdate}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setItemToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Referral(s)"
+                message={itemToDelete?.bulk
+                    ? `You are about to permanently delete ${itemToDelete.count} referral request(s).`
+                    : `You are about to permanently delete the referral request for "${itemToDelete?.job_title}" at ${itemToDelete?.company?.name}.`
+                }
+                itemCount={itemToDelete?.bulk ? itemToDelete.count : 1}
+                isDeleting={deleting}
+                itemType="referral"
+            />
         </div>
     );
 };

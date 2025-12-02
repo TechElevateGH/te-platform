@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const INTERVIEW_TYPE_COLORS = {
@@ -40,6 +41,7 @@ const formatStatus = (status) => {
 
 const MyAssignedInterviews = () => {
     const { accessToken } = useAuth();
+    const toast = useToast();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
@@ -68,7 +70,7 @@ const MyAssignedInterviews = () => {
 
     const handleComplete = async () => {
         if (!completeModal.feedback.trim()) {
-            alert('Please provide feedback for the member');
+            toast.warning('Please provide feedback for the member');
             return;
         }
 
@@ -83,7 +85,7 @@ const MyAssignedInterviews = () => {
             fetchAssignedInterviews();
         } catch (error) {
             console.error('Error completing interview:', error);
-            alert(error.response?.data?.detail || 'Failed to complete interview');
+            toast.error(error.response?.data?.detail || 'Failed to complete interview');
         } finally {
             setSubmitting(false);
         }

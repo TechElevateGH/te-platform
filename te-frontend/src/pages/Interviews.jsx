@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-    MockInterviewCreate,
-    MyMockInterviews,
+    InterviewCreate,
+    MyInterviews,
     TimeslotManagement,
-    MockInterviewManagement,
+    InterviewManagement,
     MyAssignedInterviews
-} from '../components/mock-interview';
+} from '../components/interview';
 import {
     Cog6ToothIcon,
     UserGroupIcon,
@@ -22,7 +22,7 @@ const TABS = {
     ALL_REQUESTS: 'all_requests'
 };
 
-const MockInterviews = () => {
+const Interviews = () => {
     const { userRole } = useAuth();
     const [activeTab, setActiveTab] = useState(TABS.MY_INTERVIEWS);
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -81,15 +81,15 @@ const MockInterviews = () => {
     const renderContent = () => {
         switch (activeTab) {
             case TABS.MY_INTERVIEWS:
-                return <MyMockInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
+                return <MyInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
             case TABS.ASSIGNED:
                 return <MyAssignedInterviews />;
             case TABS.MANAGE_SLOTS:
                 return <TimeslotManagement />;
             case TABS.ALL_REQUESTS:
-                return <MockInterviewManagement />;
+                return <InterviewManagement />;
             default:
-                return <MyMockInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
+                return <MyInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
         }
     };
 
@@ -185,7 +185,7 @@ const MockInterviews = () => {
 
                             {/* Modal Content */}
                             <div className="p-6">
-                                <MockInterviewCreate onSuccess={handleCreateSuccess} onCancel={() => setShowCreateModal(false)} />
+                                <InterviewCreate onSuccess={handleCreateSuccess} onCancel={() => setShowCreateModal(false)} />
                             </div>
                         </div>
                     </div>
@@ -195,4 +195,4 @@ const MockInterviews = () => {
     );
 };
 
-export default MockInterviews;
+export default Interviews;

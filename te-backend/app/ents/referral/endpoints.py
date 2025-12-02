@@ -7,7 +7,7 @@ import app.ents.referral.schema as referral_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from app.core.permissions import require_lead
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pymongo.database import Database
 
 referral_router = APIRouter(prefix="/referrals")
@@ -544,6 +544,65 @@ def review_referral(
         raise HTTPException(status_code=404, detail="Referral not found")
 
     return {"referral": referral_dependencies.parse_referral_with_user(referral)}
+
+
+@referral_router.delete(
+    "/{referral_id}",
+    response_model=Dict[str, str],
+)
+def delete_referral(
+    referral_id: str,
+    db: Database = Depends(session.get_db),
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_user
+    ),
+) -> Any:
+    """
+    Permanently delete a referral from the database (Admin only).
+    This action cannot be undone.
+    """
+    from app.core.permissions import get_user_role
+
+    # Only Admin (role 5) can delete
+    user_role = get_user_role(user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete referrals",
+        )
+
+    referral_crud.delete_referral(db, referral_id=referral_id)
+    return {"message": "Referral permanently deleted successfully"}
+
+
+@referral_router.post(
+    "/bulk-delete",
+    response_model=Dict[str, Any],
+)
+def bulk_delete_referrals(
+    db: Database = Depends(session.get_db),
+    *,
+    referral_ids: list[str] = Body(..., embed=True),
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_user
+    ),
+) -> Any:
+    """
+    Permanently delete multiple referrals from the database (Admin only).
+    This action cannot be undone.
+    """
+    from app.core.permissions import get_user_role
+
+    # Only Admin (role 5) can delete
+    user_role = get_user_role(user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete referrals",
+        )
+
+    result = referral_crud.bulk_delete_referrals(db, referral_ids=referral_ids)
+    return result
 
 
 @referral_router.post(

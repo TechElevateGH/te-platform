@@ -144,6 +144,51 @@ export const NotificationProvider = ({ children }) => {
                     setUnreadCount(updated.filter(n => !n.read).length);
                     return updated;
                 });
+
+                // For members: check interview updates (assigned, confirmed, completed, feedback)
+                const interviewsResponse = await axiosInstance.get('/interviews/my-requests', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const myInterviews = interviewsResponse.data?.interviews || [];
+                const interviewNotifications = myInterviews
+                    .filter(interview => {
+                        const updateTime = interview.updated_at
+                            ? new Date(interview.updated_at)
+                            : interview.created_at
+                                ? new Date(interview.created_at)
+                                : null;
+
+                        if (!updateTime) return false;
+
+                        const lastCheck = lastChecked ? new Date(lastChecked) : new Date(0);
+
+                        // Show notification for status changes or new feedback
+                        const hasUpdate = (interview.status === 'confirmed' && interview.assigned_to_name) ||
+                            (interview.status === 'completed' && interview.interviewer_feedback);
+
+                        return updateTime > lastCheck && hasUpdate;
+                    })
+                    .map(interview => ({
+                        id: `interview_${interview.id}`,
+                        type: 'interview_update',
+                        title: interview.status === 'completed' ? 'Interview Feedback Available' : 'Interview Confirmed',
+                        message: interview.status === 'completed'
+                            ? `Your ${interview.interview_type} interview feedback is ready`
+                            : `Your ${interview.interview_type} interview has been confirmed with ${interview.assigned_to_name}`,
+                        link: '/workspace?section=mock%20interviews',
+                        timestamp: interview.updated_at || interview.created_at,
+                        read: false
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id));
+
+                setNotifications(prev => {
+                    // Remove old interview_update notifications and add new ones
+                    const filtered = prev.filter(n => n.type !== 'interview_update');
+                    const updated = [...interviewNotifications, ...filtered];
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
             }
 
             // For volunteers+: check for new resume review requests and new referral requests
@@ -207,6 +252,73 @@ export const NotificationProvider = ({ children }) => {
                     // Remove old new_referral_request notifications and add new ones
                     const filtered = prev.filter(n => n.type !== 'new_referral_request');
                     const updated = [...newReferralRequests, ...filtered];
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
+
+                // For volunteers+: check for new interview requests and assignments
+                const interviewsResponse = await axiosInstance.get('/interviews/all', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const allInterviews = interviewsResponse.data?.interviews || [];
+
+                // New pending interview requests
+                const newInterviewRequests = allInterviews
+                    .filter(interview => {
+                        const submittedDate = new Date(interview.created_at);
+                        return interview.status === 'pending' && submittedDate > lastCheck;
+                    })
+                    .map(interview => ({
+                        id: `interview_request_${interview.id}`,
+                        type: 'new_interview_request',
+                        title: 'New Interview Request',
+                        message: `${interview.user_name} requested a ${interview.interview_type} interview`,
+                        link: '/workspace?section=mock%20interviews',
+                        timestamp: interview.created_at,
+                        read: false
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id));
+
+                setNotifications(prev => {
+                    const filtered = prev.filter(n => n.type !== 'new_interview_request');
+                    const updated = [...newInterviewRequests, ...filtered];
+                    setUnreadCount(updated.filter(n => !n.read).length);
+                    return updated;
+                });
+
+                // Check assigned interviews for volunteers
+                const assignedResponse = await axiosInstance.get('/interviews/assigned', {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const assignedInterviews = assignedResponse.data?.interviews || [];
+                const newAssignments = assignedInterviews
+                    .filter(interview => {
+                        const assignedDate = interview.assigned_date
+                            ? new Date(interview.assigned_date)
+                            : interview.updated_at
+                                ? new Date(interview.updated_at)
+                                : null;
+
+                        if (!assignedDate) return false;
+
+                        return assignedDate > lastCheck && interview.status === 'confirmed';
+                    })
+                    .map(interview => ({
+                        id: `interview_assigned_${interview.id}`,
+                        type: 'interview_assigned',
+                        title: 'Interview Assigned to You',
+                        message: `You've been assigned a ${interview.interview_type} interview with ${interview.user_name} on ${interview.timeslot_date}`,
+                        link: '/workspace?section=mock%20interviews',
+                        timestamp: interview.assigned_date || interview.updated_at,
+                        read: false
+                    }))
+                    .filter(notification => !dismissedIds.has(notification.id));
+
+                setNotifications(prev => {
+                    const filtered = prev.filter(n => n.type !== 'interview_assigned');
+                    const updated = [...newAssignments, ...filtered];
                     setUnreadCount(updated.filter(n => !n.read).length);
                     return updated;
                 });
