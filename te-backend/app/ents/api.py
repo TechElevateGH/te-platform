@@ -15,7 +15,7 @@ from app.ents.resume import (
     user_resumes_router,
 )
 from app.ents.verification.endpoints import router as verification_router
-from app.ents.mock_interview import mock_interview_router
+from app.ents.interview import interview_router
 from fastapi import APIRouter
 
 api_router = APIRouter()
@@ -51,8 +51,8 @@ api_router.include_router(resumes_router)
 # Referral management
 api_router.include_router(referral_router, tags=["Referrals"])
 
-# Mock Interview management
-api_router.include_router(mock_interview_router)  # Has its own tags
+# Interview management
+api_router.include_router(interview_router)  # Has its own tags
 
 # Learning and practice
 api_router.include_router(learning_router, tags=["Learning"])

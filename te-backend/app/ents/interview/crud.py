@@ -1,4 +1,4 @@
-"""CRUD operations for Mock Interview feature."""
+"""CRUD operations for Interview feature."""
 
 from datetime import datetime
 from typing import Optional, List
@@ -6,25 +6,34 @@ from bson import ObjectId
 from pymongo.database import Database
 from fastapi import HTTPException
 
-import app.ents.mock_interview.models as mock_interview_models
-import app.ents.mock_interview.schema as mock_interview_schema
+import app.ents.interview.models as interview_models
+import app.ents.interview.schema as interview_schema
 
 
 # ============== Timeslot CRUD ==============
 
 
 def create_timeslot(
-    db: Database, *, data: mock_interview_schema.TimeslotCreate, created_by: str
-) -> mock_interview_models.MockInterviewTimeslot:
-    """Create a new interview timeslot (Volunteer+ only)."""
+    db: Database, *, data: interview_schema.TimeslotCreate, created_by: str
+) -> interview_models.InterviewTimeslot:
+    """Create a new interview timeslot (Volunteer+ only).
 
-    # Check for overlapping timeslots on the same date
+    Multiple volunteers can create slots at the same date/time.
+    Only prevents the same volunteer from creating duplicate slots.
+    """
+
+    # Check for duplicate from the same creator
     existing = db.mock_interview_timeslots.find_one(
-        {"date": data.date, "start_time": data.start_time, "is_available": True}
+        {
+            "date": data.date,
+            "start_time": data.start_time,
+            "is_available": True,
+            "created_by": ObjectId(created_by),
+        }
     )
     if existing:
         raise HTTPException(
-            status_code=400, detail="A timeslot already exists at this date and time"
+            status_code=400, detail="You already have a slot at this date and time"
         )
 
     timeslot_dict = {
@@ -38,30 +47,23 @@ def create_timeslot(
 
     result = db.mock_interview_timeslots.insert_one(timeslot_dict)
     timeslot_data = db.mock_interview_timeslots.find_one({"_id": result.inserted_id})
-    return mock_interview_models.MockInterviewTimeslot(**timeslot_data)
+    return interview_models.InterviewTimeslot(**timeslot_data)
 
 
 def create_timeslots_bulk(
     db: Database,
     *,
-    timeslots: List[mock_interview_schema.TimeslotCreate],
+    timeslots: List[interview_schema.TimeslotCreate],
     created_by: str,
-) -> List[mock_interview_models.MockInterviewTimeslot]:
-    """Create multiple timeslots at once (Volunteer+ only)."""
+) -> List[interview_models.InterviewTimeslot]:
+    """Create multiple timeslots at once (Volunteer+ only).
+
+    This allows creating multiple slots at the same date/time to support
+    multiple volunteers being available at the same time.
+    """
 
     created_timeslots = []
     for timeslot_data in timeslots:
-        # Skip duplicates silently
-        existing = db.mock_interview_timeslots.find_one(
-            {
-                "date": timeslot_data.date,
-                "start_time": timeslot_data.start_time,
-                "is_available": True,
-            }
-        )
-        if existing:
-            continue
-
         timeslot_dict = {
             "date": timeslot_data.date,
             "start_time": timeslot_data.start_time,
@@ -73,7 +75,7 @@ def create_timeslots_bulk(
 
         result = db.mock_interview_timeslots.insert_one(timeslot_dict)
         slot = db.mock_interview_timeslots.find_one({"_id": result.inserted_id})
-        created_timeslots.append(mock_interview_models.MockInterviewTimeslot(**slot))
+        created_timeslots.append(interview_models.InterviewTimeslot(**slot))
 
     return created_timeslots
 
@@ -85,7 +87,7 @@ def read_available_timeslots(
     limit: int = 100,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
-) -> List[mock_interview_models.MockInterviewTimeslot]:
+) -> List[interview_models.InterviewTimeslot]:
     """Get all available timeslots, optionally filtered by date range."""
 
     query = {"is_available": True}
@@ -111,12 +113,12 @@ def read_available_timeslots(
         .limit(limit)
     )
 
-    return [mock_interview_models.MockInterviewTimeslot(**t) for t in timeslots]
+    return [interview_models.InterviewTimeslot(**t) for t in timeslots]
 
 
 def read_all_timeslots(
     db: Database, *, skip: int = 0, limit: int = 100, include_past: bool = False
-) -> List[mock_interview_models.MockInterviewTimeslot]:
+) -> List[interview_models.InterviewTimeslot]:
     """Get all timeslots (for management view)."""
 
     query = {}
@@ -131,12 +133,12 @@ def read_all_timeslots(
         .limit(limit)
     )
 
-    return [mock_interview_models.MockInterviewTimeslot(**t) for t in timeslots]
+    return [interview_models.InterviewTimeslot(**t) for t in timeslots]
 
 
 def update_timeslot(
-    db: Database, *, timeslot_id: str, data: mock_interview_schema.TimeslotUpdate
-) -> Optional[mock_interview_models.MockInterviewTimeslot]:
+    db: Database, *, timeslot_id: str, data: interview_schema.TimeslotUpdate
+) -> Optional[interview_models.InterviewTimeslot]:
     """Update a timeslot (Volunteer+ only)."""
 
     update_dict = {}
@@ -154,7 +156,7 @@ def update_timeslot(
         timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
         if not timeslot:
             return None
-        return mock_interview_models.MockInterviewTimeslot(**timeslot)
+        return interview_models.InterviewTimeslot(**timeslot)
 
     result = db.mock_interview_timeslots.update_one(
         {"_id": ObjectId(timeslot_id)}, {"$set": update_dict}
@@ -164,7 +166,7 @@ def update_timeslot(
         return None
 
     timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
-    return mock_interview_models.MockInterviewTimeslot(**timeslot)
+    return interview_models.InterviewTimeslot(**timeslot)
 
 
 def delete_timeslot(db: Database, *, timeslot_id: str) -> bool:
@@ -188,7 +190,7 @@ def delete_timeslot(db: Database, *, timeslot_id: str) -> bool:
     return result.deleted_count > 0
 
 
-# ============== Mock Interview Request CRUD ==============
+# ============== Interview Request CRUD ==============
 
 
 def create_interview_request(
@@ -197,9 +199,9 @@ def create_interview_request(
     user_id: str,
     user_name: str,
     user_email: str,
-    data: mock_interview_schema.MockInterviewRequestCreate,
-) -> mock_interview_models.MockInterviewRequest:
-    """Create a new mock interview request (Member only)."""
+    data: interview_schema.InterviewRequestCreate,
+) -> interview_models.InterviewRequest:
+    """Create a new interview request (Member only)."""
 
     # Verify the timeslot exists and is available
     timeslot = db.mock_interview_timeslots.find_one(
@@ -227,9 +229,7 @@ def create_interview_request(
         )
 
     # Calculate duration based on interview type
-    duration = mock_interview_schema.InterviewType.get_duration(
-        data.interview_type.value
-    )
+    duration = interview_schema.InterviewType.get_duration(data.interview_type.value)
 
     now = datetime.utcnow()
     request_dict = {
@@ -259,12 +259,12 @@ def create_interview_request(
     )
 
     request_data = db.mock_interview_requests.find_one({"_id": result.inserted_id})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def read_user_interview_requests(
     db: Database, *, user_id: str, skip: int = 0, limit: int = 100
-) -> List[mock_interview_models.MockInterviewRequest]:
+) -> List[interview_models.InterviewRequest]:
     """Get all interview requests for a specific user."""
 
     requests = (
@@ -274,12 +274,12 @@ def read_user_interview_requests(
         .limit(limit)
     )
 
-    return [mock_interview_models.MockInterviewRequest(**r) for r in requests]
+    return [interview_models.InterviewRequest(**r) for r in requests]
 
 
 def read_all_interview_requests(
     db: Database, *, skip: int = 0, limit: int = 100, status: Optional[str] = None
-) -> List[mock_interview_models.MockInterviewRequest]:
+) -> List[interview_models.InterviewRequest]:
     """Get all interview requests (Lead+ only)."""
 
     query = {}
@@ -293,23 +293,23 @@ def read_all_interview_requests(
         .limit(limit)
     )
 
-    return [mock_interview_models.MockInterviewRequest(**r) for r in requests]
+    return [interview_models.InterviewRequest(**r) for r in requests]
 
 
 def read_interview_request_by_id(
     db: Database, *, request_id: str
-) -> Optional[mock_interview_models.MockInterviewRequest]:
+) -> Optional[interview_models.InterviewRequest]:
     """Get a specific interview request by ID."""
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
     if not request_data:
         return None
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def read_assigned_interview_requests(
     db: Database, *, assigned_to: str, skip: int = 0, limit: int = 100
-) -> List[mock_interview_models.MockInterviewRequest]:
+) -> List[interview_models.InterviewRequest]:
     """Get interview requests assigned to a specific interviewer."""
 
     requests = (
@@ -319,7 +319,7 @@ def read_assigned_interview_requests(
         .limit(limit)
     )
 
-    return [mock_interview_models.MockInterviewRequest(**r) for r in requests]
+    return [interview_models.InterviewRequest(**r) for r in requests]
 
 
 def assign_interviewer(
@@ -330,8 +330,8 @@ def assign_interviewer(
     assigned_to_name: str,
     assigned_by: str,
     meeting_link: str = "",
-) -> Optional[mock_interview_models.MockInterviewRequest]:
-    """Assign an interviewer to a mock interview request (Lead+ only)."""
+) -> Optional[interview_models.InterviewRequest]:
+    """Assign an interviewer to a interview request (Lead+ only)."""
 
     now = datetime.utcnow()
     update_dict = {
@@ -353,13 +353,13 @@ def assign_interviewer(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def confirm_interview(
     db: Database, *, request_id: str, meeting_link: str = ""
-) -> Optional[mock_interview_models.MockInterviewRequest]:
-    """Confirm a mock interview request (Lead+ only)."""
+) -> Optional[interview_models.InterviewRequest]:
+    """Confirm a interview request (Lead+ only)."""
 
     now = datetime.utcnow()
     update_dict = {"status": "confirmed", "confirmed_at": now, "updated_at": now}
@@ -375,13 +375,13 @@ def confirm_interview(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def complete_interview(
     db: Database, *, request_id: str, interviewer_feedback: str
-) -> Optional[mock_interview_models.MockInterviewRequest]:
-    """Mark a mock interview as completed with feedback."""
+) -> Optional[interview_models.InterviewRequest]:
+    """Mark a interview as completed with feedback."""
 
     now = datetime.utcnow()
     update_dict = {
@@ -399,13 +399,13 @@ def complete_interview(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def cancel_interview(
     db: Database, *, request_id: str, cancellation_reason: str = ""
-) -> Optional[mock_interview_models.MockInterviewRequest]:
-    """Cancel a mock interview request."""
+) -> Optional[interview_models.InterviewRequest]:
+    """Cancel a interview request."""
 
     # Get the request to find the timeslot
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
@@ -434,25 +434,25 @@ def cancel_interview(
         )
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def update_interview_status(
     db: Database,
     *,
     request_id: str,
-    data: mock_interview_schema.MockInterviewStatusUpdate,
-) -> Optional[mock_interview_models.MockInterviewRequest]:
-    """Update the status of a mock interview request."""
+    data: interview_schema.InterviewStatusUpdate,
+) -> Optional[interview_models.InterviewRequest]:
+    """Update the status of a interview request."""
 
     now = datetime.utcnow()
     update_dict = {"status": data.status.value, "updated_at": now}
 
-    if data.status == mock_interview_schema.MockInterviewStatus.confirmed:
+    if data.status == interview_schema.InterviewStatus.confirmed:
         update_dict["confirmed_at"] = now
-    elif data.status == mock_interview_schema.MockInterviewStatus.completed:
+    elif data.status == interview_schema.InterviewStatus.completed:
         update_dict["completed_at"] = now
-    elif data.status == mock_interview_schema.MockInterviewStatus.cancelled:
+    elif data.status == interview_schema.InterviewStatus.cancelled:
         update_dict["cancelled_at"] = now
         # Make timeslot available again
         request_data = db.mock_interview_requests.find_one(
@@ -477,7 +477,7 @@ def update_interview_status(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return mock_interview_models.MockInterviewRequest(**request_data)
+    return interview_models.InterviewRequest(**request_data)
 
 
 def count_interview_requests_by_status(db: Database, *, status: str) -> int:

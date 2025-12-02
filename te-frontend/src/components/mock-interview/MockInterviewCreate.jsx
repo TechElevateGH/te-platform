@@ -22,7 +22,7 @@ const INTERVIEW_TYPES = [
 const TYPE_COLORS = {
     blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
     green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300',
+    indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
     orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300',
 };
 
@@ -57,7 +57,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
 
             setLoadingTimeslots(true);
             try {
-                const response = await axiosInstance.get('/mock-interviews/timeslots', {
+                const response = await axiosInstance.get('/interviews/timeslots', {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
                 setAvailableTimeslots(response.data.timeslots || []);
@@ -114,7 +114,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
         setIsSubmitting(true);
 
         try {
-            const response = await axiosInstance.post('/mock-interviews', formData, {
+            const response = await axiosInstance.post('/interviews', formData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 }
@@ -206,7 +206,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                         href={PREP_VIDEO_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                        className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
                         <PlayCircleIcon className="h-4 w-4" />
                         Open in YouTube
@@ -214,7 +214,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                     <button
                         type="button"
                         onClick={() => setHasWatchedVideo(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         Continue to Schedule
                         <ArrowRightIcon className="h-4 w-4" />
@@ -303,11 +303,11 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                                                 type="button"
                                                 onClick={() => handleInputChange('timeslot_id', slot.id)}
                                                 className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-all ${isSelected
-                                                    ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 dark:border-purple-600 text-purple-700 dark:text-purple-300'
+                                                    ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-600 text-blue-700 dark:text-blue-300'
                                                     : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
                                                     }`}
                                             >
-                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-purple-500 dark:text-purple-400' : 'text-gray-400'}`} />
+                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400'}`} />
                                                 <span className="font-medium">{slot.start_time} - {slot.end_time}</span>
                                             </button>
                                         );
@@ -335,7 +335,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                         onChange={(e) => setCompanyInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="e.g., Google, Microsoft"
-                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <button
                         type="button"
@@ -379,7 +379,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                         value={formData.earliest_interview_date}
                         onChange={(e) => handleInputChange('earliest_interview_date', e.target.value)}
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-left mt-1">
                         When is your earliest real interview? This helps us prioritize.
@@ -396,7 +396,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                         onChange={(e) => handleInputChange('notes', e.target.value)}
                         placeholder="Any specific areas you want to focus on..."
                         rows={3}
-                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     />
                 </div>
             </div>
@@ -423,7 +423,7 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.timeslot_id}
-                    className="px-6 py-2.5 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? 'Scheduling...' : 'Schedule Interview'}
                 </button>

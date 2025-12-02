@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import {
     CalendarIcon,
     ClockIcon,
     UserIcon,
     BuildingOfficeIcon,
     CheckCircleIcon,
-    XCircleIcon,
     UserPlusIcon,
     PaperAirplaneIcon,
-    ChatBubbleLeftRightIcon,
-    FunnelIcon
+    FunnelIcon,
+    PencilIcon
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -41,19 +41,12 @@ const formatStatus = (status) => {
     return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-};
-
 const MockInterviewManagement = () => {
     const { accessToken } = useAuth();
     const [interviews, setInterviews] = useState([]);
-    const [volunteers, setVolunteers] = useState([]);
+    const [interviewers, setInterviewers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
-    const [expandedId, setExpandedId] = useState(null);
 
     // Action modals
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });
@@ -66,7 +59,7 @@ const MockInterviewManagement = () => {
 
         setLoading(true);
         try {
-            const response = await axiosInstance.get('/mock-interviews/all', {
+            const response = await axiosInstance.get('/interviews/all', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setInterviews(response.data.interviews || []);
@@ -78,29 +71,29 @@ const MockInterviewManagement = () => {
         }
     }, [accessToken]);
 
-    const fetchVolunteers = useCallback(async () => {
+    const fetchInterviewers = useCallback(async () => {
         if (!accessToken) return;
 
         try {
-            const response = await axiosInstance.get('/mock-interviews/volunteers/list', {
+            const response = await axiosInstance.get('/interviews/interviewers', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            setVolunteers(response.data.volunteers || []);
+            setInterviewers(response.data.interviewers || []);
         } catch (error) {
-            console.error('Error fetching volunteers:', error);
-            setVolunteers([]);
+            console.error('Error fetching interviewers:', error);
+            setInterviewers([]);
         }
     }, [accessToken]);
 
     useEffect(() => {
         fetchInterviews();
-        fetchVolunteers();
-    }, [fetchInterviews, fetchVolunteers]);
+        fetchInterviewers();
+    }, [fetchInterviews, fetchInterviewers]);
 
     const handleAssign = async (interviewId, assignedToId) => {
         setSubmitting(true);
         try {
-            await axiosInstance.post(`/mock-interviews/${interviewId}/assign`, {
+            await axiosInstance.post(`/interviews/${interviewId}/assign`, {
                 assigned_to: assignedToId
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -123,7 +116,7 @@ const MockInterviewManagement = () => {
 
         setSubmitting(true);
         try {
-            await axiosInstance.post(`/mock-interviews/${confirmModal.interview.id}/confirm`, {
+            await axiosInstance.post(`/interviews/${confirmModal.interview.id}/confirm`, {
                 meeting_link: confirmModal.meetingLink
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -146,7 +139,7 @@ const MockInterviewManagement = () => {
 
         setSubmitting(true);
         try {
-            await axiosInstance.post(`/mock-interviews/${completeModal.interview.id}/complete`, {
+            await axiosInstance.post(`/interviews/${completeModal.interview.id}/complete`, {
                 interviewer_feedback: completeModal.feedback
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -166,7 +159,7 @@ const MockInterviewManagement = () => {
         if (reason === null) return;
 
         try {
-            await axiosInstance.post(`/mock-interviews/${interviewId}/cancel`, {
+            await axiosInstance.post(`/interviews/${interviewId}/cancel`, {
                 cancellation_reason: reason || 'Cancelled by admin'
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -191,16 +184,16 @@ const MockInterviewManagement = () => {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header with Filter */}
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">All Interview Requests</h3>
+        <div className="space-y-4">
+            {/* Compact Header with Filter */}
+            <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">All Interview Requests</h3>
                 <div className="flex items-center gap-2">
                     <FunnelIcon className="h-4 w-4 text-gray-400" />
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:border-purple-500"
+                        className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:border-blue-500"
                     >
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>
@@ -211,208 +204,145 @@ const MockInterviewManagement = () => {
                 </div>
             </div>
 
-            {/* Interviews List */}
+            {/* Interviews Grid */}
             {filteredInterviews.length === 0 ? (
-                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Interview Requests</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {statusFilter === 'all' ? 'No mock interview requests yet.' : `No ${statusFilter} interviews.`}
+                        {statusFilter === 'all' ? 'No interview requests yet.' : `No ${statusFilter} interviews.`}
                     </p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredInterviews.map((interview) => {
                         const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
                         const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;
-                        const isExpanded = expandedId === interview.id;
 
                         return (
                             <div
                                 key={interview.id}
-                                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all"
                             >
-                                {/* Main Card */}
-                                <div
-                                    className="p-4 cursor-pointer"
-                                    onClick={() => setExpandedId(isExpanded ? null : interview.id)}
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex-1 min-w-0">
-                                            {/* Requester Name */}
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <UserIcon className="h-4 w-4 text-gray-400" />
-                                                <span className="font-bold text-gray-900 dark:text-white">{interview.user_name}</span>
-                                            </div>
-
-                                            {/* Type and Status Badges */}
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${typeColors.bg} ${typeColors.text} ${typeColors.border} border`}>
-                                                    {formatInterviewType(interview.interview_type)}
-                                                </span>
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
-                                                    {formatStatus(interview.status)}
-                                                </span>
-                                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                    ({interview.duration_minutes} min)
-                                                </span>
-                                            </div>
-
-                                            {/* Date and Time */}
-                                            <div className="flex items-center gap-4 text-sm">
-                                                <div className="flex items-center gap-1.5">
-                                                    <CalendarIcon className="h-4 w-4 text-gray-400" />
-                                                    <span className="text-gray-700 dark:text-gray-300">{interview.timeslot_date}</span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <ClockIcon className="h-4 w-4 text-gray-400" />
-                                                    <span className="text-gray-600 dark:text-gray-400">{interview.timeslot_time}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Assigned To */}
-                                            {interview.assigned_to_name && (
-                                                <div className="flex items-center gap-1.5 mt-2 text-sm">
-                                                    <UserPlusIcon className="h-4 w-4 text-purple-500" />
-                                                    <span className="text-gray-600 dark:text-gray-300">Assigned to: </span>
-                                                    <span className="font-semibold text-gray-900 dark:text-white">{interview.assigned_to_name}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex items-center gap-2">
-                                            {interview.status === 'pending' && !interview.assigned_to && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setAssignModal({ open: true, interview });
-                                                    }}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
-                                                >
-                                                    <UserPlusIcon className="h-3.5 w-3.5" />
-                                                    Assign
-                                                </button>
-                                            )}
-                                            {interview.status === 'pending' && interview.assigned_to && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setConfirmModal({ open: true, interview, meetingLink: '' });
-                                                    }}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
-                                                >
-                                                    <PaperAirplaneIcon className="h-3.5 w-3.5" />
-                                                    Confirm
-                                                </button>
-                                            )}
-                                            {interview.status === 'confirmed' && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setCompleteModal({ open: true, interview, feedback: '' });
-                                                    }}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                                                >
-                                                    <CheckCircleIcon className="h-3.5 w-3.5" />
-                                                    Complete
-                                                </button>
-                                            )}
-                                            {(interview.status === 'pending' || interview.status === 'confirmed') && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleCancel(interview.id);
-                                                    }}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                >
-                                                    <XCircleIcon className="h-3.5 w-3.5" />
-                                                    Cancel
-                                                </button>
-                                            )}
-                                        </div>
+                                {/* Card Header */}
+                                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <UserIcon className="h-4 w-4 text-gray-400" />
+                                        <span className="font-bold text-gray-900 dark:text-white truncate">{interview.user_name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColors.bg} ${typeColors.text}`}>
+                                            {formatInterviewType(interview.interview_type)}
+                                        </span>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text}`}>
+                                            {formatStatus(interview.status)}
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* Expanded Details */}
-                                {isExpanded && (
-                                    <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-4">
-                                        {/* Pending Companies */}
-                                        {interview.pending_companies && interview.pending_companies.length > 0 && (
-                                            <div>
-                                                <div className="flex items-center gap-1.5 mb-2">
-                                                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                                                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Pending Interviews With</span>
-                                                </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {interview.pending_companies.map((company, idx) => (
-                                                        <span key={idx} className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full">
-                                                            {company}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                {/* Card Body */}
+                                <div className="p-4 space-y-3">
+                                    {/* Date & Time */}
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                            <span className="font-semibold text-gray-900 dark:text-white">{interview.timeslot_date}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                            <span className="text-gray-600 dark:text-gray-400">{interview.timeslot_time}</span>
+                                            <span className="text-xs text-gray-500">({interview.duration_minutes} min)</span>
+                                        </div>
+                                    </div>
 
-                                        {/* Earliest Interview Date */}
-                                        {interview.earliest_interview_date && (
-                                            <div>
-                                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Earliest Real Interview</span>
-                                                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                                                    {formatDate(interview.earliest_interview_date)}
-                                                </p>
+                                    {/* Assigned To */}
+                                    {interview.assigned_to_name ? (
+                                        <div className="flex items-center gap-2 text-sm bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg">
+                                            <UserPlusIcon className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-xs text-gray-600 dark:text-gray-400">Interviewer</div>
+                                                <div className="font-semibold text-gray-900 dark:text-white truncate">{interview.assigned_to_name}</div>
                                             </div>
-                                        )}
+                                            <button
+                                                onClick={() => setAssignModal({ open: true, interview })}
+                                                className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors flex-shrink-0"
+                                                title="Change interviewer"
+                                            >
+                                                <PencilIcon className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs text-gray-500 dark:text-gray-400 italic px-3 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">Not assigned yet</div>
+                                    )}
 
-                                        {/* Notes */}
-                                        {interview.notes && (
-                                            <div>
-                                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">User Notes</span>
-                                                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">
-                                                    {interview.notes}
-                                                </p>
+                                    {/* Companies */}
+                                    {interview.pending_companies && interview.pending_companies.length > 0 && (
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-1.5">
+                                                <BuildingOfficeIcon className="h-3.5 w-3.5 text-gray-400" />
+                                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Companies</span>
                                             </div>
-                                        )}
+                                            <div className="flex flex-wrap gap-1">
+                                                {interview.pending_companies.slice(0, 2).map((company, idx) => (
+                                                    <span key={idx} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full truncate max-w-[120px]">
+                                                        {company}
+                                                    </span>
+                                                ))}
+                                                {interview.pending_companies.length > 2 && (
+                                                    <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
+                                                        +{interview.pending_companies.length - 2}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
 
-                                        {/* Meeting Link */}
-                                        {interview.meeting_link && (
-                                            <div>
-                                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Meeting Link</span>
-                                                <a
-                                                    href={interview.meeting_link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="block text-sm text-purple-600 dark:text-purple-400 hover:underline mt-1"
-                                                >
-                                                    {interview.meeting_link}
-                                                </a>
-                                            </div>
-                                        )}
+                                    {/* Notes Preview */}
+                                    {interview.notes && (
+                                        <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg">
+                                            {interview.notes}
+                                        </div>
+                                    )}
 
-                                        {/* Feedback */}
-                                        {interview.interviewer_feedback && (
-                                            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                                                <div className="flex items-center gap-1.5 mb-2">
-                                                    <ChatBubbleLeftRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase">Feedback Given</span>
-                                                </div>
-                                                <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">
-                                                    {interview.interviewer_feedback}
-                                                </p>
-                                            </div>
+                                    {/* Actions */}
+                                    <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        {interview.status === 'pending' && !interview.assigned_to && (
+                                            <button
+                                                onClick={() => setAssignModal({ open: true, interview })}
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                <UserPlusIcon className="h-3.5 w-3.5" />
+                                                Assign
+                                            </button>
                                         )}
-
-                                        {/* Cancellation Reason */}
-                                        {interview.cancellation_reason && (
-                                            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4">
-                                                <span className="text-xs font-bold text-red-700 dark:text-red-300 uppercase">Cancellation Reason</span>
-                                                <p className="text-sm text-red-900 dark:text-red-200 mt-1">
-                                                    {interview.cancellation_reason}
-                                                </p>
-                                            </div>
+                                        {interview.status === 'pending' && interview.assigned_to && (
+                                            <button
+                                                onClick={() => setConfirmModal({ open: true, interview, meetingLink: '' })}
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                            >
+                                                <PaperAirplaneIcon className="h-3.5 w-3.5" />
+                                                Confirm
+                                            </button>
+                                        )}
+                                        {interview.status === 'confirmed' && (
+                                            <button
+                                                onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
+                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                <CheckCircleIcon className="h-3.5 w-3.5" />
+                                                Complete
+                                            </button>
+                                        )}
+                                        {interview.status === 'pending' && (
+                                            <button
+                                                onClick={() => handleCancel(interview.id)}
+                                                className="px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
                                         )}
                                     </div>
-                                )}
+                                </div>
                             </div>
                         );
                     })}
@@ -420,106 +350,200 @@ const MockInterviewManagement = () => {
             )}
 
             {/* Assign Modal */}
-            {assignModal.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Assign Interviewer</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Select a volunteer or lead to conduct this {formatInterviewType(assignModal.interview?.interview_type)} interview.
-                        </p>
-                        <div className="space-y-2 max-h-64 overflow-y-auto">
-                            {volunteers.map((volunteer) => (
-                                <button
-                                    key={volunteer.id}
-                                    onClick={() => handleAssign(assignModal.interview.id, volunteer.id)}
-                                    disabled={submitting}
-                                    className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:border-purple-300 dark:hover:border-purple-600 transition-colors disabled:opacity-50"
-                                >
-                                    <span className="font-semibold text-gray-900 dark:text-white">{volunteer.name}</span>
-                                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">({volunteer.email})</span>
-                                </button>
-                            ))}
-                            {volunteers.length === 0 && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No volunteers available</p>
-                            )}
+            <Transition appear show={assignModal.open} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setAssignModal({ open: false, interview: null })}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                        Assign Interviewer
+                                    </Dialog.Title>
+                                    {interviewers.length === 0 ? (
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No interviewers available</p>
+                                    ) : (
+                                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                                            {interviewers.map((interviewer) => (
+                                                <button
+                                                    key={interviewer.id}
+                                                    onClick={() => {
+                                                        handleAssign(assignModal.interview?.id, interviewer.id);
+                                                    }}
+                                                    disabled={submitting}
+                                                    className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all disabled:opacity-50"
+                                                >
+                                                    <div className="font-semibold text-gray-900 dark:text-white">{interviewer.full_name}</div>
+                                                    {interviewer.email && (
+                                                        <div className="text-sm text-gray-500 dark:text-gray-400">{interviewer.email}</div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => setAssignModal({ open: false, interview: null })}
+                                        className="mt-4 w-full px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                </Dialog.Panel>
+                            </Transition.Child>
                         </div>
-                        <button
-                            onClick={() => setAssignModal({ open: false, interview: null })}
-                            className="w-full mt-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
-                        >
-                            Cancel
-                        </button>
                     </div>
-                </div>
-            )}
+                </Dialog>
+            </Transition>
 
             {/* Confirm Modal */}
-            {confirmModal.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirm Interview</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Provide the meeting link to confirm this interview and notify the member.
-                        </p>
-                        <input
-                            type="url"
-                            value={confirmModal.meetingLink}
-                            onChange={(e) => setConfirmModal(prev => ({ ...prev, meetingLink: e.target.value }))}
-                            placeholder="https://meet.google.com/..."
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 mb-4"
-                        />
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setConfirmModal({ open: false, interview: null, meetingLink: '' })}
-                                className="flex-1 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+            <Transition appear show={confirmModal.open} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setConfirmModal({ open: false, interview: null, meetingLink: '' })}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
                             >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleConfirm}
-                                disabled={submitting}
-                                className="flex-1 py-2.5 text-sm font-bold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                            >
-                                {submitting ? 'Confirming...' : 'Confirm & Notify'}
-                            </button>
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                        Confirm Interview
+                                    </Dialog.Title>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                Meeting Link
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={confirmModal.meetingLink}
+                                                onChange={(e) => setConfirmModal(prev => ({ ...prev, meetingLink: e.target.value }))}
+                                                placeholder="https://zoom.us/j/..."
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={handleConfirm}
+                                                disabled={submitting}
+                                                className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {submitting ? 'Confirming...' : 'Confirm'}
+                                            </button>
+                                            <button
+                                                onClick={() => setConfirmModal({ open: false, interview: null, meetingLink: '' })}
+                                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
                         </div>
                     </div>
-                </div>
-            )}
+                </Dialog>
+            </Transition>
 
             {/* Complete Modal */}
-            {completeModal.open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Complete Interview</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Mark this interview as completed and optionally provide feedback for the member.
-                        </p>
-                        <textarea
-                            value={completeModal.feedback}
-                            onChange={(e) => setCompleteModal(prev => ({ ...prev, feedback: e.target.value }))}
-                            placeholder="Enter feedback for the member (optional)..."
-                            rows={4}
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none mb-4"
-                        />
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setCompleteModal({ open: false, interview: null, feedback: '' })}
-                                className="flex-1 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+            <Transition appear show={completeModal.open} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setCompleteModal({ open: false, interview: null, feedback: '' })}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
                             >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleComplete}
-                                disabled={submitting}
-                                className="flex-1 py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
-                            >
-                                {submitting ? 'Completing...' : 'Mark Complete'}
-                            </button>
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
+                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                        Complete Interview
+                                    </Dialog.Title>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                Interviewer Feedback
+                                            </label>
+                                            <textarea
+                                                value={completeModal.feedback}
+                                                onChange={(e) => setCompleteModal(prev => ({ ...prev, feedback: e.target.value }))}
+                                                rows={6}
+                                                placeholder="Provide constructive feedback for the member..."
+                                                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={handleComplete}
+                                                disabled={submitting}
+                                                className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                            >
+                                                {submitting ? 'Submitting...' : 'Complete'}
+                                            </button>
+                                            <button
+                                                onClick={() => setCompleteModal({ open: false, interview: null, feedback: '' })}
+                                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
                         </div>
                     </div>
-                </div>
-            )}
+                </Dialog>
+            </Transition>
         </div>
     );
 };
