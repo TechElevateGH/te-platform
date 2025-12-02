@@ -6,30 +6,53 @@ import emails
 from app.core.settings import settings
 from emails.template import JinjaTemplate
 
+logger = logging.getLogger(__name__)
+
 
 def send_email(
     email_to: str,
     subject_template: str = "",
     html_template: str = "",
     environment: dict[str, Any] = {},
-) -> None:
-    assert settings.EMAILS_ENABLED, "Email verification not currently enabled."
+) -> bool:
+    """
+    Send an email using SMTP configuration.
 
-    message = emails.Message(
-        subject=JinjaTemplate(subject_template),
-        html=JinjaTemplate(html_template),
-        mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
-    )
+    Returns True if email was sent successfully, False otherwise.
+    """
+    if not settings.EMAILS_ENABLED:
+        logger.warning(f"Emails disabled - skipping email to {email_to}")
+        return False
 
-    smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
-    if settings.SMTP_TLS:
-        smtp_options["tls"] = True
-    if settings.SMTP_USER:
-        smtp_options["user"] = settings.SMTP_USER
-    if settings.SMTP_PASSWORD:
-        smtp_options["password"] = settings.SMTP_PASSWORD
-    response = message.send(to=email_to, render=environment, smtp=smtp_options)
-    logging.info(f"send email result: {response}")
+    try:
+        message = emails.Message(
+            subject=JinjaTemplate(subject_template),
+            html=JinjaTemplate(html_template),
+            mail_from=(settings.EMAILS_FROM_NAME, settings.EMAILS_FROM_EMAIL),
+        )
+
+        smtp_options = {"host": settings.SMTP_HOST, "port": settings.SMTP_PORT}
+        if settings.SMTP_TLS:
+            smtp_options["tls"] = True
+        if settings.SMTP_USER:
+            smtp_options["user"] = settings.SMTP_USER
+        if settings.SMTP_PASSWORD:
+            smtp_options["password"] = settings.SMTP_PASSWORD
+
+        response = message.send(to=email_to, render=environment, smtp=smtp_options)
+
+        if response.status_code in [250, 200]:
+            logger.info(f"Email sent successfully to {email_to}")
+            return True
+        else:
+            logger.error(
+                f"Email failed to {email_to}: {response.status_code} - {response.error}"
+            )
+            return False
+
+    except Exception as e:
+        logger.error(f"Email error to {email_to}: {str(e)}")
+        return False
 
 
 def send_test_email(email_to: str) -> None:
@@ -532,12 +555,10 @@ def send_resume_review_completed_email(
         subject_template=subject,
         html_template=html_template,
         environment={
-            {
-                "project_name": settings.PROJECT_NAME,
-                "member_name": member_name,
-                "reviewer_name": reviewer_name,
-                "job_title": job_title,
-            }
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "reviewer_name": reviewer_name,
+            "job_title": job_title,
         },
     )
 
@@ -707,13 +728,11 @@ def send_resume_review_request_email(
         subject_template=subject,
         html_template=html_template,
         environment={
-            {
-                "project_name": settings.PROJECT_NAME,
-                "member_name": member_name,
-                "member_email": member_email,
-                "job_title": job_title,
-                "level": level,
-            }
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "member_email": member_email,
+            "job_title": job_title,
+            "level": level,
         },
     )
 
@@ -885,14 +904,12 @@ def send_referral_request_email(
         subject_template=subject,
         html_template=html_template,
         environment={
-            {
-                "project_name": settings.PROJECT_NAME,
-                "member_name": member_name,
-                "member_email": member_email,
-                "company_name": company_name,
-                "position": position,
-                "level": level,
-            }
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "member_email": member_email,
+            "company_name": company_name,
+            "position": position,
+            "level": level,
         },
     )
 
@@ -1079,13 +1096,11 @@ def send_referral_update_email(
         subject_template=subject,
         html_template=html_template,
         environment={
-            {
-                "project_name": settings.PROJECT_NAME,
-                "member_name": member_name,
-                "company_name": company_name,
-                "position": position,
-                "feedback": feedback,
-            }
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "company_name": company_name,
+            "position": position,
+            "feedback": feedback,
         },
     )
 
@@ -1093,7 +1108,7 @@ def send_referral_update_email(
 # ============== Mock Interview Email Functions ==============
 
 
-def send_mock_interview_request_email(
+def send_interview_request_email(
     member_name: str,
     member_email: str,
     interview_type: str,
@@ -1221,7 +1236,7 @@ def send_mock_interview_request_email(
     )
 
 
-def send_mock_interview_assigned_email(
+def send_interview_assigned_email(
     email_to: str,
     interviewer_name: str,
     member_name: str,
@@ -1333,7 +1348,7 @@ def send_mock_interview_assigned_email(
     )
 
 
-def send_mock_interview_confirmed_email(
+def send_interview_confirmed_email(
     email_to: str,
     member_name: str,
     interview_type: str,
@@ -1460,7 +1475,7 @@ def send_mock_interview_confirmed_email(
     )
 
 
-def send_mock_interview_completed_email(
+def send_interview_completed_email(
     email_to: str,
     member_name: str,
     interview_type: str,
@@ -1567,7 +1582,7 @@ def send_mock_interview_completed_email(
     )
 
 
-def send_mock_interview_cancelled_email(
+def send_interview_cancelled_email(
     email_to: str,
     member_name: str,
     interview_type: str,
@@ -1858,11 +1873,9 @@ def send_referral_completed_email(
         subject_template=subject,
         html_template=html_template,
         environment={
-            {
-                "project_name": settings.PROJECT_NAME,
-                "member_name": member_name,
-                "company_name": company_name,
-                "position": position,
-            }
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "company_name": company_name,
+            "position": position,
         },
     )

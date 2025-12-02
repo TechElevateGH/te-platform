@@ -42,7 +42,6 @@ const MyAssignedInterviews = () => {
     const { accessToken } = useAuth();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [expandedId, setExpandedId] = useState(null);
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
     const [submitting, setSubmitting] = useState(false);
 
@@ -51,7 +50,7 @@ const MyAssignedInterviews = () => {
 
         setLoading(true);
         try {
-            const response = await axiosInstance.get('/mock-interviews/assigned', {
+            const response = await axiosInstance.get('/interviews/assigned', {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setInterviews(response.data.interviews || []);
@@ -75,7 +74,7 @@ const MyAssignedInterviews = () => {
 
         setSubmitting(true);
         try {
-            await axiosInstance.post(`/mock-interviews/${completeModal.interview.id}/complete`, {
+            await axiosInstance.post(`/interviews/${completeModal.interview.id}/complete`, {
                 interviewer_feedback: completeModal.feedback
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
@@ -117,167 +116,120 @@ const MyAssignedInterviews = () => {
     const renderInterviewCard = (interview) => {
         const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
         const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;
-        const isExpanded = expandedId === interview.id;
 
         return (
             <div
                 key={interview.id}
-                className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all"
             >
-                {/* Main Card */}
-                <div
-                    className="p-4 cursor-pointer"
-                    onClick={() => setExpandedId(isExpanded ? null : interview.id)}
-                >
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                            {/* Requester Name */}
-                            <div className="flex items-center gap-2 mb-2">
-                                <UserIcon className="h-4 w-4 text-gray-400" />
-                                <span className="font-bold text-gray-900 dark:text-white">{interview.user_name}</span>
-                            </div>
-
-                            {/* Type and Status Badges */}
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${typeColors.bg} ${typeColors.text} ${typeColors.border} border`}>
-                                    {formatInterviewType(interview.interview_type)}
-                                </span>
-                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${statusColors.bg} ${statusColors.text} ${statusColors.border} border`}>
-                                    {formatStatus(interview.status)}
-                                </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    ({interview.duration_minutes} min)
-                                </span>
-                            </div>
-
-                            {/* Date and Time */}
-                            <div className="flex items-center gap-4 text-sm">
-                                <div className="flex items-center gap-1.5">
-                                    <CalendarIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-gray-700 dark:text-gray-300">{interview.timeslot_date}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <ClockIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-gray-600 dark:text-gray-400">{interview.timeslot_time}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2">
-                            {interview.meeting_link && interview.status === 'confirmed' && (
-                                <a
-                                    href={interview.meeting_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                                >
-                                    <LinkIcon className="h-3.5 w-3.5" />
-                                    Join
-                                </a>
-                            )}
-                            {interview.status === 'confirmed' && (
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setCompleteModal({ open: true, interview, feedback: '' });
-                                    }}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                                >
-                                    <CheckCircleIcon className="h-3.5 w-3.5" />
-                                    Complete
-                                </button>
-                            )}
-                        </div>
+                {/* Card Header */}
+                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2 mb-2">
+                        <UserIcon className="h-4 w-4 text-gray-400" />
+                        <span className="font-bold text-gray-900 dark:text-white truncate">{interview.user_name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColors.bg} ${typeColors.text}`}>
+                            {formatInterviewType(interview.interview_type)}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text}`}>
+                            {formatStatus(interview.status)}
+                        </span>
                     </div>
                 </div>
 
-                {/* Expanded Details */}
-                {isExpanded && (
-                    <div className="px-4 pb-4 pt-2 border-t border-gray-100 dark:border-gray-700 space-y-4">
-                        {/* Pending Companies */}
-                        {interview.pending_companies && interview.pending_companies.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Companies They&apos;re Interviewing With</span>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {interview.pending_companies.map((company, idx) => (
-                                        <span key={idx} className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full">
-                                            {company}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                {/* Card Body */}
+                <div className="p-4 space-y-3">
+                    {/* Date & Time */}
+                    <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-sm">
+                            <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="font-semibold text-gray-900 dark:text-white">{interview.timeslot_date}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-600 dark:text-gray-400">{interview.timeslot_time}</span>
+                            <span className="text-xs text-gray-500">({interview.duration_minutes} min)</span>
+                        </div>
+                    </div>
 
-                        {/* Earliest Interview Date */}
-                        {interview.earliest_interview_date && (
-                            <div>
-                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Earliest Real Interview</span>
-                                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                                    {new Date(interview.earliest_interview_date).toLocaleDateString('en-US', {
-                                        weekday: 'short',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric'
-                                    })}
-                                </p>
+                    {/* Companies */}
+                    {interview.pending_companies && interview.pending_companies.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <BuildingOfficeIcon className="h-3.5 w-3.5 text-gray-400" />
+                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Companies</span>
                             </div>
-                        )}
+                            <div className="flex flex-wrap gap-1">
+                                {interview.pending_companies.slice(0, 2).map((company, idx) => (
+                                    <span key={idx} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full truncate max-w-[120px]">
+                                        {company}
+                                    </span>
+                                ))}
+                                {interview.pending_companies.length > 2 && (
+                                    <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
+                                        +{interview.pending_companies.length - 2}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
-                        {/* Notes */}
-                        {interview.notes && (
-                            <div>
-                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Member Notes</span>
-                                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">
-                                    {interview.notes}
-                                </p>
-                            </div>
-                        )}
+                    {/* Notes Preview */}
+                    {interview.notes && (
+                        <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg">
+                            {interview.notes}
+                        </div>
+                    )}
 
-                        {/* Meeting Link */}
-                        {interview.meeting_link && (
-                            <div>
-                                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Meeting Link</span>
-                                <a
-                                    href={interview.meeting_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block text-sm text-purple-600 dark:text-purple-400 hover:underline mt-1"
-                                >
-                                    {interview.meeting_link}
-                                </a>
+                    {/* Feedback Given */}
+                    {interview.interviewer_feedback && (
+                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Your Feedback</span>
                             </div>
-                        )}
+                            <p className="text-xs text-blue-900 dark:text-blue-200 line-clamp-3">
+                                {interview.interviewer_feedback}
+                            </p>
+                        </div>
+                    )}
 
-                        {/* Feedback Given */}
-                        {interview.interviewer_feedback && (
-                            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-4">
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <ChatBubbleLeftRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase">Your Feedback</span>
-                                </div>
-                                <p className="text-sm text-blue-900 dark:text-blue-200 whitespace-pre-wrap">
-                                    {interview.interviewer_feedback}
-                                </p>
-                            </div>
+                    {/* Actions */}
+                    <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        {interview.meeting_link && interview.status === 'confirmed' && (
+                            <a
+                                href={interview.meeting_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <LinkIcon className="h-3.5 w-3.5" />
+                                Join Interview
+                            </a>
+                        )}
+                        {interview.status === 'confirmed' && (
+                            <button
+                                onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                            >
+                                <CheckCircleIcon className="h-3.5 w-3.5" />
+                                Complete
+                            </button>
                         )}
                     </div>
-                )}
+                </div>
             </div>
         );
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Upcoming Interviews */}
             {upcomingInterviews.length > 0 && (
                 <div>
                     <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Upcoming</h4>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {upcomingInterviews.map(renderInterviewCard)}
                     </div>
                 </div>
@@ -287,7 +239,7 @@ const MyAssignedInterviews = () => {
             {pastInterviews.length > 0 && (
                 <div>
                     <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Past</h4>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {pastInterviews.map(renderInterviewCard)}
                     </div>
                 </div>
@@ -306,7 +258,7 @@ const MyAssignedInterviews = () => {
                             onChange={(e) => setCompleteModal(prev => ({ ...prev, feedback: e.target.value }))}
                             placeholder="Enter feedback for the member..."
                             rows={5}
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none mb-4"
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none mb-4"
                         />
                         <div className="flex gap-3">
                             <button

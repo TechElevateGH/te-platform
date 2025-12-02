@@ -1,4 +1,4 @@
-"""Pydantic schemas for Mock Interview feature."""
+"""Pydantic schemas for Interview feature."""
 
 from enum import Enum
 from typing import Optional, List
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class InterviewType(str, Enum):
-    """Types of mock interviews available."""
+    """Types of interviews available."""
 
     system_design = "system_design"
     behavioral = "behavioral"
@@ -20,8 +20,8 @@ class InterviewType(str, Enum):
         return 55
 
 
-class MockInterviewStatus(str, Enum):
-    """Status of a mock interview request."""
+class InterviewStatus(str, Enum):
+    """Status of a interview request."""
 
     pending = "pending"
     confirmed = "confirmed"
@@ -67,11 +67,11 @@ class TimeslotBulkCreate(BaseModel):
     timeslots: List[TimeslotCreate]
 
 
-# ============== Mock Interview Request Schemas ==============
+# ============== Interview Request Schemas ==============
 
 
-class MockInterviewRequestCreate(BaseModel):
-    """Schema for Member to create a mock interview request."""
+class InterviewRequestCreate(BaseModel):
+    """Schema for Member to create a interview request."""
 
     interview_type: InterviewType
     timeslot_id: str = Field(..., description="ID of the selected timeslot")
@@ -85,8 +85,8 @@ class MockInterviewRequestCreate(BaseModel):
     notes: Optional[str] = Field("", description="Additional notes for the interviewer")
 
 
-class MockInterviewRequestUpdate(BaseModel):
-    """Schema for updating a mock interview request."""
+class InterviewRequestUpdate(BaseModel):
+    """Schema for updating a interview request."""
 
     interview_type: Optional[InterviewType] = None
     timeslot_id: Optional[str] = None
@@ -95,7 +95,7 @@ class MockInterviewRequestUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-class MockInterviewAssign(BaseModel):
+class InterviewAssign(BaseModel):
     """Schema for Lead+ to assign an interviewer to a request."""
 
     assigned_to: str = Field(..., description="User ID of the Volunteer/Lead to assign")
@@ -104,8 +104,8 @@ class MockInterviewAssign(BaseModel):
     )
 
 
-class MockInterviewConfirm(BaseModel):
-    """Schema for confirming a mock interview."""
+class InterviewConfirm(BaseModel):
+    """Schema for confirming a interview."""
 
     meeting_link: Optional[str] = Field(
         "", description="Meeting link for the interview"
@@ -115,24 +115,24 @@ class MockInterviewConfirm(BaseModel):
     )
 
 
-class MockInterviewComplete(BaseModel):
-    """Schema for completing a mock interview with feedback."""
+class InterviewComplete(BaseModel):
+    """Schema for completing a interview with feedback."""
 
     interviewer_feedback: str = Field(..., description="Feedback from the interviewer")
 
 
-class MockInterviewCancel(BaseModel):
-    """Schema for cancelling a mock interview."""
+class InterviewCancel(BaseModel):
+    """Schema for cancelling a interview."""
 
     cancellation_reason: Optional[str] = Field(
         "", description="Reason for cancellation"
     )
 
 
-class MockInterviewStatusUpdate(BaseModel):
-    """Schema for updating mock interview status."""
+class InterviewStatusUpdate(BaseModel):
+    """Schema for updating interview status."""
 
-    status: MockInterviewStatus
+    status: InterviewStatus
     interviewer_feedback: Optional[str] = None
     meeting_link: Optional[str] = None
 
@@ -140,8 +140,8 @@ class MockInterviewStatusUpdate(BaseModel):
 # ============== Read Schemas ==============
 
 
-class MockInterviewRequestRead(BaseModel):
-    """Schema for reading mock interview request data."""
+class InterviewRequestRead(BaseModel):
+    """Schema for reading interview request data."""
 
     id: str
     user_id: str
@@ -169,8 +169,8 @@ class MockInterviewRequestRead(BaseModel):
     cancelled_at: Optional[str]
 
 
-class MockInterviewRequestReadBrief(BaseModel):
-    """Brief schema for listing mock interview requests."""
+class InterviewRequestReadBrief(BaseModel):
+    """Brief schema for listing interview requests."""
 
     id: str
     user_name: str

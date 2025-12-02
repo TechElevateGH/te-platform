@@ -1,14 +1,14 @@
-"""Helper functions and dependencies for Mock Interview feature."""
+"""Helper functions and dependencies for Interview feature."""
 
-import app.ents.mock_interview.models as mock_interview_models
-import app.ents.mock_interview.schema as mock_interview_schema
+import app.ents.interview.models as interview_models
+import app.ents.interview.schema as interview_schema
 
 
 def parse_timeslot(
-    timeslot: mock_interview_models.MockInterviewTimeslot,
-) -> mock_interview_schema.TimeslotRead:
+    timeslot: interview_models.InterviewTimeslot,
+) -> interview_schema.TimeslotRead:
     """Convert a timeslot model to a read schema."""
-    return mock_interview_schema.TimeslotRead(
+    return interview_schema.TimeslotRead(
         id=str(timeslot.id),
         date=timeslot.date,
         start_time=timeslot.start_time,
@@ -20,10 +20,10 @@ def parse_timeslot(
 
 
 def parse_interview_request(
-    request: mock_interview_models.MockInterviewRequest,
-) -> mock_interview_schema.MockInterviewRequestRead:
-    """Convert a mock interview request model to a read schema."""
-    return mock_interview_schema.MockInterviewRequestRead(
+    request: interview_models.InterviewRequest,
+) -> interview_schema.InterviewRequestRead:
+    """Convert a interview request model to a read schema."""
+    return interview_schema.InterviewRequestRead(
         id=str(request.id),
         user_id=str(request.user_id),
         user_name=request.user_name,
@@ -52,10 +52,10 @@ def parse_interview_request(
 
 
 def parse_interview_request_brief(
-    request: mock_interview_models.MockInterviewRequest,
-) -> mock_interview_schema.MockInterviewRequestReadBrief:
-    """Convert a mock interview request model to a brief read schema."""
-    return mock_interview_schema.MockInterviewRequestReadBrief(
+    request: interview_models.InterviewRequest,
+) -> interview_schema.InterviewRequestReadBrief:
+    """Convert a interview request model to a brief read schema."""
+    return interview_schema.InterviewRequestReadBrief(
         id=str(request.id),
         user_name=request.user_name,
         user_email=request.user_email,

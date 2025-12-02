@@ -1,4 +1,4 @@
-"""MongoDB models for Mock Interview feature."""
+"""MongoDB models for Interview feature."""
 
 from datetime import datetime
 from typing import Optional, Any, List
@@ -41,7 +41,7 @@ class PyObjectId(ObjectId):
         return {"type": "string"}
 
 
-class MockInterviewTimeslot(BaseModel):
+class InterviewTimeslot(BaseModel):
     """
     MongoDB document model for available interview timeslots.
     Volunteer+ users can manage these timeslots.
@@ -61,9 +61,9 @@ class MockInterviewTimeslot(BaseModel):
         json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}
 
 
-class MockInterviewRequest(BaseModel):
+class InterviewRequest(BaseModel):
     """
-    MongoDB document model for mock interview requests from Members.
+    MongoDB document model for interview requests from Members.
     """
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")

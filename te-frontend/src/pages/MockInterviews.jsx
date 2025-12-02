@@ -31,6 +31,7 @@ const MockInterviews = () => {
     // Permission levels based on userRole
     const userRoleInt = userRole ? parseInt(userRole) : 0;
     const isMember = userRoleInt >= 1;
+    const isMemberOnly = userRoleInt === 1; // Only Members (not Volunteers+) can have interviews
     const isVolunteer = userRoleInt >= 3;
     const isLead = userRoleInt >= 4;
 
@@ -38,7 +39,7 @@ const MockInterviews = () => {
         {
             id: TABS.MY_INTERVIEWS,
             label: 'My Interviews',
-            show: isMember,
+            show: isMemberOnly, // Only Members can have mock interviews, not Volunteers+
         },
         {
             id: TABS.ASSIGNED,
@@ -62,7 +63,7 @@ const MockInterviews = () => {
 
     // Set default tab based on permission
     const getDefaultTab = () => {
-        if (isMember) return TABS.MY_INTERVIEWS;
+        if (isMemberOnly) return TABS.MY_INTERVIEWS;
         if (isVolunteer) return TABS.ASSIGNED;
         return TABS.MY_INTERVIEWS;
     };
@@ -107,19 +108,19 @@ const MockInterviews = () => {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-4">
+            {/* Compact Header */}
+            <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Mock Interviews</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">Mock Interviews</h1>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         Practice with real interviewers and get personalized feedback
                     </p>
                 </div>
-                {isMember && activeTab === TABS.MY_INTERVIEWS && (
+                {isMemberOnly && activeTab === TABS.MY_INTERVIEWS && (
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         <PlusIcon className="h-4 w-4" />
                         Request Interview
@@ -141,7 +142,7 @@ const MockInterviews = () => {
                                 className={`
                                     relative inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all
                                     ${isActive
-                                        ? 'bg-purple-600 text-white shadow-sm'
+                                        ? 'bg-blue-600 text-white shadow-sm'
                                         : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                                     }
                                 `}

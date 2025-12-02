@@ -136,17 +136,17 @@ const Learning = ({ setContent }) => {
                     axios.get('/learning/progress'),
                     axios.get('/learning/progress/detailed').catch(() => ({ data: null }))
                 ]);
-                
+
                 const progress = progressRes.data;
                 setCompletedTopics(new Set(progress.completed_topics || []));
                 setBookmarkedTopics(new Set(progress.bookmarked_topics || []));
                 setTopicNotes(progress.topic_notes || {});
-                
+
                 // Set detailed progress if available
                 if (detailedRes.data) {
                     const detailedData = detailedRes.data;
                     const statsData = detailedData.stats || {};
-                    
+
                     // Convert categories array to an object keyed by category name
                     const categoryProgress = {};
                     (statsData.categories || []).forEach(cat => {
@@ -157,7 +157,7 @@ const Learning = ({ setContent }) => {
                             total_time_seconds: cat.total_time_seconds || 0
                         };
                     });
-                    
+
                     setDetailedProgress({
                         streak: detailedData.streak || statsData.streak || { current_streak: 0, longest_streak: 0 },
                         stats: {
@@ -829,7 +829,7 @@ const Learning = ({ setContent }) => {
                                         <span className="text-sm font-bold text-orange-600 dark:text-orange-400">{stats.percentage}%</span>
                                     </div>
                                     <div className={`h-3 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                                        <div 
+                                        <div
                                             className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-500 to-yellow-500 transition-all duration-500"
                                             style={{ width: `${stats.percentage}%` }}
                                         />
@@ -862,7 +862,7 @@ const Learning = ({ setContent }) => {
                                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{completed}/{total}</span>
                                                             </div>
                                                             <div className={`h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
-                                                                <div 
+                                                                <div
                                                                     className={`h-full rounded-full ${percentage === 100 ? 'bg-green-500' : 'bg-indigo-500'}`}
                                                                     style={{ width: `${percentage}%` }}
                                                                 />
@@ -889,7 +889,7 @@ const Learning = ({ setContent }) => {
                                     <div className={`p-3 rounded-xl text-center ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
                                         <CalendarDaysIcon className="w-5 h-5 text-teal-500 mx-auto mb-1" />
                                         <p className="text-lg font-bold text-gray-800 dark:text-white">
-                                            {detailedProgress.streak?.last_activity_date 
+                                            {detailedProgress.streak?.last_activity_date
                                                 ? new Date(detailedProgress.streak.last_activity_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                                                 : '-'}
                                         </p>
@@ -907,13 +907,12 @@ const Learning = ({ setContent }) => {
                                         <div className="space-y-2 max-h-32 overflow-y-auto">
                                             {detailedProgress.recent_activities.slice(0, 5).map((activity, idx) => (
                                                 <div key={idx} className={`flex items-center gap-3 p-2 rounded-lg ${darkMode ? 'bg-slate-800/30' : 'bg-gray-50/50'}`}>
-                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                        activity.activity_type === 'completion' 
-                                                            ? 'bg-green-100 dark:bg-green-900/30' 
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${activity.activity_type === 'completion'
+                                                            ? 'bg-green-100 dark:bg-green-900/30'
                                                             : activity.activity_type === 'bookmark'
                                                                 ? 'bg-amber-100 dark:bg-amber-900/30'
                                                                 : 'bg-blue-100 dark:bg-blue-900/30'
-                                                    }`}>
+                                                        }`}>
                                                         {activity.activity_type === 'completion' && <CheckCircleSolidIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />}
                                                         {activity.activity_type === 'bookmark' && <BookmarkSolidIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
                                                         {activity.activity_type === 'video_view' && <PlayCircleIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
@@ -939,11 +938,11 @@ const Learning = ({ setContent }) => {
                                     }`}>
                                     <FireSolidIcon className="w-8 h-8 text-orange-500 mx-auto mb-2" />
                                     <p className="text-sm font-medium text-gray-800 dark:text-white">
-                                        {stats.percentage >= 100 
+                                        {stats.percentage >= 100
                                             ? "🎉 You've mastered all topics!"
-                                            : stats.percentage >= 75 
+                                            : stats.percentage >= 75
                                                 ? "Almost there! Keep pushing!"
-                                                : stats.percentage >= 50 
+                                                : stats.percentage >= 50
                                                     ? "Halfway done! Great progress!"
                                                     : stats.percentage >= 25
                                                         ? "Good start! Keep the momentum!"
