@@ -1090,6 +1090,611 @@ def send_referral_update_email(
     )
 
 
+# ============== Mock Interview Email Functions ==============
+
+
+def send_mock_interview_request_email(
+    member_name: str,
+    member_email: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    pending_companies: list[str],
+) -> None:
+    """
+    Send notification to info@techelevate.org when a new mock interview is requested.
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - New Mock Interview Request"
+    admin_email = "info@techelevate.org"
+
+    companies_str = (
+        ", ".join(pending_companies) if pending_companies else "None specified"
+    )
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+                border-left: 4px solid #8b5cf6;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #5b21b6;
+                font-size: 14px;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                color: white;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🎤 New Mock Interview Request</h1>
+                <p>Action required</p>
+            </div>
+            <div class="content">
+                <p class="greeting">TechElevate Team,</p>
+                <p>A new mock interview request has been submitted.</p>
+                
+                <div class="info-box">
+                    <p><strong>Member:</strong> {member_name} ({member_email})</p>
+                    <p><strong>Interview Type:</strong> {interview_type}</p>
+                    <p><strong>Date:</strong> {timeslot_date}</p>
+                    <p><strong>Time:</strong> {timeslot_time}</p>
+                    <p><strong>Pending Companies:</strong> {companies_str}</p>
+                </div>
+                
+                <p>Please log in to the admin panel to assign an interviewer.</p>
+                
+                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Manage Interviews</a>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=admin_email,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
+    )
+
+
+def send_mock_interview_assigned_email(
+    email_to: str,
+    interviewer_name: str,
+    member_name: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    duration_minutes: int,
+) -> None:
+    """
+    Send notification to the assigned interviewer.
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - You've Been Assigned a Mock Interview"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border-left: 4px solid #3b82f6;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #1e40af;
+                font-size: 14px;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📋 Interview Assignment</h1>
+                <p>You've been assigned as an interviewer</p>
+            </div>
+            <div class="content">
+                <p>Hi {interviewer_name},</p>
+                <p>You've been assigned to conduct a mock interview.</p>
+                
+                <div class="info-box">
+                    <p><strong>Member:</strong> {member_name}</p>
+                    <p><strong>Interview Type:</strong> {interview_type}</p>
+                    <p><strong>Date:</strong> {timeslot_date}</p>
+                    <p><strong>Time:</strong> {timeslot_time}</p>
+                    <p><strong>Duration:</strong> {duration_minutes} minutes</p>
+                </div>
+                
+                <p>Please prepare accordingly and reach out if you have any questions.</p>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
+    )
+
+
+def send_mock_interview_confirmed_email(
+    email_to: str,
+    member_name: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    duration_minutes: int,
+    interviewer_name: str,
+    meeting_link: str,
+    confirmation_message: str = "",
+) -> None:
+    """
+    Send confirmation email to the member when their interview is confirmed.
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Your Mock Interview is Confirmed!"
+
+    meeting_section = (
+        f'<p><strong>Meeting Link:</strong> <a href="{meeting_link}">{meeting_link}</a></p>'
+        if meeting_link
+        else ""
+    )
+    message_section = (
+        f"<p><strong>Message:</strong> {confirmation_message}</p>"
+        if confirmation_message
+        else ""
+    )
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                border-left: 4px solid #10b981;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #065f46;
+                font-size: 14px;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>✅ Interview Confirmed!</h1>
+                <p>Your mock interview is scheduled</p>
+            </div>
+            <div class="content">
+                <p>Hi {member_name},</p>
+                <p>Great news! Your mock interview has been confirmed.</p>
+                
+                <div class="info-box">
+                    <p><strong>Interview Type:</strong> {interview_type}</p>
+                    <p><strong>Date:</strong> {timeslot_date}</p>
+                    <p><strong>Time:</strong> {timeslot_time}</p>
+                    <p><strong>Duration:</strong> {duration_minutes} minutes</p>
+                    <p><strong>Interviewer:</strong> {interviewer_name}</p>
+                    {meeting_section}
+                    {message_section}
+                </div>
+                
+                <p>Please be ready a few minutes before the scheduled time. Good luck!</p>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
+    )
+
+
+def send_mock_interview_completed_email(
+    email_to: str,
+    member_name: str,
+    interview_type: str,
+    interviewer_name: str,
+    feedback: str,
+) -> None:
+    """
+    Send feedback email to the member when their interview is completed.
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Your Mock Interview Feedback"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .feedback-box {{
+                background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .feedback-box p {{
+                margin: 8px 0;
+                color: #78350f;
+                font-size: 14px;
+                white-space: pre-wrap;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📝 Interview Feedback</h1>
+                <p>Your {interview_type} mock interview is complete</p>
+            </div>
+            <div class="content">
+                <p>Hi {member_name},</p>
+                <p>Thank you for participating in your mock interview with {interviewer_name}. Here's your feedback:</p>
+                
+                <div class="feedback-box">
+                    <p>{feedback}</p>
+                </div>
+                
+                <p>Keep practicing and best of luck with your upcoming interviews!</p>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
+    )
+
+
+def send_mock_interview_cancelled_email(
+    email_to: str,
+    member_name: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    cancellation_reason: str = "",
+) -> None:
+    """
+    Send cancellation notification to the member.
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Mock Interview Cancelled"
+
+    reason_section = (
+        f"<p><strong>Reason:</strong> {cancellation_reason}</p>"
+        if cancellation_reason
+        else ""
+    )
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+                border-left: 4px solid #ef4444;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #7f1d1d;
+                font-size: 14px;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                color: white;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>❌ Interview Cancelled</h1>
+                <p>Your mock interview has been cancelled</p>
+            </div>
+            <div class="content">
+                <p>Hi {member_name},</p>
+                <p>Your scheduled mock interview has been cancelled.</p>
+                
+                <div class="info-box">
+                    <p><strong>Interview Type:</strong> {interview_type}</p>
+                    <p><strong>Date:</strong> {timeslot_date}</p>
+                    <p><strong>Time:</strong> {timeslot_time}</p>
+                    {reason_section}
+                </div>
+                
+                <p>You can schedule a new mock interview at any time.</p>
+                
+                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Schedule New Interview</a>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
+    )
+
+
 def send_referral_completed_email(
     email_to: str, member_name: str, company_name: str, position: str
 ) -> None:
