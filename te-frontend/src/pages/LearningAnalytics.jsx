@@ -11,7 +11,9 @@ import {
     AdjustmentsHorizontalIcon,
     UserGroupIcon,
     FireIcon,
-    BookmarkIcon
+    ClockIcon,
+    TrophyIcon,
+    ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 
@@ -178,12 +180,32 @@ export default function LearningAnalytics() {
 
     // Calculate stats
     const stats = useMemo(() => {
-        if (!adminStatistics) return { totalMembers: 0, activeMembers: 0, totalCompletions: 0, totalBookmarks: 0 };
+        if (!adminStatistics) return {
+            totalMembers: 0,
+            activeMembers: 0,
+            totalCompletions: 0,
+            totalBookmarks: 0,
+            totalTime: 0,
+            totalSessions: 0,
+            activeStreaks: 0,
+            maxStreak: 0,
+            avgStreak: 0
+        };
         return {
             totalMembers: adminStatistics.total_members || 0,
             activeMembers: adminStatistics.members_with_progress || 0,
             totalCompletions: adminStatistics.total_completions || 0,
-            totalBookmarks: adminStatistics.total_bookmarks || 0
+            totalBookmarks: adminStatistics.total_bookmarks || 0,
+            totalTime: adminStatistics.total_learning_time_seconds || 0,
+            totalTimeFormatted: adminStatistics.total_learning_time_formatted || '0h 0m',
+            totalSessions: adminStatistics.total_sessions || 0,
+            avgSessionDuration: adminStatistics.avg_session_duration || 0,
+            activeStreaks: adminStatistics.active_streaks || 0,
+            maxStreak: adminStatistics.max_streak || 0,
+            avgStreak: adminStatistics.avg_streak || 0,
+            engagementRate: adminStatistics.engagement_rate || 0,
+            categoryStats: adminStatistics.category_stats || [],
+            weeklyActivity: adminStatistics.weekly_activity || []
         };
     }, [adminStatistics]);
 
@@ -210,7 +232,7 @@ export default function LearningAnalytics() {
 
                 {/* Stats Bar */}
                 <div className={`px-6 py-3 border-t ${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                    <div className="flex items-center gap-6 text-sm">
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
                         <div className="flex items-center gap-2">
                             <UserGroupIcon className="w-4 h-4 text-gray-400" />
                             <span className="text-gray-600 dark:text-gray-400">Total:</span>
@@ -220,6 +242,7 @@ export default function LearningAnalytics() {
                             <FireIcon className="w-4 h-4 text-green-500" />
                             <span className="text-gray-600 dark:text-gray-400">Active:</span>
                             <span className="font-semibold text-green-600 dark:text-green-400">{stats.activeMembers}</span>
+                            <span className="text-xs text-gray-500">({stats.engagementRate}%)</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <CheckCircleSolidIcon className="w-4 h-4 text-amber-500" />
@@ -227,9 +250,19 @@ export default function LearningAnalytics() {
                             <span className="font-semibold text-amber-600 dark:text-amber-400">{stats.totalCompletions}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <BookmarkIcon className="w-4 h-4 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Bookmarks:</span>
-                            <span className="font-semibold text-purple-600 dark:text-purple-400">{stats.totalBookmarks}</span>
+                            <ClockIcon className="w-4 h-4 text-blue-500" />
+                            <span className="text-gray-600 dark:text-gray-400">Time:</span>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.totalTimeFormatted}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <TrophyIcon className="w-4 h-4 text-orange-500" />
+                            <span className="text-gray-600 dark:text-gray-400">Best Streak:</span>
+                            <span className="font-semibold text-orange-600 dark:text-orange-400">{stats.maxStreak} days</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <ArrowTrendingUpIcon className="w-4 h-4 text-indigo-500" />
+                            <span className="text-gray-600 dark:text-gray-400">Active Streaks:</span>
+                            <span className="font-semibold text-indigo-600 dark:text-indigo-400">{stats.activeStreaks}</span>
                         </div>
                     </div>
                 </div>
@@ -346,11 +379,94 @@ export default function LearningAnalytics() {
                                     </div>
                                 </div>
 
-                                {/* Results Count */}
-                                <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                                    Showing <span className="font-semibold text-gray-900 dark:text-white">
-                                        {viewMode === 'member' ? filteredMembers.length : filteredTopics.length}
-                                    </span> {viewMode === 'member' ? 'members' : 'topics'}
+                            </div>
+
+                            {/* Analytics Cards - Category Breakdown & Weekly Activity */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                {/* Category Breakdown */}
+                                <div className={`rounded-lg border p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        <AcademicCapIcon className="w-4 h-4 text-indigo-500" />
+                                        Category Breakdown
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {stats.categoryStats.length > 0 ? (
+                                            stats.categoryStats.slice(0, 5).map((cat, idx) => {
+                                                const maxCompletions = Math.max(...stats.categoryStats.map(c => c.completions));
+                                                const percentage = maxCompletions > 0 ? (cat.completions / maxCompletions) * 100 : 0;
+                                                const colors = [
+                                                    'from-indigo-500 to-blue-500',
+                                                    'from-emerald-500 to-teal-500',
+                                                    'from-amber-500 to-orange-500',
+                                                    'from-pink-500 to-rose-500',
+                                                    'from-purple-500 to-violet-500',
+                                                ];
+                                                return (
+                                                    <div key={cat.category}>
+                                                        <div className="flex justify-between text-xs mb-1">
+                                                            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{cat.category}</span>
+                                                            <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{cat.completions} completions</span>
+                                                        </div>
+                                                        <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                                            <div
+                                                                className={`h-full rounded-full bg-gradient-to-r ${colors[idx % colors.length]}`}
+                                                                style={{ width: `${percentage}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No category data available</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Weekly Activity */}
+                                <div className={`rounded-lg border p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500" />
+                                        Weekly Activity
+                                    </h3>
+                                    <div className="flex items-end justify-between h-24 gap-1">
+                                        {stats.weeklyActivity.length > 0 ? (
+                                            stats.weeklyActivity.map((day, idx) => {
+                                                const maxActive = Math.max(...stats.weeklyActivity.map(d => d.active_members));
+                                                const height = maxActive > 0 ? (day.active_members / maxActive) * 100 : 0;
+                                                const dayLabel = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
+                                                return (
+                                                    <div key={day.date} className="flex-1 flex flex-col items-center">
+                                                        <div className="relative w-full flex justify-center mb-1">
+                                                            <div
+                                                                className={`w-6 rounded-t transition-all ${height > 0
+                                                                    ? 'bg-gradient-to-t from-emerald-600 to-emerald-400'
+                                                                    : darkMode ? 'bg-gray-700' : 'bg-gray-200'
+                                                                    }`}
+                                                                style={{ height: `${Math.max(height, 4)}%`, minHeight: '4px' }}
+                                                                title={`${day.active_members} active members`}
+                                                            />
+                                                            {height > 0 && (
+                                                                <span className="absolute -top-4 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                                                    {day.active_members}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <span className={`text-[10px] ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{dayLabel}</span>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            Array.from({ length: 7 }).map((_, idx) => (
+                                                <div key={idx} className="flex-1 flex flex-col items-center">
+                                                    <div className={`w-6 h-4 rounded-t ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} />
+                                                    <span className={`text-[10px] mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>-</span>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <div className={`mt-2 pt-2 border-t text-center ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">Last 7 days activity</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -364,8 +480,9 @@ export default function LearningAnalytics() {
                                                 <tr>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Member</th>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Completed</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Notes</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Time Spent</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Streak</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Sessions</th>
                                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Last Active</th>
                                                 </tr>
                                             </thead>
@@ -393,24 +510,40 @@ export default function LearningAnalytics() {
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-xs font-medium">
-                                                                    <BookmarkSolidIcon className="w-3 h-3" />
-                                                                    {member.bookmarked_count}
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded text-xs font-medium">
+                                                                    <ClockIcon className="w-3 h-3" />
+                                                                    {member.total_time_formatted || '0h 0m'}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{member.notes_count}</span>
+                                                                <div className="flex items-center gap-1">
+                                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${member.current_streak > 0
+                                                                        ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400'
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                                                        }`}>
+                                                                        <FireIcon className="w-3 h-3" />
+                                                                        {member.current_streak || 0}
+                                                                    </span>
+                                                                    {member.longest_streak > 0 && member.longest_streak > member.current_streak && (
+                                                                        <span className="text-xs text-gray-400" title="Best streak">
+                                                                            (max: {member.longest_streak})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-2.5">
+                                                                <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{member.session_count || 0}</span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
                                                                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                    {member.last_updated ? new Date(member.last_updated).toLocaleDateString() : 'Never'}
+                                                                    {member.last_activity_date || (member.last_updated ? new Date(member.last_updated).toLocaleDateString() : 'Never')}
                                                                 </p>
                                                             </td>
                                                         </tr>
                                                     ))
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan="5" className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <td colSpan="6" className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                                             {searchQuery ? 'No members found matching your search' : 'No member progress data available'}
                                                         </td>
                                                     </tr>
@@ -526,20 +659,85 @@ export default function LearningAnalytics() {
                                 /* Member Details */
                                 <div className="space-y-4">
                                     {/* Stats Summary */}
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                                             <p className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedMember.completed_count}</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Completed</p>
                                         </div>
                                         <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{selectedMember.bookmarked_count}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Bookmarked</p>
+                                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedMember.total_time_formatted || '0h'}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Time Spent</p>
                                         </div>
                                         <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedMember.notes_count}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Notes</p>
+                                            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{selectedMember.current_streak || 0}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Current Streak</p>
+                                        </div>
+                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                                            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedMember.session_count || 0}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Sessions</p>
                                         </div>
                                     </div>
+
+                                    {/* Streak Info */}
+                                    {(selectedMember.current_streak > 0 || selectedMember.longest_streak > 0) && (
+                                        <div className={`p-3 rounded-lg ${darkMode ? 'bg-orange-900/20 border-orange-800/50' : 'bg-orange-50 border-orange-200'} border`}>
+                                            <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-2">
+                                                <TrophyIcon className="w-4 h-4" />
+                                                Streak Stats
+                                            </h4>
+                                            <div className="flex items-center gap-4 text-sm">
+                                                <div>
+                                                    <span className="text-gray-600 dark:text-gray-400">Current: </span>
+                                                    <span className="font-bold text-orange-600 dark:text-orange-400">{selectedMember.current_streak || 0} days</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-gray-600 dark:text-gray-400">Best: </span>
+                                                    <span className="font-bold text-orange-600 dark:text-orange-400">{selectedMember.longest_streak || 0} days</span>
+                                                </div>
+                                                {selectedMember.last_activity_date && (
+                                                    <div>
+                                                        <span className="text-gray-600 dark:text-gray-400">Last: </span>
+                                                        <span className="font-medium text-gray-800 dark:text-gray-200">{selectedMember.last_activity_date}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Category Breakdown */}
+                                    {selectedMember.category_breakdown && Object.keys(selectedMember.category_breakdown).length > 0 && (
+                                        <div>
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                                <AcademicCapIcon className="w-4 h-4 text-indigo-600" />
+                                                Progress by Category
+                                            </h4>
+                                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                                {Object.entries(selectedMember.category_breakdown).map(([category, data], idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className={`flex items-center justify-between px-3 py-2 rounded ${darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}
+                                                    >
+                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">{category}</span>
+                                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                                                ✓ {data.completed}
+                                                            </span>
+                                                            {data.in_progress > 0 && (
+                                                                <span className="text-xs text-blue-600 dark:text-blue-400">
+                                                                    ◐ {data.in_progress}
+                                                                </span>
+                                                            )}
+                                                            {data.time_seconds > 0 && (
+                                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    {Math.floor(data.time_seconds / 60)}m
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Completed Topics */}
                                     {selectedMember.completed_topics && selectedMember.completed_topics.length > 0 && (
@@ -555,9 +753,16 @@ export default function LearningAnalytics() {
                                                         className={`flex items-center justify-between px-2.5 py-1.5 rounded ${darkMode ? 'bg-gray-700/20 hover:bg-gray-700/30' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}
                                                     >
                                                         <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">{topic.topic_name}</span>
-                                                        <span className={`text-xs px-2 py-0.5 rounded ml-2 flex-shrink-0 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
-                                                            {topic.category || 'Uncategorized'}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            {topic.count > 1 && (
+                                                                <span className={`text-xs px-1.5 py-0.5 rounded font-semibold ${darkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                                                                    ×{topic.count}
+                                                                </span>
+                                                            )}
+                                                            <span className={`text-xs px-2 py-0.5 rounded ml-2 flex-shrink-0 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                                {topic.category || 'Uncategorized'}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
