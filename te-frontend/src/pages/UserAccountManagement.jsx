@@ -10,11 +10,13 @@ import {
 } from '@heroicons/react/24/outline';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import EditPrivilegedAccount from '../components/user/EditPrivilegedAccount';
 import CreateLeadAdmin from '../components/user/CreateLeadAdmin';
 
 const UserAccountManagement = () => {
     const { userRole } = useAuth();
+    const toast = useToast();
     const [activeTab, setActiveTab] = useState('privileged'); // 'privileged' or 'members'
     const [privilegedUsers, setPrivilegedUsers] = useState([]);
     const [memberUsers, setMemberUsers] = useState([]);
@@ -106,7 +108,7 @@ const UserAccountManagement = () => {
             }
         } catch (error) {
             console.error('Error toggling user status:', error);
-            alert('Failed to update user status');
+            toast.error('Failed to update user status');
         }
     };
 
@@ -114,7 +116,7 @@ const UserAccountManagement = () => {
     const handleEditPrivileged = (user) => {
         // Leads cannot edit other Lead accounts (role 4) or Admin accounts (role 5)
         if (isLead && user.role >= 4) {
-            alert('You do not have permission to edit this account');
+            toast.warning('You do not have permission to edit this account');
             return;
         }
 

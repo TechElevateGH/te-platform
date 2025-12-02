@@ -17,10 +17,12 @@ import { FormTextArea } from '../_custom/FormInputs';
 import SelectCombobox from '../_custom/SelectCombobox';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { getCompanyLogoUrl, handleCompanyLogoError } from '../../utils';
 
 const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
     const { accessToken } = useAuth();
+    const toast = useToast();
     const [status, setStatus] = useState(referral?.status || 'Pending');
     const [reviewNote, setReviewNote] = useState(referral?.review_note || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +83,7 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
             }
         } catch (error) {
             console.error('Error updating referral:', error);
-            alert('Failed to update referral. Please try again.');
+            toast.error('Failed to update referral. Please try again.');
         } finally {
             setIsSubmitting(false);
         }

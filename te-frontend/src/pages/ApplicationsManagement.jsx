@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import DeleteConfirmationModal from '../components/_custom/DeleteConfirmationModal';
@@ -22,6 +23,7 @@ import {
 
 const ApplicationManagement = () => {
     const { accessToken, userRole } = useAuth();
+    const toast = useToast();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -124,9 +126,9 @@ const ApplicationManagement = () => {
             fetchAllApplications();
         } catch (error) {
             console.error('Error archiving applications:', error);
-            alert('Failed to archive applications. Please try again.');
+            toast.error('Failed to archive applications. Please try again.');
         }
-    }, [accessToken, fetchAllApplications]);
+    }, [accessToken, fetchAllApplications, toast]);
 
     const deleteApplications = useCallback(async (applicationIds) => {
         try {
@@ -136,9 +138,9 @@ const ApplicationManagement = () => {
             fetchAllApplications();
         } catch (error) {
             console.error('Error deleting applications:', error);
-            alert('Failed to delete applications. Please try again.');
+            toast.error('Failed to delete applications. Please try again.');
         }
-    }, [accessToken, fetchAllApplications]);
+    }, [accessToken, fetchAllApplications, toast]);
 
     useEffect(() => {
         if (accessToken) {
@@ -175,23 +177,23 @@ const ApplicationManagement = () => {
         setDeleting(true);
         try {
             if (itemToDelete?.bulk) {
-                await axiosInstance.post('/applications/bulk-delete-admin', 
+                await axiosInstance.post('/applications/bulk-delete-admin',
                     { application_ids: selectedItems },
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
                 setSelectedItems([]);
-                alert(`Successfully deleted ${itemToDelete.count} application(s)`);
+                toast.success(`Successfully deleted ${itemToDelete.count} application(s)`);
             } else {
-                await axiosInstance.post('/applications/bulk-delete-admin', 
+                await axiosInstance.post('/applications/bulk-delete-admin',
                     { application_ids: [itemToDelete.id] },
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
-                alert('Application deleted successfully');
+                toast.success('Application deleted successfully');
             }
             fetchAllApplications();
         } catch (error) {
             console.error('Error deleting application(s):', error);
-            alert(error.response?.data?.detail || 'Failed to delete');
+            toast.error(error.response?.data?.detail || 'Failed to delete');
         } finally {
             setDeleting(false);
             setShowDeleteModal(false);
@@ -1014,7 +1016,7 @@ const ApplicationManagement = () => {
                 }}
                 onConfirm={handleDeleteConfirm}
                 title="Delete Application(s)"
-                message={itemToDelete?.bulk 
+                message={itemToDelete?.bulk
                     ? `You are about to permanently delete ${itemToDelete.count} application(s).`
                     : `You are about to permanently delete the application for "${itemToDelete?.title}" at ${itemToDelete?.company}.`
                 }

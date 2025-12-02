@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 import DeleteConfirmationModal from '../_custom/DeleteConfirmationModal';
 
@@ -45,6 +46,7 @@ const formatStatus = (status) => {
 
 const MockInterviewManagement = () => {
     const { accessToken, userRole } = useAuth();
+    const toast = useToast();
     const [interviews, setInterviews] = useState([]);
     const [interviewers, setInterviewers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ const MockInterviewManagement = () => {
             fetchInterviews();
         } catch (error) {
             console.error('Error assigning interviewer:', error);
-            alert(error.response?.data?.detail || 'Failed to assign interviewer');
+            toast.error(error.response?.data?.detail || 'Failed to assign interviewer');
         } finally {
             setSubmitting(false);
         }
@@ -119,7 +121,7 @@ const MockInterviewManagement = () => {
 
     const handleConfirm = async () => {
         if (!confirmModal.meetingLink.trim()) {
-            alert('Please provide a meeting link');
+            toast.warning('Please provide a meeting link');
             return;
         }
 
@@ -134,7 +136,7 @@ const MockInterviewManagement = () => {
             fetchInterviews();
         } catch (error) {
             console.error('Error confirming interview:', error);
-            alert(error.response?.data?.detail || 'Failed to confirm interview');
+            toast.error(error.response?.data?.detail || 'Failed to confirm interview');
         } finally {
             setSubmitting(false);
         }
@@ -142,7 +144,7 @@ const MockInterviewManagement = () => {
 
     const handleComplete = async () => {
         if (!completeModal.feedback.trim()) {
-            alert('Please provide feedback for the member');
+            toast.warning('Please provide feedback for the member');
             return;
         }
 
@@ -157,7 +159,7 @@ const MockInterviewManagement = () => {
             fetchInterviews();
         } catch (error) {
             console.error('Error completing interview:', error);
-            alert(error.response?.data?.detail || 'Failed to complete interview');
+            toast.error(error.response?.data?.detail || 'Failed to complete interview');
         } finally {
             setSubmitting(false);
         }
@@ -173,10 +175,10 @@ const MockInterviewManagement = () => {
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            fetchInterviews();
+            fetchAllInterviews();
         } catch (error) {
             console.error('Error cancelling interview:', error);
-            alert(error.response?.data?.detail || 'Failed to cancel interview');
+            toast.error(error.response?.data?.detail || 'Failed to cancel interview');
         }
     };
 
@@ -209,22 +211,22 @@ const MockInterviewManagement = () => {
         setDeleting(true);
         try {
             if (itemToDelete?.bulk) {
-                await axiosInstance.post('/interviews/bulk-delete', 
+                await axiosInstance.post('/interviews/bulk-delete',
                     { request_ids: selectedItems },
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
                 setSelectedItems([]);
-                alert(`Successfully deleted ${itemToDelete.count} interview(s)`);
+                toast.success(`Successfully deleted ${itemToDelete.count} interview(s)`);
             } else {
-                await axiosInstance.delete(`/interviews/${itemToDelete.id}`, {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
-                alert('Interview deleted successfully');
+                await axiosInstance.delete(`/interviews/${itemToDelete.id}`,
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                toast.success('Interview deleted successfully');
             }
-            fetchInterviews();
+            fetchAllInterviews();
         } catch (error) {
             console.error('Error deleting interview(s):', error);
-            alert(error.response?.data?.detail || 'Failed to delete');
+            toast.error(error.response?.data?.detail || 'Failed to delete');
         } finally {
             setDeleting(false);
             setShowDeleteModal(false);
@@ -635,7 +637,7 @@ const MockInterviewManagement = () => {
                 }}
                 onConfirm={handleDeleteConfirm}
                 title="Delete Interview(s)"
-                message={itemToDelete?.bulk 
+                message={itemToDelete?.bulk
                     ? `You are about to permanently delete ${itemToDelete.count} interview request(s).`
                     : `You are about to permanently delete the ${itemToDelete?.interview_type} interview for ${itemToDelete?.user_name}.`
                 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
 import DeleteConfirmationModal from '../components/_custom/DeleteConfirmationModal';
@@ -26,6 +27,7 @@ import { Fragment } from 'react';
 const ReferralsManagement = () => {
     const { accessToken, userRole } = useAuth();
     const { userInfo } = useData();
+    const toast = useToast();
     const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddCompany, setShowAddCompany] = useState(false);
@@ -274,10 +276,10 @@ const ReferralsManagement = () => {
                 requires_essay: true,
             });
             setShowAddCompany(false);
-            alert('Referral company added successfully!');
+            toast.success('Referral company added successfully!');
         } catch (error) {
             console.error('Error adding referral company:', error);
-            alert('Failed to add referral company. Please try again.');
+            toast.error('Failed to add referral company. Please try again.');
         }
     };
 
@@ -314,10 +316,10 @@ const ReferralsManagement = () => {
             });
             setShowEditCompany(false);
             setEditingCompany(null);
-            alert('Company updated successfully!');
+            toast.success('Company updated successfully!');
         } catch (error) {
             console.error('Error updating company:', error);
-            alert(error.response?.data?.detail || 'Failed to update company. Please try again.');
+            toast.error(error.response?.data?.detail || 'Failed to update company. Please try again.');
         }
     };
 
@@ -350,7 +352,7 @@ const ReferralsManagement = () => {
             }
         } catch (error) {
             console.error('Error updating referral status:', error);
-            alert('Failed to update status. Please try again.');
+            toast.error('Failed to update status. Please try again.');
         }
     };
 
@@ -395,23 +397,23 @@ const ReferralsManagement = () => {
         try {
             if (itemToDelete?.bulk) {
                 // Bulk delete
-                await axiosInstance.post('/referrals/bulk-delete', 
+                await axiosInstance.post('/referrals/bulk-delete',
                     { referral_ids: selectedItems },
                     { headers: { Authorization: `Bearer ${accessToken}` } }
                 );
                 setSelectedItems([]);
-                alert(`Successfully deleted ${itemToDelete.count} referral(s)`);
+                toast.success(`Successfully deleted ${itemToDelete.count} referral(s)`);
             } else {
                 // Single delete
                 await axiosInstance.delete(`/referrals/${itemToDelete.id}`, {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
-                alert('Referral deleted successfully');
+                toast.success('Referral deleted successfully');
             }
             fetchAllReferrals();
         } catch (error) {
             console.error('Error deleting referral(s):', error);
-            alert(error.response?.data?.detail || 'Failed to delete');
+            toast.error(error.response?.data?.detail || 'Failed to delete');
         } finally {
             setDeleting(false);
             setShowDeleteModal(false);
@@ -597,7 +599,7 @@ const ReferralsManagement = () => {
                             <button
                                 onClick={exportToCSV}
                                 className="flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1.5 text-[10px] md:text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
-            >
+                            >
                                 <ArrowDownTrayIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
                                 <span className="hidden sm:inline">Export</span>
                             </button>
@@ -1796,7 +1798,7 @@ const ReferralsManagement = () => {
                 }}
                 onConfirm={handleDeleteConfirm}
                 title="Delete Referral(s)"
-                message={itemToDelete?.bulk 
+                message={itemToDelete?.bulk
                     ? `You are about to permanently delete ${itemToDelete.count} referral request(s).`
                     : `You are about to permanently delete the referral request for "${itemToDelete?.job_title}" at ${itemToDelete?.company?.name}.`
                 }

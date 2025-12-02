@@ -3,6 +3,7 @@ import Workspace from './components/user/Workspace'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DarkModeProvider } from './context/DarkModeContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { ToastProvider } from './context/ToastContext'
 import Login from './components/user/Login';
 import Home from './components/home/Home';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -47,25 +48,27 @@ function App() {
       <PostHogProvider>
         <DarkModeProvider>
           <AuthProvider>
-            <NotificationProvider>
-              <DataProvider>
-                <div className="App gentium-book">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
-                    <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
-                    <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/lead-login" element={<LeadLogin />} />
-                    <Route path="/referrer-login" element={<ReferrerLogin />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/verify-email" element={<EmailVerification />} />
-                    <Route path="/auth/callback" element={<OAuthCallback />} />
-                    <Route path="/documentation" element={<Documentation />} />
-                  </Routes>
-                </div>
-              </DataProvider>
-            </NotificationProvider>
+            <ToastProvider>
+              <NotificationProvider>
+                <DataProvider>
+                  <div className="App gentium-book">
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
+                      <Route path="/workspace/account-management" element={<ProtectedRoute><UserAccountManagement /></ProtectedRoute>} />
+                      <Route path="/workspace/resume-reviews" element={<ProtectedRoute><ResumeReviews /></ProtectedRoute>} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/lead-login" element={<LeadLogin />} />
+                      <Route path="/referrer-login" element={<ReferrerLogin />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/verify-email" element={<EmailVerification />} />
+                      <Route path="/auth/callback" element={<OAuthCallback />} />
+                      <Route path="/documentation" element={<Documentation />} />
+                    </Routes>
+                  </div>
+                </DataProvider>
+              </NotificationProvider>
+            </ToastProvider>
           </AuthProvider >
         </DarkModeProvider>
       </PostHogProvider>

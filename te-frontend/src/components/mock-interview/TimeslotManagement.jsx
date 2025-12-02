@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -54,6 +55,7 @@ const QUICK_TIMES = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:0
 
 const TimeslotManagement = () => {
     const { accessToken } = useAuth();
+    const toast = useToast();
     const [timeslots, setTimeslots] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -144,7 +146,7 @@ const TimeslotManagement = () => {
             fetchTimeslots();
         } catch (error) {
             console.error('Error creating timeslot:', error);
-            alert(error.response?.data?.detail || 'Failed to create timeslot');
+            toast.error(error.response?.data?.detail || 'Failed to create timeslot');
         } finally {
             setCreating(false);
         }
@@ -153,7 +155,7 @@ const TimeslotManagement = () => {
     const handleCreateBulk = async (e) => {
         e.preventDefault();
         if (bulkData.days.length === 0 || bulkData.times.length === 0) {
-            alert('Please select at least one day and one time slot');
+            toast.warning('Please select at least one day and one time slot');
             return;
         }
 
@@ -194,7 +196,7 @@ const TimeslotManagement = () => {
             fetchTimeslots();
         } catch (error) {
             console.error('Error creating bulk timeslots:', error);
-            alert(error.response?.data?.detail || 'Failed to create timeslots');
+            toast.error(error.response?.data?.detail || 'Failed to create timeslots');
         } finally {
             setCreating(false);
         }
@@ -211,7 +213,7 @@ const TimeslotManagement = () => {
             fetchTimeslots();
         } catch (error) {
             console.error('Error deleting timeslot:', error);
-            alert(error.response?.data?.detail || 'Failed to delete timeslot');
+            toast.error(error.response?.data?.detail || 'Failed to delete timeslot');
         } finally {
             setDeletingId(null);
         }

@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const INTERVIEW_TYPE_COLORS = {
@@ -43,6 +44,7 @@ const formatStatus = (status) => {
 
 const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
     const { accessToken } = useAuth();
+    const toast = useToast();
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cancellingId, setCancellingId] = useState(null);
@@ -108,7 +110,7 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
             closeCancelModal();
         } catch (error) {
             console.error('Error cancelling interview:', error);
-            alert(error.response?.data?.detail || 'Failed to cancel interview');
+            toast.error(error.response?.data?.detail || 'Failed to cancel interview');
         } finally {
             setCancellingId(null);
         }
