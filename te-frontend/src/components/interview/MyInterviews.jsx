@@ -42,7 +42,7 @@ const formatStatus = (status) => {
     return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
+const MyInterviews = ({ onFeedbackCount, onRequestNew }) => {
     const { accessToken } = useAuth();
     const toast = useToast();
     const [interviews, setInterviews] = useState([]);
@@ -170,15 +170,15 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
                 <button
                     onClick={() => setStatusFilter('all')}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statusFilter === 'all'
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     All
                     {statusCounts.all > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === 'all'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                             }`}>
                             {statusCounts.all}
                         </span>
@@ -187,15 +187,15 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
                 <button
                     onClick={() => setStatusFilter('pending')}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statusFilter === 'pending'
-                            ? 'bg-amber-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     Pending
                     {statusCounts.pending > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === 'pending'
-                                ? 'bg-amber-500 text-white'
-                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
                             }`}>
                             {statusCounts.pending}
                         </span>
@@ -204,15 +204,15 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
                 <button
                     onClick={() => setStatusFilter('confirmed')}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statusFilter === 'confirmed'
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     Confirmed
                     {statusCounts.confirmed > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === 'confirmed'
-                                ? 'bg-emerald-500 text-white'
-                                : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                             }`}>
                             {statusCounts.confirmed}
                         </span>
@@ -221,15 +221,15 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
                 <button
                     onClick={() => setStatusFilter('completed')}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statusFilter === 'completed'
-                            ? 'bg-blue-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     Completed
                     {statusCounts.completed > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === 'completed'
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                             }`}>
                             {statusCounts.completed}
                         </span>
@@ -238,15 +238,15 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
                 <button
                     onClick={() => setStatusFilter('cancelled')}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statusFilter === 'cancelled'
-                            ? 'bg-gray-600 text-white shadow-sm'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'bg-gray-600 text-white shadow-sm'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     Cancelled
                     {statusCounts.cancelled > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusFilter === 'cancelled'
-                                ? 'bg-gray-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                            ? 'bg-gray-500 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                             }`}>
                             {statusCounts.cancelled}
                         </span>
@@ -470,4 +470,4 @@ const MyMockInterviews = ({ onFeedbackCount, onRequestNew }) => {
     );
 };
 
-export default MyMockInterviews;
+export default MyInterviews;

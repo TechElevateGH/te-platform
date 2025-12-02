@@ -45,7 +45,7 @@ const formatStatus = (status) => {
     return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-const MockInterviewManagement = () => {
+const InterviewManagement = () => {
     const { accessToken, userRole } = useAuth();
     const toast = useToast();
     const [interviews, setInterviews] = useState([]);
@@ -693,4 +693,4 @@ const MockInterviewManagement = () => {
     );
 };
 
-export default MockInterviewManagement;
+export default InterviewManagement;

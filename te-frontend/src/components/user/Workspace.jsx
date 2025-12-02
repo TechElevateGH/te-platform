@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from "../../axiosConfig"
 import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon, VideoCameraIcon } from '@heroicons/react/20/solid'
 import Applications from '../../pages/Applications'
-import MockInterviews from '../../pages/MockInterviews'
+import Interviews from '../../pages/Interviews'
 import Sidebar from '../_custom/Sidebar'
 import Navbar from '../home/Navbar'
 import ResumesAndEssays from '../../pages/ResumesAndEssays'
@@ -388,7 +388,7 @@ const Workspace = ({ setLogin }) => {
                                                 content === "Referrals" ? (
                                                     (isLeadOrAdmin || isReferrer || isVolunteer) ? <ReferralsManagement /> : <Referrals />
                                                 ) :
-                                                    content === "Mock Interviews" ? <MockInterviews /> :
+                                                    content === "Mock Interviews" ? <Interviews /> :
                                                         content === "Opportunities" ? <Opportunities /> :
                                                             content === "Practice" ? <Practice /> :
                                                                 <Learning setContent={setContentHandler} />

@@ -21,7 +21,7 @@ export const ToastProvider = ({ children }) => {
     const addToast = useCallback((message, type = 'info', duration = 4000) => {
         const id = Date.now() + Math.random();
         const toast = { id, message, type, duration };
-        
+
         setToasts(prev => [...prev, toast]);
 
         if (duration > 0) {
@@ -98,7 +98,7 @@ const Toast = ({ toast, onClose }) => {
     const Icon = style.icon;
 
     return (
-        <div 
+        <div
             className={`pointer-events-auto flex items-start gap-3 min-w-[300px] max-w-md p-4 rounded-lg border shadow-lg backdrop-blur-sm transition-all duration-300 animate-slide-in ${style.bg}`}
         >
             <Icon className={`h-5 w-5 flex-shrink-0 mt-0.5 ${style.iconColor}`} />

@@ -28,7 +28,7 @@ const TYPE_COLORS = {
 
 const PREP_VIDEO_URL = "https://www.youtube.com/watch?v=FYUXYcJfOMM";
 
-const MockInterviewCreate = ({ onSuccess, onCancel }) => {
+const InterviewCreate = ({ onSuccess, onCancel }) => {
     const { accessToken } = useAuth();
     const [hasWatchedVideo, setHasWatchedVideo] = useState(false);
 
@@ -432,4 +432,4 @@ const MockInterviewCreate = ({ onSuccess, onCancel }) => {
     );
 };
 
-export default MockInterviewCreate;
+export default InterviewCreate;
