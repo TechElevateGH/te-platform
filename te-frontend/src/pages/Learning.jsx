@@ -19,12 +19,16 @@ import {
     PencilSquareIcon,
     Bars3Icon,
     VideoCameraIcon,
-    MagnifyingGlassIcon
+    MagnifyingGlassIcon,
+    ArrowTrendingUpIcon,
+    BoltIcon,
+    CalendarDaysIcon
 } from '@heroicons/react/24/outline'
 import {
     CheckCircleIcon as CheckCircleSolidIcon,
     BookmarkIcon as BookmarkSolidIcon,
-    FireIcon as FireSolidIcon
+    FireIcon as FireSolidIcon,
+    TrophyIcon as TrophySolidIcon
 } from '@heroicons/react/24/solid'
 
 import { dsaTopics } from '../data/dsaTopics'
@@ -98,6 +102,14 @@ const Learning = ({ setContent }) => {
     const [selectedLesson, setSelectedLesson] = useState(null);
     const [currentTopicForLesson, setCurrentTopicForLesson] = useState(null);
 
+    // Detailed progress tracking (streaks, time, activities)
+    const [detailedProgress, setDetailedProgress] = useState({
+        streak: { current_streak: 0, longest_streak: 0, last_activity_date: null },
+        stats: { total_time_seconds: 0, session_count: 0, total_topics_completed: 0 },
+        category_progress: {},
+        recent_activities: []
+    });
+
     const categoryRefs = useRef({});
     const [activeCategory, setActiveCategory] = useState('');
     const saveTimeoutRef = useRef(null);
@@ -119,12 +131,44 @@ const Learning = ({ setContent }) => {
             }
 
             try {
-                const response = await axios.get('/learning/progress');
-                const progress = response.data;
-
+                // Fetch both basic progress and detailed progress in parallel
+                const [progressRes, detailedRes] = await Promise.all([
+                    axios.get('/learning/progress'),
+                    axios.get('/learning/progress/detailed').catch(() => ({ data: null }))
+                ]);
+                
+                const progress = progressRes.data;
                 setCompletedTopics(new Set(progress.completed_topics || []));
                 setBookmarkedTopics(new Set(progress.bookmarked_topics || []));
                 setTopicNotes(progress.topic_notes || {});
+                
+                // Set detailed progress if available
+                if (detailedRes.data) {
+                    const detailedData = detailedRes.data;
+                    const statsData = detailedData.stats || {};
+                    
+                    // Convert categories array to an object keyed by category name
+                    const categoryProgress = {};
+                    (statsData.categories || []).forEach(cat => {
+                        categoryProgress[cat.category] = {
+                            completed_topics: cat.completed_topics || 0,
+                            total_topics: cat.total_topics || 0,
+                            in_progress_topics: cat.in_progress_topics || 0,
+                            total_time_seconds: cat.total_time_seconds || 0
+                        };
+                    });
+                    
+                    setDetailedProgress({
+                        streak: detailedData.streak || statsData.streak || { current_streak: 0, longest_streak: 0 },
+                        stats: {
+                            total_time_seconds: statsData.total_learning_time_seconds || 0,
+                            session_count: statsData.session_count || 0,
+                            total_topics_completed: statsData.total_completed || 0
+                        },
+                        category_progress: categoryProgress,
+                        recent_activities: detailedData.recent_activities || []
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching progress:', error);
                 // Fallback to localStorage
@@ -700,19 +744,20 @@ const Learning = ({ setContent }) => {
             {/* Statistics Modal - Member Only */}
             {isMember && showStats && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowStats(false)}>
-                    <div className={`rounded-3xl shadow-lg max-w-md w-full border backdrop-blur-sm ${darkMode
-                        ? 'bg-slate-900/90 border-slate-700/50'
-                        : 'bg-white/90 border-white/20'
+                    <div className={`rounded-3xl shadow-lg max-w-2xl w-full border backdrop-blur-sm overflow-hidden ${darkMode
+                        ? 'bg-slate-900/95 border-slate-700/50'
+                        : 'bg-white/95 border-white/20'
                         }`} onClick={(e) => e.stopPropagation()}>
-                        <div className={`px-8 py-6 border-b ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
+                        {/* Header */}
+                        <div className={`px-6 py-5 border-b ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-600 flex items-center justify-center shadow-lg">
-                                        <TrophyIcon className="h-7 w-7 text-white" />
+                                        <TrophySolidIcon className="h-7 w-7 text-white" />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Your Progress</h2>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">Keep up the great work!</p>
+                                        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Learning Dashboard</h2>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Track your DSA journey</p>
                                     </div>
                                 </div>
                                 <button
@@ -724,41 +769,186 @@ const Learning = ({ setContent }) => {
                             </div>
                         </div>
 
-                        <div className="p-8">
-                            <div className="grid grid-cols-3 gap-4 mb-6">
-                                <div className="text-center">
-                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
-                                        <CheckCircleIcon className="h-8 w-8 text-white" />
+                        <div className="max-h-[70vh] overflow-y-auto">
+                            <div className="p-6 space-y-6">
+                                {/* Top Stats Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {/* Current Streak */}
+                                    <div className={`p-4 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-orange-900/40 to-red-900/40' : 'bg-gradient-to-br from-orange-50 to-red-50'} border ${darkMode ? 'border-orange-700/30' : 'border-orange-200'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FireSolidIcon className="w-5 h-5 text-orange-500" />
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Streak</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                                            {detailedProgress.streak?.current_streak || 0}
+                                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">days</span>
+                                        </p>
                                     </div>
-                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.completed}</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Done</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center shadow-lg">
-                                        <ClockIcon className="h-8 w-8 text-white" />
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.remaining}</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">To Go</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-orange-600 via-orange-600 to-yellow-600 flex items-center justify-center shadow-lg">
-                                        <BookmarkIcon className="h-8 w-8 text-white" />
-                                    </div>
-                                    <p className="text-3xl font-bold text-gray-800 dark:text-white mb-1">{stats.bookmarked}</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Saved</p>
-                                </div>
-                            </div>
 
-                            <div className={`pt-6 border-t ${darkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
-                                <div className={`flex items-center justify-center gap-3 px-6 py-4 rounded-2xl border ${darkMode
-                                    ? 'bg-gradient-to-r from-orange-500/30 via-orange-500/30 to-yellow-500/30 border-orange-500/80'
-                                    : 'bg-gradient-to-r from-orange-500/20 via-orange-500/20 to-yellow-500/20 border-orange-400/80'
-                                    }`}>
-                                    <FireSolidIcon className="h-7 w-7 text-orange-500" />
-                                    <div className="text-center">
-                                        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-700 via-orange-600 to-yellow-600 dark:from-orange-400 dark:to-amber-400">{stats.percentage}%</p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Complete</p>
+                                    {/* Longest Streak */}
+                                    <div className={`p-4 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-yellow-900/40 to-amber-900/40' : 'bg-gradient-to-br from-yellow-50 to-amber-50'} border ${darkMode ? 'border-yellow-700/30' : 'border-yellow-200'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Best</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                                            {detailedProgress.streak?.longest_streak || 0}
+                                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">days</span>
+                                        </p>
                                     </div>
+
+                                    {/* Topics Completed */}
+                                    <div className={`p-4 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-green-900/40 to-emerald-900/40' : 'bg-gradient-to-br from-green-50 to-emerald-50'} border ${darkMode ? 'border-green-700/30' : 'border-green-200'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <CheckCircleSolidIcon className="w-5 h-5 text-green-500" />
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Done</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                            {stats.completed}
+                                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">/{stats.totalTopics}</span>
+                                        </p>
+                                    </div>
+
+                                    {/* Time Spent */}
+                                    <div className={`p-4 rounded-2xl ${darkMode ? 'bg-gradient-to-br from-blue-900/40 to-indigo-900/40' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} border ${darkMode ? 'border-blue-700/30' : 'border-blue-200'}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <ClockIcon className="w-5 h-5 text-blue-500" />
+                                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Time</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                            {Math.floor((detailedProgress.stats?.total_time_seconds || 0) / 3600)}
+                                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">hrs</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className={`p-4 rounded-2xl ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Progress</span>
+                                        <span className="text-sm font-bold text-orange-600 dark:text-orange-400">{stats.percentage}%</span>
+                                    </div>
+                                    <div className={`h-3 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                        <div 
+                                            className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-500 to-yellow-500 transition-all duration-500"
+                                            style={{ width: `${stats.percentage}%` }}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                        <span>{stats.completed} completed</span>
+                                        <span>{stats.remaining} remaining</span>
+                                    </div>
+                                </div>
+
+                                {/* Category Progress */}
+                                {Object.keys(detailedProgress.category_progress || {}).length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                                            <AcademicCapIcon className="w-4 h-4 text-indigo-500" />
+                                            Category Progress
+                                        </h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {Object.entries(detailedProgress.category_progress)
+                                                .sort(([, a], [, b]) => (b.completed_topics || 0) - (a.completed_topics || 0))
+                                                .slice(0, 6)
+                                                .map(([category, data]) => {
+                                                    const completed = data.completed_topics || 0;
+                                                    const total = data.total_topics || 1;
+                                                    const percentage = Math.round((completed / total) * 100);
+                                                    return (
+                                                        <div key={category} className={`p-3 rounded-xl ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                                            <div className="flex items-center justify-between mb-1.5">
+                                                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{category}</span>
+                                                                <span className="text-xs text-gray-500 dark:text-gray-400">{completed}/{total}</span>
+                                                            </div>
+                                                            <div className={`h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                                                <div 
+                                                                    className={`h-full rounded-full ${percentage === 100 ? 'bg-green-500' : 'bg-indigo-500'}`}
+                                                                    style={{ width: `${percentage}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Quick Stats Row */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className={`p-3 rounded-xl text-center ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                        <BookmarkSolidIcon className="w-5 h-5 text-amber-500 mx-auto mb-1" />
+                                        <p className="text-lg font-bold text-gray-800 dark:text-white">{stats.bookmarked}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Bookmarked</p>
+                                    </div>
+                                    <div className={`p-3 rounded-xl text-center ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                        <BoltIcon className="w-5 h-5 text-purple-500 mx-auto mb-1" />
+                                        <p className="text-lg font-bold text-gray-800 dark:text-white">{detailedProgress.stats?.session_count || 0}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Sessions</p>
+                                    </div>
+                                    <div className={`p-3 rounded-xl text-center ${darkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                        <CalendarDaysIcon className="w-5 h-5 text-teal-500 mx-auto mb-1" />
+                                        <p className="text-lg font-bold text-gray-800 dark:text-white">
+                                            {detailedProgress.streak?.last_activity_date 
+                                                ? new Date(detailedProgress.streak.last_activity_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                                : '-'}
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Last Active</p>
+                                    </div>
+                                </div>
+
+                                {/* Recent Activity */}
+                                {(detailedProgress.recent_activities || []).length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-3 flex items-center gap-2">
+                                            <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500" />
+                                            Recent Activity
+                                        </h3>
+                                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                                            {detailedProgress.recent_activities.slice(0, 5).map((activity, idx) => (
+                                                <div key={idx} className={`flex items-center gap-3 p-2 rounded-lg ${darkMode ? 'bg-slate-800/30' : 'bg-gray-50/50'}`}>
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                        activity.activity_type === 'completion' 
+                                                            ? 'bg-green-100 dark:bg-green-900/30' 
+                                                            : activity.activity_type === 'bookmark'
+                                                                ? 'bg-amber-100 dark:bg-amber-900/30'
+                                                                : 'bg-blue-100 dark:bg-blue-900/30'
+                                                    }`}>
+                                                        {activity.activity_type === 'completion' && <CheckCircleSolidIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />}
+                                                        {activity.activity_type === 'bookmark' && <BookmarkSolidIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
+                                                        {activity.activity_type === 'video_view' && <PlayCircleIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-medium text-gray-800 dark:text-white truncate">
+                                                            {activity.topic_name || activity.topic_key}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {activity.category} • {activity.timestamp ? new Date(activity.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Motivational Footer */}
+                                <div className={`p-4 rounded-2xl border text-center ${darkMode
+                                    ? 'bg-gradient-to-r from-orange-900/30 via-orange-900/30 to-yellow-900/30 border-orange-700/30'
+                                    : 'bg-gradient-to-r from-orange-50 via-orange-50 to-yellow-50 border-orange-200'
+                                    }`}>
+                                    <FireSolidIcon className="w-8 h-8 text-orange-500 mx-auto mb-2" />
+                                    <p className="text-sm font-medium text-gray-800 dark:text-white">
+                                        {stats.percentage >= 100 
+                                            ? "🎉 You've mastered all topics!"
+                                            : stats.percentage >= 75 
+                                                ? "Almost there! Keep pushing!"
+                                                : stats.percentage >= 50 
+                                                    ? "Halfway done! Great progress!"
+                                                    : stats.percentage >= 25
+                                                        ? "Good start! Keep the momentum!"
+                                                        : "Let's get started! You've got this!"}
+                                    </p>
                                 </div>
                             </div>
                         </div>

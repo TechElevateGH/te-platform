@@ -6,8 +6,9 @@ import {
 } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from "../../axiosConfig"
-import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon } from '@heroicons/react/20/solid'
+import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon, VideoCameraIcon } from '@heroicons/react/20/solid'
 import Applications from '../../pages/Applications'
+import MockInterviews from '../../pages/MockInterviews'
 import Sidebar from '../_custom/Sidebar'
 import Navbar from '../home/Navbar'
 import ResumesAndEssays from '../../pages/ResumesAndEssays'
@@ -60,25 +61,27 @@ const Workspace = ({ setLogin }) => {
         // Referrers only see Referrals (Profile accessed via navbar)
         if (isReferrer) {
             return [
-                { name: 'Referrals', type: "app", icon: FolderIcon },
+                { name: 'Referrals', type: "interview", icon: FolderIcon },
             ];
         }
 
         // Volunteers see Resume Reviews, Learning, and Referrals (no Applications or Profile)
         if (isVolunteer) {
             return [
-                { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
-                { name: 'Referrals', type: "app", icon: FolderIcon },
+                { name: 'Resume and Essays', type: "career", icon: DocumentIcon },
+                { name: 'Mock Interviews', type: "interview", icon: VideoCameraIcon },
+                { name: 'Referrals', type: "career", icon: FolderIcon },
                 { name: 'Learning', type: "learn", icon: BookOpenIcon },
                 { name: 'Practice', type: "learn", icon: CodeBracketIcon },
             ];
         }
 
         const baseNavigation = [
-            { name: 'Applications', type: "app", icon: BriefcaseIcon },
-            { name: 'Resume and Essays', type: "app", icon: DocumentIcon },
-            { name: 'Referrals', type: "app", icon: FolderIcon },
-            { name: 'Opportunities', type: "app", icon: ComputerDesktopIcon },
+            { name: 'Applications', type: "career", icon: BriefcaseIcon },
+            { name: 'Resume and Essays', type: "career", icon: DocumentIcon },
+            { name: 'Mock Interviews', type: "interview", icon: VideoCameraIcon },
+            { name: 'Referrals', type: "interview", icon: FolderIcon },
+            { name: 'Opportunities', type: "interview", icon: ComputerDesktopIcon },
             { name: 'Learning', type: "learn", icon: BookOpenIcon },
             { name: 'Practice', type: "learn", icon: CodeBracketIcon },
         ];
@@ -385,9 +388,10 @@ const Workspace = ({ setLogin }) => {
                                                 content === "Referrals" ? (
                                                     (isLeadOrAdmin || isReferrer || isVolunteer) ? <ReferralsManagement /> : <Referrals />
                                                 ) :
-                                                    content === "Opportunities" ? <Opportunities /> :
-                                                        content === "Practice" ? <Practice /> :
-                                                            <Learning setContent={setContentHandler} />
+                                                    content === "Mock Interviews" ? <MockInterviews /> :
+                                                        content === "Opportunities" ? <Opportunities /> :
+                                                            content === "Practice" ? <Practice /> :
+                                                                <Learning setContent={setContentHandler} />
                         }
                     </main>
                 </div>

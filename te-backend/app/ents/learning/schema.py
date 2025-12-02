@@ -1,12 +1,122 @@
 from enum import Enum
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
 
-# Lesson Schemas for DSA Content
+# ============================================
+# LEARNING ACTIVITY SCHEMAS
+# ============================================
+
+
+class LearningActivityType(str, Enum):
+    """Types of learning activities"""
+
+    TOPIC_STARTED = "topic_started"
+    TOPIC_COMPLETED = "topic_completed"
+    TOPIC_REVISITED = "topic_revisited"
+    VIDEO_WATCHED = "video_watched"
+    RESOURCE_ACCESSED = "resource_accessed"
+    NOTE_ADDED = "note_added"
+    BOOKMARK_ADDED = "bookmark_added"
+    BOOKMARK_REMOVED = "bookmark_removed"
+    SESSION_STARTED = "session_started"
+    SESSION_ENDED = "session_ended"
+
+
+class LogActivityRequest(BaseModel):
+    """Request to log a learning activity"""
+
+    activity_type: LearningActivityType
+    topic_key: Optional[str] = None  # Format: "category::topic"
+    resource_url: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class TopicProgressRead(BaseModel):
+    """Read schema for topic progress"""
+
+    topic_key: str
+    category: str
+    topic_name: str
+    is_completed: bool = False
+    completion_count: int = 0
+    first_completed_at: Optional[datetime] = None
+    last_completed_at: Optional[datetime] = None
+    total_time_seconds: int = 0
+    session_count: int = 0
+    last_session_at: Optional[datetime] = None
+    video_views: int = 0
+    resource_clicks: int = 0
+    started_at: Optional[datetime] = None
+    last_activity_at: Optional[datetime] = None
+
+
+class StreakDataRead(BaseModel):
+    """Read schema for streak data"""
+
+    current_streak: int = 0
+    longest_streak: int = 0
+    last_activity_date: Optional[str] = None
+    streak_dates: List[str] = []
+    weekly_goals_met: int = 0
+
+
+class CategoryProgressRead(BaseModel):
+    """Read schema for category progress"""
+
+    category: str
+    total_topics: int = 0
+    completed_topics: int = 0
+    in_progress_topics: int = 0
+    completion_percentage: float = 0.0
+    total_time_seconds: int = 0
+    last_activity_at: Optional[datetime] = None
+
+
+class LearningStatsRead(BaseModel):
+    """Detailed learning statistics"""
+
+    total_completed: int = 0
+    total_in_progress: int = 0
+    total_bookmarked: int = 0
+    total_notes: int = 0
+    total_learning_time_seconds: int = 0
+    session_count: int = 0
+    average_session_duration: int = 0
+    streak: StreakDataRead = Field(default_factory=StreakDataRead)
+    categories: List[CategoryProgressRead] = []
+    recent_completions: List[Dict[str, Any]] = []
+    learning_velocity: float = 0.0  # Topics completed per week
+    weekly_time_trend: List[Dict[str, Any]] = []  # Last 4 weeks of time data
+
+
+class StartSessionRequest(BaseModel):
+    """Request to start a learning session"""
+
+    topic_key: Optional[str] = None
+
+
+class EndSessionRequest(BaseModel):
+    """Request to end a learning session"""
+
+    topic_key: Optional[str] = None
+    duration_seconds: Optional[int] = None
+
+
+class TrackTimeRequest(BaseModel):
+    """Request to track time spent on a topic"""
+
+    topic_key: str
+    duration_seconds: int
+
+
+# ============================================
+# LESSON SCHEMAS
+# ============================================
 class LessonBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     category: str = Field(..., min_length=1, max_length=100)
@@ -98,6 +208,29 @@ class ProgressRead(ProgressBase):
     """Schema for reading user progress"""
 
     user_id: str  # MongoDB ObjectId as string
+    last_updated: datetime
+    created_at: datetime
+
+    # Enhanced fields
+    streak: Optional[StreakDataRead] = None
+    stats: Optional[LearningStatsRead] = None
+    topic_progress: Optional[Dict[str, TopicProgressRead]] = None
+
+    class Config:
+        from_attributes = True
+
+
+class DetailedProgressRead(BaseModel):
+    """Detailed progress with full analytics"""
+
+    user_id: str
+    completed_topics: List[str] = []
+    bookmarked_topics: List[str] = []
+    topic_notes: Dict[str, str] = {}
+    topic_progress: Dict[str, TopicProgressRead] = {}
+    streak: StreakDataRead = Field(default_factory=StreakDataRead)
+    stats: LearningStatsRead = Field(default_factory=LearningStatsRead)
+    recent_activities: List[Dict[str, Any]] = []
     last_updated: datetime
     created_at: datetime
 

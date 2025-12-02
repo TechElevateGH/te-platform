@@ -36,7 +36,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
         }
     }, [isExpanded])
 
-    const appItems = navigation.filter((item) => item.type === "app");
+    const careerItems = navigation.filter((item) => item.type === "career");
+    const interviewItems = navigation.filter((item) => item.type === "interview");
     const learningItems = navigation.filter((item) => item.type === "learn");
     const accountItems = navigation.filter((item) => item.type === "accounts");
     const analyticsItems = navigation.filter((item) => item.type === "analytics");
@@ -213,20 +214,74 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                         >
                             <nav className="flex flex-1 flex-col">
                                 <ul className="flex flex-1 flex-col gap-y-7">
-                                    {appItems.length > 0 && (
+                                    {careerItems.length > 0 && (
                                         <li>
                                             {isExpanded && (
                                                 <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Workspace
+                                                    Career Tools
                                                 </div>
                                             )}
                                             <ul className="space-y-2">
-                                                {appItems.map((item, index) => {
+                                                {careerItems.map((item, index) => {
                                                     const colors = [
-                                                        { bg: 'bg-blue-500/10', hoverBg: 'hover:bg-blue-500/20', text: 'text-blue-700', icon: 'text-blue-600', activeBg: 'bg-gradient-to-r from-blue-500 to-cyan-500', ring: 'ring-blue-500/20' },
-                                                        { bg: 'bg-emerald-500/10', hoverBg: 'hover:bg-emerald-500/20', text: 'text-emerald-700', icon: 'text-emerald-600', activeBg: 'bg-gradient-to-r from-emerald-500 to-green-500', ring: 'ring-emerald-500/20' },
-                                                        { bg: 'bg-cyan-500/10', hoverBg: 'hover:bg-cyan-500/20', text: 'text-cyan-700', icon: 'text-cyan-600', activeBg: 'bg-gradient-to-r from-cyan-500 to-blue-500', ring: 'ring-cyan-500/20' },
-                                                        { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
+                                                        { bg: 'bg-blue-100/80 dark:bg-blue-900/40', hoverBg: 'hover:bg-blue-200/80 dark:hover:bg-blue-800/50', text: 'text-blue-800 dark:text-blue-200', icon: 'text-blue-600 dark:text-blue-400', activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600', ring: 'ring-blue-400/30' },
+                                                        { bg: 'bg-teal-100/80 dark:bg-teal-900/40', hoverBg: 'hover:bg-teal-200/80 dark:hover:bg-teal-800/50', text: 'text-teal-800 dark:text-teal-200', icon: 'text-teal-600 dark:text-teal-400', activeBg: 'bg-gradient-to-r from-teal-600 to-emerald-600', ring: 'ring-teal-400/30' },
+                                                    ];
+                                                    const color = colors[index % colors.length];
+                                                    return (
+                                                        <li key={item.name}>
+                                                            <button
+                                                                onClick={() => setContent(item.name)}
+                                                                className={classNames(
+                                                                    item.name === content
+                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
+                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
+                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
+                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
+                                                                )}
+                                                                title={!isExpanded ? item.name : ''}
+                                                            >
+                                                                <div className={classNames(
+                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
+                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
+                                                                )}>
+                                                                    <item.icon
+                                                                        className={classNames(
+                                                                            item.name === content ? 'text-white' : color.icon,
+                                                                            'h-5 w-5 transition-colors'
+                                                                        )}
+                                                                        aria-hidden="true"
+                                                                    />
+                                                                </div>
+                                                                {isExpanded && (
+                                                                    <>
+                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
+                                                                        {item.name === content && (
+                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        </li>
+                                    )}
+
+                                    {interviewItems.length > 0 && (
+                                        <li>
+                                            {isExpanded && (
+                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
+                                                    Career Support
+                                                </div>
+                                            )}
+                                            <ul className="space-y-2">
+                                                {interviewItems.map((item, index) => {
+                                                    const colors = [
+                                                        { bg: 'bg-purple-100/80 dark:bg-purple-900/40', hoverBg: 'hover:bg-purple-200/80 dark:hover:bg-purple-800/50', text: 'text-purple-800 dark:text-purple-200', icon: 'text-purple-600 dark:text-purple-400', activeBg: 'bg-gradient-to-r from-purple-600 to-violet-600', ring: 'ring-purple-400/30' },
+                                                        { bg: 'bg-rose-100/80 dark:bg-rose-900/40', hoverBg: 'hover:bg-rose-200/80 dark:hover:bg-rose-800/50', text: 'text-rose-800 dark:text-rose-200', icon: 'text-rose-600 dark:text-rose-400', activeBg: 'bg-gradient-to-r from-rose-600 to-pink-600', ring: 'ring-rose-400/30' },
+                                                        { bg: 'bg-amber-100/80 dark:bg-amber-900/40', hoverBg: 'hover:bg-amber-200/80 dark:hover:bg-amber-800/50', text: 'text-amber-800 dark:text-amber-200', icon: 'text-amber-600 dark:text-amber-400', activeBg: 'bg-gradient-to-r from-amber-500 to-orange-500', ring: 'ring-amber-400/30' },
                                                     ];
                                                     const color = colors[index % colors.length];
                                                     return (
@@ -280,8 +335,8 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             <ul className="space-y-2">
                                                 {learningItems.map((item, index) => {
                                                     const colors = [
-                                                        { bg: 'bg-orange-500/10', hoverBg: 'hover:bg-orange-500/20', text: 'text-orange-700', icon: 'text-orange-600', activeBg: 'bg-gradient-to-r from-orange-500 to-amber-500', ring: 'ring-orange-500/20' },
-                                                        { bg: 'bg-rose-500/10', hoverBg: 'hover:bg-rose-500/20', text: 'text-rose-700', icon: 'text-rose-600', activeBg: 'bg-gradient-to-r from-rose-500 to-pink-500', ring: 'ring-rose-500/20' },
+                                                        { bg: 'bg-orange-100/80 dark:bg-orange-900/40', hoverBg: 'hover:bg-orange-200/80 dark:hover:bg-orange-800/50', text: 'text-orange-800 dark:text-orange-200', icon: 'text-orange-600 dark:text-orange-400', activeBg: 'bg-gradient-to-r from-orange-500 to-red-500', ring: 'ring-orange-400/30' },
+                                                        { bg: 'bg-red-100/80 dark:bg-red-900/40', hoverBg: 'hover:bg-red-200/80 dark:hover:bg-red-800/50', text: 'text-red-800 dark:text-red-200', icon: 'text-red-600 dark:text-red-400', activeBg: 'bg-gradient-to-r from-red-500 to-rose-500', ring: 'ring-red-400/30' },
                                                     ];
                                                     const color = colors[index % colors.length];
                                                     return (
@@ -334,7 +389,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             )}
                                             <ul className="space-y-2">
                                                 {analyticsItems.map((item) => {
-                                                    const color = { bg: 'bg-sky-500/10', hoverBg: 'hover:bg-sky-500/20', text: 'text-sky-700', icon: 'text-sky-600', activeBg: 'bg-gradient-to-r from-sky-500 to-indigo-500', ring: 'ring-sky-500/20' };
+                                                    const color = { bg: 'bg-sky-100/80 dark:bg-sky-900/40', hoverBg: 'hover:bg-sky-200/80 dark:hover:bg-sky-800/50', text: 'text-sky-800 dark:text-sky-200', icon: 'text-sky-600 dark:text-sky-400', activeBg: 'bg-gradient-to-r from-sky-600 to-indigo-600', ring: 'ring-sky-400/30' };
                                                     return (
                                                         <li key={item.name}>
                                                             <button
@@ -385,7 +440,7 @@ const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSi
                                             )}
                                             <ul className="space-y-2">
                                                 {accountItems.map((item) => {
-                                                    const color = { bg: 'bg-indigo-500/10', hoverBg: 'hover:bg-indigo-500/20', text: 'text-indigo-700', icon: 'text-indigo-600', activeBg: 'bg-gradient-to-r from-indigo-500 to-purple-500', ring: 'ring-indigo-500/20' };
+                                                    const color = { bg: 'bg-indigo-100/80 dark:bg-indigo-900/40', hoverBg: 'hover:bg-indigo-200/80 dark:hover:bg-indigo-800/50', text: 'text-indigo-800 dark:text-indigo-200', icon: 'text-indigo-600 dark:text-indigo-400', activeBg: 'bg-gradient-to-r from-indigo-600 to-purple-600', ring: 'ring-indigo-400/30' };
                                                     return (
                                                         <li key={item.name}>
                                                             <button

@@ -455,6 +455,171 @@ def update_note(
 
 
 # ============================================
+# ENHANCED PROGRESS TRACKING ENDPOINTS
+# ============================================
+
+
+@router.get(
+    "/progress/detailed",
+)
+def get_detailed_progress(
+    db: Database = Depends(session.get_db),
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
+) -> Any:
+    """
+    Get detailed learning progress with full analytics.
+    Includes streak data, time tracking, category breakdown, and recent activities.
+    Only available for Members (role=1).
+    """
+    detailed = learning_crud.get_detailed_progress(db, current_user.id)
+
+    if not detailed:
+        # Create empty progress and return basic stats
+        learning_crud.create_user_progress(
+            db, current_user.id, learning_schema.ProgressCreate()
+        )
+        detailed = learning_crud.get_detailed_progress(db, current_user.id)
+
+    return detailed
+
+
+@router.post(
+    "/progress/track-time",
+)
+def track_time(
+    *,
+    db: Database = Depends(session.get_db),
+    data: learning_schema.TrackTimeRequest,
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
+) -> Any:
+    """
+    Track time spent on a specific topic.
+    Only available for Members (role=1).
+    """
+    progress = learning_crud.track_time_on_topic(
+        db, current_user.id, data.topic_key, data.duration_seconds
+    )
+
+    return {
+        "success": True,
+        "message": f"Tracked {data.duration_seconds} seconds on {data.topic_key}",
+        "total_time": progress.total_learning_time_seconds
+        if hasattr(progress, "total_learning_time_seconds")
+        else 0,
+    }
+
+
+@router.post(
+    "/progress/session/start",
+)
+def start_session(
+    *,
+    db: Database = Depends(session.get_db),
+    data: learning_schema.StartSessionRequest = None,
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
+) -> Any:
+    """
+    Start a learning session. Optionally specify a topic.
+    Only available for Members (role=1).
+    """
+    topic_key = data.topic_key if data else None
+    progress = learning_crud.start_learning_session(db, current_user.id, topic_key)
+
+    return {
+        "success": True,
+        "message": "Learning session started",
+        "session_start": progress.current_session_start
+        if hasattr(progress, "current_session_start")
+        else None,
+    }
+
+
+@router.post(
+    "/progress/session/end",
+)
+def end_session(
+    *,
+    db: Database = Depends(session.get_db),
+    data: learning_schema.EndSessionRequest = None,
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
+) -> Any:
+    """
+    End a learning session and record duration.
+    Only available for Members (role=1).
+    """
+    topic_key = data.topic_key if data else None
+    duration = data.duration_seconds if data else None
+    progress = learning_crud.end_learning_session(
+        db, current_user.id, topic_key, duration
+    )
+
+    if not progress:
+        return {"success": False, "message": "No active session found"}
+
+    return {
+        "success": True,
+        "message": "Learning session ended",
+        "session_count": progress.session_count
+        if hasattr(progress, "session_count")
+        else 0,
+        "total_time": progress.total_learning_time_seconds
+        if hasattr(progress, "total_learning_time_seconds")
+        else 0,
+    }
+
+
+@router.post(
+    "/progress/activity",
+)
+def log_activity(
+    *,
+    db: Database = Depends(session.get_db),
+    data: learning_schema.LogActivityRequest,
+    current_user: user_models.MemberUser = Depends(
+        user_dependencies.get_current_member_only
+    ),
+) -> Any:
+    """
+    Log a learning activity (video watched, resource accessed, etc.).
+    Only available for Members (role=1).
+    """
+    if data.activity_type == learning_schema.LearningActivityType.VIDEO_WATCHED:
+        if data.topic_key and data.metadata.get("video_id"):
+            learning_crud.track_video_view(
+                db,
+                current_user.id,
+                data.topic_key,
+                data.metadata["video_id"],
+                data.duration_seconds,
+            )
+    elif data.activity_type == learning_schema.LearningActivityType.RESOURCE_ACCESSED:
+        if data.topic_key and data.resource_url:
+            learning_crud.track_resource_access(
+                db, current_user.id, data.topic_key, data.resource_url
+            )
+    else:
+        # Generic activity logging
+        learning_crud.log_activity(
+            db,
+            current_user.id,
+            data.activity_type.value,
+            data.topic_key,
+            data.duration_seconds,
+            data.metadata,
+        )
+
+    return {"success": True, "message": f"Activity logged: {data.activity_type.value}"}
+
+
+# ============================================
 # ADMIN/LEAD STATISTICS ENDPOINTS
 # ============================================
 
