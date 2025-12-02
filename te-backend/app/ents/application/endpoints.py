@@ -6,7 +6,7 @@ import app.ents.application.crud as application_crud
 import app.ents.application.dependencies as application_dependencies
 import app.ents.application.schema as application_schema
 import app.ents.user.dependencies as user_dependencies
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Body, Depends, status, HTTPException
 from pymongo.database import Database
 
 # Routers with clear, RESTful naming
@@ -278,3 +278,33 @@ def delete_applications(
             )
 
     return {"message": f"Successfully deleted {len(application_ids)} application(s)"}
+
+
+@applications_router.post("/bulk-delete-admin", status_code=status.HTTP_200_OK)
+def admin_bulk_delete_applications(
+    db: Database = Depends(session.get_db),
+    *,
+    application_ids: list[str] = Body(..., embed=True),  # List of application UUIDs
+    current_user=Depends(user_dependencies.get_current_user),
+):
+    """
+    Permanently delete multiple applications from any user (Admin only).
+
+    - **application_ids**: List of application UUIDs to delete
+    - Returns: Success message with count
+
+    Only Admins can use this endpoint.
+    """
+    from app.core.permissions import get_user_role
+
+    user_role = get_user_role(current_user)
+    if user_role != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can permanently delete applications",
+        )
+
+    result = application_crud.bulk_delete_applications(
+        db, application_ids=application_ids
+    )
+    return result

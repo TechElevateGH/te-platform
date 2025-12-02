@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
+import DeleteConfirmationModal from '../components/_custom/DeleteConfirmationModal';
 import ApplicationInfo from '../components/application/ApplicationInfo';
 import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
 import {
@@ -15,11 +16,12 @@ import {
     XMarkIcon,
     AdjustmentsHorizontalIcon,
     ArrowDownTrayIcon,
-    EyeIcon
+    EyeIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
 
 const ApplicationManagement = () => {
-    const { accessToken } = useAuth();
+    const { accessToken, userRole } = useAuth();
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,6 +37,13 @@ const ApplicationManagement = () => {
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+
+    // Selection and bulk delete state
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+    const isAdmin = parseInt(userRole) === 5;
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
@@ -136,6 +145,59 @@ const ApplicationManagement = () => {
             fetchAllApplications();
         }
     }, [accessToken, fetchAllApplications]);
+
+    // Selection handlers
+    const toggleSelectItem = (id) => {
+        setSelectedItems(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedItems.length === filteredApplications.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(filteredApplications.map(app => app.id));
+        }
+    };
+
+    // Delete handlers
+    const handleDeleteClick = (application = null) => {
+        if (application) {
+            setItemToDelete(application);
+        } else if (selectedItems.length > 0) {
+            setItemToDelete({ bulk: true, count: selectedItems.length });
+        }
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setDeleting(true);
+        try {
+            if (itemToDelete?.bulk) {
+                await axiosInstance.post('/applications/bulk-delete-admin', 
+                    { application_ids: selectedItems },
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                setSelectedItems([]);
+                alert(`Successfully deleted ${itemToDelete.count} application(s)`);
+            } else {
+                await axiosInstance.post('/applications/bulk-delete-admin', 
+                    { application_ids: [itemToDelete.id] },
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                alert('Application deleted successfully');
+            }
+            fetchAllApplications();
+        } catch (error) {
+            console.error('Error deleting application(s):', error);
+            alert(error.response?.data?.detail || 'Failed to delete');
+        } finally {
+            setDeleting(false);
+            setShowDeleteModal(false);
+            setItemToDelete(null);
+        }
+    };
 
     // Filter applications
     const filteredApplications = applications.filter(app => {
@@ -277,6 +339,18 @@ const ApplicationManagement = () => {
 
                         {/* Action Buttons */}
                         <div className="flex items-center gap-2 self-end sm:self-auto">
+                            {/* Bulk Delete Button */}
+                            {isAdmin && selectedItems.length > 0 && (
+                                <button
+                                    onClick={() => handleDeleteClick()}
+                                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] md:text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-red-500/30 whitespace-nowrap"
+                                >
+                                    <TrashIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                                    <span className="hidden sm:inline">Delete ({selectedItems.length})</span>
+                                    <span className="sm:hidden">Del ({selectedItems.length})</span>
+                                </button>
+                            )}
+
                             {/* Column Selector */}
                             <div className="relative">
                                 <button
@@ -606,6 +680,16 @@ const ApplicationManagement = () => {
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                        {isAdmin && (
+                                            <th className="px-4 py-3 w-12">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedItems.length === filteredApplications.length && filteredApplications.length > 0}
+                                                    onChange={toggleSelectAll}
+                                                    className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                />
+                                            </th>
+                                        )}
                                         {visibleColumns.company && (
                                             <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                                 Company
@@ -686,6 +770,16 @@ const ApplicationManagement = () => {
                                                 aria-label={`View details for application at ${app.company}`}
                                                 className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
                                             >
+                                                {isAdmin && (
+                                                    <td className="px-4 py-3 w-12" onClick={(e) => e.stopPropagation()}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedItems.includes(app.id)}
+                                                            onChange={() => toggleSelectItem(app.id)}
+                                                            className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                        />
+                                                    </td>
+                                                )}
                                                 {visibleColumns.company && (
                                                     <td className="px-3 py-2 text-left">
                                                         <div className="flex items-center gap-2">
@@ -911,6 +1005,23 @@ const ApplicationManagement = () => {
                     refreshApplications={fetchAllApplications}
                 />
             )}
+
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setItemToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Application(s)"
+                message={itemToDelete?.bulk 
+                    ? `You are about to permanently delete ${itemToDelete.count} application(s).`
+                    : `You are about to permanently delete the application for "${itemToDelete?.title}" at ${itemToDelete?.company}.`
+                }
+                itemCount={itemToDelete?.bulk ? itemToDelete.count : 1}
+                isDeleting={deleting}
+                itemType="application"
+            />
         </div>
     );
 };

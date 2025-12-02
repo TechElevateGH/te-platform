@@ -307,6 +307,34 @@ def update_referral_status(
     return referral_models.Referral(**referral_data)
 
 
+def delete_referral(db: Database, *, referral_id: str) -> bool:
+    """
+    Permanently delete a referral from the database (Admin only).
+    """
+    from bson import ObjectId
+
+    result = db.referrals.delete_one({"_id": ObjectId(referral_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Referral not found")
+    return True
+
+
+def bulk_delete_referrals(db: Database, *, referral_ids: list[str]) -> dict:
+    """
+    Permanently delete multiple referrals from the database (Admin only).
+    """
+    from bson import ObjectId
+
+    object_ids = [ObjectId(rid) for rid in referral_ids]
+    result = db.referrals.delete_many({"_id": {"$in": object_ids}})
+
+    return {
+        "message": f"Successfully deleted {result.deleted_count} referral(s)",
+        "deleted_count": result.deleted_count,
+        "total_requested": len(referral_ids),
+    }
+
+
 def export_referrals_to_google_sheets(
     db: Database,
     *,

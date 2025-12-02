@@ -465,3 +465,17 @@ def get_all_assigned_reviews(db: Database) -> list[dict]:
             }
         )
     return result
+
+
+def bulk_delete_review_requests(db: Database, *, review_ids: list[str]) -> dict:
+    """
+    Permanently delete multiple resume review requests from the database (Admin only).
+    """
+    object_ids = [ObjectId(rid) for rid in review_ids]
+    result = db.resume_reviews.delete_many({"_id": {"$in": object_ids}})
+
+    return {
+        "message": f"Successfully deleted {result.deleted_count} resume review(s)",
+        "deleted_count": result.deleted_count,
+        "total_requested": len(review_ids),
+    }

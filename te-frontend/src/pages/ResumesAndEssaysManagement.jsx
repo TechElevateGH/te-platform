@@ -51,7 +51,7 @@ const ResumesAndEssaysManagement = () => {
     const [reviewFeedback, setReviewFeedback] = useState('');
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
-    const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('active'); // Default to Pending + In Review
+    const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('Pending'); // Default to Pending status
     const [toast, setToast] = useState(null);
     const [myAssignedReviews, setMyAssignedReviews] = useState([]);
     const [allAssignments, setAllAssignments] = useState([]);

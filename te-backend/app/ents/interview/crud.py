@@ -491,3 +491,61 @@ def count_available_timeslots(db: Database) -> int:
     return db.mock_interview_timeslots.count_documents(
         {"is_available": True, "date": {"$gte": today}}
     )
+
+
+def delete_interview_request(db: Database, *, request_id: str) -> bool:
+    """
+    Permanently delete an interview request from the database (Admin only).
+    Also makes the associated timeslot available again.
+    """
+    # Get the request to find the timeslot
+    request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
+    if not request_data:
+        raise HTTPException(status_code=404, detail="Interview request not found")
+
+    # Delete the request
+    result = db.mock_interview_requests.delete_one({"_id": ObjectId(request_id)})
+
+    # Make the timeslot available again if it exists
+    if request_data.get("timeslot_id"):
+        db.mock_interview_timeslots.update_one(
+            {"_id": request_data["timeslot_id"]}, {"$set": {"is_available": True}}
+        )
+
+    return result.deleted_count > 0
+
+
+def bulk_delete_interview_requests(db: Database, *, request_ids: list[str]) -> dict:
+    """
+    Permanently delete multiple interview requests from the database (Admin only).
+    Also makes the associated timeslots available again.
+    """
+    deleted_count = 0
+    for request_id in request_ids:
+        try:
+            # Get the request to find the timeslot
+            request_data = db.mock_interview_requests.find_one(
+                {"_id": ObjectId(request_id)}
+            )
+            if request_data:
+                # Delete the request
+                result = db.mock_interview_requests.delete_one(
+                    {"_id": ObjectId(request_id)}
+                )
+                if result.deleted_count > 0:
+                    deleted_count += 1
+
+                # Make the timeslot available again if it exists
+                if request_data.get("timeslot_id"):
+                    db.mock_interview_timeslots.update_one(
+                        {"_id": request_data["timeslot_id"]},
+                        {"$set": {"is_available": True}},
+                    )
+        except Exception:
+            continue
+
+    return {
+        "message": f"Successfully deleted {deleted_count} interview request(s)",
+        "deleted_count": deleted_count,
+        "total_requested": len(request_ids),
+    }

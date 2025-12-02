@@ -262,7 +262,7 @@ export const NotificationProvider = ({ children }) => {
                 });
 
                 const allInterviews = interviewsResponse.data?.interviews || [];
-                
+
                 // New pending interview requests
                 const newInterviewRequests = allInterviews
                     .filter(interview => {

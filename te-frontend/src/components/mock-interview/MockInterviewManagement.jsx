@@ -9,11 +9,13 @@ import {
     UserPlusIcon,
     PaperAirplaneIcon,
     FunnelIcon,
-    PencilIcon
+    PencilIcon,
+    TrashIcon
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { Loading } from '../_custom/Loading';
+import DeleteConfirmationModal from '../_custom/DeleteConfirmationModal';
 
 const INTERVIEW_TYPE_COLORS = {
     system_design: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
@@ -42,11 +44,18 @@ const formatStatus = (status) => {
 };
 
 const MockInterviewManagement = () => {
-    const { accessToken } = useAuth();
+    const { accessToken, userRole } = useAuth();
     const [interviews, setInterviews] = useState([]);
     const [interviewers, setInterviewers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('pending'); // Default to pending status
+
+    // Selection and bulk delete state
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+    const isAdmin = userRole === 5;
 
     // Action modals
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });
@@ -171,6 +180,58 @@ const MockInterviewManagement = () => {
         }
     };
 
+    // Selection handlers
+    const toggleSelectItem = (id) => {
+        setSelectedItems(prev =>
+            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedItems.length === filteredInterviews.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(filteredInterviews.map(interview => interview.id));
+        }
+    };
+
+    // Delete handlers
+    const handleDeleteClick = (interview = null) => {
+        if (interview) {
+            setItemToDelete(interview);
+        } else if (selectedItems.length > 0) {
+            setItemToDelete({ bulk: true, count: selectedItems.length });
+        }
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setDeleting(true);
+        try {
+            if (itemToDelete?.bulk) {
+                await axiosInstance.post('/interviews/bulk-delete', 
+                    { request_ids: selectedItems },
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                setSelectedItems([]);
+                alert(`Successfully deleted ${itemToDelete.count} interview(s)`);
+            } else {
+                await axiosInstance.delete(`/interviews/${itemToDelete.id}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                alert('Interview deleted successfully');
+            }
+            fetchInterviews();
+        } catch (error) {
+            console.error('Error deleting interview(s):', error);
+            alert(error.response?.data?.detail || 'Failed to delete');
+        } finally {
+            setDeleting(false);
+            setShowDeleteModal(false);
+            setItemToDelete(null);
+        }
+    };
+
     const filteredInterviews = interviews.filter(i =>
         statusFilter === 'all' || i.status === statusFilter
     );
@@ -189,6 +250,15 @@ const MockInterviewManagement = () => {
             <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">All Interview Requests</h3>
                 <div className="flex items-center gap-2">
+                    {isAdmin && selectedItems.length > 0 && (
+                        <button
+                            onClick={() => handleDeleteClick()}
+                            className="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                        >
+                            <TrashIcon className="h-4 w-4 mr-1.5" />
+                            Delete ({selectedItems.length})
+                        </button>
+                    )}
                     <FunnelIcon className="h-4 w-4 text-gray-400" />
                     <select
                         value={statusFilter}
@@ -226,9 +296,20 @@ const MockInterviewManagement = () => {
                             >
                                 {/* Card Header */}
                                 <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <UserIcon className="h-4 w-4 text-gray-400" />
-                                        <span className="font-bold text-gray-900 dark:text-white truncate">{interview.user_name}</span>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                                            <UserIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                            <span className="font-bold text-gray-900 dark:text-white truncate">{interview.user_name}</span>
+                                        </div>
+                                        {isAdmin && (
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.includes(interview.id)}
+                                                onChange={() => toggleSelectItem(interview.id)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="ml-2 rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700 flex-shrink-0"
+                                            />
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColors.bg} ${typeColors.text}`}>
@@ -544,6 +625,24 @@ const MockInterviewManagement = () => {
                     </div>
                 </Dialog>
             </Transition>
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setItemToDelete(null);
+                }}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Interview(s)"
+                message={itemToDelete?.bulk 
+                    ? `You are about to permanently delete ${itemToDelete.count} interview request(s).`
+                    : `You are about to permanently delete the ${itemToDelete?.interview_type} interview for ${itemToDelete?.user_name}.`
+                }
+                itemCount={itemToDelete?.bulk ? itemToDelete.count : 1}
+                isDeleting={deleting}
+                itemType="interview"
+            />
         </div>
     );
 };
