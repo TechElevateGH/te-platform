@@ -496,7 +496,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                 )}
                 <button
                     type="submit"
-                    disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.member_notes.trim()) || (sessionType === 'interview' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
+                    disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.member_notes.trim()) || (sessionType !== 'one_on_one' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
                     className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? 'Scheduling...' : sessionType === 'one_on_one' ? 'Schedule Session' : 'Schedule Meeting'}

@@ -81,6 +81,7 @@ class PrivilegedUser(BaseModel):
     username: str  # Required for privileged users
     password: str  # Hashed token
     lead_token: str  # Plain token for login
+    email: Optional[EmailStr] = None  # Optional email for notifications
     role: int  # UserRoles enum value (2=Referrer, 3=Lead, 5=Admin)
     company_id: Optional[PyObjectId] = None  # For Referrer users only
     company_name: Optional[str] = (

@@ -51,6 +51,12 @@ frontend-status:
 		echo "📍 Current: PRODUCTION backend (https://te-platform.onrender.com/v1/)"; \
 	fi
 
+# Install backend dependencies in venv
+install:
+	@echo "Installing backend dependencies..."
+	cd te-backend && . venv/bin/activate && pip install -r requirements.txt
+	@echo "✅ Dependencies installed successfully"
+
 # Start backend only (in venv)
 backend:
 	@echo "Starting backend server in virtual environment..."
@@ -96,6 +102,7 @@ help:
 	@echo "  make backend          - Start backend server only (port 8000)"
 	@echo "  make frontend-dev     - Start frontend with local backend"
 	@echo "  make frontend-prod    - Start frontend with production backend"
+	@echo "  make install          - Install backend dependencies in venv"
 	@echo ""
 	@echo "🔧 Configuration Commands:"
 	@echo "  make frontend-status     - Check current backend configuration"
