@@ -14,6 +14,8 @@ import {
     CheckCircleIcon,
     XCircleIcon as XCircleIconSolid,
     ChevronUpDownIcon,
+    ChevronUpIcon,
+    ChevronDownIcon,
     MapPinIcon,
     CalendarIcon,
     BuildingOfficeIcon,
@@ -645,7 +647,13 @@ const Applications = () => {
                                                     <div className="flex items-center gap-2">
                                                         <BuildingOfficeIcon className="h-4 w-4" />
                                                         Company
-                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                        {sortBy === 'company' ? (
+                                                            sortOrder === 'asc' ?
+                                                                <ChevronUpIcon className="h-4 w-4" /> :
+                                                                <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                        )}
                                                     </div>
                                                 </th>
                                                 <th
@@ -655,7 +663,13 @@ const Applications = () => {
                                                     <div className="flex items-center gap-2">
                                                         <BriefcaseIcon className="h-4 w-4" />
                                                         Position
-                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                        {sortBy === 'title' ? (
+                                                            sortOrder === 'asc' ?
+                                                                <ChevronUpIcon className="h-4 w-4" /> :
+                                                                <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                        )}
                                                     </div>
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
@@ -667,7 +681,13 @@ const Applications = () => {
                                                 >
                                                     <div className="flex items-center gap-2">
                                                         Status
-                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                        {sortBy === 'status' ? (
+                                                            sortOrder === 'asc' ?
+                                                                <ChevronUpIcon className="h-4 w-4" /> :
+                                                                <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                        )}
                                                     </div>
                                                 </th>
                                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
@@ -683,7 +703,13 @@ const Applications = () => {
                                                     <div className="flex items-center gap-2">
                                                         <CalendarIcon className="h-4 w-4" />
                                                         Date
-                                                        <ChevronUpDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                                                        {sortBy === 'date' ? (
+                                                            sortOrder === 'asc' ?
+                                                                <ChevronUpIcon className="h-4 w-4" /> :
+                                                                <ChevronDownIcon className="h-4 w-4" />
+                                                        ) : (
+                                                            <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                        )}
                                                     </div>
                                                 </th>
                                             </tr>
@@ -895,8 +921,8 @@ const Applications = () => {
                             <button
                                 onClick={confirmDialog.onConfirm}
                                 className={`px-5 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors shadow-sm ${confirmDialog.confirmStyle === 'danger'
-                                        ? 'bg-red-600 hover:bg-red-700'
-                                        : 'bg-blue-600 hover:bg-blue-700'
+                                    ? 'bg-red-600 hover:bg-red-700'
+                                    : 'bg-blue-600 hover:bg-blue-700'
                                     }`}
                             >
                                 {confirmDialog.confirmText}

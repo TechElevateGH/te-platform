@@ -18,7 +18,10 @@ import {
     AdjustmentsHorizontalIcon,
     ArrowDownTrayIcon,
     EyeIcon,
-    TrashIcon
+    TrashIcon,
+    ChevronUpDownIcon,
+    ChevronUpIcon,
+    ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 const ApplicationManagement = () => {
@@ -35,7 +38,8 @@ const ApplicationManagement = () => {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-    const [sortBy, setSortBy] = useState('date_desc');
+    const [sortField, setSortField] = useState('date');
+    const [sortDirection, setSortDirection] = useState('desc');
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [selectedApplicationId, setSelectedApplicationId] = useState(null);
@@ -231,25 +235,50 @@ const ApplicationManagement = () => {
     });
 
     // Sort applications
+    const handleSort = (field) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
     const sortedApplications = [...filteredApplications].sort((a, b) => {
-        switch (sortBy) {
-            case 'date_desc':
-                return new Date(b.date) - new Date(a.date);
-            case 'date_asc':
-                return new Date(a.date) - new Date(b.date);
-            case 'company_asc':
-                return (a.company || '').localeCompare(b.company || '');
-            case 'company_desc':
-                return (b.company || '').localeCompare(a.company || '');
-            case 'member_asc':
-                return (a.user_name || '').localeCompare(b.user_name || '');
-            case 'member_desc':
-                return (b.user_name || '').localeCompare(a.user_name || '');
+        let aValue, bValue;
+
+        switch (sortField) {
+            case 'date':
+                aValue = new Date(a.date);
+                bValue = new Date(b.date);
+                break;
+            case 'company':
+                aValue = a.company || '';
+                bValue = b.company || '';
+                break;
+            case 'member':
+                aValue = a.user_name || '';
+                bValue = b.user_name || '';
+                break;
+            case 'position':
+                aValue = a.title || '';
+                bValue = b.title || '';
+                break;
+            case 'level':
+                aValue = a.role || '';
+                bValue = b.role || '';
+                break;
             case 'status':
-                return (a.status || '').localeCompare(b.status || '');
+                aValue = a.status || '';
+                bValue = b.status || '';
+                break;
             default:
                 return 0;
         }
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
     });
 
     // Clear all filters
@@ -507,26 +536,6 @@ const ApplicationManagement = () => {
                             />
                         </div>
 
-                        {/* Sort Dropdown */}
-                        <div className="flex items-center gap-2">
-                            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                Sort by:
-                            </label>
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            >
-                                <option value="date_desc">Newest First</option>
-                                <option value="date_asc">Oldest First</option>
-                                <option value="company_asc">Company (A-Z)</option>
-                                <option value="company_desc">Company (Z-A)</option>
-                                <option value="member_asc">Member (A-Z)</option>
-                                <option value="member_desc">Member (Z-A)</option>
-                                <option value="status">Status</option>
-                            </select>
-                        </div>
-
                         {/* Results Count */}
                         <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
                             {sortedApplications.length} of {applications.length}
@@ -693,23 +702,71 @@ const ApplicationManagement = () => {
                                             </th>
                                         )}
                                         {visibleColumns.company && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Company
+                                            <th
+                                                onClick={() => handleSort('company')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Company
+                                                    {sortField === 'company' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                         {visibleColumns.member && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Member
+                                            <th
+                                                onClick={() => handleSort('member')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Member
+                                                    {sortField === 'member' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                         {visibleColumns.position && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Position
+                                            <th
+                                                onClick={() => handleSort('position')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Position
+                                                    {sortField === 'position' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                         {visibleColumns.level && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Level
+                                            <th
+                                                onClick={() => handleSort('level')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Level
+                                                    {sortField === 'level' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                         {visibleColumns.location && (
@@ -728,13 +785,37 @@ const ApplicationManagement = () => {
                                             </th>
                                         )}
                                         {visibleColumns.status && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Status
+                                            <th
+                                                onClick={() => handleSort('status')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Status
+                                                    {sortField === 'status' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                         {visibleColumns.applied && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Applied
+                                            <th
+                                                onClick={() => handleSort('date')}
+                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Applied
+                                                    {sortField === 'date' ? (
+                                                        sortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                         )}
                                     </tr>
