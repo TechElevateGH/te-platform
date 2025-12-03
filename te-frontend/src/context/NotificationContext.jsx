@@ -153,31 +153,41 @@ export const NotificationProvider = ({ children }) => {
                 const myInterviews = interviewsResponse.data?.interviews || [];
                 const interviewNotifications = myInterviews
                     .filter(interview => {
-                        const updateTime = interview.updated_at
-                            ? new Date(interview.updated_at)
-                            : interview.created_at
-                                ? new Date(interview.created_at)
-                                : null;
-
-                        if (!updateTime) return false;
-
                         const lastCheck = lastChecked ? new Date(lastChecked) : new Date(0);
 
-                        // Show notification for status changes or new feedback
-                        const hasUpdate = (interview.status === 'confirmed' && interview.assigned_to_name) ||
-                            (interview.status === 'completed' && interview.interviewer_feedback);
+                        // For completed interviews, check if completed_at is after last check
+                        if (interview.status === 'completed' && interview.interviewer_feedback) {
+                            const completedTime = interview.completed_at
+                                ? new Date(interview.completed_at)
+                                : interview.updated_at
+                                    ? new Date(interview.updated_at)
+                                    : null;
+                            return completedTime && completedTime > lastCheck;
+                        }
 
-                        return updateTime > lastCheck && hasUpdate;
+                        // For confirmed interviews, check if confirmed_at is after last check
+                        if (interview.status === 'confirmed' && interview.assigned_to_name) {
+                            const confirmedTime = interview.confirmed_at
+                                ? new Date(interview.confirmed_at)
+                                : interview.updated_at
+                                    ? new Date(interview.updated_at)
+                                    : null;
+                            return confirmedTime && confirmedTime > lastCheck;
+                        }
+
+                        return false;
                     })
                     .map(interview => ({
                         id: `interview_${interview.id}`,
                         type: 'interview_update',
-                        title: interview.status === 'completed' ? 'Interview Feedback Available' : 'Interview Confirmed',
+                        title: interview.status === 'completed' ? 'Meeting Feedback Available' : 'Meeting Confirmed',
                         message: interview.status === 'completed'
-                            ? `Your ${interview.interview_type} interview feedback is ready`
-                            : `Your ${interview.interview_type} interview has been confirmed with ${interview.assigned_to_name}`,
-                        link: '/workspace?section=mock%20interviews',
-                        timestamp: interview.updated_at || interview.created_at,
+                            ? `Your ${interview.interview_type} meeting feedback is ready`
+                            : `Your ${interview.interview_type} meeting has been confirmed with ${interview.assigned_to_name}`,
+                        link: '/workspace?section=Meetings',
+                        timestamp: interview.status === 'completed'
+                            ? (interview.completed_at || interview.updated_at || interview.created_at)
+                            : (interview.confirmed_at || interview.updated_at || interview.created_at),
                         read: false
                     }))
                     .filter(notification => !dismissedIds.has(notification.id));
@@ -272,9 +282,9 @@ export const NotificationProvider = ({ children }) => {
                     .map(interview => ({
                         id: `interview_request_${interview.id}`,
                         type: 'new_interview_request',
-                        title: 'New Interview Request',
-                        message: `${interview.user_name} requested a ${interview.interview_type} interview`,
-                        link: '/workspace?section=mock%20interviews',
+                        title: 'New Meeting Request',
+                        message: `${interview.user_name} requested a ${interview.interview_type} meeting`,
+                        link: '/workspace?section=Meetings',
                         timestamp: interview.created_at,
                         read: false
                     }))
@@ -295,23 +305,24 @@ export const NotificationProvider = ({ children }) => {
                 const assignedInterviews = assignedResponse.data?.interviews || [];
                 const newAssignments = assignedInterviews
                     .filter(interview => {
-                        const assignedDate = interview.assigned_date
-                            ? new Date(interview.assigned_date)
+                        const assignedDate = interview.assigned_at
+                            ? new Date(interview.assigned_at)
                             : interview.updated_at
                                 ? new Date(interview.updated_at)
                                 : null;
 
                         if (!assignedDate) return false;
 
-                        return assignedDate > lastCheck && interview.status === 'confirmed';
+                        // Show notification for newly assigned interviews (pending or confirmed)
+                        return assignedDate > lastCheck && (interview.status === 'pending' || interview.status === 'confirmed');
                     })
                     .map(interview => ({
                         id: `interview_assigned_${interview.id}`,
                         type: 'interview_assigned',
-                        title: 'Interview Assigned to You',
-                        message: `You've been assigned a ${interview.interview_type} interview with ${interview.user_name} on ${interview.timeslot_date}`,
-                        link: '/workspace?section=mock%20interviews',
-                        timestamp: interview.assigned_date || interview.updated_at,
+                        title: 'Meeting Assigned to You',
+                        message: `You've been assigned a ${interview.interview_type} meeting with ${interview.user_name} on ${interview.timeslot_date}`,
+                        link: '/workspace?section=Meetings',
+                        timestamp: interview.assigned_at || interview.updated_at,
                         read: false
                     }))
                     .filter(notification => !dismissedIds.has(notification.id));

@@ -11,12 +11,15 @@ import {
     Cog6ToothIcon,
     UserGroupIcon,
     BriefcaseIcon,
-    XMarkIcon
+    XMarkIcon,
+    AcademicCapIcon,
+    ChatBubbleBottomCenterTextIcon
 } from '@heroicons/react/24/outline';
 import { CalendarDaysIcon, PlusIcon } from '@heroicons/react/20/solid';
 
 const TABS = {
     MY_INTERVIEWS: 'my_interviews',
+    MY_ONE_ON_ONE: 'my_one_on_one',
     ASSIGNED: 'assigned',
     MANAGE_SLOTS: 'manage_slots',
     ALL_REQUESTS: 'all_requests'
@@ -26,6 +29,7 @@ const Interviews = () => {
     const { userRole } = useAuth();
     const [activeTab, setActiveTab] = useState(TABS.MY_INTERVIEWS);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [sessionType, setSessionType] = useState('interview'); // 'interview' or 'one_on_one'
     const [refreshKey, setRefreshKey] = useState(0);
 
     // Permission levels based on userRole
@@ -38,8 +42,15 @@ const Interviews = () => {
     const tabs = [
         {
             id: TABS.MY_INTERVIEWS,
-            label: 'My Interviews',
+            label: 'Mock Interviews',
+            icon: AcademicCapIcon,
             show: isMemberOnly, // Only Members can have mock interviews, not Volunteers+
+        },
+        {
+            id: TABS.MY_ONE_ON_ONE,
+            label: '1-on-1 Sessions',
+            icon: ChatBubbleBottomCenterTextIcon,
+            show: isMemberOnly,
         },
         {
             id: TABS.ASSIGNED,
@@ -48,16 +59,16 @@ const Interviews = () => {
             show: isVolunteer,
         },
         {
-            id: TABS.MANAGE_SLOTS,
-            label: 'Manage Slots',
-            icon: Cog6ToothIcon,
-            show: isVolunteer,
-        },
-        {
             id: TABS.ALL_REQUESTS,
             label: 'All Requests',
             icon: UserGroupIcon,
             show: isLead,
+        },
+        {
+            id: TABS.MANAGE_SLOTS,
+            label: 'Manage Slots',
+            icon: Cog6ToothIcon,
+            show: isVolunteer,
         }
     ].filter(tab => tab.show);
 
@@ -81,7 +92,23 @@ const Interviews = () => {
     const renderContent = () => {
         switch (activeTab) {
             case TABS.MY_INTERVIEWS:
-                return <MyInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
+                return <MyInterviews
+                    key={`interviews-${refreshKey}`}
+                    onRequestNew={() => {
+                        setSessionType('interview');
+                        setShowCreateModal(true);
+                    }}
+                    interviewType="mock"
+                />;
+            case TABS.MY_ONE_ON_ONE:
+                return <MyInterviews
+                    key={`one-on-one-${refreshKey}`}
+                    onRequestNew={() => {
+                        setSessionType('one_on_one');
+                        setShowCreateModal(true);
+                    }}
+                    interviewType="one_on_one"
+                />;
             case TABS.ASSIGNED:
                 return <MyAssignedInterviews />;
             case TABS.MANAGE_SLOTS:
@@ -89,7 +116,13 @@ const Interviews = () => {
             case TABS.ALL_REQUESTS:
                 return <InterviewManagement />;
             default:
-                return <MyInterviews key={refreshKey} onRequestNew={() => setShowCreateModal(true)} />;
+                return <MyInterviews
+                    key={refreshKey}
+                    onRequestNew={() => {
+                        setSessionType('interview');
+                        setShowCreateModal(true);
+                    }}
+                />;
         }
     };
 
@@ -101,7 +134,7 @@ const Interviews = () => {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Members Only</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-sm">
-                    Mock interviews are available to verified members only. Please sign in or complete verification to access this feature.
+                    Meetings are available to verified members only. Please sign in or complete verification to access this feature.
                 </p>
             </div>
         );
@@ -112,18 +145,28 @@ const Interviews = () => {
             {/* Compact Header */}
             <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
                 <div>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">Mock Interviews</h1>
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {activeTab === TABS.MY_ONE_ON_ONE ? '1-on-1 Sessions' : activeTab === TABS.MY_INTERVIEWS ? 'Mock Interviews' : 'Meetings'}
+                    </h1>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        Practice with real interviewers and get personalized feedback
+                        {activeTab === TABS.MY_ONE_ON_ONE
+                            ? 'Get mentorship and ask questions about your career journey'
+                            : activeTab === TABS.MY_INTERVIEWS
+                                ? 'Practice with real interviewers and get personalized feedback'
+                                : 'Manage meeting requests and availability'
+                        }
                     </p>
                 </div>
-                {isMemberOnly && activeTab === TABS.MY_INTERVIEWS && (
+                {isMemberOnly && (activeTab === TABS.MY_INTERVIEWS || activeTab === TABS.MY_ONE_ON_ONE) && (
                     <button
-                        onClick={() => setShowCreateModal(true)}
+                        onClick={() => {
+                            setSessionType(activeTab === TABS.MY_ONE_ON_ONE ? 'one_on_one' : 'interview');
+                            setShowCreateModal(true);
+                        }}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         <PlusIcon className="h-4 w-4" />
-                        Request Interview
+                        {activeTab === TABS.MY_ONE_ON_ONE ? 'Request 1-on-1' : 'Request Mock Interview'}
                     </button>
                 )}
             </div>
@@ -174,7 +217,9 @@ const Interviews = () => {
                         <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                             {/* Modal Header */}
                             <div className="sticky top-0 bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Request Mock Interview</h2>
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {sessionType === 'one_on_one' ? 'Request 1-on-1 Session' : 'Request Mock Interview'}
+                                </h2>
                                 <button
                                     onClick={() => setShowCreateModal(false)}
                                     className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -185,7 +230,11 @@ const Interviews = () => {
 
                             {/* Modal Content */}
                             <div className="p-6">
-                                <InterviewCreate onSuccess={handleCreateSuccess} onCancel={() => setShowCreateModal(false)} />
+                                <InterviewCreate
+                                    sessionType={sessionType}
+                                    onSuccess={handleCreateSuccess}
+                                    onCancel={() => setShowCreateModal(false)}
+                                />
                             </div>
                         </div>
                     </div>

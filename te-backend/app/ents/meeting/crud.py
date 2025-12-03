@@ -1,4 +1,4 @@
-"""CRUD operations for Interview feature."""
+"""CRUD operations for Meeting feature."""
 
 from datetime import datetime
 from typing import Optional, List
@@ -6,17 +6,17 @@ from bson import ObjectId
 from pymongo.database import Database
 from fastapi import HTTPException
 
-import app.ents.interview.models as interview_models
-import app.ents.interview.schema as interview_schema
+import app.ents.meeting.models as meeting_models
+import app.ents.meeting.schema as meeting_schema
 
 
 # ============== Timeslot CRUD ==============
 
 
 def create_timeslot(
-    db: Database, *, data: interview_schema.TimeslotCreate, created_by: str
-) -> interview_models.InterviewTimeslot:
-    """Create a new interview timeslot (Volunteer+ only).
+    db: Database, *, data: meeting_schema.TimeslotCreate, created_by: str
+) -> meeting_models.MeetingTimeslot:
+    """Create a new meeting timeslot (Volunteer+ only).
 
     Multiple volunteers can create slots at the same date/time.
     Only prevents the same volunteer from creating duplicate slots.
@@ -41,21 +41,24 @@ def create_timeslot(
         "start_time": data.start_time,
         "end_time": data.end_time,
         "is_available": True,
+        "interview_types": [t.value for t in data.interview_types]
+        if data.interview_types
+        else [],
         "created_by": ObjectId(created_by),
         "created_at": datetime.utcnow(),
     }
 
     result = db.mock_interview_timeslots.insert_one(timeslot_dict)
     timeslot_data = db.mock_interview_timeslots.find_one({"_id": result.inserted_id})
-    return interview_models.InterviewTimeslot(**timeslot_data)
+    return meeting_models.MeetingTimeslot(**timeslot_data)
 
 
 def create_timeslots_bulk(
     db: Database,
     *,
-    timeslots: List[interview_schema.TimeslotCreate],
+    timeslots: List[meeting_schema.TimeslotCreate],
     created_by: str,
-) -> List[interview_models.InterviewTimeslot]:
+) -> List[meeting_models.MeetingTimeslot]:
     """Create multiple timeslots at once (Volunteer+ only).
 
     This allows creating multiple slots at the same date/time to support
@@ -69,13 +72,16 @@ def create_timeslots_bulk(
             "start_time": timeslot_data.start_time,
             "end_time": timeslot_data.end_time,
             "is_available": True,
+            "interview_types": [t.value for t in timeslot_data.interview_types]
+            if timeslot_data.interview_types
+            else [],
             "created_by": ObjectId(created_by),
             "created_at": datetime.utcnow(),
         }
 
         result = db.mock_interview_timeslots.insert_one(timeslot_dict)
         slot = db.mock_interview_timeslots.find_one({"_id": result.inserted_id})
-        created_timeslots.append(interview_models.InterviewTimeslot(**slot))
+        created_timeslots.append(meeting_models.MeetingTimeslot(**slot))
 
     return created_timeslots
 
@@ -87,7 +93,7 @@ def read_available_timeslots(
     limit: int = 100,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
-) -> List[interview_models.InterviewTimeslot]:
+) -> List[meeting_models.MeetingTimeslot]:
     """Get all available timeslots, optionally filtered by date range."""
 
     query = {"is_available": True}
@@ -113,12 +119,12 @@ def read_available_timeslots(
         .limit(limit)
     )
 
-    return [interview_models.InterviewTimeslot(**t) for t in timeslots]
+    return [meeting_models.MeetingTimeslot(**t) for t in timeslots]
 
 
 def read_all_timeslots(
     db: Database, *, skip: int = 0, limit: int = 100, include_past: bool = False
-) -> List[interview_models.InterviewTimeslot]:
+) -> List[meeting_models.MeetingTimeslot]:
     """Get all timeslots (for management view)."""
 
     query = {}
@@ -133,13 +139,35 @@ def read_all_timeslots(
         .limit(limit)
     )
 
-    return [interview_models.InterviewTimeslot(**t) for t in timeslots]
+    return [meeting_models.MeetingTimeslot(**t) for t in timeslots]
 
 
 def update_timeslot(
-    db: Database, *, timeslot_id: str, data: interview_schema.TimeslotUpdate
-) -> Optional[interview_models.InterviewTimeslot]:
-    """Update a timeslot (Volunteer+ only)."""
+    db: Database,
+    *,
+    timeslot_id: str,
+    data: meeting_schema.TimeslotUpdate,
+    user_role: int = 3,
+) -> Optional[meeting_models.MeetingTimeslot]:
+    """Update a timeslot.
+
+    Volunteer+ can update if no member has booked it.
+    Admin can update anytime.
+    """
+
+    # Check if timeslot is booked (only if not Admin)
+    if user_role < 5:  # Not an Admin
+        existing_request = db.mock_interview_requests.find_one(
+            {
+                "timeslot_id": ObjectId(timeslot_id),
+                "status": {"$in": ["pending", "confirmed"]},
+            }
+        )
+        if existing_request:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot update timeslot that has pending or confirmed meeting requests. Only Admins can modify booked timeslots.",
+            )
 
     update_dict = {}
     if data.date is not None:
@@ -150,13 +178,15 @@ def update_timeslot(
         update_dict["end_time"] = data.end_time
     if data.is_available is not None:
         update_dict["is_available"] = data.is_available
+    if data.interview_types is not None:
+        update_dict["interview_types"] = [t.value for t in data.interview_types]
 
     if not update_dict:
         # No changes, return existing
         timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
         if not timeslot:
             return None
-        return interview_models.InterviewTimeslot(**timeslot)
+        return meeting_models.MeetingTimeslot(**timeslot)
 
     result = db.mock_interview_timeslots.update_one(
         {"_id": ObjectId(timeslot_id)}, {"$set": update_dict}
@@ -166,42 +196,47 @@ def update_timeslot(
         return None
 
     timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
-    return interview_models.InterviewTimeslot(**timeslot)
+    return meeting_models.MeetingTimeslot(**timeslot)
 
 
-def delete_timeslot(db: Database, *, timeslot_id: str) -> bool:
-    """Delete a timeslot (Volunteer+ only). Only if not booked."""
+def delete_timeslot(db: Database, *, timeslot_id: str, user_role: int = 3) -> bool:
+    """Delete a timeslot.
 
-    # Check if any interview request is using this timeslot
-    existing_request = db.mock_interview_requests.find_one(
-        {
-            "timeslot_id": ObjectId(timeslot_id),
-            "status": {"$in": ["pending", "confirmed"]},
-        }
-    )
+    Volunteer+ can delete if no member has booked it.
+    Admin can delete anytime.
+    """
 
-    if existing_request:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete timeslot that has pending or confirmed interview requests",
+    # Check if any meeting request is using this timeslot (only if not Admin)
+    if user_role < 5:  # Not an Admin
+        existing_request = db.mock_interview_requests.find_one(
+            {
+                "timeslot_id": ObjectId(timeslot_id),
+                "status": {"$in": ["pending", "confirmed"]},
+            }
         )
+
+        if existing_request:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot delete timeslot that has pending or confirmed meeting requests. Only Admins can delete booked timeslots.",
+            )
 
     result = db.mock_interview_timeslots.delete_one({"_id": ObjectId(timeslot_id)})
     return result.deleted_count > 0
 
 
-# ============== Interview Request CRUD ==============
+# ============== Meeting Request CRUD ==============
 
 
-def create_interview_request(
+def create_meeting_request(
     db: Database,
     *,
     user_id: str,
     user_name: str,
     user_email: str,
-    data: interview_schema.InterviewRequestCreate,
-) -> interview_models.InterviewRequest:
-    """Create a new interview request (Member only)."""
+    data: meeting_schema.MeetingRequestCreate,
+) -> meeting_models.MeetingRequest:
+    """Create a new meeting request (Member only)."""
 
     # Verify the timeslot exists and is available
     timeslot = db.mock_interview_timeslots.find_one(
@@ -228,8 +263,8 @@ def create_interview_request(
             detail="You already have a pending or confirmed request for this timeslot",
         )
 
-    # Calculate duration based on interview type
-    duration = interview_schema.InterviewType.get_duration(data.interview_type.value)
+    # Calculate duration based on meeting type
+    duration = meeting_schema.MeetingType.get_duration(data.interview_type.value)
 
     now = datetime.utcnow()
     request_dict = {
@@ -243,10 +278,10 @@ def create_interview_request(
         "duration_minutes": duration,
         "pending_companies": data.pending_companies,
         "earliest_interview_date": data.earliest_interview_date,
-        "notes": data.notes or "",
+        "member_notes": data.member_notes or "",
         "status": "pending",
         "interviewer_feedback": "",
-        "meeting_link": "",
+        "meeting_notes": "",
         "created_at": now,
         "updated_at": now,
     }
@@ -259,13 +294,13 @@ def create_interview_request(
     )
 
     request_data = db.mock_interview_requests.find_one({"_id": result.inserted_id})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def read_user_interview_requests(
+def read_user_meeting_requests(
     db: Database, *, user_id: str, skip: int = 0, limit: int = 100
-) -> List[interview_models.InterviewRequest]:
-    """Get all interview requests for a specific user."""
+) -> List[meeting_models.MeetingRequest]:
+    """Get all meeting requests for a specific user."""
 
     requests = (
         db.mock_interview_requests.find({"user_id": ObjectId(user_id)})
@@ -274,13 +309,13 @@ def read_user_interview_requests(
         .limit(limit)
     )
 
-    return [interview_models.InterviewRequest(**r) for r in requests]
+    return [meeting_models.MeetingRequest(**r) for r in requests]
 
 
-def read_all_interview_requests(
+def read_all_meeting_requests(
     db: Database, *, skip: int = 0, limit: int = 100, status: Optional[str] = None
-) -> List[interview_models.InterviewRequest]:
-    """Get all interview requests (Lead+ only)."""
+) -> List[meeting_models.MeetingRequest]:
+    """Get all meeting requests (Lead+ only)."""
 
     query = {}
     if status:
@@ -293,24 +328,24 @@ def read_all_interview_requests(
         .limit(limit)
     )
 
-    return [interview_models.InterviewRequest(**r) for r in requests]
+    return [meeting_models.MeetingRequest(**r) for r in requests]
 
 
-def read_interview_request_by_id(
+def read_meeting_request_by_id(
     db: Database, *, request_id: str
-) -> Optional[interview_models.InterviewRequest]:
-    """Get a specific interview request by ID."""
+) -> Optional[meeting_models.MeetingRequest]:
+    """Get a specific meeting request by ID."""
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
     if not request_data:
         return None
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def read_assigned_interview_requests(
+def read_assigned_meeting_requests(
     db: Database, *, assigned_to: str, skip: int = 0, limit: int = 100
-) -> List[interview_models.InterviewRequest]:
-    """Get interview requests assigned to a specific interviewer."""
+) -> List[meeting_models.MeetingRequest]:
+    """Get meeting requests assigned to a specific interviewer."""
 
     requests = (
         db.mock_interview_requests.find({"assigned_to": ObjectId(assigned_to)})
@@ -319,19 +354,19 @@ def read_assigned_interview_requests(
         .limit(limit)
     )
 
-    return [interview_models.InterviewRequest(**r) for r in requests]
+    return [meeting_models.MeetingRequest(**r) for r in requests]
 
 
-def assign_interviewer(
+def assign_volunteer(
     db: Database,
     *,
     request_id: str,
     assigned_to: str,
     assigned_to_name: str,
     assigned_by: str,
-    meeting_link: str = "",
-) -> Optional[interview_models.InterviewRequest]:
-    """Assign an interviewer to a interview request (Lead+ only)."""
+    meeting_notes: str = "",
+) -> Optional[meeting_models.MeetingRequest]:
+    """Assign a volunteer to a meeting request (Lead+ only)."""
 
     now = datetime.utcnow()
     update_dict = {
@@ -342,8 +377,8 @@ def assign_interviewer(
         "updated_at": now,
     }
 
-    if meeting_link:
-        update_dict["meeting_link"] = meeting_link
+    if meeting_notes:
+        update_dict["meeting_notes"] = meeting_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -353,19 +388,19 @@ def assign_interviewer(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def confirm_interview(
-    db: Database, *, request_id: str, meeting_link: str = ""
-) -> Optional[interview_models.InterviewRequest]:
-    """Confirm a interview request (Lead+ only)."""
+def confirm_meeting(
+    db: Database, *, request_id: str, meeting_notes: str = ""
+) -> Optional[meeting_models.MeetingRequest]:
+    """Confirm a meeting request (Lead+ only)."""
 
     now = datetime.utcnow()
     update_dict = {"status": "confirmed", "confirmed_at": now, "updated_at": now}
 
-    if meeting_link:
-        update_dict["meeting_link"] = meeting_link
+    if meeting_notes:
+        update_dict["meeting_notes"] = meeting_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -375,13 +410,13 @@ def confirm_interview(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def complete_interview(
+def complete_meeting(
     db: Database, *, request_id: str, interviewer_feedback: str
-) -> Optional[interview_models.InterviewRequest]:
-    """Mark a interview as completed with feedback."""
+) -> Optional[meeting_models.MeetingRequest]:
+    """Mark a meeting as completed with feedback."""
 
     now = datetime.utcnow()
     update_dict = {
@@ -399,13 +434,13 @@ def complete_interview(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def cancel_interview(
+def cancel_meeting(
     db: Database, *, request_id: str, cancellation_reason: str = ""
-) -> Optional[interview_models.InterviewRequest]:
-    """Cancel a interview request."""
+) -> Optional[meeting_models.MeetingRequest]:
+    """Cancel a meeting request."""
 
     # Get the request to find the timeslot
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
@@ -434,25 +469,25 @@ def cancel_interview(
         )
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def update_interview_status(
+def update_meeting_status(
     db: Database,
     *,
     request_id: str,
-    data: interview_schema.InterviewStatusUpdate,
-) -> Optional[interview_models.InterviewRequest]:
-    """Update the status of a interview request."""
+    data: meeting_schema.MeetingStatusUpdate,
+) -> Optional[meeting_models.MeetingRequest]:
+    """Update the status of a meeting request."""
 
     now = datetime.utcnow()
     update_dict = {"status": data.status.value, "updated_at": now}
 
-    if data.status == interview_schema.InterviewStatus.confirmed:
+    if data.status == meeting_schema.MeetingStatus.confirmed:
         update_dict["confirmed_at"] = now
-    elif data.status == interview_schema.InterviewStatus.completed:
+    elif data.status == meeting_schema.MeetingStatus.completed:
         update_dict["completed_at"] = now
-    elif data.status == interview_schema.InterviewStatus.cancelled:
+    elif data.status == meeting_schema.MeetingStatus.cancelled:
         update_dict["cancelled_at"] = now
         # Make timeslot available again
         request_data = db.mock_interview_requests.find_one(
@@ -466,8 +501,8 @@ def update_interview_status(
     if data.interviewer_feedback is not None:
         update_dict["interviewer_feedback"] = data.interviewer_feedback
 
-    if data.meeting_link is not None:
-        update_dict["meeting_link"] = data.meeting_link
+    if data.member_notes is not None:
+        update_dict["member_notes"] = data.member_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -477,11 +512,11 @@ def update_interview_status(
         return None
 
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
-    return interview_models.InterviewRequest(**request_data)
+    return meeting_models.MeetingRequest(**request_data)
 
 
-def count_interview_requests_by_status(db: Database, *, status: str) -> int:
-    """Count interview requests by status."""
+def count_meeting_requests_by_status(db: Database, *, status: str) -> int:
+    """Count meeting requests by status."""
     return db.mock_interview_requests.count_documents({"status": status})
 
 
@@ -493,15 +528,15 @@ def count_available_timeslots(db: Database) -> int:
     )
 
 
-def delete_interview_request(db: Database, *, request_id: str) -> bool:
+def delete_meeting_request(db: Database, *, request_id: str) -> bool:
     """
-    Permanently delete an interview request from the database (Admin only).
+    Permanently delete a meeting request from the database (Admin only).
     Also makes the associated timeslot available again.
     """
     # Get the request to find the timeslot
     request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
     if not request_data:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     # Delete the request
     result = db.mock_interview_requests.delete_one({"_id": ObjectId(request_id)})
@@ -515,9 +550,9 @@ def delete_interview_request(db: Database, *, request_id: str) -> bool:
     return result.deleted_count > 0
 
 
-def bulk_delete_interview_requests(db: Database, *, request_ids: list[str]) -> dict:
+def bulk_delete_meeting_requests(db: Database, *, request_ids: list[str]) -> dict:
     """
-    Permanently delete multiple interview requests from the database (Admin only).
+    Permanently delete multiple meeting requests from the database (Admin only).
     Also makes the associated timeslots available again.
     """
     deleted_count = 0
@@ -545,7 +580,7 @@ def bulk_delete_interview_requests(db: Database, *, request_ids: list[str]) -> d
             continue
 
     return {
-        "message": f"Successfully deleted {deleted_count} interview request(s)",
+        "message": f"Successfully deleted {deleted_count} meeting request(s)",
         "deleted_count": deleted_count,
         "total_requested": len(request_ids),
     }
