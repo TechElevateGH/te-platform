@@ -532,7 +532,7 @@ def send_resume_review_completed_email(
                 
                 <p class="message">Log in to your TechElevate account to view the detailed feedback and recommendations.</p>
                 
-                <a href="{settings.SERVER_HOST}/resumes" class="cta-button">View Your Feedback</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Feedback</a>
                 
                 <div class="divider"></div>
                 
@@ -705,7 +705,7 @@ def send_resume_review_request_email(
                 
                 <p class="message">Please log in to the admin panel to assign a reviewer.</p>
                 
-                <a href="{settings.SERVER_HOST}/admin/resumes" class="cta-button">Manage Reviews</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Reviews</a>
                 
                 <div class="divider"></div>
                 
@@ -881,7 +881,7 @@ def send_referral_request_email(
                 
                 <p class="message">Please log in to the admin panel to review and assign this referral request.</p>
                 
-                <a href="{settings.SERVER_HOST}/admin/referrals" class="cta-button">Manage Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -1073,7 +1073,7 @@ def send_referral_update_email(
                 
                 <p class="message">Please check your referral dashboard for more details and next steps.</p>
                 
-                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -1117,15 +1117,23 @@ def send_interview_request_email(
     pending_companies: list[str],
 ) -> None:
     """
-    Send notification to info@techelevate.org when a new mock interview is requested.
+    Send notification to info@techelevate.org when a new interview is requested.
     """
     project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - New Mock Interview Request"
+    subject = f"{project_name} - New Interview Request"
     admin_email = "info@techelevate.org"
 
-    companies_str = (
-        ", ".join(pending_companies) if pending_companies else "None specified"
+    # Only show pending companies for mock interviews (not 1-on-1 sessions)
+    is_one_on_one = (
+        interview_type.lower() == "one_on_one"
+        or interview_type.lower() == "1-on-1 mentorship"
     )
+    companies_section = ""
+    if not is_one_on_one and pending_companies:
+        companies_str = ", ".join(pending_companies)
+        companies_section = (
+            f"<p><strong>Pending Companies:</strong> {companies_str}</p>"
+        )
 
     html_template = f"""
     <!DOCTYPE html>
@@ -1150,7 +1158,7 @@ def send_interview_request_email(
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             }}
             .header {{
-                background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+                background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
                 color: white;
                 padding: 40px 30px;
                 text-align: center;
@@ -1164,15 +1172,15 @@ def send_interview_request_email(
                 padding: 40px 30px;
             }}
             .info-box {{
-                background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-                border-left: 4px solid #8b5cf6;
+                background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+                border-left: 4px solid #06b6d4;
                 padding: 20px;
                 margin: 20px 0;
                 border-radius: 8px;
             }}
             .info-box p {{
                 margin: 8px 0;
-                color: #5b21b6;
+                color: #164e63;
                 font-size: 14px;
             }}
             .cta-button {{
@@ -1182,7 +1190,7 @@ def send_interview_request_email(
                 border-radius: 8px;
                 text-decoration: none;
                 font-weight: 600;
-                background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                background: linear-gradient(135deg, #06b6d4, #0891b2);
                 color: white;
             }}
             .footer {{
@@ -1201,24 +1209,24 @@ def send_interview_request_email(
     <body>
         <div class="container">
             <div class="header">
-                <h1>🎤 New Mock Interview Request</h1>
+                <h1>🎤 New Interview Request</h1>
                 <p>Action required</p>
             </div>
             <div class="content">
                 <p class="greeting">TechElevate Team,</p>
-                <p>A new mock interview request has been submitted.</p>
+                <p>A new interview request has been submitted.</p>
                 
                 <div class="info-box">
                     <p><strong>Member:</strong> {member_name} ({member_email})</p>
                     <p><strong>Interview Type:</strong> {interview_type}</p>
                     <p><strong>Date:</strong> {timeslot_date}</p>
                     <p><strong>Time:</strong> {timeslot_time}</p>
-                    <p><strong>Pending Companies:</strong> {companies_str}</p>
+                    {companies_section}
                 </div>
                 
                 <p>Please log in to the admin panel to assign an interviewer.</p>
                 
-                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Manage Interviews</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Interviews</a>
             </div>
             <div class="footer">
                 <p>© 2025 {project_name}. All rights reserved.</p>
@@ -1692,7 +1700,7 @@ def send_interview_cancelled_email(
                 
                 <p>You can schedule a new mock interview at any time.</p>
                 
-                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Schedule New Interview</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Schedule New Interview</a>
             </div>
             <div class="footer">
                 <p>© 2025 {project_name}. All rights reserved.</p>
@@ -1850,7 +1858,7 @@ def send_referral_completed_email(
                 
                 <p class="message">Thank you for using TechElevate's referral network. We hope this connection leads to great opportunities!</p>
                 
-                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -1878,4 +1886,184 @@ def send_referral_completed_email(
             "company_name": company_name,
             "position": position,
         },
+    )
+
+
+def send_meeting_reminder_email(
+    email_to: str,
+    recipient_name: str,
+    member_name: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    duration_minutes: int,
+    meeting_notes: str = "",
+) -> None:
+    """
+    Send reminder email 30 minutes before a scheduled meeting.
+
+    Args:
+        email_to: Email address to send to (volunteer+ or admin)
+        recipient_name: Name of the recipient
+        member_name: Name of the member being interviewed
+        interview_type: Type of interview (Behavioral, Technical, etc.)
+        timeslot_date: Date of the meeting (YYYY-MM-DD)
+        timeslot_time: Time of the meeting (HH:MM)
+        duration_minutes: Duration in minutes
+        meeting_notes: Optional meeting notes
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Meeting Reminder: {interview_type} in 30 Minutes"
+
+    notes_section = (
+        f"""
+                <div class="notes-box">
+                    <p><strong>Notes:</strong></p>
+                    <p>{meeting_notes}</p>
+                </div>
+                """
+        if meeting_notes
+        else ""
+    )
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+            }}
+            .reminder-badge {{
+                display: inline-block;
+                padding: 8px 16px;
+                background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+                color: #164e63;
+                border-radius: 999px;
+                font-weight: 700;
+                font-size: 14px;
+                margin-bottom: 20px;
+                border: 2px solid #06b6d4;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+                border-left: 4px solid #06b6d4;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #164e63;
+                font-size: 15px;
+            }}
+            .info-box strong {{
+                color: #0e7490;
+            }}
+            .notes-box {{
+                background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                border-left: 4px solid #3b82f6;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .notes-box p {{
+                margin: 8px 0;
+                color: #1e40af;
+                font-size: 14px;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #06b6d4, #0891b2);
+                color: white;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>⏰ Meeting Reminder</h1>
+                <p>Your meeting starts in 30 minutes</p>
+            </div>
+            <div class="content">
+                <span class="reminder-badge">🔔 STARTS IN 30 MINUTES</span>
+                
+                <p>Hi {recipient_name},</p>
+                <p>This is a friendly reminder about your upcoming mock interview.</p>
+                
+                <div class="info-box">
+                    <p><strong>Member:</strong> {member_name}</p>
+                    <p><strong>Interview Type:</strong> {interview_type}</p>
+                    <p><strong>Date:</strong> {timeslot_date}</p>
+                    <p><strong>Time:</strong> {timeslot_time}</p>
+                    <p><strong>Duration:</strong> {duration_minutes} minutes</p>
+                </div>
+                {notes_section}
+                
+                <p>Please be ready a few minutes early. Good luck!</p>
+                
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Details</a>
+            </div>
+            <div class="footer">
+                <p>© 2025 {project_name}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={},
     )

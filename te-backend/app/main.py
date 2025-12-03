@@ -241,11 +241,33 @@ def on_startup():
     except Exception as e:
         logger.warning(f"Could not seed initial data: {e}")
 
+    # Start background tasks scheduler
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from app.core.background_tasks import send_meeting_reminders
+
+    scheduler = AsyncIOScheduler()
+    # Run meeting reminder check every 5 minutes
+    scheduler.add_job(
+        send_meeting_reminders, "interval", minutes=5, id="meeting_reminders"
+    )
+    scheduler.start()
+    logger.info(
+        "✓ Background tasks scheduler started (meeting reminders every 5 minutes)"
+    )
+
+    # Store scheduler instance for shutdown
+    app.state.scheduler = scheduler
+
 
 @app.on_event("shutdown")
 def on_shutdown():
-    """Close MongoDB connection"""
+    """Close MongoDB connection and shutdown scheduler"""
     from app.database.session import client
+
+    # Shutdown scheduler if it exists
+    if hasattr(app.state, "scheduler"):
+        app.state.scheduler.shutdown()
+        logger.info("✓ Background tasks scheduler shutdown")
 
     client.close()
     logger.info("✓ MongoDB connection closed")

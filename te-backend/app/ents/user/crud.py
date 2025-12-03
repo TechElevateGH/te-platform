@@ -149,6 +149,7 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
         "username": data.username,
         "password": security.get_password_hash(data.token),  # Hash token as password
         "lead_token": data.token,  # Store plain token for Lead login
+        "email": data.email,  # Optional email for notifications
         "role": data.role,
         "is_active": True,
         "company_id": None,  # Not needed for Lead/Admin
@@ -198,6 +199,7 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
         "username": data.username,
         "password": security.get_password_hash(data.token),  # Hash token as password
         "lead_token": data.token,  # Store plain token for Referrer login
+        "email": data.email,  # Optional email for notifications
         "company_id": ObjectId(data.company_id),  # Store company they manage
         "company_name": data.company_name,  # Store company name from request
         "role": user_schema.UserRoles.referrer,  # Always Referrer role
@@ -346,6 +348,10 @@ def update_privileged_user(
     if data.token is not None:
         update_data["password"] = security.get_password_hash(data.token)
         update_data["lead_token"] = data.token
+
+    # Update email if provided
+    if data.email is not None:
+        update_data["email"] = data.email
 
     # Update is_active if provided
     if data.is_active is not None:

@@ -22,6 +22,9 @@ python-multipart==0.0.9
 pymongo[srv]==4.10.1
 certifi
 
+# Background tasks scheduler
+apscheduler==3.10.4
+
 # Environment configuration helper
 python-dotenv==1.0.0
 

@@ -11,7 +11,10 @@ import {
     FunnelIcon,
     PencilIcon,
     TrashIcon,
-    XMarkIcon
+    XMarkIcon,
+    ChevronUpDownIcon,
+    ChevronUpIcon,
+    ChevronDownIcon
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -107,6 +110,8 @@ const InterviewManagement = () => {
     const [interviewers, setInterviewers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('pending'); // Default to pending status
+    const [sortField, setSortField] = useState('timeslot_date'); // Field to sort by
+    const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
 
     // Selection and bulk delete state
     const [selectedItems, setSelectedItems] = useState([]);
@@ -296,6 +301,50 @@ const InterviewManagement = () => {
         statusFilter === 'all' || i.status === statusFilter
     );
 
+    // Sort function
+    const handleSort = (field) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
+
+    // Apply sorting
+    const sortedInterviews = [...filteredInterviews].sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortField) {
+            case 'user_name':
+                aValue = a.user_name || '';
+                bValue = b.user_name || '';
+                break;
+            case 'interview_type':
+                aValue = a.interview_type || '';
+                bValue = b.interview_type || '';
+                break;
+            case 'timeslot_date':
+                aValue = new Date(a.timeslot_date + 'T' + (a.timeslot_time || '00:00'));
+                bValue = new Date(b.timeslot_date + 'T' + (b.timeslot_time || '00:00'));
+                break;
+            case 'assigned_to_name':
+                aValue = a.assigned_to_name || 'zzz'; // Put unassigned at end
+                bValue = b.assigned_to_name || 'zzz';
+                break;
+            case 'status':
+                aValue = a.status || '';
+                bValue = b.status || '';
+                break;
+            default:
+                return 0;
+        }
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -353,29 +402,89 @@ const InterviewManagement = () => {
                                         <th className="px-4 py-3 w-12">
                                             <input
                                                 type="checkbox"
-                                                checked={selectedItems.length === filteredInterviews.length && filteredInterviews.length > 0}
+                                                checked={selectedItems.length === sortedInterviews.length && sortedInterviews.length > 0}
                                                 onChange={toggleSelectAll}
                                                 className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
                                             />
                                         </th>
                                     )}
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Member
+                                    <th
+                                        onClick={() => handleSort('user_name')}
+                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            Member
+                                            {sortField === 'user_name' ? (
+                                                sortDirection === 'asc' ?
+                                                    <ChevronUpIcon className="h-4 w-4" /> :
+                                                    <ChevronDownIcon className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                            )}
+                                        </div>
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Type
+                                    <th
+                                        onClick={() => handleSort('interview_type')}
+                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            Type
+                                            {sortField === 'interview_type' ? (
+                                                sortDirection === 'asc' ?
+                                                    <ChevronUpIcon className="h-4 w-4" /> :
+                                                    <ChevronDownIcon className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                            )}
+                                        </div>
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Date & Time
+                                    <th
+                                        onClick={() => handleSort('timeslot_date')}
+                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            Date & Time
+                                            {sortField === 'timeslot_date' ? (
+                                                sortDirection === 'asc' ?
+                                                    <ChevronUpIcon className="h-4 w-4" /> :
+                                                    <ChevronDownIcon className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                            )}
+                                        </div>
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Interviewer
+                                    <th
+                                        onClick={() => handleSort('assigned_to_name')}
+                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            Interviewer
+                                            {sortField === 'assigned_to_name' ? (
+                                                sortDirection === 'asc' ?
+                                                    <ChevronUpIcon className="h-4 w-4" /> :
+                                                    <ChevronDownIcon className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                            )}
+                                        </div>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Companies
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Status
+                                    <th
+                                        onClick={() => handleSort('status')}
+                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            Status
+                                            {sortField === 'status' ? (
+                                                sortDirection === 'asc' ?
+                                                    <ChevronUpIcon className="h-4 w-4" /> :
+                                                    <ChevronDownIcon className="h-4 w-4" />
+                                            ) : (
+                                                <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                            )}
+                                        </div>
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                                         Actions
@@ -383,7 +492,7 @@ const InterviewManagement = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {filteredInterviews.map((interview) => {
+                                {sortedInterviews.map((interview) => {
                                     const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
                                     const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;
 

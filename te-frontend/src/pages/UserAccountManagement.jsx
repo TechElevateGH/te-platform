@@ -7,6 +7,9 @@ import {
     CheckCircleIcon,
     XCircleIcon,
     UserCircleIcon,
+    ChevronUpDownIcon,
+    ChevronUpIcon,
+    ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +30,10 @@ const UserAccountManagement = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const [showMemberModal, setShowMemberModal] = useState(false);
+    const [privilegedSortField, setPrivilegedSortField] = useState('username');
+    const [privilegedSortDirection, setPrivilegedSortDirection] = useState('asc');
+    const [memberSortField, setMemberSortField] = useState('full_name');
+    const [memberSortDirection, setMemberSortDirection] = useState('asc');
 
     // Check permissions - convert userRole to number for comparison
     const roleNumber = parseInt(userRole);
@@ -144,15 +151,76 @@ const UserAccountManagement = () => {
     // Filter privileged users based on role
     // Leads can only see Volunteers (role 3) and below
     // Admins can see all
-    const visiblePrivilegedUsers = isAdmin
+    const visiblePrivilegedUsers = (isAdmin
         ? filteredPrivilegedUsers
-        : filteredPrivilegedUsers.filter(user => user.role <= 3);
+        : filteredPrivilegedUsers.filter(user => user.role <= 3)
+    ).sort((a, b) => {
+        let aValue, bValue;
+        switch (privilegedSortField) {
+            case 'username':
+                aValue = a.username || '';
+                bValue = b.username || '';
+                break;
+            case 'role':
+                aValue = a.role || 0;
+                bValue = b.role || 0;
+                break;
+            case 'status':
+                aValue = a.is_active ? 1 : 0;
+                bValue = b.is_active ? 1 : 0;
+                break;
+            default:
+                return 0;
+        }
+        if (aValue < bValue) return privilegedSortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return privilegedSortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handlePrivilegedSort = (field) => {
+        if (privilegedSortField === field) {
+            setPrivilegedSortDirection(privilegedSortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setPrivilegedSortField(field);
+            setPrivilegedSortDirection('asc');
+        }
+    };
 
     const filteredMemberUsers = memberUsers.filter(
         (user) =>
             user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    ).sort((a, b) => {
+        let aValue, bValue;
+        switch (memberSortField) {
+            case 'full_name':
+                aValue = a.full_name || '';
+                bValue = b.full_name || '';
+                break;
+            case 'email':
+                aValue = a.email || '';
+                bValue = b.email || '';
+                break;
+            case 'status':
+                aValue = a.is_active ? 1 : 0;
+                bValue = b.is_active ? 1 : 0;
+                break;
+            default:
+                return 0;
+        }
+        if (aValue < bValue) return memberSortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return memberSortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handleMemberSort = (field) => {
+        if (memberSortField === field) {
+            setMemberSortDirection(memberSortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setMemberSortField(field);
+            setMemberSortDirection('asc');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950/50">
@@ -245,14 +313,50 @@ const UserAccountManagement = () => {
                                 <table className="w-full min-w-[640px]">
                                     <thead className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Username
+                                            <th
+                                                onClick={() => handlePrivilegedSort('username')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Username
+                                                    {privilegedSortField === 'username' ? (
+                                                        privilegedSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Role
+                                            <th
+                                                onClick={() => handlePrivilegedSort('role')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Role
+                                                    {privilegedSortField === 'role' ? (
+                                                        privilegedSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Status
+                                            <th
+                                                onClick={() => handlePrivilegedSort('status')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Status
+                                                    {privilegedSortField === 'status' ? (
+                                                        privilegedSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Actions
@@ -437,17 +541,53 @@ const UserAccountManagement = () => {
                                 <table className="w-full min-w-[640px]">
                                     <thead className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-gray-200 dark:border-gray-700">
                                         <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Member
+                                            <th
+                                                onClick={() => handleMemberSort('full_name')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Member
+                                                    {memberSortField === 'full_name' ? (
+                                                        memberSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Email
+                                            <th
+                                                onClick={() => handleMemberSort('email')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Email
+                                                    {memberSortField === 'email' ? (
+                                                        memberSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 University
                                             </th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                                                Status
+                                            <th
+                                                onClick={() => handleMemberSort('status')}
+                                                className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    Status
+                                                    {memberSortField === 'status' ? (
+                                                        memberSortDirection === 'asc' ?
+                                                            <ChevronUpIcon className="h-4 w-4" /> :
+                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
+                                                    )}
+                                                </div>
                                             </th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
                                                 Actions

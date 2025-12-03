@@ -53,6 +53,7 @@ class LeadCreate(BaseModel):
 
     username: str  # Used for login
     token: str  # Used for login
+    email: Optional[EmailStr] = None  # Optional email for notifications
     role: UserRoles = UserRoles.lead
 
 
@@ -66,6 +67,7 @@ class ReferrerCreate(BaseModel):
 
     username: str  # For admin reference only (not used for login)
     token: str  # Used for login (referrers authenticate with token only)
+    email: Optional[EmailStr] = None  # Optional email for notifications
     company_id: str  # MongoDB ObjectId as string - assigned company
     company_name: str  # Company name for quick access (denormalized)
 
@@ -75,6 +77,7 @@ class PrivilegedUserUpdate(BaseModel):
 
     username: Optional[str] = None
     token: Optional[str] = None
+    email: Optional[EmailStr] = None
     is_active: Optional[bool] = None
 
 

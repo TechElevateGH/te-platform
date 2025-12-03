@@ -90,7 +90,9 @@ class MeetingRequestCreate(BaseModel):
     earliest_interview_date: Optional[str] = Field(
         None, description="Date of earliest upcoming interview (YYYY-MM-DD format)"
     )
-    notes: Optional[str] = Field("", description="Additional notes for the interviewer")
+    member_notes: Optional[str] = Field(
+        "", description="Additional notes for the interviewer"
+    )
 
 
 class MeetingRequestUpdate(BaseModel):

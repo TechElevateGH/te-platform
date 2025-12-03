@@ -59,6 +59,39 @@ const formatTime = (timeStr) => {
     });
 };
 
+// Helper function to format date with day of week
+const formatDateWithDay = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+};
+
+// Helper to get week label for grouping
+const getWeekLabel = (dateStr) => {
+    if (!dateStr) return 'Unknown';
+    const date = new Date(dateStr + 'T12:00:00');
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const interviewDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const diffTime = interviewDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays > 1 && diffDays <= 7) return 'This Week';
+    if (diffDays > 7 && diffDays <= 14) return 'Next Week';
+
+    // Get month name for future dates
+    const monthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return monthYear;
+};
+
 const MyAssignedInterviews = () => {
     const { accessToken } = useAuth();
     const toast = useToast();
@@ -66,6 +99,8 @@ const MyAssignedInterviews = () => {
     const [loading, setLoading] = useState(true);
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [sortBy, setSortBy] = useState('date'); // 'date' or 'type'
+    const [groupBy, setGroupBy] = useState('week'); // 'week' or 'month' or 'none'
 
     const fetchAssignedInterviews = useCallback(async () => {
         if (!accessToken) return;
@@ -112,8 +147,42 @@ const MyAssignedInterviews = () => {
     };
 
     // Separate upcoming (pending/confirmed) and past (completed/cancelled)
-    const upcomingInterviews = interviews.filter(i => i.status === 'pending' || i.status === 'confirmed');
-    const pastInterviews = interviews.filter(i => i.status === 'completed' || i.status === 'cancelled');
+    let upcomingInterviews = interviews.filter(i => i.status === 'pending' || i.status === 'confirmed');
+    let pastInterviews = interviews.filter(i => i.status === 'completed' || i.status === 'cancelled');
+
+    // Sort interviews
+    const sortInterviews = (interviewsList) => {
+        return [...interviewsList].sort((a, b) => {
+            if (sortBy === 'date') {
+                const dateA = new Date(a.timeslot_date + 'T' + a.timeslot_time);
+                const dateB = new Date(b.timeslot_date + 'T' + b.timeslot_time);
+                return dateA - dateB;
+            } else if (sortBy === 'type') {
+                return a.interview_type.localeCompare(b.interview_type);
+            }
+            return 0;
+        });
+    };
+
+    upcomingInterviews = sortInterviews(upcomingInterviews);
+    pastInterviews = sortInterviews(pastInterviews);
+
+    // Group interviews by week/month
+    const groupInterviews = (interviewsList) => {
+        if (groupBy === 'none') return { 'All': interviewsList };
+
+        const grouped = {};
+        interviewsList.forEach(interview => {
+            const label = groupBy === 'week' ? getWeekLabel(interview.timeslot_date) :
+                new Date(interview.timeslot_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            if (!grouped[label]) grouped[label] = [];
+            grouped[label].push(interview);
+        });
+        return grouped;
+    };
+
+    const groupedUpcoming = groupInterviews(upcomingInterviews);
+    const groupedPast = groupInterviews(pastInterviews);
 
     if (loading) {
         return (
@@ -166,7 +235,7 @@ const MyAssignedInterviews = () => {
                     <div className="space-y-1.5">
                         <div className="flex items-center gap-2 text-sm">
                             <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span className="font-semibold text-gray-900 dark:text-white">{interview.timeslot_date}</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{formatDateWithDay(interview.timeslot_date)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -247,23 +316,74 @@ const MyAssignedInterviews = () => {
 
     return (
         <div className="space-y-4">
+            {/* Controls */}
+            {interviews.length > 0 && (
+                <div className="flex flex-wrap gap-3 items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sort by:</span>
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="text-sm px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="date">Date</option>
+                            <option value="type">Type</option>
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Group by:</span>
+                        <select
+                            value={groupBy}
+                            onChange={(e) => setGroupBy(e.target.value)}
+                            className="text-sm px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="week">Week</option>
+                            <option value="month">Month</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                </div>
+            )}
+
             {/* Upcoming Interviews */}
             {upcomingInterviews.length > 0 && (
-                <div>
-                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Upcoming</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {upcomingInterviews.map(renderInterviewCard)}
-                    </div>
+                <div className="space-y-6">
+                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Upcoming</h4>
+                    {Object.entries(groupedUpcoming).map(([label, groupInterviews]) => (
+                        <div key={label}>
+                            {groupBy !== 'none' && (
+                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-3 flex items-center gap-2">
+                                    <span className="flex-shrink-0">{label}</span>
+                                    <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
+                                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
+                                </h5>
+                            )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {groupInterviews.map(renderInterviewCard)}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
             {/* Past Interviews */}
             {pastInterviews.length > 0 && (
-                <div>
-                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase mb-3">Past</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {pastInterviews.map(renderInterviewCard)}
-                    </div>
+                <div className="space-y-6">
+                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Past</h4>
+                    {Object.entries(groupedPast).map(([label, groupInterviews]) => (
+                        <div key={label}>
+                            {groupBy !== 'none' && (
+                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-3 flex items-center gap-2">
+                                    <span className="flex-shrink-0">{label}</span>
+                                    <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
+                                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
+                                </h5>
+                            )}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {groupInterviews.map(renderInterviewCard)}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 

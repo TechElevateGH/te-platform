@@ -282,6 +282,7 @@ def create_meeting_request(
         "status": "pending",
         "interviewer_feedback": "",
         "meeting_notes": "",
+        "reminder_sent": False,
         "created_at": now,
         "updated_at": now,
     }
@@ -397,7 +398,12 @@ def confirm_meeting(
     """Confirm a meeting request (Lead+ only)."""
 
     now = datetime.utcnow()
-    update_dict = {"status": "confirmed", "confirmed_at": now, "updated_at": now}
+    update_dict = {
+        "status": "confirmed",
+        "confirmed_at": now,
+        "updated_at": now,
+        "reminder_sent": False,  # Reset reminder flag when confirming
+    }
 
     if meeting_notes:
         update_dict["meeting_notes"] = meeting_notes

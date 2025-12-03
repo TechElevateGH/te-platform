@@ -112,6 +112,10 @@ class MeetingRequest(BaseModel):
     completed_at: Optional[datetime] = None
     cancelled_at: Optional[datetime] = None
 
+    # Reminder tracking
+    reminder_sent: bool = False
+    reminder_sent_at: Optional[datetime] = None
+
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
