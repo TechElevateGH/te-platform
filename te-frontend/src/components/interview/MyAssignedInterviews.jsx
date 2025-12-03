@@ -39,6 +39,24 @@ const formatStatus = (status) => {
     return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
+// Helper function to format UTC time to local timezone
+const formatTime = (timeStr) => {
+    if (!timeStr) return '';
+    // Parse the combined time string (e.g., "14:00 - 15:00")
+    // Extract just the first time for display
+    const firstTime = timeStr.includes(' - ') ? timeStr.split(' - ')[0] : timeStr;
+    const [hours, minutes] = firstTime.split(':').map(Number);
+    const today = new Date().toISOString().split('T')[0];
+    // Parse as UTC and convert to local
+    const utcDate = new Date(`${today}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+
+    return utcDate.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
 const MyAssignedInterviews = () => {
     const { accessToken } = useAuth();
     const toast = useToast();
@@ -150,7 +168,7 @@ const MyAssignedInterviews = () => {
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                             <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-600 dark:text-gray-400">{interview.timeslot_time}</span>
+                            <span className="text-gray-600 dark:text-gray-400">{formatTime(interview.timeslot_time)}</span>
                             <span className="text-xs text-gray-500">({interview.duration_minutes} min)</span>
                         </div>
                     </div>
