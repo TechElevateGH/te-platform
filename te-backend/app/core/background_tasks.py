@@ -57,12 +57,14 @@ async def send_meeting_reminders():
 
                 # Parse the meeting datetime
                 # timeslot_date is YYYY-MM-DD, timeslot_time is HH:MM
+                # The times are stored in UTC in the database
                 meeting_datetime_str = (
-                    f"{meeting.timeslot_date} {meeting.timeslot_time}"
+                    f"{meeting.timeslot_date}T{meeting.timeslot_time}:00"
                 )
+                # Parse as UTC by adding explicit timezone
                 meeting_datetime = datetime.strptime(
-                    meeting_datetime_str, "%Y-%m-%d %H:%M"
-                )
+                    meeting_datetime_str, "%Y-%m-%dT%H:%M:%S"
+                ).replace(tzinfo=None)  # Keep as naive UTC datetime for comparison
 
                 # Check if this meeting is in our reminder window
                 if reminder_time_start <= meeting_datetime <= reminder_time_end:

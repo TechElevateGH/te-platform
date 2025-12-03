@@ -44,6 +44,18 @@ const formatStatus = (status) => {
     return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
+// Helper function to format date with day of week
+const formatDateWithDay = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+};
+
 // Helper function to format UTC time to local timezone
 const formatTime = (timeStr) => {
     if (!timeStr) return '';
@@ -136,8 +148,8 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
         }
     };
 
-    // Filter interviews by status and interview type
-    const filteredInterviews = useMemo(() => {
+    // Filter interviews by interview type first
+    const typeFilteredInterviews = useMemo(() => {
         let filtered = interviews;
 
         // Filter by interview type (mock interviews or one-on-one)
@@ -147,21 +159,25 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
             filtered = filtered.filter(i => i.interview_type === 'one_on_one');
         }
 
-        // Then filter by status
-        if (statusFilter === 'all') return filtered;
-        return filtered.filter(interview => interview.status === statusFilter);
-    }, [interviews, statusFilter, interviewType]);
+        return filtered;
+    }, [interviews, interviewType]);
 
-    // Get status counts
+    // Get status counts based on type-filtered interviews
     const statusCounts = useMemo(() => {
         return {
-            all: interviews.length,
-            pending: interviews.filter(i => i.status === 'pending').length,
-            confirmed: interviews.filter(i => i.status === 'confirmed').length,
-            completed: interviews.filter(i => i.status === 'completed').length,
-            cancelled: interviews.filter(i => i.status === 'cancelled').length,
+            all: typeFilteredInterviews.length,
+            pending: typeFilteredInterviews.filter(i => i.status === 'pending').length,
+            confirmed: typeFilteredInterviews.filter(i => i.status === 'confirmed').length,
+            completed: typeFilteredInterviews.filter(i => i.status === 'completed').length,
+            cancelled: typeFilteredInterviews.filter(i => i.status === 'cancelled').length,
         };
-    }, [interviews]);
+    }, [typeFilteredInterviews]);
+
+    // Filter by status
+    const filteredInterviews = useMemo(() => {
+        if (statusFilter === 'all') return typeFilteredInterviews;
+        return typeFilteredInterviews.filter(interview => interview.status === statusFilter);
+    }, [typeFilteredInterviews, statusFilter]);
 
     if (loading) {
         return (
@@ -331,7 +347,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                     <div className="space-y-1.5">
                                         <div className="flex items-center gap-2 text-sm">
                                             <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                            <span className="font-semibold text-gray-900 dark:text-white">{interview.timeslot_date}</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{formatDateWithDay(interview.timeslot_date)}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
                                             <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -470,7 +486,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                                     Cancel Interview?
                                                 </Dialog.Title>
                                                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                                    Are you sure you want to cancel this {interviewToCancel && formatInterviewType(interviewToCancel.interview_type).toLowerCase()} interview scheduled for {interviewToCancel?.timeslot_date} at {formatTime(interviewToCancel?.timeslot_time)}?
+                                                    Are you sure you want to cancel this {interviewToCancel && formatInterviewType(interviewToCancel.interview_type).toLowerCase()} interview scheduled for {interviewToCancel && formatDateWithDay(interviewToCancel.timeslot_date)} at {formatTime(interviewToCancel?.timeslot_time)}?
                                                 </p>
                                                 {interviewToCancel?.status === 'confirmed' && interviewToCancel?.assigned_to_name && (
                                                     <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 mb-4">
