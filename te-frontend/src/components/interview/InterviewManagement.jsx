@@ -89,7 +89,7 @@ const formatTimestamp = (timestamp) => {
         // No timezone info, assume UTC and append 'Z'
         date = new Date(timestamp + 'Z');
     }
-    
+
     return date.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',

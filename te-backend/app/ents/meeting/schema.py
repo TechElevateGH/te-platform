@@ -107,13 +107,17 @@ class MeetingAssign(BaseModel):
     """Schema for Lead+ to assign an interviewer to a request."""
 
     assigned_to: str = Field(..., description="User ID of the Volunteer/Lead to assign")
-    meeting_notes: Optional[str] = Field("", description="Notes for the meeting (link, details, etc.)")
+    meeting_notes: Optional[str] = Field(
+        "", description="Notes for the meeting (link, details, etc.)"
+    )
 
 
 class MeetingConfirm(BaseModel):
     """Schema for confirming a meeting."""
 
-    meeting_notes: Optional[str] = Field("", description="Notes for the meeting (link, details, etc.)")
+    meeting_notes: Optional[str] = Field(
+        "", description="Notes for the meeting (link, details, etc.)"
+    )
     confirmation_message: Optional[str] = Field(
         "", description="Optional message to send to the member"
     )
