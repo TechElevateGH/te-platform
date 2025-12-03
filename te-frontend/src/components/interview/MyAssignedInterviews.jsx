@@ -219,9 +219,9 @@ const MyAssignedInterviews = () => {
 
                     {/* Actions */}
                     <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                        {interview.meeting_link && interview.status === 'confirmed' && (
+                        {interview.meeting_notes && interview.meeting_notes.startsWith('http') && interview.status === 'confirmed' && (
                             <a
-                                href={interview.meeting_link}
+                                href={interview.meeting_notes}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

@@ -390,6 +390,19 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                         </div>
                                     )}
 
+                                    {/* Notes */}
+                                    {interview.meeting_notes && interview.status === 'confirmed' && (
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                                            <div className="flex items-center gap-1.5 mb-1.5">
+                                                <LinkIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                                                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Meeting Notes</span>
+                                            </div>
+                                            <p className="text-xs text-blue-900 dark:text-blue-200 break-all">
+                                                {interview.meeting_notes}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     {/* Actions */}
                                     <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                                         {(interview.status === 'pending' || interview.status === 'confirmed') && (
@@ -401,9 +414,9 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                                 {cancellingId === interview.id ? 'Cancelling...' : 'Cancel'}
                                             </button>
                                         )}
-                                        {interview.meeting_link && interview.status === 'confirmed' && (
+                                        {interview.meeting_notes && interview.meeting_notes.startsWith('http') && interview.status === 'confirmed' && (
                                             <a
-                                                href={interview.meeting_link}
+                                                href={interview.meeting_notes}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

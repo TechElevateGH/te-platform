@@ -100,20 +100,20 @@ class MeetingRequestUpdate(BaseModel):
     timeslot_id: Optional[str] = None
     pending_companies: Optional[List[str]] = None
     earliest_interview_date: Optional[str] = None
-    notes: Optional[str] = None
+    member_notes: Optional[str] = None
 
 
 class MeetingAssign(BaseModel):
     """Schema for Lead+ to assign an interviewer to a request."""
 
     assigned_to: str = Field(..., description="User ID of the Volunteer/Lead to assign")
-    meeting_link: Optional[str] = Field("", description="Meeting link for the meeting")
+    meeting_notes: Optional[str] = Field("", description="Notes for the meeting (link, details, etc.)")
 
 
 class MeetingConfirm(BaseModel):
     """Schema for confirming a meeting."""
 
-    meeting_link: Optional[str] = Field("", description="Meeting link for the meeting")
+    meeting_notes: Optional[str] = Field("", description="Notes for the meeting (link, details, etc.)")
     confirmation_message: Optional[str] = Field(
         "", description="Optional message to send to the member"
     )
@@ -138,7 +138,7 @@ class MeetingStatusUpdate(BaseModel):
 
     status: MeetingStatus
     interviewer_feedback: Optional[str] = None
-    meeting_link: Optional[str] = None
+    meeting_notes: Optional[str] = None
 
 
 # ============== Read Schemas ==============
@@ -158,14 +158,14 @@ class MeetingRequestRead(BaseModel):
     duration_minutes: int
     pending_companies: List[str]
     earliest_interview_date: Optional[str]
-    notes: str
+    member_notes: str
     assigned_to: Optional[str]
     assigned_to_name: Optional[str]
     assigned_by: Optional[str]
     assigned_at: Optional[str]
     status: str
     interviewer_feedback: str
-    meeting_link: str
+    meeting_notes: str
     created_at: str
     updated_at: str
     confirmed_at: Optional[str]

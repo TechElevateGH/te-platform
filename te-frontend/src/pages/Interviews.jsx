@@ -59,16 +59,16 @@ const Interviews = () => {
             show: isVolunteer,
         },
         {
-            id: TABS.MANAGE_SLOTS,
-            label: 'Manage Slots',
-            icon: Cog6ToothIcon,
-            show: isVolunteer,
-        },
-        {
             id: TABS.ALL_REQUESTS,
             label: 'All Requests',
             icon: UserGroupIcon,
             show: isLead,
+        },
+        {
+            id: TABS.MANAGE_SLOTS,
+            label: 'Manage Slots',
+            icon: Cog6ToothIcon,
+            show: isVolunteer,
         }
     ].filter(tab => tab.show);
 

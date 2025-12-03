@@ -77,6 +77,29 @@ const formatDate = (dateStr) => {
     });
 };
 
+// Helper function to format timestamp with timezone
+const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    // Parse the timestamp - it comes from backend as ISO string in UTC
+    let date;
+    if (timestamp.endsWith('Z') || timestamp.includes('+')) {
+        // Already has timezone info
+        date = new Date(timestamp);
+    } else {
+        // No timezone info, assume UTC and append 'Z'
+        date = new Date(timestamp + 'Z');
+    }
+    
+    return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
 const InterviewManagement = () => {
     const { accessToken, userRole, userId } = useAuth();
     const toast = useToast();
@@ -95,8 +118,9 @@ const InterviewManagement = () => {
 
     // Action modals
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });
-    const [confirmModal, setConfirmModal] = useState({ open: false, interview: null, meetingLink: '' });
+    const [confirmModal, setConfirmModal] = useState({ open: false, interview: null, meeting_notes: '' });
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
+    const [viewModal, setViewModal] = useState({ open: false, interview: null });
     const [submitting, setSubmitting] = useState(false);
 
     const fetchInterviews = useCallback(async () => {
@@ -154,19 +178,19 @@ const InterviewManagement = () => {
     };
 
     const handleConfirm = async () => {
-        if (!confirmModal.meetingLink.trim()) {
-            toast.warning('Please provide a meeting link');
+        if (!confirmModal.meeting_notes.trim()) {
+            toast.warning('Please provide notes');
             return;
         }
 
         setSubmitting(true);
         try {
             await axiosInstance.post(`/interviews/${confirmModal.interview.id}/confirm`, {
-                meeting_link: confirmModal.meetingLink
+                meeting_notes: confirmModal.meeting_notes
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
-            setConfirmModal({ open: false, interview: null, meetingLink: '' });
+            setConfirmModal({ open: false, interview: null, meeting_notes: '' });
             fetchInterviews();
         } catch (error) {
             console.error('Error confirming interview:', error);
@@ -454,6 +478,12 @@ const InterviewManagement = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setViewModal({ open: true, interview })}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                                                    >
+                                                        View
+                                                    </button>
                                                     {interview.status === 'pending' && !interview.assigned_to && (
                                                         <button
                                                             onClick={() => setAssignModal({ open: true, interview })}
@@ -613,13 +643,13 @@ const InterviewManagement = () => {
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                Meeting Link
+                                                Notes
                                             </label>
                                             <input
-                                                type="url"
-                                                value={confirmModal.meetingLink}
-                                                onChange={(e) => setConfirmModal(prev => ({ ...prev, meetingLink: e.target.value }))}
-                                                placeholder="https://zoom.us/j/..."
+                                                type="text"
+                                                value={confirmModal.meeting_notes}
+                                                onChange={(e) => setConfirmModal(prev => ({ ...prev, meeting_notes: e.target.value }))}
+                                                placeholder="Add meeting notes, link, or details..."
                                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                                             />
                                         </div>
@@ -632,7 +662,7 @@ const InterviewManagement = () => {
                                                 {submitting ? 'Confirming...' : 'Confirm'}
                                             </button>
                                             <button
-                                                onClick={() => setConfirmModal({ open: false, interview: null, meetingLink: '' })}
+                                                onClick={() => setConfirmModal({ open: false, interview: null, meeting_notes: '' })}
                                                 className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                             >
                                                 Cancel
@@ -704,6 +734,189 @@ const InterviewManagement = () => {
                                                 Cancel
                                             </button>
                                         </div>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* View Details Modal */}
+            <Transition appear show={viewModal.open} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setViewModal({ open: false, interview: null })}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                    <div className="p-6">
+                                        <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                                            Meeting Request Details
+                                        </Dialog.Title>
+
+                                        {viewModal.interview && (
+                                            <div className="space-y-6">
+                                                {/* Header with Status */}
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.bg} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.text}`}>
+                                                                {formatInterviewType(viewModal.interview.interview_type)}
+                                                            </span>
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${STATUS_COLORS[viewModal.interview.status]?.bg} ${STATUS_COLORS[viewModal.interview.status]?.text}`}>
+                                                                {formatStatus(viewModal.interview.status)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Member Information */}
+                                                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Member Information</h3>
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <UserIcon className="h-4 w-4 text-gray-400" />
+                                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{viewModal.interview.user_name}</span>
+                                                        </div>
+                                                        <div className="text-sm text-gray-600 dark:text-gray-400">{viewModal.interview.user_email}</div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Date & Time */}
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <CalendarIcon className="h-4 w-4 text-gray-400" />
+                                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Date</span>
+                                                        </div>
+                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(viewModal.interview.timeslot_date)}</div>
+                                                    </div>
+                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <ClockIcon className="h-4 w-4 text-gray-400" />
+                                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Time</span>
+                                                        </div>
+                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                            {formatTime(viewModal.interview.timeslot_time)} <span className="text-xs text-gray-500">({viewModal.interview.duration_minutes} min)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Interviewer */}
+                                                {viewModal.interview.assigned_to_name && (
+                                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                                                        <h3 className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase mb-2">Assigned Interviewer</h3>
+                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{viewModal.interview.assigned_to_name}</div>
+                                                    </div>
+                                                )}
+
+                                                {/* Companies */}
+                                                {viewModal.interview.pending_companies && viewModal.interview.pending_companies.length > 0 && (
+                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Pending Interviews</h3>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {viewModal.interview.pending_companies.map((company, idx) => (
+                                                                <span key={idx} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-full">
+                                                                    {company}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        {viewModal.interview.earliest_interview_date && (
+                                                            <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                                                                Earliest: {formatDate(viewModal.interview.earliest_interview_date)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {/* Member Notes */}
+                                                {viewModal.interview.member_notes && (
+                                                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+                                                        <h3 className="text-sm font-bold text-purple-700 dark:text-purple-300 uppercase mb-2">Member Notes</h3>
+                                                        <p className="text-sm text-gray-900 dark:text-gray-200">{viewModal.interview.member_notes}</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Meeting Notes */}
+                                                {viewModal.interview.meeting_notes && (
+                                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                                                        <h3 className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase mb-2">Meeting Notes</h3>
+                                                        <p className="text-sm text-gray-900 dark:text-gray-200 break-all">{viewModal.interview.meeting_notes}</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Feedback */}
+                                                {viewModal.interview.interviewer_feedback && (
+                                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg p-4">
+                                                        <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase mb-2">Interviewer Feedback</h3>
+                                                        <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap">{viewModal.interview.interviewer_feedback}</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Timestamps */}
+                                                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Timeline</h3>
+                                                    <div className="space-y-2 text-sm">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-600 dark:text-gray-400">Created:</span>
+                                                            <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.created_at)}</span>
+                                                        </div>
+                                                        {viewModal.interview.assigned_at && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-gray-600 dark:text-gray-400">Assigned:</span>
+                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.assigned_at)}</span>
+                                                            </div>
+                                                        )}
+                                                        {viewModal.interview.confirmed_at && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-gray-600 dark:text-gray-400">Confirmed:</span>
+                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.confirmed_at)}</span>
+                                                            </div>
+                                                        )}
+                                                        {viewModal.interview.completed_at && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-gray-600 dark:text-gray-400">Completed:</span>
+                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.completed_at)}</span>
+                                                            </div>
+                                                        )}
+                                                        {viewModal.interview.cancelled_at && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-gray-600 dark:text-gray-400">Cancelled:</span>
+                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.cancelled_at)}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Close Button */}
+                                                <button
+                                                    onClick={() => setViewModal({ open: false, interview: null })}
+                                                    className="w-full px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

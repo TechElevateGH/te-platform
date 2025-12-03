@@ -88,7 +88,7 @@ class MeetingRequest(BaseModel):
     earliest_interview_date: Optional[str] = None  # Format: YYYY-MM-DD
 
     # Additional notes from the member
-    notes: str = ""
+    member_notes: str = ""
 
     # Assignment and status
     assigned_to: Optional[PyObjectId] = None  # Volunteer/Lead assigned to conduct
@@ -102,8 +102,8 @@ class MeetingRequest(BaseModel):
     # Feedback from the interviewer
     interviewer_feedback: str = ""
 
-    # Meeting link (if applicable)
-    meeting_link: str = ""
+    # Meeting notes from interviewer (meeting link, details, etc.)
+    meeting_notes: str = ""
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -419,7 +419,7 @@ def assign_interviewer(
         assigned_to=data.assigned_to,
         assigned_to_name=assignee_name,
         assigned_by=str(user.id),
-        meeting_link=data.meeting_link or "",
+        meeting_notes=data.meeting_notes or "",
     )
 
     if not request:
@@ -466,7 +466,7 @@ def confirm_interview(
     Lead+ only.
     """
     request = meeting_crud.confirm_meeting(
-        db, request_id=request_id, meeting_link=data.meeting_link or ""
+        db, request_id=request_id, meeting_notes=data.meeting_notes or ""
     )
 
     if not request:
@@ -486,7 +486,7 @@ def confirm_interview(
             timeslot_time=request.timeslot_time,
             duration_minutes=request.duration_minutes,
             interviewer_name=request.assigned_to_name or "TBD",
-            meeting_link=request.meeting_link,
+            meeting_notes=request.meeting_notes,
             confirmation_message=data.confirmation_message or "",
         )
     except Exception as e:

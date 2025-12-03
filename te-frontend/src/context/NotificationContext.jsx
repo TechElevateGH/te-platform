@@ -185,7 +185,7 @@ export const NotificationProvider = ({ children }) => {
                             ? `Your ${interview.interview_type} meeting feedback is ready`
                             : `Your ${interview.interview_type} meeting has been confirmed with ${interview.assigned_to_name}`,
                         link: '/workspace?section=Meetings',
-                        timestamp: interview.status === 'completed' 
+                        timestamp: interview.status === 'completed'
                             ? (interview.completed_at || interview.updated_at || interview.created_at)
                             : (interview.confirmed_at || interview.updated_at || interview.created_at),
                         read: false

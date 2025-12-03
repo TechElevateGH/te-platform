@@ -278,10 +278,10 @@ def create_meeting_request(
         "duration_minutes": duration,
         "pending_companies": data.pending_companies,
         "earliest_interview_date": data.earliest_interview_date,
-        "notes": data.notes or "",
+        "member_notes": data.member_notes or "",
         "status": "pending",
         "interviewer_feedback": "",
-        "meeting_link": "",
+        "meeting_notes": "",
         "created_at": now,
         "updated_at": now,
     }
@@ -364,7 +364,7 @@ def assign_volunteer(
     assigned_to: str,
     assigned_to_name: str,
     assigned_by: str,
-    meeting_link: str = "",
+    meeting_notes: str = "",
 ) -> Optional[meeting_models.MeetingRequest]:
     """Assign a volunteer to a meeting request (Lead+ only)."""
 
@@ -377,8 +377,8 @@ def assign_volunteer(
         "updated_at": now,
     }
 
-    if meeting_link:
-        update_dict["meeting_link"] = meeting_link
+    if meeting_notes:
+        update_dict["meeting_notes"] = meeting_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -392,15 +392,15 @@ def assign_volunteer(
 
 
 def confirm_meeting(
-    db: Database, *, request_id: str, meeting_link: str = ""
+    db: Database, *, request_id: str, meeting_notes: str = ""
 ) -> Optional[meeting_models.MeetingRequest]:
     """Confirm a meeting request (Lead+ only)."""
 
     now = datetime.utcnow()
     update_dict = {"status": "confirmed", "confirmed_at": now, "updated_at": now}
 
-    if meeting_link:
-        update_dict["meeting_link"] = meeting_link
+    if meeting_notes:
+        update_dict["meeting_notes"] = meeting_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -501,8 +501,8 @@ def update_meeting_status(
     if data.interviewer_feedback is not None:
         update_dict["interviewer_feedback"] = data.interviewer_feedback
 
-    if data.meeting_link is not None:
-        update_dict["meeting_link"] = data.meeting_link
+    if data.member_notes is not None:
+        update_dict["member_notes"] = data.member_notes
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}

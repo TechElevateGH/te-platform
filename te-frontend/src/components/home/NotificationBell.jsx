@@ -35,31 +35,31 @@ const NotificationBell = () => {
             // No timezone info, assume UTC and append 'Z'
             date = new Date(timestamp + 'Z');
         }
-        
+
         const now = new Date();
-        
+
         // Check if it's today in local timezone
         const isToday = date.toDateString() === now.toDateString();
-        
+
         // Check if it's yesterday in local timezone
         const yesterday = new Date(now);
         yesterday.setDate(yesterday.getDate() - 1);
         const isYesterday = date.toDateString() === yesterday.toDateString();
-        
-        const timeString = date.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
+
+        const timeString = date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         });
-        
+
         if (isToday) {
             return `Today at ${timeString}`;
         } else if (isYesterday) {
             return `Yesterday at ${timeString}`;
         } else {
             // Show date and time for older notifications
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
                 day: 'numeric',
                 year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
             }) + ` at ${timeString}`;
