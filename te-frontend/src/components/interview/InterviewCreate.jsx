@@ -155,9 +155,34 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
         return acc;
     }, {});
 
+    // Get user's timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Helper function to format date with timezone awareness
     const formatDate = (dateStr) => {
-        const date = new Date(dateStr + 'T00:00:00');
-        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        // Parse the date string and display in user's local timezone
+        const date = new Date(dateStr + 'T12:00:00');
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    // Helper function to format time with timezone
+    const formatTime = (timeStr, dateStr) => {
+        if (!timeStr) return '';
+        // Parse time string as UTC and convert to local
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        // Use the actual date from the slot for proper timezone conversion
+        const date = dateStr || new Date().toISOString().split('T')[0];
+        const utcDate = new Date(`${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+
+        return utcDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
     };
 
     if (submitSuccess) {
@@ -271,9 +296,12 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
 
             {/* Timeslot Selection */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-2">
                     Select Timeslot
                 </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-left">
+                    Times shown in your timezone: {userTimezone}
+                </p>
 
                 {loadingTimeslots ? (
                     <div className="flex justify-center py-8">
@@ -308,7 +336,7 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
                                                     }`}
                                             >
                                                 <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400'}`} />
-                                                <span className="font-medium">{slot.start_time} - {slot.end_time}</span>
+                                                <span className="font-medium">{formatTime(slot.start_time, slot.date)} - {formatTime(slot.end_time, slot.date)}</span>
                                             </button>
                                         );
                                     })}

@@ -25,6 +25,37 @@ import { Loading } from '../_custom/Loading';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+// Timezone conversion utilities
+const convertLocalTimeToUTC = (date, time) => {
+    // Create a date object in local timezone
+    const localDateTime = new Date(`${date}T${time}:00`);
+    // Extract UTC hours and minutes
+    const utcHours = String(localDateTime.getUTCHours()).padStart(2, '0');
+    const utcMinutes = String(localDateTime.getUTCMinutes()).padStart(2, '0');
+    return `${utcHours}:${utcMinutes}`;
+};
+
+const convertUTCTimeToLocal = (date, utcTime) => {
+    // Parse UTC time and create a UTC date
+    const [hours, minutes] = utcTime.split(':').map(Number);
+    const utcDate = new Date(`${date}T${utcTime}:00Z`);
+    // Extract local hours and minutes
+    const localHours = String(utcDate.getHours()).padStart(2, '0');
+    const localMinutes = String(utcDate.getMinutes()).padStart(2, '0');
+    return `${localHours}:${localMinutes}`;
+};
+
+const formatTimeForDisplay = (utcTime, date) => {
+    if (!utcTime || !date) return '';
+    const [hours, minutes] = utcTime.split(':').map(Number);
+    const utcDate = new Date(`${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+    return utcDate.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+};
+
 // Interview types with their durations (matching backend)
 const INTERVIEW_TYPES = {
     behavioral: {
@@ -119,14 +150,18 @@ const TimeslotManagement = () => {
 
         const endTime = calculateEndTime(formData.start_time, selectedInterviewType);
 
+        // Convert local time to UTC for storage
+        const utcStartTime = convertLocalTimeToUTC(formData.date, formData.start_time);
+        const utcEndTime = convertLocalTimeToUTC(formData.date, endTime);
+
         try {
             // Create multiple slots based on count
             const slotsToCreate = [];
             for (let i = 0; i < slotCount; i++) {
                 slotsToCreate.push({
                     date: formData.date,
-                    start_time: formData.start_time,
-                    end_time: endTime
+                    start_time: utcStartTime,
+                    end_time: utcEndTime
                 });
             }
 
@@ -175,11 +210,14 @@ const TimeslotManagement = () => {
                     const dateStr = d.toISOString().split('T')[0];
                     for (const time of bulkData.times) {
                         const endTime = calculateEndTime(time, selectedInterviewType);
+                        // Convert local times to UTC for storage
+                        const utcStartTime = convertLocalTimeToUTC(dateStr, time);
+                        const utcEndTime = convertLocalTimeToUTC(dateStr, endTime);
                         for (let i = 0; i < slotCount; i++) {
                             slotsToCreate.push({
                                 date: dateStr,
-                                start_time: time,
-                                end_time: endTime
+                                start_time: utcStartTime,
+                                end_time: utcEndTime
                             });
                         }
                     }
@@ -453,6 +491,12 @@ const TimeslotManagement = () => {
                                             </div>
                                         </div>                                        {formData.mode === 'single' ? (
                                             <form onSubmit={handleCreateSingle} className="space-y-5">
+                                                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                                                    <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                                                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                        Enter times in your local timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). They will be converted to UTC for storage.
+                                                    </p>
+                                                </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -469,7 +513,7 @@ const TimeslotManagement = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                                            Start Time
+                                                            Start Time (Your Local Time)
                                                         </label>
                                                         <input
                                                             type="time"
@@ -508,6 +552,12 @@ const TimeslotManagement = () => {
                                             </form>
                                         ) : (
                                             <form onSubmit={handleCreateBulk} className="space-y-5">
+                                                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                                                    <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                                                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                        Enter times in your local timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). They will be converted to UTC for storage.
+                                                    </p>
+                                                </div>
                                                 {/* Date Range */}
                                                 <div>
                                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -729,7 +779,7 @@ const TimeslotManagement = () => {
                                             >
                                                 <ClockIcon className={`h-3.5 w-3.5 ${slot.is_available ? 'text-emerald-500 dark:text-emerald-400' : 'text-amber-500 dark:text-amber-400'}`} />
                                                 <span className="font-semibold">
-                                                    {slot.start_time}
+                                                    {formatTimeForDisplay(slot.start_time, slot.date)}
                                                 </span>
                                                 {!slot.is_available && (
                                                     <span className="text-xs px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 rounded">Booked</span>
