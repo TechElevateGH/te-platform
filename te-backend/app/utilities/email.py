@@ -532,7 +532,7 @@ def send_resume_review_completed_email(
                 
                 <p class="message">Log in to your TechElevate account to view the detailed feedback and recommendations.</p>
                 
-                <a href="{settings.SERVER_HOST}/resumes" class="cta-button">View Your Feedback</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Feedback</a>
                 
                 <div class="divider"></div>
                 
@@ -705,7 +705,7 @@ def send_resume_review_request_email(
                 
                 <p class="message">Please log in to the admin panel to assign a reviewer.</p>
                 
-                <a href="{settings.SERVER_HOST}/admin/resumes" class="cta-button">Manage Reviews</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Reviews</a>
                 
                 <div class="divider"></div>
                 
@@ -881,7 +881,7 @@ def send_referral_request_email(
                 
                 <p class="message">Please log in to the admin panel to review and assign this referral request.</p>
                 
-                <a href="{settings.SERVER_HOST}/admin/referrals" class="cta-button">Manage Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -1073,7 +1073,7 @@ def send_referral_update_email(
                 
                 <p class="message">Please check your referral dashboard for more details and next steps.</p>
                 
-                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -1124,11 +1124,16 @@ def send_interview_request_email(
     admin_email = "info@techelevate.org"
 
     # Only show pending companies for mock interviews (not 1-on-1 sessions)
-    is_one_on_one = interview_type.lower() == 'one_on_one' or interview_type.lower() == '1-on-1 mentorship'
+    is_one_on_one = (
+        interview_type.lower() == "one_on_one"
+        or interview_type.lower() == "1-on-1 mentorship"
+    )
     companies_section = ""
     if not is_one_on_one and pending_companies:
         companies_str = ", ".join(pending_companies)
-        companies_section = f'<p><strong>Pending Companies:</strong> {companies_str}</p>'
+        companies_section = (
+            f"<p><strong>Pending Companies:</strong> {companies_str}</p>"
+        )
 
     html_template = f"""
     <!DOCTYPE html>
@@ -1221,7 +1226,7 @@ def send_interview_request_email(
                 
                 <p>Please log in to the admin panel to assign an interviewer.</p>
                 
-                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Manage Interviews</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Manage Interviews</a>
             </div>
             <div class="footer">
                 <p>© 2025 {project_name}. All rights reserved.</p>
@@ -1695,7 +1700,7 @@ def send_interview_cancelled_email(
                 
                 <p>You can schedule a new mock interview at any time.</p>
                 
-                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">Schedule New Interview</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">Schedule New Interview</a>
             </div>
             <div class="footer">
                 <p>© 2025 {project_name}. All rights reserved.</p>
@@ -1853,7 +1858,7 @@ def send_referral_completed_email(
                 
                 <p class="message">Thank you for using TechElevate's referral network. We hope this connection leads to great opportunities!</p>
                 
-                <a href="{settings.SERVER_HOST}/referrals" class="cta-button">View Your Referrals</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Your Referrals</a>
                 
                 <div class="divider"></div>
                 
@@ -2046,7 +2051,7 @@ def send_meeting_reminder_email(
                 
                 <p>Please be ready a few minutes early. Good luck!</p>
                 
-                <a href="{settings.SERVER_HOST}/workspace?section=mock%20interviews" class="cta-button">View Details</a>
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Details</a>
             </div>
             <div class="footer">
                 <p>© 2025 {project_name}. All rights reserved.</p>
