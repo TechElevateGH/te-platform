@@ -44,7 +44,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
         timeslot_id: '',
         pending_companies: [],
         earliest_interview_date: '',
-        notes: ''
+        member_notes: ''
     });
 
     const [availableTimeslots, setAvailableTimeslots] = useState([]);
@@ -135,7 +135,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                     timeslot_id: '',
                     pending_companies: [],
                     earliest_interview_date: '',
-                    notes: ''
+                    member_notes: ''
                 });
                 // Remove the booked timeslot from available list
                 setAvailableTimeslots(prev => prev.filter(t => t.id !== response.data.interview?.timeslot_id));
@@ -463,8 +463,8 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                         {sessionType === 'one_on_one' ? <span className="text-red-500"> *</span> : <span className="text-gray-400 font-normal"> (Optional)</span>}
                     </label>
                     <textarea
-                        value={formData.notes}
-                        onChange={(e) => handleInputChange('notes', e.target.value)}
+                        value={formData.member_notes}
+                        onChange={(e) => handleInputChange('member_notes', e.target.value)}
                         placeholder={sessionType === 'one_on_one'
                             ? "What would you like to discuss? (career advice, resume review, etc.)"
                             : "Any specific areas you want to focus on..."}
@@ -496,7 +496,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                 )}
                 <button
                     type="submit"
-                    disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.notes.trim()) || (sessionType === 'interview' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
+                    disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.member_notes.trim()) || (sessionType === 'interview' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
                     className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? 'Scheduling...' : sessionType === 'one_on_one' ? 'Schedule Session' : 'Schedule Meeting'}
