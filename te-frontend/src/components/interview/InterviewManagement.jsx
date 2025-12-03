@@ -23,6 +23,7 @@ const INTERVIEW_TYPE_COLORS = {
     system_design: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
     behavioral: { bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-700' },
     coding: { bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-700' },
+    one_on_one: { bg: 'bg-purple-50 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-700' },
 };
 
 const STATUS_COLORS = {
@@ -36,7 +37,8 @@ const formatInterviewType = (type) => {
     const names = {
         system_design: 'System Design',
         behavioral: 'Behavioral',
-        coding: 'Coding'
+        coding: 'Coding',
+        one_on_one: '1-on-1 Mentorship'
     };
     return names[type] || type;
 };
@@ -76,7 +78,7 @@ const formatDate = (dateStr) => {
 };
 
 const InterviewManagement = () => {
-    const { accessToken, userRole } = useAuth();
+    const { accessToken, userRole, userId } = useAuth();
     const toast = useToast();
     const [interviews, setInterviews] = useState([]);
     const [interviewers, setInterviewers] = useState([]);
@@ -89,6 +91,7 @@ const InterviewManagement = () => {
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const isAdmin = parseInt(userRole) === 5;
+    const isLead = parseInt(userRole) === 4;
 
     // Action modals
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });
@@ -478,7 +481,7 @@ const InterviewManagement = () => {
                                                             Complete
                                                         </button>
                                                     )}
-                                                    {interview.status === 'pending' && (
+                                                    {interview.status === 'pending' && isAdmin && (
                                                         <button
                                                             onClick={() => handleCancel(interview.id)}
                                                             className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -549,7 +552,14 @@ const InterviewManagement = () => {
                                                     disabled={submitting}
                                                     className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all disabled:opacity-50"
                                                 >
-                                                    <div className="font-semibold text-gray-900 dark:text-white">{interviewer.full_name}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="font-semibold text-gray-900 dark:text-white">{interviewer.full_name}</div>
+                                                        {interviewer.id === userId && (
+                                                            <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                                                You
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {interviewer.email && (
                                                         <div className="text-sm text-gray-500 dark:text-gray-400">{interviewer.email}</div>
                                                     )}

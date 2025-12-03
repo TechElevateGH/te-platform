@@ -1,27 +1,30 @@
-"""Pydantic schemas for Interview feature."""
+"""Pydantic schemas for Meeting feature."""
 
 from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
-class InterviewType(str, Enum):
-    """Types of interviews available."""
+class MeetingType(str, Enum):
+    """Types of meetings available."""
 
     system_design = "system_design"
     behavioral = "behavioral"
     coding = "coding"
+    one_on_one = "one_on_one"
 
     @classmethod
-    def get_duration(cls, interview_type: str) -> int:
-        """Get duration in minutes for interview type. Behavioral is 20 min, others are 55 min."""
-        if interview_type == cls.behavioral.value:
+    def get_duration(cls, meeting_type: str) -> int:
+        """Get duration in minutes for meeting type. Behavioral and 1-on-1 are 20 min, others are 55 min."""
+        if meeting_type == cls.behavioral.value:
+            return 20
+        if meeting_type == cls.one_on_one.value:
             return 20
         return 55
 
 
-class InterviewStatus(str, Enum):
-    """Status of a interview request."""
+class MeetingStatus(str, Enum):
+    """Status of a meeting request."""
 
     pending = "pending"
     confirmed = "confirmed"
@@ -38,6 +41,9 @@ class TimeslotCreate(BaseModel):
     date: str = Field(..., description="Date in YYYY-MM-DD format")
     start_time: str = Field(..., description="Start time in HH:MM format (24-hour)")
     end_time: str = Field(..., description="End time in HH:MM format (24-hour)")
+    interview_types: List[MeetingType] = Field(
+        default=[], description="List of meeting types available in this slot"
+    )
 
 
 class TimeslotUpdate(BaseModel):
@@ -47,6 +53,7 @@ class TimeslotUpdate(BaseModel):
     start_time: Optional[str] = None
     end_time: Optional[str] = None
     is_available: Optional[bool] = None
+    interview_types: Optional[List[MeetingType]] = None
 
 
 class TimeslotRead(BaseModel):
@@ -57,6 +64,7 @@ class TimeslotRead(BaseModel):
     start_time: str
     end_time: str
     is_available: bool
+    interview_types: List[str]
     created_by: str
     created_at: str
 
@@ -67,13 +75,13 @@ class TimeslotBulkCreate(BaseModel):
     timeslots: List[TimeslotCreate]
 
 
-# ============== Interview Request Schemas ==============
+# ============== Meeting Request Schemas ==============
 
 
-class InterviewRequestCreate(BaseModel):
-    """Schema for Member to create a interview request."""
+class MeetingRequestCreate(BaseModel):
+    """Schema for Member to create a meeting request."""
 
-    interview_type: InterviewType
+    interview_type: MeetingType
     timeslot_id: str = Field(..., description="ID of the selected timeslot")
     pending_companies: List[str] = Field(
         default=[],
@@ -85,54 +93,50 @@ class InterviewRequestCreate(BaseModel):
     notes: Optional[str] = Field("", description="Additional notes for the interviewer")
 
 
-class InterviewRequestUpdate(BaseModel):
-    """Schema for updating a interview request."""
+class MeetingRequestUpdate(BaseModel):
+    """Schema for updating a meeting request."""
 
-    interview_type: Optional[InterviewType] = None
+    interview_type: Optional[MeetingType] = None
     timeslot_id: Optional[str] = None
     pending_companies: Optional[List[str]] = None
     earliest_interview_date: Optional[str] = None
     notes: Optional[str] = None
 
 
-class InterviewAssign(BaseModel):
+class MeetingAssign(BaseModel):
     """Schema for Lead+ to assign an interviewer to a request."""
 
     assigned_to: str = Field(..., description="User ID of the Volunteer/Lead to assign")
-    meeting_link: Optional[str] = Field(
-        "", description="Meeting link for the interview"
-    )
+    meeting_link: Optional[str] = Field("", description="Meeting link for the meeting")
 
 
-class InterviewConfirm(BaseModel):
-    """Schema for confirming a interview."""
+class MeetingConfirm(BaseModel):
+    """Schema for confirming a meeting."""
 
-    meeting_link: Optional[str] = Field(
-        "", description="Meeting link for the interview"
-    )
+    meeting_link: Optional[str] = Field("", description="Meeting link for the meeting")
     confirmation_message: Optional[str] = Field(
         "", description="Optional message to send to the member"
     )
 
 
-class InterviewComplete(BaseModel):
-    """Schema for completing a interview with feedback."""
+class MeetingComplete(BaseModel):
+    """Schema for completing a meeting with feedback."""
 
     interviewer_feedback: str = Field(..., description="Feedback from the interviewer")
 
 
-class InterviewCancel(BaseModel):
-    """Schema for cancelling a interview."""
+class MeetingCancel(BaseModel):
+    """Schema for cancelling a meeting."""
 
     cancellation_reason: Optional[str] = Field(
         "", description="Reason for cancellation"
     )
 
 
-class InterviewStatusUpdate(BaseModel):
-    """Schema for updating interview status."""
+class MeetingStatusUpdate(BaseModel):
+    """Schema for updating meeting status."""
 
-    status: InterviewStatus
+    status: MeetingStatus
     interviewer_feedback: Optional[str] = None
     meeting_link: Optional[str] = None
 
@@ -140,8 +144,8 @@ class InterviewStatusUpdate(BaseModel):
 # ============== Read Schemas ==============
 
 
-class InterviewRequestRead(BaseModel):
-    """Schema for reading interview request data."""
+class MeetingRequestRead(BaseModel):
+    """Schema for reading meeting request data."""
 
     id: str
     user_id: str
@@ -169,8 +173,8 @@ class InterviewRequestRead(BaseModel):
     cancelled_at: Optional[str]
 
 
-class InterviewRequestReadBrief(BaseModel):
-    """Brief schema for listing interview requests."""
+class MeetingRequestReadBrief(BaseModel):
+    """Brief schema for listing meeting requests."""
 
     id: str
     user_name: str

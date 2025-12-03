@@ -69,7 +69,7 @@ const Workspace = ({ setLogin }) => {
         if (isVolunteer) {
             return [
                 { name: 'Resume and Essays', type: "career", icon: DocumentIcon },
-                { name: 'Mock Interviews', type: "interview", icon: VideoCameraIcon },
+                { name: 'Meetings', type: "interview", icon: VideoCameraIcon },
                 { name: 'Referrals', type: "career", icon: FolderIcon },
                 { name: 'Learning', type: "learn", icon: BookOpenIcon },
                 { name: 'Practice', type: "learn", icon: CodeBracketIcon },
@@ -79,7 +79,7 @@ const Workspace = ({ setLogin }) => {
         const baseNavigation = [
             { name: 'Applications', type: "career", icon: BriefcaseIcon },
             { name: 'Resume and Essays', type: "career", icon: DocumentIcon },
-            { name: 'Mock Interviews', type: "interview", icon: VideoCameraIcon },
+            { name: 'Meetings', type: "interview", icon: VideoCameraIcon },
             { name: 'Referrals', type: "interview", icon: FolderIcon },
             { name: 'Opportunities', type: "interview", icon: ComputerDesktopIcon },
             { name: 'Learning', type: "learn", icon: BookOpenIcon },
@@ -388,7 +388,7 @@ const Workspace = ({ setLogin }) => {
                                                 content === "Referrals" ? (
                                                     (isLeadOrAdmin || isReferrer || isVolunteer) ? <ReferralsManagement /> : <Referrals />
                                                 ) :
-                                                    content === "Mock Interviews" ? <Interviews /> :
+                                                    content === "Meetings" ? <Interviews /> :
                                                         content === "Opportunities" ? <Opportunities /> :
                                                             content === "Practice" ? <Practice /> :
                                                                 <Learning setContent={setContentHandler} />

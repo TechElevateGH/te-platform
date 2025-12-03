@@ -1,4 +1,4 @@
-"""MongoDB models for Interview feature."""
+"""MongoDB models for Meeting feature."""
 
 from datetime import datetime
 from typing import Optional, Any, List
@@ -41,9 +41,9 @@ class PyObjectId(ObjectId):
         return {"type": "string"}
 
 
-class InterviewTimeslot(BaseModel):
+class MeetingTimeslot(BaseModel):
     """
-    MongoDB document model for available interview timeslots.
+    MongoDB document model for available meeting timeslots.
     Volunteer+ users can manage these timeslots.
     """
 
@@ -52,6 +52,7 @@ class InterviewTimeslot(BaseModel):
     start_time: str  # Format: HH:MM (24-hour)
     end_time: str  # Format: HH:MM (24-hour)
     is_available: bool = True
+    interview_types: List[str] = []  # List of meeting types available in this slot
     created_by: PyObjectId  # Volunteer/Lead/Admin who created this slot
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -61,19 +62,19 @@ class InterviewTimeslot(BaseModel):
         json_encoders = {ObjectId: str, datetime: lambda v: v.isoformat()}
 
 
-class InterviewRequest(BaseModel):
+class MeetingRequest(BaseModel):
     """
-    MongoDB document model for interview requests from Members.
+    MongoDB document model for meeting requests from Members.
     """
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
 
-    # Member who requested the interview
+    # Member who requested the meeting
     user_id: PyObjectId
     user_name: str = ""
     user_email: str = ""
 
-    # Interview details
+    # Meeting details
     interview_type: str  # system_design, behavioral, technical, coding
     timeslot_id: PyObjectId  # Reference to the selected timeslot
     timeslot_date: str = ""  # Denormalized for quick access

@@ -25,15 +25,45 @@ const NotificationBell = () => {
         markAsRead(notificationId);
     };
 
-    const getTimeAgo = (timestamp) => {
+    const formatTimestamp = (timestamp) => {
+        // Parse the timestamp - it comes from backend as ISO string in UTC
+        let date;
+        if (timestamp.endsWith('Z') || timestamp.includes('+')) {
+            // Already has timezone info
+            date = new Date(timestamp);
+        } else {
+            // No timezone info, assume UTC and append 'Z'
+            date = new Date(timestamp + 'Z');
+        }
+        
         const now = new Date();
-        const time = new Date(timestamp);
-        const diffInSeconds = Math.floor((now - time) / 1000);
-
-        if (diffInSeconds < 60) return 'Just now';
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-        return `${Math.floor(diffInSeconds / 86400)}d ago`;
+        
+        // Check if it's today in local timezone
+        const isToday = date.toDateString() === now.toDateString();
+        
+        // Check if it's yesterday in local timezone
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const isYesterday = date.toDateString() === yesterday.toDateString();
+        
+        const timeString = date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        if (isToday) {
+            return `Today at ${timeString}`;
+        } else if (isYesterday) {
+            return `Yesterday at ${timeString}`;
+        } else {
+            // Show date and time for older notifications
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            }) + ` at ${timeString}`;
+        }
     };
 
     return (
@@ -119,7 +149,7 @@ const NotificationBell = () => {
                                                 {notification.message}
                                             </p>
                                             <p className="text-xs text-gray-400 dark:text-gray-500">
-                                                {getTimeAgo(notification.timestamp)}
+                                                {formatTimestamp(notification.timestamp)}
                                             </p>
                                         </div>
                                         <button

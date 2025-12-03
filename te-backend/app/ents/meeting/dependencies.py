@@ -1,29 +1,32 @@
-"""Helper functions and dependencies for Interview feature."""
+"""Helper functions and dependencies for Meeting feature."""
 
-import app.ents.interview.models as interview_models
-import app.ents.interview.schema as interview_schema
+import app.ents.meeting.models as meeting_models
+import app.ents.meeting.schema as meeting_schema
 
 
 def parse_timeslot(
-    timeslot: interview_models.InterviewTimeslot,
-) -> interview_schema.TimeslotRead:
+    timeslot: meeting_models.MeetingTimeslot,
+) -> meeting_schema.TimeslotRead:
     """Convert a timeslot model to a read schema."""
-    return interview_schema.TimeslotRead(
+    return meeting_schema.TimeslotRead(
         id=str(timeslot.id),
         date=timeslot.date,
         start_time=timeslot.start_time,
         end_time=timeslot.end_time,
         is_available=timeslot.is_available,
+        interview_types=timeslot.interview_types
+        if hasattr(timeslot, "interview_types")
+        else [],
         created_by=str(timeslot.created_by),
         created_at=timeslot.created_at.isoformat() if timeslot.created_at else "",
     )
 
 
-def parse_interview_request(
-    request: interview_models.InterviewRequest,
-) -> interview_schema.InterviewRequestRead:
-    """Convert a interview request model to a read schema."""
-    return interview_schema.InterviewRequestRead(
+def parse_meeting_request(
+    request: meeting_models.MeetingRequest,
+) -> meeting_schema.MeetingRequestRead:
+    """Convert a meeting request model to a read schema."""
+    return meeting_schema.MeetingRequestRead(
         id=str(request.id),
         user_id=str(request.user_id),
         user_name=request.user_name,
@@ -51,11 +54,11 @@ def parse_interview_request(
     )
 
 
-def parse_interview_request_brief(
-    request: interview_models.InterviewRequest,
-) -> interview_schema.InterviewRequestReadBrief:
-    """Convert a interview request model to a brief read schema."""
-    return interview_schema.InterviewRequestReadBrief(
+def parse_meeting_request_brief(
+    request: meeting_models.MeetingRequest,
+) -> meeting_schema.MeetingRequestReadBrief:
+    """Convert a meeting request model to a brief read schema."""
+    return meeting_schema.MeetingRequestReadBrief(
         id=str(request.id),
         user_name=request.user_name,
         user_email=request.user_email,
@@ -71,12 +74,13 @@ def parse_interview_request_brief(
     )
 
 
-def get_interview_type_display_name(interview_type: str) -> str:
-    """Get a user-friendly display name for interview type."""
+def get_meeting_type_display_name(interview_type: str) -> str:
+    """Get a user-friendly display name for meeting type."""
     display_names = {
         "system_design": "System Design",
         "behavioral": "Behavioral",
         "coding": "Coding",
+        "one_on_one": "1-on-1 Mentorship",
     }
     return display_names.get(interview_type, interview_type.title())
 

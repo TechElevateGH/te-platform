@@ -1,4 +1,4 @@
-"""API endpoints for Interview feature."""
+"""API endpoints for Meeting feature."""
 
 from typing import Any, Dict, List, Optional, Union
 
@@ -7,22 +7,22 @@ from pymongo.database import Database
 from bson import ObjectId
 
 import app.database.session as session
-import app.ents.interview.crud as interview_crud
-import app.ents.interview.dependencies as interview_deps
-import app.ents.interview.schema as interview_schema
+import app.ents.meeting.crud as meeting_crud
+import app.ents.meeting.dependencies as meeting_deps
+import app.ents.meeting.schema as meeting_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from app.core.permissions import get_user_role
 
-interview_router = APIRouter(prefix="/interviews", tags=["Interviews"])
+meeting_router = APIRouter(prefix="/interviews", tags=["Meetings"])
 
 
 # ============== Timeslot Endpoints ==============
 
 
-@interview_router.get(
+@meeting_router.get(
     "/timeslots",
-    response_model=Dict[str, List[interview_schema.TimeslotRead]],
+    response_model=Dict[str, List[meeting_schema.TimeslotRead]],
 )
 def get_available_timeslots(
     db: Database = Depends(session.get_db),
@@ -33,16 +33,16 @@ def get_available_timeslots(
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get available timeslots for booking interviews.
+    Get available timeslots for booking meetings.
     Available to all authenticated users.
     """
-    timeslots = interview_crud.read_available_timeslots(
+    timeslots = meeting_crud.read_available_timeslots(
         db, skip=skip, limit=limit, date_from=date_from, date_to=date_to
     )
-    return {"timeslots": [interview_deps.parse_timeslot(t) for t in timeslots]}
+    return {"timeslots": [meeting_deps.parse_timeslot(t) for t in timeslots]}
 
 
-@interview_router.get(
+@meeting_router.get(
     "/timeslots/all",
     response_model=Dict[str, Any],
 )
@@ -59,40 +59,40 @@ def get_all_timeslots(
     Get all timeslots (available and booked) for management.
     Volunteer+ only.
     """
-    timeslots = interview_crud.read_all_timeslots(
+    timeslots = meeting_crud.read_all_timeslots(
         db, skip=skip, limit=limit, include_past=include_past
     )
-    available_count = interview_crud.count_available_timeslots(db)
+    available_count = meeting_crud.count_available_timeslots(db)
 
     return {
-        "timeslots": [interview_deps.parse_timeslot(t) for t in timeslots],
+        "timeslots": [meeting_deps.parse_timeslot(t) for t in timeslots],
         "total": len(timeslots),
         "available_count": available_count,
     }
 
 
-@interview_router.post(
+@meeting_router.post(
     "/timeslots",
-    response_model=Dict[str, interview_schema.TimeslotRead],
+    response_model=Dict[str, meeting_schema.TimeslotRead],
     status_code=status.HTTP_201_CREATED,
 )
 def create_timeslot(
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.TimeslotCreate,
+    data: meeting_schema.TimeslotCreate,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_volunteer_or_above
     ),
 ) -> Any:
     """
-    Create a new timeslot for interviews.
+    Create a new timeslot for meetings.
     Volunteer+ only.
     """
-    timeslot = interview_crud.create_timeslot(db, data=data, created_by=str(user.id))
-    return {"timeslot": interview_deps.parse_timeslot(timeslot)}
+    timeslot = meeting_crud.create_timeslot(db, data=data, created_by=str(user.id))
+    return {"timeslot": meeting_deps.parse_timeslot(timeslot)}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/timeslots/bulk",
     response_model=Dict[str, Any],
     status_code=status.HTTP_201_CREATED,
@@ -100,7 +100,7 @@ def create_timeslot(
 def create_timeslots_bulk(
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.TimeslotBulkCreate,
+    data: meeting_schema.TimeslotBulkCreate,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_volunteer_or_above
     ),
@@ -109,39 +109,42 @@ def create_timeslots_bulk(
     Create multiple timeslots at once.
     Volunteer+ only.
     """
-    timeslots = interview_crud.create_timeslots_bulk(
+    timeslots = meeting_crud.create_timeslots_bulk(
         db, timeslots=data.timeslots, created_by=str(user.id)
     )
     return {
-        "timeslots": [interview_deps.parse_timeslot(t) for t in timeslots],
+        "timeslots": [meeting_deps.parse_timeslot(t) for t in timeslots],
         "created_count": len(timeslots),
     }
 
 
-@interview_router.patch(
+@meeting_router.patch(
     "/timeslots/{timeslot_id}",
-    response_model=Dict[str, interview_schema.TimeslotRead],
+    response_model=Dict[str, meeting_schema.TimeslotRead],
 )
 def update_timeslot(
     timeslot_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.TimeslotUpdate,
+    data: meeting_schema.TimeslotUpdate,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_volunteer_or_above
     ),
 ) -> Any:
     """
     Update a timeslot.
-    Volunteer+ only.
+    Volunteer+ can update if not booked. Admin can update anytime.
     """
-    timeslot = interview_crud.update_timeslot(db, timeslot_id=timeslot_id, data=data)
+    user_role = get_user_role(user)
+    timeslot = meeting_crud.update_timeslot(
+        db, timeslot_id=timeslot_id, data=data, user_role=user_role
+    )
     if not timeslot:
         raise HTTPException(status_code=404, detail="Timeslot not found")
-    return {"timeslot": interview_deps.parse_timeslot(timeslot)}
+    return {"timeslot": meeting_deps.parse_timeslot(timeslot)}
 
 
-@interview_router.delete(
+@meeting_router.delete(
     "/timeslots/{timeslot_id}",
     response_model=Dict[str, str],
 )
@@ -154,9 +157,12 @@ def delete_timeslot(
 ) -> Any:
     """
     Delete a timeslot.
-    Volunteer+ only. Cannot delete if there are pending/confirmed interviews.
+    Volunteer+ can delete if not booked. Admin can delete anytime.
     """
-    success = interview_crud.delete_timeslot(db, timeslot_id=timeslot_id)
+    user_role = get_user_role(user)
+    success = meeting_crud.delete_timeslot(
+        db, timeslot_id=timeslot_id, user_role=user_role
+    )
     if not success:
         raise HTTPException(status_code=404, detail="Timeslot not found")
     return {"message": "Timeslot deleted successfully"}
@@ -165,22 +171,22 @@ def delete_timeslot(
 # ============== Interview Request Endpoints ==============
 
 
-@interview_router.post(
+@meeting_router.post(
     "",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
     status_code=status.HTTP_201_CREATED,
 )
 def create_interview_request(
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewRequestCreate,
+    data: meeting_schema.MeetingRequestCreate,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Create a new interview request.
+    Create a new meeting request.
     Member only.
     """
-    request = interview_crud.create_interview_request(
+    request = meeting_crud.create_meeting_request(
         db,
         user_id=str(user.id),
         user_name=user.full_name,
@@ -195,7 +201,7 @@ def create_interview_request(
         send_interview_request_email(
             member_name=user.full_name,
             member_email=user.email,
-            interview_type=interview_deps.get_interview_type_display_name(
+            interview_type=meeting_deps.get_meeting_type_display_name(
                 data.interview_type.value
             ),
             timeslot_date=request.timeslot_date,
@@ -204,14 +210,14 @@ def create_interview_request(
         )
     except Exception as e:
         # Log error but don't fail the request
-        print(f"Failed to send interview request email: {e}")
+        print(f"Failed to send meeting request email: {e}")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.get(
+@meeting_router.get(
     "/my-requests",
-    response_model=Dict[str, List[interview_schema.InterviewRequestRead]],
+    response_model=Dict[str, List[meeting_schema.MeetingRequestRead]],
 )
 def get_my_interview_requests(
     db: Database = Depends(session.get_db),
@@ -220,18 +226,18 @@ def get_my_interview_requests(
     user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
 ) -> Any:
     """
-    Get the current user's interview requests.
+    Get the current user's meeting requests.
     Member only.
     """
-    requests = interview_crud.read_user_interview_requests(
+    requests = meeting_crud.read_user_meeting_requests(
         db, user_id=str(user.id), skip=skip, limit=limit
     )
-    return {"interviews": [interview_deps.parse_interview_request(r) for r in requests]}
+    return {"interviews": [meeting_deps.parse_meeting_request(r) for r in requests]}
 
 
-@interview_router.get(
+@meeting_router.get(
     "/assigned",
-    response_model=Dict[str, List[interview_schema.InterviewRequestRead]],
+    response_model=Dict[str, List[meeting_schema.MeetingRequestRead]],
 )
 def get_assigned_interviews(
     db: Database = Depends(session.get_db),
@@ -245,13 +251,13 @@ def get_assigned_interviews(
     Get interviews assigned to the current user (as interviewer).
     Volunteer+ only.
     """
-    requests = interview_crud.read_assigned_interview_requests(
+    requests = meeting_crud.read_assigned_meeting_requests(
         db, assigned_to=str(user.id), skip=skip, limit=limit
     )
-    return {"interviews": [interview_deps.parse_interview_request(r) for r in requests]}
+    return {"interviews": [meeting_deps.parse_meeting_request(r) for r in requests]}
 
 
-@interview_router.get(
+@meeting_router.get(
     "/all",
     response_model=Dict[str, Any],
 )
@@ -265,29 +271,27 @@ def get_all_interview_requests(
     ),
 ) -> Any:
     """
-    Get all interview requests.
+    Get all meeting requests.
     Lead+ only.
     """
-    requests = interview_crud.read_all_interview_requests(
+    requests = meeting_crud.read_all_meeting_requests(
         db, skip=skip, limit=limit, status=status
     )
 
-    pending_count = interview_crud.count_interview_requests_by_status(
-        db, status="pending"
-    )
-    confirmed_count = interview_crud.count_interview_requests_by_status(
+    pending_count = meeting_crud.count_meeting_requests_by_status(db, status="pending")
+    confirmed_count = meeting_crud.count_meeting_requests_by_status(
         db, status="confirmed"
     )
 
     return {
-        "interviews": [interview_deps.parse_interview_request(r) for r in requests],
+        "interviews": [meeting_deps.parse_meeting_request(r) for r in requests],
         "total": len(requests),
         "pending_count": pending_count,
         "confirmed_count": confirmed_count,
     }
 
 
-@interview_router.get(
+@meeting_router.get(
     "/interviewers",
     response_model=Dict[str, List[Dict[str, Any]]],
 )
@@ -298,11 +302,29 @@ def get_interviewers_list(
     ),
 ) -> Any:
     """
-    Get list of available interviewers (Volunteer+ users).
-    Lead+ only.
+    Get list of available interviewers.
+    Lead can see themselves and Volunteers only.
+    Admin can see all Volunteer+ users.
     """
-    # Get privileged users with role >= 3 (Volunteer, Lead, Admin)
-    interviewers = db.privileged_users.find({"role": {"$gte": 3}, "is_active": True})
+    user_role = get_user_role(user)
+
+    if user_role == 4:  # Lead
+        # Leads can only see themselves and Volunteers (role 3)
+        interviewers = list(
+            db.privileged_users.find(
+                {
+                    "$or": [
+                        {"_id": user.id, "is_active": True},  # Themselves
+                        {"role": 3, "is_active": True},  # Volunteers
+                    ]
+                }
+            )
+        )
+    else:  # Admin (role 5)
+        # Admins can see all Volunteer+ users (role >= 3)
+        interviewers = list(
+            db.privileged_users.find({"role": {"$gte": 3}, "is_active": True})
+        )
 
     interviewer_list = []
     for interviewer in interviewers:
@@ -320,9 +342,9 @@ def get_interviewers_list(
     return {"interviewers": interviewer_list}
 
 
-@interview_router.get(
+@meeting_router.get(
     "/{request_id}",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def get_interview_request(
     request_id: str,
@@ -330,43 +352,46 @@ def get_interview_request(
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Get a specific interview request.
+    Get a specific meeting request.
     Members can only view their own requests.
     Volunteer+ can view any request.
     """
-    request = interview_crud.read_interview_request_by_id(db, request_id=request_id)
+    request = meeting_crud.read_meeting_request_by_id(db, request_id=request_id)
     if not request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     # Check authorization
     user_role = get_user_role(user)
     if user_role < 3 and str(request.user_id) != str(user.id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to view this interview request",
+            detail="Not authorized to view this meeting request",
         )
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/{request_id}/assign",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def assign_interviewer(
     request_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewAssign,
+    data: meeting_schema.MeetingAssign,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_lead
     ),
 ) -> Any:
     """
-    Assign an interviewer to a interview request.
-    Lead+ only.
+    Assign an interviewer to a meeting request.
+    Lead can assign to themselves or Volunteers only.
+    Admin can assign to anyone.
     """
-    # Get the assignee's name
+    user_role = get_user_role(user)
+
+    # Get the assignee's information
     assignee = db.privileged_users.find_one({"_id": ObjectId(data.assigned_to)})
     if not assignee:
         # Try member users (in case a member with elevated privileges)
@@ -375,9 +400,20 @@ def assign_interviewer(
     if not assignee:
         raise HTTPException(status_code=404, detail="Assignee not found")
 
+    assignee_role = assignee.get("role", 1)
+
+    # Leads (role 4) can only assign to themselves or Volunteers (role 3)
+    # Admins (role 5) can assign to anyone
+    if user_role == 4:  # Lead
+        if data.assigned_to != str(user.id) and assignee_role != 3:
+            raise HTTPException(
+                status_code=403,
+                detail="Leads can only assign meeting requests to themselves or to Volunteers",
+            )
+
     assignee_name = assignee.get("username") or assignee.get("full_name", "Unknown")
 
-    request = interview_crud.assign_interviewer(
+    request = meeting_crud.assign_volunteer(
         db,
         request_id=request_id,
         assigned_to=data.assigned_to,
@@ -387,7 +423,7 @@ def assign_interviewer(
     )
 
     if not request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     # Send notification to the assigned interviewer
     from app.utilities.email import send_interview_assigned_email
@@ -399,7 +435,7 @@ def assign_interviewer(
                 email_to=assignee_email,
                 interviewer_name=assignee_name,
                 member_name=request.user_name,
-                interview_type=interview_deps.get_interview_type_display_name(
+                interview_type=meeting_deps.get_meeting_type_display_name(
                     request.interview_type
                 ),
                 timeslot_date=request.timeslot_date,
@@ -409,32 +445,32 @@ def assign_interviewer(
         except Exception as e:
             print(f"Failed to send assignment email: {e}")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/{request_id}/confirm",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def confirm_interview(
     request_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewConfirm,
+    data: meeting_schema.MeetingConfirm,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_lead
     ),
 ) -> Any:
     """
-    Confirm a interview request.
+    Confirm a meeting request.
     Lead+ only.
     """
-    request = interview_crud.confirm_interview(
+    request = meeting_crud.confirm_meeting(
         db, request_id=request_id, meeting_link=data.meeting_link or ""
     )
 
     if not request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     # Send confirmation email to the member
     from app.utilities.email import send_interview_confirmed_email
@@ -443,7 +479,7 @@ def confirm_interview(
         send_interview_confirmed_email(
             email_to=request.user_email,
             member_name=request.user_name,
-            interview_type=interview_deps.get_interview_type_display_name(
+            interview_type=meeting_deps.get_meeting_type_display_name(
                 request.interview_type
             ),
             timeslot_date=request.timeslot_date,
@@ -456,18 +492,18 @@ def confirm_interview(
     except Exception as e:
         print(f"Failed to send confirmation email: {e}")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/{request_id}/complete",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def complete_interview(
     request_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewComplete,
+    data: meeting_schema.MeetingComplete,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_volunteer_or_above
     ),
@@ -477,11 +513,11 @@ def complete_interview(
     Volunteer+ only. Must be the assigned interviewer or Lead+.
     """
     # Get the request to verify authorization
-    existing_request = interview_crud.read_interview_request_by_id(
+    existing_request = meeting_crud.read_meeting_request_by_id(
         db, request_id=request_id
     )
     if not existing_request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     # Verify user is either the assigned interviewer or Lead+
     user_role = get_user_role(user)
@@ -491,7 +527,7 @@ def complete_interview(
             detail="Only the assigned interviewer or Lead+ can complete this interview",
         )
 
-    request = interview_crud.complete_interview(
+    request = meeting_crud.complete_meeting(
         db, request_id=request_id, interviewer_feedback=data.interviewer_feedback
     )
 
@@ -502,7 +538,7 @@ def complete_interview(
         send_interview_completed_email(
             email_to=request.user_email,
             member_name=request.user_name,
-            interview_type=interview_deps.get_interview_type_display_name(
+            interview_type=meeting_deps.get_meeting_type_display_name(
                 request.interview_type
             ),
             interviewer_name=request.assigned_to_name or "Your Interviewer",
@@ -511,40 +547,48 @@ def complete_interview(
     except Exception as e:
         print(f"Failed to send completion email: {e}")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/{request_id}/cancel",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def cancel_interview(
     request_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewCancel,
+    data: meeting_schema.MeetingCancel,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
-    Cancel a interview request.
-    Members can cancel their own pending requests.
-    Lead+ can cancel any request.
+    Cancel a meeting request.
+    Members can cancel their own pending/confirmed requests.
+    Admins can cancel any request.
+    Leads cannot cancel requests.
     """
     # Get the request to verify authorization
-    existing_request = interview_crud.read_interview_request_by_id(
+    existing_request = meeting_crud.read_meeting_request_by_id(
         db, request_id=request_id
     )
     if not existing_request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
     user_role = get_user_role(user)
 
-    # Members can cancel their own pending or confirmed requests
-    if user_role < 4:
+    # Only Members (their own) and Admins (any) can cancel
+    if user_role == 4:  # Lead
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Leads cannot cancel meeting requests. Only the member who created the request or an Admin can cancel.",
+        )
+    elif user_role == 5:  # Admin - can cancel any request
+        pass
+    else:  # Member or lower
         if str(existing_request.user_id) != str(user.id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You can only cancel your own interview requests",
+                detail="You can only cancel your own meeting requests",
             )
         if existing_request.status not in ["pending", "confirmed"]:
             raise HTTPException(
@@ -552,7 +596,7 @@ def cancel_interview(
                 detail="Only pending or confirmed requests can be cancelled",
             )
 
-    request = interview_crud.cancel_interview(
+    request = meeting_crud.cancel_meeting(
         db, request_id=request_id, cancellation_reason=data.cancellation_reason or ""
     )
 
@@ -564,7 +608,7 @@ def cancel_interview(
         send_interview_cancelled_email(
             email_to=request.user_email,
             member_name=request.user_name,
-            interview_type=interview_deps.get_interview_type_display_name(
+            interview_type=meeting_deps.get_meeting_type_display_name(
                 request.interview_type
             ),
             timeslot_date=request.timeslot_date,
@@ -575,7 +619,7 @@ def cancel_interview(
         send_interview_cancelled_email(
             email_to="info@techelevate.org",
             member_name=request.user_name,
-            interview_type=interview_deps.get_interview_type_display_name(
+            interview_type=meeting_deps.get_meeting_type_display_name(
                 request.interview_type
             ),
             timeslot_date=request.timeslot_date,
@@ -585,10 +629,10 @@ def cancel_interview(
     except Exception as e:
         print(f"Failed to send cancellation email: {e}")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
-@interview_router.delete(
+@meeting_router.delete(
     "/{request_id}",
     response_model=Dict[str, str],
 )
@@ -600,7 +644,7 @@ def delete_interview_request(
     ),
 ) -> Any:
     """
-    Permanently delete an interview request from the database (Admin only).
+    Permanently delete an meeting request from the database (Admin only).
     This action cannot be undone. Also makes the associated timeslot available again.
     """
     from app.core.permissions import get_user_role
@@ -610,14 +654,14 @@ def delete_interview_request(
     if user_role != 5:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only Admins can permanently delete interview requests",
+            detail="Only Admins can permanently delete meeting requests",
         )
 
-    interview_crud.delete_interview_request(db, request_id=request_id)
-    return {"message": "Interview request permanently deleted successfully"}
+    meeting_crud.delete_meeting_request(db, request_id=request_id)
+    return {"message": "Meeting request permanently deleted successfully"}
 
 
-@interview_router.post(
+@meeting_router.post(
     "/bulk-delete",
     response_model=Dict[str, Any],
 )
@@ -630,7 +674,7 @@ def bulk_delete_interview_requests(
     ),
 ) -> Any:
     """
-    Permanently delete multiple interview requests from the database (Admin only).
+    Permanently delete multiple meeting requests from the database (Admin only).
     This action cannot be undone. Also makes associated timeslots available again.
     """
     from app.core.permissions import get_user_role
@@ -640,22 +684,22 @@ def bulk_delete_interview_requests(
     if user_role != 5:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only Admins can permanently delete interview requests",
+            detail="Only Admins can permanently delete meeting requests",
         )
 
-    result = interview_crud.bulk_delete_interview_requests(db, request_ids=request_ids)
+    result = meeting_crud.bulk_delete_interview_requests(db, request_ids=request_ids)
     return result
 
 
-@interview_router.patch(
+@meeting_router.patch(
     "/{request_id}",
-    response_model=Dict[str, interview_schema.InterviewRequestRead],
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
 )
 def update_interview_status(
     request_id: str,
     db: Database = Depends(session.get_db),
     *,
-    data: interview_schema.InterviewStatusUpdate,
+    data: meeting_schema.MeetingStatusUpdate,
     user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
         user_dependencies.get_current_lead
     ),
@@ -664,11 +708,9 @@ def update_interview_status(
     Update interview status.
     Lead+ only.
     """
-    request = interview_crud.update_interview_status(
-        db, request_id=request_id, data=data
-    )
+    request = meeting_crud.update_meeting_status(db, request_id=request_id, data=data)
 
     if not request:
-        raise HTTPException(status_code=404, detail="Interview request not found")
+        raise HTTPException(status_code=404, detail="Meeting request not found")
 
-    return {"interview": interview_deps.parse_interview_request(request)}
+    return {"interview": meeting_deps.parse_meeting_request(request)}

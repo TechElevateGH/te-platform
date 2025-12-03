@@ -17,6 +17,7 @@ const INTERVIEW_TYPE_COLORS = {
     system_design: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
     behavioral: { bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-700' },
     coding: { bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-700' },
+    one_on_one: { bg: 'bg-purple-50 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-700' },
 };
 
 const STATUS_COLORS = {
@@ -30,7 +31,8 @@ const formatInterviewType = (type) => {
     const names = {
         system_design: 'System Design',
         behavioral: 'Behavioral',
-        coding: 'Coding'
+        coding: 'Coding',
+        one_on_one: '1-on-1 Mentorship'
     };
     return names[type] || type;
 };

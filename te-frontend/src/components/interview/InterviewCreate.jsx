@@ -17,6 +17,7 @@ const INTERVIEW_TYPES = [
     { id: 'system_design', name: 'System Design', duration: 55, description: 'Architecture & system design', color: 'blue' },
     { id: 'behavioral', name: 'Behavioral', duration: 20, description: 'STAR method questions', color: 'green' },
     { id: 'coding', name: 'Coding', duration: 55, description: 'Live coding & algorithms', color: 'orange' },
+    { id: 'one_on_one', name: '1-on-1 Mentorship', duration: 20, description: 'General questions & mentorship', color: 'purple' },
 ];
 
 const TYPE_COLORS = {
@@ -24,16 +25,22 @@ const TYPE_COLORS = {
     green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
     indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
     orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300',
+    purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300',
 };
 
 const PREP_VIDEO_URL = "https://www.youtube.com/watch?v=FYUXYcJfOMM";
 
-const InterviewCreate = ({ onSuccess, onCancel }) => {
+const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => {
     const { accessToken } = useAuth();
     const [hasWatchedVideo, setHasWatchedVideo] = useState(false);
 
+    // Filter interview types based on session type
+    const availableInterviewTypes = sessionType === 'one_on_one'
+        ? INTERVIEW_TYPES.filter(t => t.id === 'one_on_one')
+        : INTERVIEW_TYPES.filter(t => t.id !== 'one_on_one');
+
     const [formData, setFormData] = useState({
-        interview_type: 'coding',
+        interview_type: sessionType === 'one_on_one' ? 'one_on_one' : 'coding',
         timeslot_id: '',
         pending_companies: [],
         earliest_interview_date: '',
@@ -48,7 +55,7 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
     const [companyInput, setCompanyInput] = useState("");
 
     // Get selected interview type details
-    const selectedType = INTERVIEW_TYPES.find(t => t.id === formData.interview_type);
+    const selectedType = availableInterviewTypes.find(t => t.id === formData.interview_type);
 
     // Fetch available timeslots
     useEffect(() => {
@@ -146,8 +153,18 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
         }
     };
 
+    // Filter timeslots based on selected interview type
+    const filteredTimeslots = availableTimeslots.filter(slot => {
+        // If slot has interview_types array, check if selected type is included
+        if (slot.interview_types && slot.interview_types.length > 0) {
+            return slot.interview_types.includes(formData.interview_type);
+        }
+        // If no interview_types specified (old slots), show all slots
+        return true;
+    });
+
     // Group timeslots by date
-    const groupedTimeslots = availableTimeslots.reduce((acc, slot) => {
+    const groupedTimeslots = filteredTimeslots.reduce((acc, slot) => {
         if (!acc[slot.date]) {
             acc[slot.date] = [];
         }
@@ -185,6 +202,24 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
         });
     };
 
+    // Helper function to calculate end time based on interview type
+    const calculateEndTime = (startTimeStr, dateStr, interviewType) => {
+        if (!startTimeStr) return '';
+        const [hours, minutes] = startTimeStr.split(':').map(Number);
+        const date = dateStr || new Date().toISOString().split('T')[0];
+        const utcDate = new Date(`${date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00Z`);
+
+        // Get duration for interview type
+        const duration = selectedType?.duration || 55;
+        const endDate = new Date(utcDate.getTime() + duration * 60000);
+
+        return endDate.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
     if (submitSuccess) {
         return (
             <div className="py-6">
@@ -192,17 +227,17 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
                     <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
                         <CheckCircleIcon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Interview Scheduled!</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Meeting Scheduled!</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
-                        Your mock interview request has been submitted. You&apos;ll receive a confirmation email once an interviewer is assigned.
+                        Your {sessionType === 'one_on_one' ? '1-on-1 session' : 'mock interview'} request has been submitted. You&apos;ll receive a confirmation email once a volunteer is assigned.
                     </p>
                 </div>
             </div>
         );
     }
 
-    // Video prerequisite step
-    if (!hasWatchedVideo) {
+    // Video prerequisite step - only for mock interviews, not 1-on-1 sessions
+    if (!hasWatchedVideo && sessionType !== 'one_on_one') {
         return (
             <div className="space-y-6">
                 <div className="text-left">
@@ -251,53 +286,55 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Interview Type Selection */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-3">
-                    Interview Type
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                    {INTERVIEW_TYPES.map((type) => {
-                        const isSelected = formData.interview_type === type.id;
-                        const colorClasses = TYPE_COLORS[type.color];
-                        return (
-                            <button
-                                key={type.id}
-                                type="button"
-                                onClick={() => handleInputChange('interview_type', type.id)}
-                                className={`relative p-3 rounded-lg border text-left transition-all ${isSelected
-                                    ? colorClasses
-                                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                                    }`}
-                            >
-                                {isSelected && (
-                                    <CheckCircleIcon className="absolute top-2 right-2 h-4 w-4" />
-                                )}
-                                <p className={`text-sm font-medium ${isSelected ? '' : 'text-gray-900 dark:text-white'}`}>
-                                    {type.name}
-                                </p>
-                                <p className={`text-xs mt-0.5 ${isSelected ? 'opacity-80' : 'text-gray-500 dark:text-gray-400'}`}>
-                                    {type.duration} min
-                                </p>
-                            </button>
-                        );
-                    })}
-                </div>
+            {/* Interview Type Selection - Only show for mock interviews */}
+            {sessionType !== 'one_on_one' && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-3">
+                        Interview Type
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                        {availableInterviewTypes.map((type) => {
+                            const isSelected = formData.interview_type === type.id;
+                            const colorClasses = TYPE_COLORS[type.color];
+                            return (
+                                <button
+                                    key={type.id}
+                                    type="button"
+                                    onClick={() => handleInputChange('interview_type', type.id)}
+                                    className={`relative p-3 rounded-lg border text-left transition-all ${isSelected
+                                        ? colorClasses
+                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                        }`}
+                                >
+                                    {isSelected && (
+                                        <CheckCircleIcon className="absolute top-2 right-2 h-4 w-4" />
+                                    )}
+                                    <p className={`text-sm font-medium ${isSelected ? '' : 'text-gray-900 dark:text-white'}`}>
+                                        {type.name}
+                                    </p>
+                                    <p className={`text-xs mt-0.5 ${isSelected ? 'opacity-80' : 'text-gray-500 dark:text-gray-400'}`}>
+                                        {type.duration} min
+                                    </p>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                {/* Duration Info */}
-                <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <InformationCircleIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
-                        {selectedType?.name} interviews are {selectedType?.duration} minutes long.
-                        {selectedType?.id === 'behavioral' && ' Focus on past experiences using the STAR method.'}
-                    </p>
+                    {/* Duration Info */}
+                    <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <InformationCircleIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                            {selectedType?.name} sessions are {selectedType?.duration} minutes long.
+                            {selectedType?.id === 'behavioral' && ' Focus on past experiences using the STAR method.'}
+                        </p>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Timeslot Selection */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-2">
-                    Select Timeslot
+                    Select Timeslot <span className="text-red-500">*</span>
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-left">
                     Times shown in your timezone: {userTimezone}
@@ -336,7 +373,7 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
                                                     }`}
                                             >
                                                 <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400'}`} />
-                                                <span className="font-medium">{formatTime(slot.start_time, slot.date)} - {formatTime(slot.end_time, slot.date)}</span>
+                                                <span className="font-medium">{formatTime(slot.start_time, slot.date)} - {calculateEndTime(slot.start_time, slot.date, formData.interview_type)}</span>
                                             </button>
                                         );
                                     })}
@@ -347,84 +384,93 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
                 )}
             </div>
 
-            {/* Pending Companies */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
-                    Pending Interviews <span className="text-gray-400 font-normal">(Optional)</span>
-                </label>
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-left mb-3">
-                    List companies you have upcoming interviews with
-                </p>
+            {/* Pending Companies - Only for mock interviews */}
+            {sessionType !== 'one_on_one' && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
+                        Pending Interviews <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-left mb-3">
+                        List companies you have upcoming interviews with
+                    </p>
 
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        value={companyInput}
-                        onChange={(e) => setCompanyInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="e.g., Google, Microsoft"
-                        className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <button
-                        type="button"
-                        onClick={addCompany}
-                        className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
-                    >
-                        Add
-                    </button>
-                </div>
-
-                {formData.pending_companies.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                        {formData.pending_companies.map((company, index) => (
-                            <span
-                                key={index}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-md"
-                            >
-                                {company}
-                                <button
-                                    type="button"
-                                    onClick={() => removeCompany(company)}
-                                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                >
-                                    <XMarkIcon className="h-3.5 w-3.5" />
-                                </button>
-                            </span>
-                        ))}
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={companyInput}
+                            onChange={(e) => setCompanyInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder="e.g., Google, Microsoft"
+                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <button
+                            type="button"
+                            onClick={addCompany}
+                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
+                        >
+                            Add
+                        </button>
                     </div>
-                )}
-            </div>
+
+                    {formData.pending_companies.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {formData.pending_companies.map((company, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-md"
+                                >
+                                    {company}
+                                    <button
+                                        type="button"
+                                        onClick={() => removeCompany(company)}
+                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                    >
+                                        <XMarkIcon className="h-3.5 w-3.5" />
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Additional Details */}
             <div className="space-y-4">
-                {/* Earliest Interview Date */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
-                        Earliest Interview Date <span className="text-gray-400 font-normal">(Optional)</span>
-                    </label>
-                    <input
-                        type="date"
-                        value={formData.earliest_interview_date}
-                        onChange={(e) => handleInputChange('earliest_interview_date', e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className="w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-left mt-1">
-                        When is your earliest real interview? This helps us prioritize.
-                    </p>
-                </div>
+                {/* Earliest Interview Date - Only for mock interviews */}
+                {sessionType !== 'one_on_one' && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
+                            Earliest Interview Date <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.earliest_interview_date}
+                            onChange={(e) => handleInputChange('earliest_interview_date', e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left"
+                            required
+                        />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 text-left mt-1">
+                            When is your earliest real interview? This helps us prioritize.
+                        </p>
+                    </div>
+                )}
 
-                {/* Additional Notes */}
+                {/* Additional Notes / Discussion Summary */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
-                        Additional Notes <span className="text-gray-400 font-normal">(Optional)</span>
+                        {sessionType === 'one_on_one' ? 'Discussion Summary' : 'Additional Notes'}
+                        {sessionType === 'one_on_one' ? <span className="text-red-500"> *</span> : <span className="text-gray-400 font-normal"> (Optional)</span>}
                     </label>
                     <textarea
                         value={formData.notes}
                         onChange={(e) => handleInputChange('notes', e.target.value)}
-                        placeholder="Any specific areas you want to focus on..."
+                        placeholder={sessionType === 'one_on_one'
+                            ? "What would you like to discuss? (career advice, resume review, etc.)"
+                            : "Any specific areas you want to focus on..."}
                         rows={3}
                         className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        required={sessionType === 'one_on_one'}
                     />
                 </div>
             </div>
@@ -450,10 +496,10 @@ const InterviewCreate = ({ onSuccess, onCancel }) => {
                 )}
                 <button
                     type="submit"
-                    disabled={isSubmitting || !formData.timeslot_id}
+                    disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.notes.trim()) || (sessionType === 'interview' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
                     className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {isSubmitting ? 'Scheduling...' : 'Schedule Interview'}
+                    {isSubmitting ? 'Scheduling...' : sessionType === 'one_on_one' ? 'Schedule Session' : 'Schedule Meeting'}
                 </button>
             </div>
         </form>
