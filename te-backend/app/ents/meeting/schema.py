@@ -139,6 +139,14 @@ class MeetingCancel(BaseModel):
     )
 
 
+class MeetingNotesUpdate(BaseModel):
+    """Schema for updating meeting notes (Volunteer+ only)."""
+
+    meeting_notes: str = Field(
+        ..., description="Updated meeting notes (link, details, etc.)"
+    )
+
+
 class MeetingStatusUpdate(BaseModel):
     """Schema for updating meeting status."""
 

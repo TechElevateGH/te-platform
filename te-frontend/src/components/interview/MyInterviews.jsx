@@ -70,7 +70,8 @@ const formatTime = (timeStr) => {
     return utcDate.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
+        timeZoneName: 'short'
     });
 };
 
@@ -319,7 +320,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {filteredInterviews.map((interview) => {
                         const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
                         const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;

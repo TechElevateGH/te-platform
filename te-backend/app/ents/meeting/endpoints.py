@@ -550,6 +550,64 @@ def complete_interview(
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
 
+@meeting_router.patch(
+    "/{request_id}/notes",
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
+)
+def update_interview_notes(
+    request_id: str,
+    db: Database = Depends(session.get_db),
+    *,
+    data: meeting_schema.MeetingNotesUpdate,
+    user: Union[user_models.MemberUser, user_models.PrivilegedUser] = Depends(
+        user_dependencies.get_current_volunteer_or_above
+    ),
+) -> Any:
+    """
+    Update meeting notes for a confirmed interview.
+    Volunteer+ only. Must be the assigned interviewer or Lead+.
+    Sends notification email to the member.
+    """
+    # Get the request to verify it exists and check authorization
+    existing_request = meeting_crud.read_meeting_request_by_id(
+        db, request_id=request_id
+    )
+    if not existing_request:
+        raise HTTPException(status_code=404, detail="Meeting request not found")
+
+    # Verify user is either the assigned interviewer or Lead+
+    user_role = get_user_role(user)
+    if user_role < 4 and str(existing_request.assigned_to) != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the assigned interviewer or Lead+ can update meeting notes",
+        )
+
+    request = meeting_crud.update_meeting_notes(
+        db, request_id=request_id, meeting_notes=data.meeting_notes
+    )
+
+    # Send notification email to the member
+    from app.utilities.email import send_meeting_notes_updated_email
+
+    try:
+        send_meeting_notes_updated_email(
+            email_to=request.user_email,
+            member_name=request.user_name,
+            interview_type=meeting_deps.get_meeting_type_display_name(
+                request.interview_type
+            ),
+            timeslot_date=request.timeslot_date,
+            timeslot_time=request.timeslot_time,
+            interviewer_name=request.assigned_to_name or "Your Interviewer",
+            meeting_notes=data.meeting_notes,
+        )
+    except Exception as e:
+        print(f"Failed to send notes update email: {e}")
+
+    return {"interview": meeting_deps.parse_meeting_request(request)}
+
+
 @meeting_router.post(
     "/{request_id}/cancel",
     response_model=Dict[str, meeting_schema.MeetingRequestRead],

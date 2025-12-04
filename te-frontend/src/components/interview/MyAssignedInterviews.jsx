@@ -55,7 +55,8 @@ const formatTime = (timeStr) => {
     return utcDate.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
+        timeZoneName: 'short'
     });
 };
 
@@ -98,6 +99,7 @@ const MyAssignedInterviews = () => {
     const [interviews, setInterviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
+    const [editNotesModal, setEditNotesModal] = useState({ open: false, interview: null, notes: '' });
     const [submitting, setSubmitting] = useState(false);
     const [sortBy, setSortBy] = useState('date'); // 'date' or 'type'
     const [groupBy, setGroupBy] = useState('week'); // 'week' or 'month' or 'none'
@@ -138,9 +140,34 @@ const MyAssignedInterviews = () => {
             });
             setCompleteModal({ open: false, interview: null, feedback: '' });
             fetchAssignedInterviews();
+            toast.success('Interview marked as completed');
         } catch (error) {
             console.error('Error completing interview:', error);
             toast.error(error.response?.data?.detail || 'Failed to complete interview');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleUpdateNotes = async () => {
+        if (!editNotesModal.notes.trim()) {
+            toast.warning('Please provide meeting notes or link');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await axiosInstance.patch(`/interviews/${editNotesModal.interview.id}/notes`, {
+                meeting_notes: editNotesModal.notes
+            }, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setEditNotesModal({ open: false, interview: null, notes: '' });
+            fetchAssignedInterviews();
+            toast.success('Meeting notes updated and member notified');
+        } catch (error) {
+            console.error('Error updating notes:', error);
+            toast.error(error.response?.data?.detail || 'Failed to update notes');
         } finally {
             setSubmitting(false);
         }
@@ -300,13 +327,22 @@ const MyAssignedInterviews = () => {
                             </a>
                         )}
                         {interview.status === 'confirmed' && (
-                            <button
-                                onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                            >
-                                <CheckCircleIcon className="h-3.5 w-3.5" />
-                                Complete
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => setEditNotesModal({ open: true, interview, notes: interview.meeting_notes || '' })}
+                                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                                >
+                                    <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
+                                    Edit Notes
+                                </button>
+                                <button
+                                    onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
+                                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                >
+                                    <CheckCircleIcon className="h-3.5 w-3.5" />
+                                    Complete
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
@@ -358,7 +394,7 @@ const MyAssignedInterviews = () => {
                                     <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
                                 </h5>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {groupInterviews.map(renderInterviewCard)}
                             </div>
                         </div>
@@ -379,7 +415,7 @@ const MyAssignedInterviews = () => {
                                     <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
                                 </h5>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {groupInterviews.map(renderInterviewCard)}
                             </div>
                         </div>
@@ -415,6 +451,40 @@ const MyAssignedInterviews = () => {
                                 className="flex-1 py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
                             >
                                 {submitting ? 'Completing...' : 'Mark Complete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Notes Modal */}
+            {editNotesModal.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Update Meeting Notes</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Update the meeting details for <strong>{editNotesModal.interview?.user_name}</strong>. The member will be notified via email.
+                        </p>
+                        <textarea
+                            value={editNotesModal.notes}
+                            onChange={(e) => setEditNotesModal(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder="Enter meeting link or details..."
+                            rows={4}
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 resize-none mb-4"
+                        />
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setEditNotesModal({ open: false, interview: null, notes: '' })}
+                                className="flex-1 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleUpdateNotes}
+                                disabled={submitting}
+                                className="flex-1 py-2.5 text-sm font-bold bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition-colors disabled:opacity-50"
+                            >
+                                {submitting ? 'Updating...' : 'Update Notes'}
                             </button>
                         </div>
                     </div>
