@@ -148,15 +148,29 @@ def update_timeslot(
     timeslot_id: str,
     data: meeting_schema.TimeslotUpdate,
     user_role: int = 3,
+    user_id: str = None,
 ) -> Optional[meeting_models.MeetingTimeslot]:
     """Update a timeslot.
 
-    Volunteer+ can update if no member has booked it.
-    Admin can update anytime.
+    Admin can update all timeslots anytime.
+    Volunteer/Lead can only update their own timeslots if no member has booked it.
     """
 
-    # Check if timeslot is booked (only if not Admin)
+    # Get the timeslot to check ownership
+    timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
+    if not timeslot:
+        return None
+
+    # Check ownership (only if not Admin)
     if user_role < 5:  # Not an Admin
+        # Verify the user owns this timeslot
+        if str(timeslot["created_by"]) != str(user_id):
+            raise HTTPException(
+                status_code=403,
+                detail="You can only update timeslots that you created. Only Admins can modify other users' timeslots.",
+            )
+
+        # Check if timeslot is booked
         existing_request = db.mock_interview_requests.find_one(
             {
                 "timeslot_id": ObjectId(timeslot_id),
@@ -199,15 +213,30 @@ def update_timeslot(
     return meeting_models.MeetingTimeslot(**timeslot)
 
 
-def delete_timeslot(db: Database, *, timeslot_id: str, user_role: int = 3) -> bool:
+def delete_timeslot(
+    db: Database, *, timeslot_id: str, user_role: int = 3, user_id: str = None
+) -> bool:
     """Delete a timeslot.
 
-    Volunteer+ can delete if no member has booked it.
-    Admin can delete anytime.
+    Admin can delete all timeslots anytime.
+    Volunteer/Lead can only delete their own timeslots if no member has booked it.
     """
 
-    # Check if any meeting request is using this timeslot (only if not Admin)
+    # Get the timeslot to check ownership
+    timeslot = db.mock_interview_timeslots.find_one({"_id": ObjectId(timeslot_id)})
+    if not timeslot:
+        return False
+
+    # Check ownership and booking status (only if not Admin)
     if user_role < 5:  # Not an Admin
+        # Verify the user owns this timeslot
+        if str(timeslot["created_by"]) != str(user_id):
+            raise HTTPException(
+                status_code=403,
+                detail="You can only delete timeslots that you created. Only Admins can delete other users' timeslots.",
+            )
+
+        # Check if any meeting request is using this timeslot
         existing_request = db.mock_interview_requests.find_one(
             {
                 "timeslot_id": ObjectId(timeslot_id),
@@ -380,6 +409,7 @@ def assign_volunteer(
 
     if meeting_notes:
         update_dict["meeting_notes"] = meeting_notes
+        update_dict["notes_updated_at"] = now
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -407,6 +437,7 @@ def confirm_meeting(
 
     if meeting_notes:
         update_dict["meeting_notes"] = meeting_notes
+        update_dict["notes_updated_at"] = now
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
@@ -486,11 +517,35 @@ def update_meeting_notes(
     now = datetime.utcnow()
     update_dict = {
         "meeting_notes": meeting_notes,
+        "notes_updated_at": now,
         "updated_at": now,
     }
 
     result = db.mock_interview_requests.update_one(
         {"_id": ObjectId(request_id)}, {"$set": update_dict}
+    )
+
+    if result.matched_count == 0:
+        return None
+
+    request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
+    return meeting_models.MeetingRequest(**request_data)
+
+
+def mark_notes_as_viewed(
+    db: Database, *, request_id: str, user_id: str
+) -> Optional[meeting_models.MeetingRequest]:
+    """Mark meeting notes as viewed by the member."""
+
+    now = datetime.utcnow()
+    update_dict = {
+        "notes_viewed_at": now,
+        "updated_at": now,
+    }
+
+    result = db.mock_interview_requests.update_one(
+        {"_id": ObjectId(request_id), "user_id": ObjectId(user_id)},
+        {"$set": update_dict},
     )
 
     if result.matched_count == 0:

@@ -104,6 +104,8 @@ class MeetingRequest(BaseModel):
 
     # Meeting notes from interviewer (meeting link, details, etc.)
     meeting_notes: str = ""
+    notes_updated_at: Optional[datetime] = None  # When notes were last updated
+    notes_viewed_at: Optional[datetime] = None  # When member last viewed notes
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
