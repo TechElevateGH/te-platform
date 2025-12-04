@@ -9,7 +9,8 @@ import {
     LinkIcon,
     ExclamationTriangleIcon,
     XMarkIcon,
-    FunnelIcon
+    FunnelIcon,
+    EyeIcon
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -85,6 +86,8 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
     const [interviewToCancel, setInterviewToCancel] = useState(null);
     const [cancelReason, setCancelReason] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [showNotesModal, setShowNotesModal] = useState(false);
+    const [selectedInterview, setSelectedInterview] = useState(null);
 
     const fetchMyInterviews = useCallback(async () => {
         if (!accessToken) return;
@@ -147,6 +150,41 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
         } finally {
             setCancellingId(null);
         }
+    };
+
+    const openNotesModal = async (interview) => {
+        setSelectedInterview(interview);
+        setShowNotesModal(true);
+
+        // Mark notes as viewed when opening the modal
+        if (interview.meeting_notes && hasUnviewedNotes(interview)) {
+            try {
+                await axiosInstance.post(
+                    `/interviews/${interview.id}/mark-notes-viewed`,
+                    {},
+                    { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                // Refresh the interviews list to update the viewed status
+                fetchMyInterviews();
+            } catch (error) {
+                console.error('Error marking notes as viewed:', error);
+            }
+        }
+    };
+
+    const closeNotesModal = () => {
+        setShowNotesModal(false);
+        setSelectedInterview(null);
+    };
+
+    // Helper function to check if notes have been updated but not viewed
+    const hasUnviewedNotes = (interview) => {
+        if (!interview.meeting_notes || !interview.notes_updated_at) return false;
+        if (!interview.notes_viewed_at) return true;
+
+        const updatedAt = new Date(interview.notes_updated_at);
+        const viewedAt = new Date(interview.notes_viewed_at);
+        return updatedAt > viewedAt;
     };
 
     // Filter interviews by interview type first
@@ -413,8 +451,14 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                             <div className="flex items-center gap-1.5 mb-1.5">
                                                 <LinkIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                                                 <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Meeting Notes</span>
+                                                {hasUnviewedNotes(interview) && (
+                                                    <span className="relative flex h-2 w-2 ml-1">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                                    </span>
+                                                )}
                                             </div>
-                                            <p className="text-xs text-blue-900 dark:text-blue-200 break-all">
+                                            <p className="text-xs text-blue-900 dark:text-blue-200 break-all line-clamp-2">
                                                 {interview.meeting_notes}
                                             </p>
                                         </div>
@@ -431,16 +475,33 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                                 {cancellingId === interview.id ? 'Cancelling...' : 'Cancel'}
                                             </button>
                                         )}
-                                        {interview.meeting_notes && interview.meeting_notes.startsWith('http') && interview.status === 'confirmed' && (
-                                            <a
-                                                href={interview.meeting_notes}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                            >
-                                                <LinkIcon className="h-3.5 w-3.5" />
-                                                Join Interview
-                                            </a>
+                                        {interview.meeting_notes && interview.status === 'confirmed' && (
+                                            <>
+                                                <button
+                                                    onClick={() => openNotesModal(interview)}
+                                                    className="relative flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                                                >
+                                                    <EyeIcon className="h-3.5 w-3.5" />
+                                                    View Notes
+                                                    {hasUnviewedNotes(interview) && (
+                                                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                                        </span>
+                                                    )}
+                                                </button>
+                                                {interview.meeting_notes.startsWith('http') && (
+                                                    <a
+                                                        href={interview.meeting_notes}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        <LinkIcon className="h-3.5 w-3.5" />
+                                                        Join Interview
+                                                    </a>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </div>
@@ -523,6 +584,125 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                             className="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {cancellingId === interviewToCancel?.id ? 'Cancelling...' : 'Yes, Cancel Interview'}
+                                        </button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* View Notes Modal */}
+            <Transition appear show={showNotesModal} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={closeNotesModal}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                    <div className="p-6">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div>
+                                                <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                                    Meeting Notes
+                                                </Dialog.Title>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    {selectedInterview && formatInterviewType(selectedInterview.interview_type)} • {selectedInterview && formatDateWithDay(selectedInterview.timeslot_date)}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={closeNotesModal}
+                                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                            >
+                                                <XMarkIcon className="h-6 w-6" />
+                                            </button>
+                                        </div>
+
+                                        {selectedInterview && (
+                                            <div className="space-y-4">
+                                                {/* Interviewer Info */}
+                                                {selectedInterview.assigned_to_name && (
+                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <UserIcon className="h-4 w-4 text-gray-400" />
+                                                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Interviewer</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-900 dark:text-white font-medium">
+                                                            {selectedInterview.assigned_to_name}
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                {/* Meeting Notes */}
+                                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <ChatBubbleLeftRightIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                                        <span className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase">Notes</span>
+                                                    </div>
+                                                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
+                                                        <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap break-words">
+                                                            {selectedInterview.meeting_notes}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* If it's a link, show join button */}
+                                                    {selectedInterview.meeting_notes.startsWith('http') && (
+                                                        <div className="mt-3">
+                                                            <a
+                                                                href={selectedInterview.meeting_notes}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm"
+                                                            >
+                                                                <LinkIcon className="h-4 w-4" />
+                                                                Join Interview
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Member Notes */}
+                                                {selectedInterview.member_notes && (
+                                                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <ChatBubbleLeftRightIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                                            <span className="text-sm font-semibold text-purple-700 dark:text-purple-300">Your Notes</span>
+                                                        </div>
+                                                        <p className="text-sm text-purple-900 dark:text-purple-200">
+                                                            {selectedInterview.member_notes}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end">
+                                        <button
+                                            onClick={closeNotesModal}
+                                            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                        >
+                                            Close
                                         </button>
                                     </div>
                                 </Dialog.Panel>

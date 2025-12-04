@@ -133,11 +133,16 @@ def update_timeslot(
 ) -> Any:
     """
     Update a timeslot.
-    Volunteer+ can update if not booked. Admin can update anytime.
+    Admin can update all timeslots.
+    Volunteer/Lead can only update their own timeslots if not booked.
     """
     user_role = get_user_role(user)
     timeslot = meeting_crud.update_timeslot(
-        db, timeslot_id=timeslot_id, data=data, user_role=user_role
+        db,
+        timeslot_id=timeslot_id,
+        data=data,
+        user_role=user_role,
+        user_id=str(user.id),
     )
     if not timeslot:
         raise HTTPException(status_code=404, detail="Timeslot not found")
@@ -157,11 +162,12 @@ def delete_timeslot(
 ) -> Any:
     """
     Delete a timeslot.
-    Volunteer+ can delete if not booked. Admin can delete anytime.
+    Admin can delete all timeslots.
+    Volunteer/Lead can only delete their own timeslots if not booked.
     """
     user_role = get_user_role(user)
     success = meeting_crud.delete_timeslot(
-        db, timeslot_id=timeslot_id, user_role=user_role
+        db, timeslot_id=timeslot_id, user_role=user_role, user_id=str(user.id)
     )
     if not success:
         raise HTTPException(status_code=404, detail="Timeslot not found")
@@ -604,6 +610,43 @@ def update_interview_notes(
         )
     except Exception as e:
         print(f"Failed to send notes update email: {e}")
+
+    return {"interview": meeting_deps.parse_meeting_request(request)}
+
+
+@meeting_router.post(
+    "/{request_id}/mark-notes-viewed",
+    response_model=Dict[str, meeting_schema.MeetingRequestRead],
+)
+def mark_meeting_notes_as_viewed(
+    request_id: str,
+    db: Database = Depends(session.get_db),
+    user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
+) -> Any:
+    """
+    Mark meeting notes as viewed by the member.
+    Only the member who owns the request can mark notes as viewed.
+    """
+    # Get the request to verify it exists and belongs to the user
+    existing_request = meeting_crud.read_meeting_request_by_id(
+        db, request_id=request_id
+    )
+    if not existing_request:
+        raise HTTPException(status_code=404, detail="Meeting request not found")
+
+    # Verify user owns this request
+    if str(existing_request.user_id) != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only mark notes as viewed for your own meeting requests",
+        )
+
+    request = meeting_crud.mark_notes_as_viewed(
+        db, request_id=request_id, user_id=str(user.id)
+    )
+
+    if not request:
+        raise HTTPException(status_code=404, detail="Failed to update request")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
