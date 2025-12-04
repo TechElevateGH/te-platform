@@ -2067,3 +2067,209 @@ def send_meeting_reminder_email(
         html_template=html_template,
         environment={},
     )
+
+
+def send_meeting_notes_updated_email(
+    email_to: str,
+    member_name: str,
+    interview_type: str,
+    timeslot_date: str,
+    timeslot_time: str,
+    interviewer_name: str,
+    meeting_notes: str,
+) -> None:
+    """
+    Send notification when meeting notes are updated.
+
+    Args:
+        email_to: Member's email address
+        member_name: Name of the member
+        interview_type: Type of interview
+        timeslot_date: Date of the meeting (YYYY-MM-DD)
+        timeslot_time: Time of the meeting (HH:MM)
+        interviewer_name: Name of the interviewer
+        meeting_notes: Updated meeting notes
+    """
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Meeting Details Updated"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #1f2937;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f3f4f6;
+            }}
+            .container {{
+                background-color: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }}
+            .header {{
+                background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+                color: white;
+                padding: 40px 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }}
+            .header p {{
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                opacity: 0.95;
+            }}
+            .content {{
+                padding: 40px 30px;
+                background-color: #ffffff;
+            }}
+            .greeting {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #111827;
+                margin: 0 0 20px 0;
+            }}
+            .message {{
+                color: #4b5563;
+                margin: 0 0 20px 0;
+                font-size: 15px;
+                line-height: 1.7;
+            }}
+            .info-box {{
+                background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+                border-left: 4px solid #06b6d4;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .info-box p {{
+                margin: 8px 0;
+                color: #164e63;
+                font-size: 14px;
+            }}
+            .info-box strong {{
+                color: #0e7490;
+            }}
+            .notes-box {{
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 8px;
+            }}
+            .notes-box p {{
+                margin: 0;
+                color: #78350f;
+                font-size: 14px;
+                word-break: break-all;
+            }}
+            .notes-box strong {{
+                color: #92400e;
+            }}
+            .cta-button {{
+                display: inline-block;
+                margin: 30px 0;
+                padding: 14px 28px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                background: linear-gradient(135deg, #06b6d4, #0891b2);
+                color: white;
+                text-align: center;
+            }}
+            .signature {{
+                margin: 30px 0 0 0;
+                color: #6b7280;
+                font-size: 14px;
+            }}
+            .signature strong {{
+                color: #1f2937;
+            }}
+            .footer {{
+                background-color: #f9fafb;
+                padding: 20px 30px;
+                text-align: center;
+                border-top: 1px solid #e5e7eb;
+            }}
+            .footer p {{
+                margin: 0;
+                font-size: 12px;
+                color: #9ca3af;
+                line-height: 1.5;
+            }}
+            .divider {{
+                height: 1px;
+                background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+                margin: 30px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📝 Meeting Details Updated</h1>
+                <p>Your interviewer has updated the meeting information</p>
+            </div>
+            <div class="content">
+                <p class="greeting">Hi {{{{ member_name }}}},</p>
+                <p class="message">{{{{ interviewer_name }}}} has updated the details for your upcoming session.</p>
+                
+                <div class="info-box">
+                    <p><strong>Type:</strong> {{{{ interview_type }}}}</p>
+                    <p><strong>Date:</strong> {{{{ timeslot_date }}}}</p>
+                    <p><strong>Time:</strong> {{{{ timeslot_time }}}}</p>
+                    <p><strong>Interviewer:</strong> {{{{ interviewer_name }}}}</p>
+                </div>
+                
+                <div class="notes-box">
+                    <p><strong>Updated Meeting Details:</strong></p>
+                    <p>{{{{ meeting_notes }}}}</p>
+                </div>
+                
+                <p class="message">Please review the updated details and save the meeting link. We look forward to seeing you!</p>
+                
+                <a href="{settings.SERVER_HOST}/workspace" class="cta-button">View Interview Details</a>
+                
+                <div class="divider"></div>
+                
+                <p class="signature">
+                    Best regards,<br>
+                    <strong>The {{{{ project_name }}}} Team</strong>
+                </p>
+            </div>
+            <div class="footer">
+                <p>This is an automated message, please do not reply to this email.</p>
+                <p>© 2025 {{{{ project_name }}}}. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    send_email(
+        email_to=email_to,
+        subject_template=subject,
+        html_template=html_template,
+        environment={
+            "project_name": settings.PROJECT_NAME,
+            "member_name": member_name,
+            "interview_type": interview_type,
+            "timeslot_date": timeslot_date,
+            "timeslot_time": timeslot_time,
+            "interviewer_name": interviewer_name,
+            "meeting_notes": meeting_notes,
+        },
+    )

@@ -478,6 +478,28 @@ def cancel_meeting(
     return meeting_models.MeetingRequest(**request_data)
 
 
+def update_meeting_notes(
+    db: Database, *, request_id: str, meeting_notes: str
+) -> Optional[meeting_models.MeetingRequest]:
+    """Update meeting notes for a confirmed meeting (Volunteer+ only)."""
+
+    now = datetime.utcnow()
+    update_dict = {
+        "meeting_notes": meeting_notes,
+        "updated_at": now,
+    }
+
+    result = db.mock_interview_requests.update_one(
+        {"_id": ObjectId(request_id)}, {"$set": update_dict}
+    )
+
+    if result.matched_count == 0:
+        return None
+
+    request_data = db.mock_interview_requests.find_one({"_id": ObjectId(request_id)})
+    return meeting_models.MeetingRequest(**request_data)
+
+
 def update_meeting_status(
     db: Database,
     *,
