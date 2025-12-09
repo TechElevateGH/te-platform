@@ -10,7 +10,8 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     UserGroupIcon,
-    MinusIcon
+    MinusIcon,
+    PencilIcon
 } from '@heroicons/react/20/solid';
 import {
     ComputerDesktopIcon,
@@ -100,6 +101,13 @@ const TimeslotManagement = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [creating, setCreating] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
+    const [editingSlot, setEditingSlot] = useState(null);
+    const [updating, setUpdating] = useState(false);
+    const [editFormData, setEditFormData] = useState({
+        date: '',
+        start_time: '',
+        interview_types: []
+    });
 
     // Calendar view state
     const [currentMonth, setCurrentMonth] = useState(() => {
@@ -280,6 +288,61 @@ const TimeslotManagement = () => {
         } finally {
             setDeletingId(null);
         }
+    };
+
+    const handleEdit = (slot) => {
+        setEditingSlot(slot);
+        setEditFormData({
+            date: slot.date,
+            start_time: convertUTCTimeToLocal(slot.date, slot.start_time),
+            interview_types: slot.interview_types || []
+        });
+    };
+
+    const handleUpdateSlot = async () => {
+        if (!editingSlot) return;
+
+        setUpdating(true);
+        try {
+            const utcStartTime = convertLocalTimeToUTC(editFormData.date, editFormData.start_time);
+            const endTime = calculateEndTimeForEdit(editFormData.start_time, editFormData.interview_types);
+            const utcEndTime = convertLocalTimeToUTC(editFormData.date, endTime);
+
+            await axiosInstance.patch(`/interviews/timeslots/${editingSlot.id}`, {
+                date: editFormData.date,
+                start_time: utcStartTime,
+                end_time: utcEndTime,
+                interview_types: editFormData.interview_types
+            }, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+
+            toast.success('Timeslot updated successfully');
+            setEditingSlot(null);
+            fetchTimeslots();
+        } catch (error) {
+            console.error('Error updating timeslot:', error);
+            toast.error(error.response?.data?.detail || 'Failed to update timeslot');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const calculateEndTimeForEdit = (startTime, types) => {
+        if (!startTime || !types || types.length === 0) return '';
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const maxDuration = Math.max(...types.map(type => INTERVIEW_TYPES[type]?.duration || 20));
+        const endDate = new Date(2000, 0, 1, hours, minutes + maxDuration);
+        return `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+    };
+
+    const toggleEditInterviewType = (type) => {
+        setEditFormData(prev => ({
+            ...prev,
+            interview_types: prev.interview_types.includes(type)
+                ? prev.interview_types.filter(t => t !== type)
+                : [...prev.interview_types, type]
+        }));
     };
 
     const toggleDay = (day) => {
@@ -754,13 +817,23 @@ const TimeslotManagement = () => {
                                                             <span className="text-xs px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 rounded text-amber-700 dark:text-amber-300">Booked</span>
                                                         )}
                                                         {slot.is_available && (
-                                                            <button
-                                                                onClick={() => handleDelete(slot.id)}
-                                                                disabled={deletingId === slot.id}
-                                                                className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                            >
-                                                                <TrashIcon className="h-3.5 w-3.5" />
-                                                            </button>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => handleEdit(slot)}
+                                                                    className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                                    title="Edit timeslot"
+                                                                >
+                                                                    <PencilIcon className="h-3.5 w-3.5" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDelete(slot.id)}
+                                                                    disabled={deletingId === slot.id}
+                                                                    className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                                    title="Delete timeslot"
+                                                                >
+                                                                    <TrashIcon className="h-3.5 w-3.5" />
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                     {slotInterviewTypes.length > 0 && (
@@ -792,6 +865,122 @@ const TimeslotManagement = () => {
                     )}
                 </div>
             </div>
+
+            {/* Edit Timeslot Modal */}
+            <Transition appear show={editingSlot !== null} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setEditingSlot(null)}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                    <div className="p-6">
+                                        <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                                            Edit Timeslot
+                                        </Dialog.Title>
+
+                                        <div className="space-y-4">
+                                            {/* Date */}
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    Date
+                                                </label>
+                                                <input
+                                                    type="date"
+                                                    value={editFormData.date}
+                                                    onChange={(e) => setEditFormData(prev => ({ ...prev, date: e.target.value }))}
+                                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+
+                                            {/* Time */}
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    Start Time
+                                                </label>
+                                                <input
+                                                    type="time"
+                                                    value={editFormData.start_time}
+                                                    onChange={(e) => setEditFormData(prev => ({ ...prev, start_time: e.target.value }))}
+                                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+
+                                            {/* Interview Types */}
+                                            <div>
+                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    Interview Types
+                                                </label>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    {Object.entries(INTERVIEW_TYPES).map(([key, type]) => (
+                                                        <button
+                                                            key={key}
+                                                            type="button"
+                                                            onClick={() => toggleEditInterviewType(key)}
+                                                            className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                                                                editFormData.interview_types.includes(key)
+                                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                                            }`}
+                                                        >
+                                                            {editFormData.interview_types.includes(key) && (
+                                                                <CheckIcon className="h-4 w-4 text-blue-500" />
+                                                            )}
+                                                            <span className={`text-sm font-medium ${
+                                                                editFormData.interview_types.includes(key)
+                                                                    ? 'text-blue-700 dark:text-blue-300'
+                                                                    : 'text-gray-700 dark:text-gray-300'
+                                                            }`}>
+                                                                {type.label}
+                                                            </span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex gap-3 justify-end">
+                                        <button
+                                            onClick={() => setEditingSlot(null)}
+                                            disabled={updating}
+                                            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={handleUpdateSlot}
+                                            disabled={updating || !editFormData.date || !editFormData.start_time || editFormData.interview_types.length === 0}
+                                            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {updating ? 'Updating...' : 'Update Timeslot'}
+                                        </button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 };

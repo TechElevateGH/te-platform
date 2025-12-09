@@ -14,7 +14,9 @@ import {
     XMarkIcon,
     ChevronUpDownIcon,
     ChevronUpIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    XCircleIcon,
+    CalendarDaysIcon
 } from '@heroicons/react/20/solid';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -126,6 +128,7 @@ const InterviewManagement = () => {
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });
     const [confirmModal, setConfirmModal] = useState({ open: false, interview: null, meeting_notes: '' });
     const [completeModal, setCompleteModal] = useState({ open: false, interview: null, feedback: '' });
+    const [cancelModal, setCancelModal] = useState({ open: false, interview: null, reason: '' });
     const [viewModal, setViewModal] = useState({ open: false, interview: null });
     const [submitting, setSubmitting] = useState(false);
 
@@ -229,20 +232,28 @@ const InterviewManagement = () => {
         }
     };
 
-    const handleCancel = async (interviewId) => {
-        const reason = window.prompt('Please provide a cancellation reason:');
-        if (reason === null) return;
+    const openCancelModal = (interview) => {
+        setCancelModal({ open: true, interview, reason: '' });
+    };
 
+    const handleCancel = async () => {
+        if (!cancelModal.interview) return;
+
+        setSubmitting(true);
         try {
-            await axiosInstance.post(`/interviews/${interviewId}/cancel`, {
-                cancellation_reason: reason || 'Cancelled by admin'
+            await axiosInstance.post(`/interviews/${cancelModal.interview.id}/cancel`, {
+                cancellation_reason: cancelModal.reason || 'Cancelled by admin'
             }, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+            toast.success('Interview cancelled successfully');
+            setCancelModal({ open: false, interview: null, reason: '' });
             fetchInterviews();
         } catch (error) {
             console.error('Error cancelling interview:', error);
             toast.error(error.response?.data?.detail || 'Failed to cancel interview');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -623,7 +634,7 @@ const InterviewManagement = () => {
                                                     )}
                                                     {interview.status === 'pending' && isAdmin && (
                                                         <button
-                                                            onClick={() => handleCancel(interview.id)}
+                                                            onClick={() => openCancelModal(interview)}
                                                             className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                         >
                                                             Cancel
@@ -1027,6 +1038,97 @@ const InterviewManagement = () => {
                                                 </button>
                                             </div>
                                         )}
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+            {/* Cancel Interview Modal */}
+            <Transition appear show={cancelModal.open} as={Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setCancelModal({ open: false, interview: null, reason: '' })}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                    <div className="p-6">
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                                <XCircleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                    Cancel Interview Request
+                                                </Dialog.Title>
+                                                {cancelModal.interview && (
+                                                    <div className="space-y-3">
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                            Cancel {formatInterviewType(cancelModal.interview.interview_type).toLowerCase()} interview for <strong>{cancelModal.interview.user_name}</strong>?
+                                                        </p>
+                                                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 text-sm">
+                                                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                                                <CalendarDaysIcon className="h-4 w-4" />
+                                                                <span>{formatDate(cancelModal.interview.timeslot_date)}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
+                                                                <ClockIcon className="h-4 w-4" />
+                                                                <span>{formatTime(cancelModal.interview.timeslot_time)}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                                Cancellation Reason
+                                                            </label>
+                                                            <textarea
+                                                                value={cancelModal.reason}
+                                                                onChange={(e) => setCancelModal(prev => ({ ...prev, reason: e.target.value }))}
+                                                                rows={3}
+                                                                placeholder="Please provide a reason for cancellation..."
+                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex gap-3 justify-end">
+                                        <button
+                                            onClick={() => setCancelModal({ open: false, interview: null, reason: '' })}
+                                            disabled={submitting}
+                                            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                        >
+                                            Keep Interview
+                                        </button>
+                                        <button
+                                            onClick={handleCancel}
+                                            disabled={submitting}
+                                            className="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {submitting ? 'Cancelling...' : 'Yes, Cancel Interview'}
+                                        </button>
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

@@ -410,14 +410,31 @@ def cancel_resume_review_request(
     *,
     db: Database = Depends(session.get_db),
     review_id: str = Query(..., description="ID of the review to cancel"),
+    cancellation_reason: str = Body(..., description="Reason for cancellation"),
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Dict[str, Any]:
-    """Cancel a resume review request (members can cancel their own)."""
+    """
+    Cancel a resume review request.
+    - Members can cancel their own requests
+    - Volunteers/Leads can cancel reviews assigned to them
+    - Admins can cancel any review
+    """
     review = resume_crud.get_review_by_id(db, review_id=review_id)
-    if str(review.user_id) != str(current_user.id):
+    user_role = get_user_role(current_user)
+    
+    # Check permissions
+    is_owner = str(review.user_id) == str(current_user.id)
+    is_assigned = review.reviewed_by and str(review.reviewed_by) == str(current_user.id)
+    is_admin = user_role == 5
+    is_volunteer_plus = user_role >= 3
+    
+    # Allow if: Admin OR (Volunteer+ AND assigned) OR (owner)
+    can_cancel = is_admin or (is_volunteer_plus and is_assigned) or is_owner
+    
+    if not can_cancel:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only cancel your own resume review requests",
+            detail="You don't have permission to cancel this review",
         )
 
     updated_review = resume_crud.update_review_request(
@@ -425,7 +442,7 @@ def cancel_resume_review_request(
         review_id=review_id,
         reviewer_id=str(current_user.id),
         reviewer_name=_reviewer_name(current_user),
-        data=resume_schema.ResumeReviewUpdate(status="Cancelled"),
+        data=resume_schema.ResumeReviewUpdate(status="Cancelled", notes=cancellation_reason),
     )
 
     return {
