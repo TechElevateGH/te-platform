@@ -180,9 +180,17 @@ def read_company_referrals(
     Get all referrals for a specific company from MongoDB.
     Useful for seeing all referral requests to a particular company.
     company_id is actually the company name (string).
+    Uses collation for case-insensitive matching.
     """
+    from pymongo.collation import Collation
+
+    # Use collation for case-insensitive matching (strength=2 ignores case)
+    collation = Collation(locale="en", strength=2)
     referrals_data = (
-        db.referrals.find({"company_name": company_id}).skip(skip).limit(limit)
+        db.referrals.find({"company_name": company_id})
+        .collation(collation)
+        .skip(skip)
+        .limit(limit)
     )
     referrals_list = [referral_models.Referral(**ref) for ref in referrals_data]
 
@@ -207,12 +215,16 @@ def read_user_company_referrals(
     Get all referrals for a specific user at a specific company from MongoDB.
     Useful for checking if user already requested referral at this company.
     company_id is actually the company name (string).
+    Uses collation for case-insensitive matching.
     """
     from bson import ObjectId
+    from pymongo.collation import Collation
 
+    # Use collation for case-insensitive matching (strength=2 ignores case)
+    collation = Collation(locale="en", strength=2)
     referrals_data = db.referrals.find(
         {"user_id": ObjectId(user_id), "company_name": company_id}
-    )
+    ).collation(collation)
     return [referral_models.Referral(**ref) for ref in referrals_data]
 
 
@@ -220,8 +232,15 @@ def count_referrals_by_company(db: Database, *, company_id: str) -> int:
     """
     Count total referrals for a specific company.
     company_id is actually the company name (string).
+    Uses collation for case-insensitive matching.
     """
-    return db.referrals.count_documents({"company_name": company_id})
+    from pymongo.collation import Collation
+
+    # Use collation for case-insensitive matching (strength=2 ignores case)
+    collation = Collation(locale="en", strength=2)
+    return db.referrals.count_documents(
+        {"company_name": company_id}, collation=collation
+    )
 
 
 def count_referrals_by_status(db: Database, *, status: str) -> int:
