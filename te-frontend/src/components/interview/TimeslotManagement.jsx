@@ -7,8 +7,6 @@ import {
     TrashIcon,
     CheckIcon,
     XMarkIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
     UserGroupIcon,
     MinusIcon,
     PencilIcon
@@ -38,7 +36,6 @@ const convertLocalTimeToUTC = (date, time) => {
 
 const convertUTCTimeToLocal = (date, utcTime) => {
     // Parse UTC time and create a UTC date
-    const [hours, minutes] = utcTime.split(':').map(Number);
     const utcDate = new Date(`${date}T${utcTime}:00Z`);
     // Extract local hours and minutes
     const localHours = String(utcDate.getHours()).padStart(2, '0');
@@ -110,7 +107,7 @@ const TimeslotManagement = () => {
     });
 
     // Calendar view state
-    const [currentMonth, setCurrentMonth] = useState(() => {
+    const [currentMonth] = useState(() => {
         const now = new Date();
         return new Date(now.getFullYear(), now.getMonth(), 1);
     });
@@ -390,7 +387,7 @@ const TimeslotManagement = () => {
         return days;
     };
 
-    const calendarDays = getDaysInMonth(currentMonth);
+    getDaysInMonth(currentMonth); // Calendar days computed but view simplified
     const sortedDates = Object.keys(groupedTimeslots).sort();
     const upcomingDates = sortedDates.filter(d => new Date(d) >= new Date(new Date().toDateString()));
 

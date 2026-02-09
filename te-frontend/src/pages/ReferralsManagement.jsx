@@ -21,8 +21,6 @@ import {
     TrashIcon
 } from '@heroicons/react/24/outline';
 import { ClipboardDocumentIcon } from '@heroicons/react/20/solid';
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 
 const ReferralsManagement = () => {
     const { accessToken, userRole } = useAuth();

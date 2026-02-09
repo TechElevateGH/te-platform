@@ -4,14 +4,12 @@ import {
     CalendarIcon,
     ClockIcon,
     UserIcon,
-    BuildingOfficeIcon,
     CheckCircleIcon,
     UserPlusIcon,
     PaperAirplaneIcon,
     FunnelIcon,
     PencilIcon,
     TrashIcon,
-    XMarkIcon,
     ChevronUpDownIcon,
     ChevronUpIcon,
     ChevronDownIcon,
@@ -122,7 +120,7 @@ const InterviewManagement = () => {
     const [itemToDelete, setItemToDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const isAdmin = parseInt(userRole) === 5;
-    const isLead = parseInt(userRole) === 4;
+    const _isLead = parseInt(userRole) === 4; // eslint-disable-line no-unused-vars
 
     // Action modals
     const [assignModal, setAssignModal] = useState({ open: false, interview: null });

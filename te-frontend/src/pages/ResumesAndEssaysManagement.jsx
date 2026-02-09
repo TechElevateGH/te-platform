@@ -45,7 +45,7 @@ const ResumesAndEssaysManagement = () => {
     const [memberFilter, setMemberFilter] = useState('');
     const [levelFilter, setLevelFilter] = useState('');
     const [sortBy, setSortBy] = useState('name_asc');
-    const [showColumnSelector, setShowColumnSelector] = useState(false);
+    const [showColumnSelector, setShowColumnSelector] = useState(false); // eslint-disable-line no-unused-vars
     const [assigningReview, setAssigningReview] = useState(null);
     const [assigningInProgress, setAssigningInProgress] = useState(false);
     const [selectedReview, setSelectedReview] = useState(null);
@@ -87,8 +87,8 @@ const ResumesAndEssaysManagement = () => {
     const [showAdvancedResumesFilters, setShowAdvancedResumesFilters] = useState(false);
 
     // Essays tab filters
-    const [essaysSearch, setEssaysSearch] = useState('');
-    const [essaysSortBy, setEssaysSortBy] = useState('name_asc');
+    const [essaysSearch] = useState('');
+    const [essaysSortBy] = useState('name_asc');
 
     // Column visibility state - default visible columns
     const [visibleColumns, setVisibleColumns] = useState({
@@ -109,6 +109,8 @@ const ResumesAndEssaysManagement = () => {
         { key: 'actions', label: 'Actions', default: true }
     ];
 
+    // Column management functions (reserved for future column selector UI)
+    // eslint-disable-next-line no-unused-vars
     const toggleColumn = (columnKey) => {
         setVisibleColumns(prev => ({
             ...prev,
@@ -116,6 +118,7 @@ const ResumesAndEssaysManagement = () => {
         }));
     };
 
+    // eslint-disable-next-line no-unused-vars
     const resetColumns = () => {
         const defaultColumns = {};
         columnConfig.forEach(col => {
@@ -124,6 +127,7 @@ const ResumesAndEssaysManagement = () => {
         setVisibleColumns(defaultColumns);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const showAllColumns = () => {
         const allColumns = {};
         columnConfig.forEach(col => {
@@ -132,6 +136,7 @@ const ResumesAndEssaysManagement = () => {
         setVisibleColumns(allColumns);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
 
     // Persist activeTab to localStorage whenever it changes
@@ -639,7 +644,8 @@ const ResumesAndEssaysManagement = () => {
 
     const hasActiveMyAssignmentsFilters = myAssignmentsStatusFilter || myAssignmentsLevelFilter || myAssignmentsMemberFilter || myAssignmentsJobTitleFilter;
 
-    // Filtered and sorted Essays
+    // Filtered and sorted Essays (reserved for Essays tab)
+    // eslint-disable-next-line no-unused-vars
     const filteredEssays = useMemo(() => {
         // Get users with essays
         let usersWithEssays = users.filter(u => u.referral_essay || u.cover_letter);

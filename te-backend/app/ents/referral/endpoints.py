@@ -191,9 +191,6 @@ def get_referrals(
     # For viewing all referrals (requires at least Referrer role)
     require_referrer(current_user)
 
-    # Determine which company to filter by
-    filter_company_id = None
-
     # If user is a Referrer, they can only see their assigned company
     if is_referrer(current_user):
         if not current_user.company_id:
@@ -202,39 +199,38 @@ def get_referrals(
                 detail="Referrer account has no assigned company",
             )
 
-        # If referrer provided company_id, verify it matches their assigned company
-        if company_id:
-            # Ensure both are ObjectIds for comparison
+        # Use the denormalized company_name from the referrer's user record
+        # This is stored when the referrer account is created
+        company_name = getattr(current_user, "company_name", None)
+
+        # Fallback: look up company name if not on user record
+        if not company_name:
             from bson import ObjectId
 
-            provided_id = (
-                ObjectId(company_id) if isinstance(company_id, str) else company_id
-            )
-            assigned_id = (
-                current_user.company_id
-                if not isinstance(current_user.company_id, str)
-                else ObjectId(current_user.company_id)
-            )
+            filter_company_id = current_user.company_id
+            if isinstance(filter_company_id, str):
+                filter_company_id = ObjectId(filter_company_id)
 
-            if provided_id != assigned_id:
+            company = db.referral_companies.find_one({"_id": filter_company_id})
+            if not company:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Referrers can only view referrals for their assigned company",
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Company not found",
                 )
+            company_name = company.get("name", "")
 
-        filter_company_id = current_user.company_id
-    # If user is Lead/Admin and provided company_id, use it for filtering
+        # Get referrals filtered by company name
+        referrals = referral_crud.read_company_referrals(
+            db, company_id=company_name, skip=skip, limit=limit
+        )
+
+    # Lead/Admin with company_id filter
     elif company_id:
-        filter_company_id = company_id
-
-    # Fetch referrals based on filter
-    if filter_company_id:
-        # Get company name from company_id for filtering
         from bson import ObjectId
 
-        # Ensure filter_company_id is an ObjectId
-        if isinstance(filter_company_id, str):
-            filter_company_id = ObjectId(filter_company_id)
+        filter_company_id = (
+            ObjectId(company_id) if isinstance(company_id, str) else company_id
+        )
 
         company = db.referral_companies.find_one({"_id": filter_company_id})
         if not company:
@@ -244,12 +240,12 @@ def get_referrals(
             )
         company_name = company.get("name", "")
 
-        # Get referrals filtered by company (using company name)
         referrals = referral_crud.read_company_referrals(
             db, company_id=company_name, skip=skip, limit=limit
         )
+
+    # Lead/Admin without filter - get all referrals
     else:
-        # No filter - get all referrals (Lead/Admin only)
         referrals = referral_crud.read_all_referrals(db, skip=skip, limit=limit)
 
     return {
