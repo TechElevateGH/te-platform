@@ -3,7 +3,6 @@ import Hero from "./Hero";
 import Features from "./Features";
 import Companies from "./Companies";
 import ImpactStats from "./ImpactStats";
-import Testimonials from "./Testimonials";
 import Footer from "./Footer";
 import { useAuth } from '../../context/AuthContext';
 import { useMemo, useEffect, useState } from 'react';
@@ -263,7 +262,6 @@ const Home = () => {
             <Features />
             <Companies />
             <ImpactStats />
-            <Testimonials />
             <Footer />
         </div>
     );
