@@ -434,6 +434,20 @@ code, .font-mono {
   .text-te-gold { color: var(--te-gold); }
   .text-te-red { color: var(--te-red); }
 
+  /* Colored icon tiles (tinted bg + on-palette icon/text) */
+  .te-tile-green { color: var(--te-green); background: var(--te-green-soft); }
+  .te-tile-gold  { color: var(--te-gold);  background: var(--te-gold-soft); }
+  .te-tile-red   { color: var(--te-red);   background: var(--te-red-soft); }
+  .te-tile-dark  { color: var(--te-on-primary); background: var(--te-text); }
+
+  /* Ghana tricolor flag stripe (red | gold | green) — recurring accent motif */
+  .te-stripe {
+    background-image: linear-gradient(90deg, var(--te-red) 0 33.33%, var(--te-gold) 33.33% 66.66%, var(--te-green) 66.66% 100%);
+  }
+  .te-stripe-v {
+    background-image: linear-gradient(180deg, var(--te-red) 0 33.33%, var(--te-gold) 33.33% 66.66%, var(--te-green) 66.66% 100%);
+  }
+
   .te-divider { height: 1px; width: 100%; background: var(--te-border); }
 
   .te-link {

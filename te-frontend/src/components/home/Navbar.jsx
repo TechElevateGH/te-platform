@@ -257,6 +257,9 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         </div>
                     </div>
                 </nav>
+                {(scrolled || isWorkspace) && (
+                    <div className="te-stripe absolute bottom-0 left-0 right-0 h-[3px]" />
+                )}
             </header>
 
             {/* Mobile menu - only for home page - Outside header for proper layering */}

@@ -101,14 +101,16 @@ const ImpactStats = () => {
 
                 {/* Stats grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)]">
-                    {stats.map((stat) => (
+                    {stats.map((stat, i) => {
+                        const tone = ['green', 'gold', 'red'][i % 3];
+                        return (
                         <div key={stat.id} className="bg-[var(--te-surface)] p-8">
                             <div className="flex items-center justify-between">
-                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
-                                    <stat.icon className="h-5 w-5" strokeWidth={1.8} />
+                                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg te-tile-${tone}`}>
+                                    <stat.icon className="h-5 w-5" strokeWidth={1.9} />
                                 </span>
                             </div>
-                            <div className="mt-6 font-mono text-5xl font-bold tracking-tight text-[var(--te-text)]">
+                            <div className={`mt-6 font-mono text-5xl font-bold tracking-tight text-te-${tone}`}>
                                 {isVisible ? <AnimatedNumber value={stat.value} /> : 0}
                                 {stat.suffix}
                             </div>
@@ -119,7 +121,8 @@ const ImpactStats = () => {
                                 {stat.description}
                             </p>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Bottom CTA */}

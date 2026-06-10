@@ -794,7 +794,7 @@ const Learning = ({ setContent }) => {
         );
     };
 
-    const renderDsaTopicRow = (category, topic) => {
+    const renderDsaTopicRow = (category, topic, idx = 0) => {
         const completed = isTopicCompleted(category.category, topic.name);
         const bookmarked = isTopicBookmarked(category.category, topic.name);
         const expanded = isTopicExpanded(category.category, topic.name);
@@ -802,16 +802,17 @@ const Learning = ({ setContent }) => {
         const note = getTopicNote(category.category, topic.name);
         return (
             <Fragment key={topic.name}>
-                <tr className={`transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-surface-alt)]' : ''}`}>
-                    <td className="w-10 py-2.5 pl-4 align-top">
+                <tr className={`group transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-green-soft)]' : ''}`}>
+                    <td className="w-12 py-3 pl-4 align-top">
                         <CheckToggle done={completed} onClick={() => toggleTopicCompletion(category.category, topic.name)} />
                     </td>
-                    <td className="py-2.5 pr-3 align-top">
-                        <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="text-left">
+                    <td className="py-3 pr-3 align-top">
+                        <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="flex items-baseline gap-2.5 text-left">
+                            <span className="font-mono text-[11px] tabular-nums text-[var(--te-gold)]">{String(idx + 1).padStart(2, '0')}</span>
                             <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
                         </button>
                     </td>
-                    <td className="hidden py-2.5 pr-3 align-top lg:table-cell">
+                    <td className="hidden py-3 pr-3 align-top lg:table-cell">
                         <div className="flex flex-wrap gap-1.5">
                             {topic.youtubeId && (
                                 <a href={`https://www.youtube.com/watch?v=${topic.youtubeId}`} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]"><VideoCameraIcon className="h-3.5 w-3.5" /> Watch</a>
@@ -823,10 +824,10 @@ const Learning = ({ setContent }) => {
                             {!(topic.resources?.length) && !topic.youtubeId && <span className="font-mono text-[11px] text-[var(--te-text-dim)]">—</span>}
                         </div>
                     </td>
-                    <td className="w-20 py-2.5 pr-3 align-top">
+                    <td className="w-24 py-3 pr-4 align-top">
                         <div className="flex items-center justify-end gap-0.5">
                             <button onClick={() => toggleBookmark(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">
-                                {bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}
+                                {bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-gold)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}
                             </button>
                             <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Expand">
                                 <ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -870,28 +871,29 @@ const Learning = ({ setContent }) => {
         );
     };
 
-    const renderPyTopicRow = (categoryName, topic) => {
+    const renderPyTopicRow = (categoryName, topic, idx = 0) => {
         const key = `${categoryName}::${topic.name}`;
         const completed = pythonCompletedTopics.has(key);
         const bookmarked = pythonBookmarkedTopics.has(key);
         const expanded = pythonExpandedTopics.has(key);
         return (
             <Fragment key={topic.name}>
-                <tr className={`transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-surface-alt)]' : ''}`}>
-                    <td className="w-10 py-2.5 pl-4 align-top">
+                <tr className={`group transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-green-soft)]' : ''}`}>
+                    <td className="w-12 py-3 pl-4 align-top">
                         <CheckToggle done={completed} onClick={() => togglePyComplete(key)} />
                     </td>
-                    <td className="py-2.5 pr-3 align-top">
-                        <button onClick={() => togglePyExpand(key)} className="text-left">
+                    <td className="py-3 pr-3 align-top">
+                        <button onClick={() => togglePyExpand(key)} className="flex items-baseline gap-2.5 text-left">
+                            <span className="font-mono text-[11px] tabular-nums text-[var(--te-gold)]">{String(idx + 1).padStart(2, '0')}</span>
                             <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
                         </button>
                     </td>
-                    <td className="hidden py-2.5 pr-3 align-top lg:table-cell">
+                    <td className="hidden py-3 pr-3 align-top lg:table-cell">
                         <span className="font-mono text-[11px] text-[var(--te-text-dim)]">{topic.resources?.length || 0} resource{(topic.resources?.length || 0) !== 1 ? 's' : ''}</span>
                     </td>
-                    <td className="w-20 py-2.5 pr-3 align-top">
+                    <td className="w-24 py-3 pr-4 align-top">
                         <div className="flex items-center justify-end gap-0.5">
-                            <button onClick={() => togglePyBookmark(key)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">{bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}</button>
+                            <button onClick={() => togglePyBookmark(key)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">{bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-gold)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}</button>
                             <button onClick={() => togglePyExpand(key)} className="te-icon-btn h-7 w-7" aria-label="Expand"><ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} /></button>
                         </div>
                     </td>
@@ -1087,26 +1089,33 @@ const Learning = ({ setContent }) => {
                                                     ref={(el) => (categoryRefs.current[category.category] = el)}
                                                     className="scroll-mt-40"
                                                 >
-                                                    <div className="mb-4 flex items-center justify-between border-b border-[var(--te-border)] pb-2">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <h2 className="text-lg font-bold text-[var(--te-text)]">{category.category}</h2>
-                                                            <span className={`te-chip-${diff.level === 'Hard' ? 'red' : diff.level === 'Medium' ? 'gold' : 'green'}`}>{diff.icon} {diff.level}</span>
+                                                    <div className="mb-4 border-b border-[var(--te-border)] pb-3">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <div className="flex items-center gap-2.5">
+                                                                <h2 className="text-lg font-bold text-[var(--te-text)]">{category.category}</h2>
+                                                                <span className={`te-chip-${diff.level === 'Hard' ? 'red' : diff.level === 'Medium' ? 'gold' : 'green'}`}>{diff.icon} {diff.level}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="hidden h-1.5 w-28 overflow-hidden rounded-full bg-[var(--te-surface-alt)] sm:block">
+                                                                    <div className="h-full rounded-full bg-[var(--te-green)] transition-all" style={{ width: `${category.total ? Math.round((category.completed / category.total) * 100) : 0}%` }} />
+                                                                </div>
+                                                                <span className="font-mono text-xs text-[var(--te-text-dim)]">{category.completed}/{category.total}</span>
+                                                            </div>
                                                         </div>
-                                                        <span className="font-mono text-xs text-[var(--te-text-dim)]">{category.completed}/{category.total}</span>
                                                     </div>
                                                     {viewMode === 'table' ? (
                                                         <div className="te-card overflow-hidden">
-                                                            <table className="w-full">
+                                                            <table className="w-full table-fixed">
                                                                 <thead>
                                                                     <tr className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] text-left">
-                                                                        <th className="w-10 py-2 pl-4"></th>
-                                                                        <th className="py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
-                                                                        <th className="hidden py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
-                                                                        <th className="w-20 py-2 pr-3"></th>
+                                                                        <th className="w-12 py-2.5 pl-4"></th>
+                                                                        <th className="w-[44%] py-2.5 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
+                                                                        <th className="hidden py-2.5 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
+                                                                        <th className="w-24 py-2.5 pr-4"></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody className="divide-y divide-[var(--te-border)]">
-                                                                    {category.topics.map((topic) => renderDsaTopicRow(category, topic))}
+                                                                    {category.topics.map((topic, i) => renderDsaTopicRow(category, topic, i))}
                                                                 </tbody>
                                                             </table>
                                                         </div>
@@ -1159,28 +1168,36 @@ const Learning = ({ setContent }) => {
                                             ? data.topics.filter((t) => t.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
                                             : data.topics;
                                         if (topics.length === 0) return null;
+                                        const catDone = topics.filter((t) => pythonCompletedTopics.has(`${categoryName}::${t.name}`)).length;
                                         return (
                                             <section key={categoryName} id={`py-${idx}`} className="scroll-mt-40">
-                                                <div className="mb-4 flex items-center justify-between border-b border-[var(--te-border)] pb-2">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <h2 className="text-lg font-bold text-[var(--te-text)]">{categoryName}</h2>
-                                                        {data.difficulty?.level && <span className={`te-chip-${/adv|hard/i.test(data.difficulty.level) ? 'red' : /inter|medium/i.test(data.difficulty.level) ? 'gold' : 'green'}`}>{data.difficulty.level}</span>}
+                                                <div className="mb-4 border-b border-[var(--te-border)] pb-3">
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <h2 className="text-lg font-bold text-[var(--te-text)]">{categoryName}</h2>
+                                                            {data.difficulty?.level && <span className={`te-chip-${/adv|hard/i.test(data.difficulty.level) ? 'red' : /inter|medium/i.test(data.difficulty.level) ? 'gold' : 'green'}`}>{data.difficulty.level}</span>}
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="hidden h-1.5 w-28 overflow-hidden rounded-full bg-[var(--te-surface-alt)] sm:block">
+                                                                <div className="h-full rounded-full bg-[var(--te-green)] transition-all" style={{ width: `${topics.length ? Math.round((catDone / topics.length) * 100) : 0}%` }} />
+                                                            </div>
+                                                            <span className="font-mono text-xs text-[var(--te-text-dim)]">{catDone}/{topics.length}</span>
+                                                        </div>
                                                     </div>
-                                                    <span className="font-mono text-xs text-[var(--te-text-dim)]">{topics.length}</span>
                                                 </div>
                                                 {viewMode === 'table' ? (
                                                     <div className="te-card overflow-hidden">
-                                                        <table className="w-full">
+                                                        <table className="w-full table-fixed">
                                                             <thead>
                                                                 <tr className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] text-left">
-                                                                    <th className="w-10 py-2 pl-4"></th>
-                                                                    <th className="py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
-                                                                    <th className="hidden py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
-                                                                    <th className="w-20 py-2 pr-3"></th>
+                                                                    <th className="w-12 py-2.5 pl-4"></th>
+                                                                    <th className="w-[44%] py-2.5 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
+                                                                    <th className="hidden py-2.5 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
+                                                                    <th className="w-24 py-2.5 pr-4"></th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody className="divide-y divide-[var(--te-border)]">
-                                                                {topics.map((topic) => renderPyTopicRow(categoryName, topic))}
+                                                                {topics.map((topic, i) => renderPyTopicRow(categoryName, topic, i))}
                                                             </tbody>
                                                         </table>
                                                     </div>

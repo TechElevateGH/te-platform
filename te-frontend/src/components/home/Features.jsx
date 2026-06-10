@@ -72,10 +72,10 @@ const Features = () => {
                             className="group relative border-b border-r border-[var(--te-border)] p-8 transition-colors hover:bg-[var(--te-hover)]"
                         >
                             <div className="flex items-center justify-between">
-                                <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
-                                    <feature.icon className="h-5 w-5" strokeWidth={1.8} />
+                                <div className={`inline-flex h-11 w-11 items-center justify-center rounded-lg te-tile-${['green', 'gold', 'red'][index % 3]}`}>
+                                    <feature.icon className="h-5 w-5" strokeWidth={1.9} />
                                 </div>
-                                <span className="font-mono text-xs text-[var(--te-text-dim)]">
+                                <span className="font-mono text-xs text-[var(--te-gold)]">
                                     {String(index + 1).padStart(2, '0')}
                                 </span>
                             </div>

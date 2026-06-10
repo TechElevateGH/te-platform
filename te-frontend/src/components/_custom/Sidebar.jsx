@@ -66,7 +66,7 @@ const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen 
                 <div className="flex flex-col gap-y-5">
                     {groups.map((group) => (
                         <div key={group.key}>
-                            <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">
+                            <p className="mb-1.5 px-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-gold)]">
                                 {group.label}
                             </p>
                             <ul className="space-y-0.5">
@@ -150,6 +150,7 @@ const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen 
 
             {/* ===================== Desktop sidebar (persistent) ===================== */}
             <aside className="hidden md:fixed md:top-16 md:bottom-0 md:left-0 md:z-40 md:flex md:w-60 md:flex-col border-r border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                <div className="te-stripe h-1 w-full flex-shrink-0" />
                 {renderBody((name) => setContent(name))}
             </aside>
         </>

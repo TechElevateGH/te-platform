@@ -116,12 +116,12 @@ const Companies = () => {
         {/* Success Stats */}
         <div className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] max-w-2xl">
           <div className="bg-[var(--te-surface)] p-6 text-center">
-            <div className="font-mono text-4xl font-bold text-[var(--te-text)]">35+</div>
+            <div className="font-mono text-4xl font-bold text-te-green">35+</div>
             <div className="mt-1 text-sm font-semibold text-[var(--te-text)]">Top Companies</div>
             <div className="mt-0.5 text-xs text-[var(--te-text-dim)]">Where our members thrive</div>
           </div>
           <div className="bg-[var(--te-surface)] p-6 text-center">
-            <div className="font-mono text-4xl font-bold text-[var(--te-text)]">50+</div>
+            <div className="font-mono text-4xl font-bold text-te-gold">50+</div>
             <div className="mt-1 text-sm font-semibold text-[var(--te-text)]">Success Stories</div>
             <div className="mt-0.5 text-xs text-[var(--te-text-dim)]">Members placed in dream roles</div>
           </div>

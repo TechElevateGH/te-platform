@@ -48,6 +48,13 @@ module.exports = {
   mode: 'jit',
   darkMode: 'class',
   content: ["./src/**/*.{js,ts,jsx,tsx,html}"],
+  safelist: [
+    'te-tile-green', 'te-tile-gold', 'te-tile-red', 'te-tile-dark',
+    'te-chip-green', 'te-chip-gold', 'te-chip-red',
+    'te-badge-green', 'te-badge-gold', 'te-badge-red',
+    'text-te-green', 'text-te-gold', 'text-te-red',
+    'te-stripe', 'te-stripe-v',
+  ],
   theme: {
     extend: {
       fontFamily: {

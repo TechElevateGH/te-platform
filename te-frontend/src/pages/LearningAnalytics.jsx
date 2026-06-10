@@ -184,10 +184,15 @@ export default function LearningAnalytics() {
             totalCompletions: 0,
             totalBookmarks: 0,
             totalTime: 0,
+            totalTimeFormatted: '0h 0m',
             totalSessions: 0,
+            avgSessionDuration: 0,
             activeStreaks: 0,
             maxStreak: 0,
-            avgStreak: 0
+            avgStreak: 0,
+            engagementRate: 0,
+            categoryStats: [],
+            weeklyActivity: []
         };
         return {
             totalMembers: adminStatistics.total_members || 0,
