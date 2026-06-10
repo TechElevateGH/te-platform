@@ -4,6 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema
 from bson import ObjectId
+from datetime import timezone
 
 
 # Custom type for MongoDB ObjectId compatible with Pydantic v2
@@ -79,8 +80,8 @@ class PrivilegedUser(BaseModel):
 
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     username: str  # Required for privileged users
-    password: str  # Hashed token
-    lead_token: str  # Plain token for login
+    password: str  # Hashed token (bcrypt)
+    lead_token: Optional[str] = None  # DEPRECATED — kept for backward compat with existing docs
     email: Optional[EmailStr] = None  # Optional email for notifications
     role: int  # UserRoles enum value (2=Referrer, 3=Lead, 5=Admin)
     company_id: Optional[PyObjectId] = None  # For Referrer users only
@@ -104,7 +105,7 @@ class PasswordReset(BaseModel):
     code: str
     status: str = "requested"  # requested -> verified -> completed/expired
     attempts: int = 0
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: datetime
     verified_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None

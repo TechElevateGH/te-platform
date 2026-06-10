@@ -15,7 +15,7 @@ import {
     ChevronDownIcon,
     XCircleIcon,
     CalendarDaysIcon
-} from '@heroicons/react/20/solid';
+} from 'icons';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -23,17 +23,17 @@ import { Loading } from '../_custom/Loading';
 import DeleteConfirmationModal from '../_custom/DeleteConfirmationModal';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
-    behavioral: { bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-700' },
-    coding: { bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-700' },
-    one_on_one: { bg: 'bg-purple-50 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-700' },
+    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    one_on_one: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-700' },
-    confirmed: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-700' },
-    completed: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
-    cancelled: { bg: 'bg-gray-50 dark:bg-gray-700/50', text: 'text-gray-600 dark:text-gray-400', border: 'border-gray-200 dark:border-gray-600' },
+    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -366,23 +366,23 @@ const InterviewManagement = () => {
     return (
         <div className="space-y-4">
             {/* Compact Header with Filter */}
-            <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">All Interview Requests</h3>
+            <div className="te-card flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                <h3 className="font-mono text-base font-bold text-[var(--te-text)]">All Interview Requests</h3>
                 <div className="flex items-center gap-2">
                     {isAdmin && selectedItems.length > 0 && (
                         <button
                             onClick={() => handleDeleteClick()}
-                            className="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                            className="te-btn-danger te-btn-sm"
                         >
                             <TrashIcon className="h-4 w-4 mr-1.5" />
                             Delete ({selectedItems.length})
                         </button>
                     )}
-                    <FunnelIcon className="h-4 w-4 text-gray-400" />
+                    <FunnelIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white focus:border-blue-500"
+                        className="te-select py-1.5 text-sm"
                     >
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>
@@ -395,18 +395,18 @@ const InterviewManagement = () => {
 
             {/* Interviews Table */}
             {filteredInterviews.length === 0 ? (
-                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Interview Requests</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="te-card flex flex-col items-center py-14">
+                    <CalendarIcon className="mb-4 h-12 w-12 text-[var(--te-text-dim)]" />
+                    <h3 className="font-mono text-lg font-bold text-[var(--te-text)] mb-2">No Interview Requests</h3>
+                    <p className="text-sm text-[var(--te-text-dim)]">
                         {statusFilter === 'all' ? 'No interview requests yet.' : `No ${statusFilter} interviews.`}
                     </p>
                 </div>
             ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="te-card overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                            <thead className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
                                 <tr>
                                     {isAdmin && (
                                         <th className="px-4 py-3 w-12">
@@ -414,13 +414,13 @@ const InterviewManagement = () => {
                                                 type="checkbox"
                                                 checked={selectedItems.length === sortedInterviews.length && sortedInterviews.length > 0}
                                                 onChange={toggleSelectAll}
-                                                className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                className="rounded border-[var(--te-border)] text-[var(--te-text)] focus:ring-[var(--te-ring)]"
                                             />
                                         </th>
                                     )}
                                     <th
                                         onClick={() => handleSort('user_name')}
-                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
                                     >
                                         <div className="flex items-center gap-1">
                                             Member
@@ -435,7 +435,7 @@ const InterviewManagement = () => {
                                     </th>
                                     <th
                                         onClick={() => handleSort('interview_type')}
-                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
                                     >
                                         <div className="flex items-center gap-1">
                                             Type
@@ -450,7 +450,7 @@ const InterviewManagement = () => {
                                     </th>
                                     <th
                                         onClick={() => handleSort('timeslot_date')}
-                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
                                     >
                                         <div className="flex items-center gap-1">
                                             Date & Time
@@ -465,7 +465,7 @@ const InterviewManagement = () => {
                                     </th>
                                     <th
                                         onClick={() => handleSort('assigned_to_name')}
-                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
                                     >
                                         <div className="flex items-center gap-1">
                                             Interviewer
@@ -478,12 +478,12 @@ const InterviewManagement = () => {
                                             )}
                                         </div>
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider">
                                         Companies
                                     </th>
                                     <th
                                         onClick={() => handleSort('status')}
-                                        className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
                                     >
                                         <div className="flex items-center gap-1">
                                             Status
@@ -496,20 +496,20 @@ const InterviewManagement = () => {
                                             )}
                                         </div>
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text)] uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tbody className="divide-y divide-[var(--te-border)]">
                                 {sortedInterviews.map((interview) => {
-                                    const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
+                                    const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.coding;
                                     const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;
 
                                     return (
                                         <tr
                                             key={interview.id}
-                                            className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                                            className="hover:bg-[var(--te-hover)] transition-colors"
                                         >
                                             {isAdmin && (
                                                 <td className="px-4 py-3 w-12" onClick={(e) => e.stopPropagation()}>
@@ -517,35 +517,35 @@ const InterviewManagement = () => {
                                                         type="checkbox"
                                                         checked={selectedItems.includes(interview.id)}
                                                         onChange={() => toggleSelectItem(interview.id)}
-                                                        className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
+                                                        className="rounded border-[var(--te-border)] text-[var(--te-text)] focus:ring-[var(--te-ring)]"
                                                     />
                                                 </td>
                                             )}
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-2">
-                                                    <UserIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                    <UserIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
+                                                    <span className="font-semibold text-[var(--te-text)] text-sm">
                                                         {interview.user_name}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${typeColors.bg} ${typeColors.text}`}>
+                                                <span className={`te-chip border ${typeColors.border} ${typeColors.bg} ${typeColors.text}`}>
                                                     {formatInterviewType(interview.interview_type)}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                                                        <span className="font-medium text-gray-900 dark:text-white">
+                                                        <CalendarIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
+                                                        <span className="font-medium text-[var(--te-text)]">
                                                             {formatDate(interview.timeslot_date)}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                                        <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                    <div className="flex items-center gap-2 text-sm text-[var(--te-text-dim)]">
+                                                        <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
                                                         <span>{formatTime(interview.timeslot_time)}</span>
-                                                        <span className="text-xs text-gray-500">({interview.duration_minutes} min)</span>
+                                                        <span className="text-xs text-[var(--te-text-dim)]">({interview.duration_minutes} min)</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -553,20 +553,20 @@ const InterviewManagement = () => {
                                                 {interview.assigned_to_name ? (
                                                     <div className="flex items-center gap-2">
                                                         <div className="flex-1">
-                                                            <div className="font-medium text-gray-900 dark:text-white text-sm">
+                                                            <div className="font-medium text-[var(--te-text)] text-sm">
                                                                 {interview.assigned_to_name}
                                                             </div>
                                                         </div>
                                                         <button
                                                             onClick={() => setAssignModal({ open: true, interview })}
-                                                            className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded transition-colors"
+                                                            className="te-icon-btn"
                                                             title="Change interviewer"
                                                         >
                                                             <PencilIcon className="h-4 w-4" />
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400 italic">Not assigned</span>
+                                                    <span className="text-xs text-[var(--te-text-dim)] italic">Not assigned</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3">
@@ -575,23 +575,23 @@ const InterviewManagement = () => {
                                                         {interview.pending_companies.slice(0, 2).map((company, idx) => (
                                                             <span
                                                                 key={idx}
-                                                                className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
+                                                                className="te-chip"
                                                             >
                                                                 {company}
                                                             </span>
                                                         ))}
                                                         {interview.pending_companies.length > 2 && (
-                                                            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
+                                                            <span className="te-chip text-[var(--te-text-dim)]">
                                                                 +{interview.pending_companies.length - 2}
                                                             </span>
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400">-</span>
+                                                    <span className="text-xs text-[var(--te-text-dim)]">-</span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text}`}>
+                                                <span className={`te-chip border ${statusColors.border} ${statusColors.bg} ${statusColors.text}`}>
                                                     {formatStatus(interview.status)}
                                                 </span>
                                             </td>
@@ -599,14 +599,14 @@ const InterviewManagement = () => {
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={() => setViewModal({ open: true, interview })}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                                                        className="te-btn-secondary te-btn-sm"
                                                     >
                                                         View
                                                     </button>
                                                     {interview.status === 'pending' && !interview.assigned_to && (
                                                         <button
                                                             onClick={() => setAssignModal({ open: true, interview })}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                            className="te-btn-primary te-btn-sm"
                                                         >
                                                             <UserPlusIcon className="h-3.5 w-3.5" />
                                                             Assign
@@ -615,7 +615,7 @@ const InterviewManagement = () => {
                                                     {interview.status === 'pending' && interview.assigned_to && (
                                                         <button
                                                             onClick={() => setConfirmModal({ open: true, interview, meetingLink: '' })}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                                                            className="te-btn-primary te-btn-sm"
                                                         >
                                                             <PaperAirplaneIcon className="h-3.5 w-3.5" />
                                                             Confirm
@@ -624,7 +624,7 @@ const InterviewManagement = () => {
                                                     {interview.status === 'confirmed' && (
                                                         <button
                                                             onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                            className="te-btn-primary te-btn-sm"
                                                         >
                                                             <CheckCircleIcon className="h-3.5 w-3.5" />
                                                             Complete
@@ -633,7 +633,7 @@ const InterviewManagement = () => {
                                                     {interview.status === 'pending' && isAdmin && (
                                                         <button
                                                             onClick={() => openCancelModal(interview)}
-                                                            className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                            className="te-btn-ghost te-btn-sm"
                                                         >
                                                             Cancel
                                                         </button>
@@ -641,7 +641,7 @@ const InterviewManagement = () => {
                                                     {isAdmin && (
                                                         <button
                                                             onClick={() => handleDeleteClick(interview)}
-                                                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                            className="te-icon-btn"
                                                             title="Delete"
                                                         >
                                                             <TrashIcon className="h-4 w-4" />
@@ -684,12 +684,12 @@ const InterviewManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
-                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden p-6 transition-all">
+                                    <Dialog.Title className="font-mono text-lg font-bold text-[var(--te-text)] mb-4">
                                         Assign Interviewer
                                     </Dialog.Title>
                                     {interviewers.length === 0 ? (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No interviewers available</p>
+                                        <p className="text-sm text-[var(--te-text-dim)] py-4">No interviewers available</p>
                                     ) : (
                                         <div className="space-y-3 max-h-96 overflow-y-auto">
                                             {interviewers.map((interviewer) => (
@@ -699,18 +699,18 @@ const InterviewManagement = () => {
                                                         handleAssign(assignModal.interview?.id, interviewer.id);
                                                     }}
                                                     disabled={submitting}
-                                                    className="w-full text-left px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-700 transition-all disabled:opacity-50"
+                                                    className="w-full text-left px-4 py-3 rounded-lg border border-[var(--te-border)] hover:bg-[var(--te-hover)] hover:border-[var(--te-border-strong)] transition-all disabled:opacity-50"
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <div className="font-semibold text-gray-900 dark:text-white">{interviewer.full_name}</div>
+                                                        <div className="font-semibold text-[var(--te-text)]">{interviewer.full_name}</div>
                                                         {interviewer.id === userId && (
-                                                            <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                                            <span className="inline-flex items-center rounded-md bg-[var(--te-hover)] px-2 py-0.5 text-xs font-medium text-[var(--te-text)]">
                                                                 You
                                                             </span>
                                                         )}
                                                     </div>
                                                     {interviewer.email && (
-                                                        <div className="text-sm text-gray-500 dark:text-gray-400">{interviewer.email}</div>
+                                                        <div className="text-sm text-[var(--te-text-dim)]">{interviewer.email}</div>
                                                     )}
                                                 </button>
                                             ))}
@@ -718,7 +718,7 @@ const InterviewManagement = () => {
                                     )}
                                     <button
                                         onClick={() => setAssignModal({ open: false, interview: null })}
-                                        className="mt-4 w-full px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                        className="mt-4 w-full px-4 py-2 text-sm font-semibold text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] rounded-lg transition-colors"
                                     >
                                         Cancel
                                     </button>
@@ -755,13 +755,13 @@ const InterviewManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
-                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden p-6 transition-all">
+                                    <Dialog.Title className="font-mono text-lg font-bold text-[var(--te-text)] mb-4">
                                         Confirm Interview
                                     </Dialog.Title>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                            <label className="block text-sm font-semibold text-[var(--te-text)] mb-2">
                                                 Notes
                                             </label>
                                             <input
@@ -769,20 +769,20 @@ const InterviewManagement = () => {
                                                 value={confirmModal.meeting_notes}
                                                 onChange={(e) => setConfirmModal(prev => ({ ...prev, meeting_notes: e.target.value }))}
                                                 placeholder="Add meeting notes, link, or details..."
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                                className="te-textarea"
                                             />
                                         </div>
                                         <div className="flex gap-3">
                                             <button
                                                 onClick={handleConfirm}
                                                 disabled={submitting}
-                                                className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                                                className="te-btn-primary flex-1 disabled:opacity-50"
                                             >
                                                 {submitting ? 'Confirming...' : 'Confirm'}
                                             </button>
                                             <button
                                                 onClick={() => setConfirmModal({ open: false, interview: null, meeting_notes: '' })}
-                                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                className="te-btn-secondary"
                                             >
                                                 Cancel
                                             </button>
@@ -821,13 +821,13 @@ const InterviewManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
-                                    <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                                <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden p-6 transition-all">
+                                    <Dialog.Title className="font-mono text-lg font-bold text-[var(--te-text)] mb-4">
                                         Complete Interview
                                     </Dialog.Title>
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                            <label className="block text-sm font-semibold text-[var(--te-text)] mb-2">
                                                 Interviewer Feedback
                                             </label>
                                             <textarea
@@ -835,20 +835,20 @@ const InterviewManagement = () => {
                                                 onChange={(e) => setCompleteModal(prev => ({ ...prev, feedback: e.target.value }))}
                                                 rows={6}
                                                 placeholder="Provide constructive feedback for the member..."
-                                                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                                className="te-textarea"
                                             />
                                         </div>
                                         <div className="flex gap-3">
                                             <button
                                                 onClick={handleComplete}
                                                 disabled={submitting}
-                                                className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                                className="te-btn-primary flex-1 disabled:opacity-50"
                                             >
                                                 {submitting ? 'Submitting...' : 'Complete'}
                                             </button>
                                             <button
                                                 onClick={() => setCompleteModal({ open: false, interview: null, feedback: '' })}
-                                                className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                                className="te-btn-secondary"
                                             >
                                                 Cancel
                                             </button>
@@ -873,7 +873,7 @@ const InterviewManagement = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="fixed inset-0 bg-black/50 " />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -887,9 +887,9 @@ const InterviewManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                <Dialog.Panel className="te-card w-full max-w-2xl transform overflow-hidden transition-all">
                                     <div className="p-6">
-                                        <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                                        <Dialog.Title className="font-mono text-xl font-bold text-[var(--te-text)] mb-6">
                                             Meeting Request Details
                                         </Dialog.Title>
 
@@ -899,10 +899,10 @@ const InterviewManagement = () => {
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-3 mb-2">
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.bg} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.text}`}>
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-semibold ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.bg} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.text}`}>
                                                                 {formatInterviewType(viewModal.interview.interview_type)}
                                                             </span>
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${STATUS_COLORS[viewModal.interview.status]?.bg} ${STATUS_COLORS[viewModal.interview.status]?.text}`}>
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-semibold ${STATUS_COLORS[viewModal.interview.status]?.bg} ${STATUS_COLORS[viewModal.interview.status]?.text}`}>
                                                                 {formatStatus(viewModal.interview.status)}
                                                             </span>
                                                         </div>
@@ -910,58 +910,58 @@ const InterviewManagement = () => {
                                                 </div>
 
                                                 {/* Member Information */}
-                                                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                                                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Member Information</h3>
+                                                <div className="te-panel p-4">
+                                                    <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-3">Member Information</h3>
                                                     <div className="space-y-2">
                                                         <div className="flex items-center gap-2">
-                                                            <UserIcon className="h-4 w-4 text-gray-400" />
-                                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{viewModal.interview.user_name}</span>
+                                                            <UserIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                                            <span className="text-sm font-semibold text-[var(--te-text)]">{viewModal.interview.user_name}</span>
                                                         </div>
-                                                        <div className="text-sm text-gray-600 dark:text-gray-400">{viewModal.interview.user_email}</div>
+                                                        <div className="text-sm text-[var(--te-text-dim)]">{viewModal.interview.user_email}</div>
                                                     </div>
                                                 </div>
 
                                                 {/* Date & Time */}
                                                 <div className="grid grid-cols-2 gap-4">
-                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                    <div className="te-panel p-4">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <CalendarIcon className="h-4 w-4 text-gray-400" />
-                                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Date</span>
+                                                            <CalendarIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                                            <span className="text-xs font-bold text-[var(--te-text)] uppercase">Date</span>
                                                         </div>
-                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{formatDate(viewModal.interview.timeslot_date)}</div>
+                                                        <div className="text-sm font-semibold text-[var(--te-text)]">{formatDate(viewModal.interview.timeslot_date)}</div>
                                                     </div>
-                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                                                    <div className="te-panel p-4">
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <ClockIcon className="h-4 w-4 text-gray-400" />
-                                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Time</span>
+                                                            <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                                            <span className="text-xs font-bold text-[var(--te-text)] uppercase">Time</span>
                                                         </div>
-                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                                                            {formatTime(viewModal.interview.timeslot_time)} <span className="text-xs text-gray-500">({viewModal.interview.duration_minutes} min)</span>
+                                                        <div className="text-sm font-semibold text-[var(--te-text)]">
+                                                            {formatTime(viewModal.interview.timeslot_time)} <span className="text-xs text-[var(--te-text-dim)]">({viewModal.interview.duration_minutes} min)</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Interviewer */}
                                                 {viewModal.interview.assigned_to_name && (
-                                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-                                                        <h3 className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase mb-2">Assigned Interviewer</h3>
-                                                        <div className="text-sm font-semibold text-gray-900 dark:text-white">{viewModal.interview.assigned_to_name}</div>
+                                                    <div className="te-panel p-4">
+                                                        <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-2">Assigned Interviewer</h3>
+                                                        <div className="text-sm font-semibold text-[var(--te-text)]">{viewModal.interview.assigned_to_name}</div>
                                                     </div>
                                                 )}
 
                                                 {/* Companies */}
                                                 {viewModal.interview.pending_companies && viewModal.interview.pending_companies.length > 0 && (
-                                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                                                        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Pending Interviews</h3>
+                                                    <div className="te-panel p-4">
+                                                        <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-3">Pending Interviews</h3>
                                                         <div className="flex flex-wrap gap-2">
                                                             {viewModal.interview.pending_companies.map((company, idx) => (
-                                                                <span key={idx} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-full">
+                                                                <span key={idx} className="te-chip">
                                                                     {company}
                                                                 </span>
                                                             ))}
                                                         </div>
                                                         {viewModal.interview.earliest_interview_date && (
-                                                            <div className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                                                            <div className="mt-3 text-sm text-[var(--te-text-dim)]">
                                                                 Earliest: {formatDate(viewModal.interview.earliest_interview_date)}
                                                             </div>
                                                         )}
@@ -970,58 +970,58 @@ const InterviewManagement = () => {
 
                                                 {/* Member Notes */}
                                                 {viewModal.interview.member_notes && (
-                                                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
-                                                        <h3 className="text-sm font-bold text-purple-700 dark:text-purple-300 uppercase mb-2">Member Notes</h3>
-                                                        <p className="text-sm text-gray-900 dark:text-gray-200">{viewModal.interview.member_notes}</p>
+                                                    <div className="te-panel p-4">
+                                                        <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-2">Member Notes</h3>
+                                                        <p className="text-sm text-[var(--te-text)]">{viewModal.interview.member_notes}</p>
                                                     </div>
                                                 )}
 
                                                 {/* Meeting Notes */}
                                                 {viewModal.interview.meeting_notes && (
-                                                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-                                                        <h3 className="text-sm font-bold text-blue-700 dark:text-blue-300 uppercase mb-2">Meeting Notes</h3>
-                                                        <p className="text-sm text-gray-900 dark:text-gray-200 break-all">{viewModal.interview.meeting_notes}</p>
+                                                    <div className="te-panel p-4">
+                                                        <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-2">Meeting Notes</h3>
+                                                        <p className="text-sm text-[var(--te-text)] break-all">{viewModal.interview.meeting_notes}</p>
                                                     </div>
                                                 )}
 
                                                 {/* Feedback */}
                                                 {viewModal.interview.interviewer_feedback && (
-                                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg p-4">
-                                                        <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-300 uppercase mb-2">Interviewer Feedback</h3>
-                                                        <p className="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-wrap">{viewModal.interview.interviewer_feedback}</p>
+                                                    <div className="te-panel p-4">
+                                                        <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-2">Interviewer Feedback</h3>
+                                                        <p className="text-sm text-[var(--te-text)] whitespace-pre-wrap">{viewModal.interview.interviewer_feedback}</p>
                                                     </div>
                                                 )}
 
                                                 {/* Timestamps */}
-                                                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
-                                                    <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Timeline</h3>
+                                                <div className="te-panel p-4">
+                                                    <h3 className="text-sm font-bold text-[var(--te-text)] uppercase mb-3">Timeline</h3>
                                                     <div className="space-y-2 text-sm">
                                                         <div className="flex justify-between">
-                                                            <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                                                            <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.created_at)}</span>
+                                                            <span className="text-[var(--te-text-dim)]">Created:</span>
+                                                            <span className="font-medium text-[var(--te-text)]">{formatTimestamp(viewModal.interview.created_at)}</span>
                                                         </div>
                                                         {viewModal.interview.assigned_at && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-600 dark:text-gray-400">Assigned:</span>
-                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.assigned_at)}</span>
+                                                                <span className="text-[var(--te-text-dim)]">Assigned:</span>
+                                                                <span className="font-medium text-[var(--te-text)]">{formatTimestamp(viewModal.interview.assigned_at)}</span>
                                                             </div>
                                                         )}
                                                         {viewModal.interview.confirmed_at && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-600 dark:text-gray-400">Confirmed:</span>
-                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.confirmed_at)}</span>
+                                                                <span className="text-[var(--te-text-dim)]">Confirmed:</span>
+                                                                <span className="font-medium text-[var(--te-text)]">{formatTimestamp(viewModal.interview.confirmed_at)}</span>
                                                             </div>
                                                         )}
                                                         {viewModal.interview.completed_at && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-600 dark:text-gray-400">Completed:</span>
-                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.completed_at)}</span>
+                                                                <span className="text-[var(--te-text-dim)]">Completed:</span>
+                                                                <span className="font-medium text-[var(--te-text)]">{formatTimestamp(viewModal.interview.completed_at)}</span>
                                                             </div>
                                                         )}
                                                         {viewModal.interview.cancelled_at && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-gray-600 dark:text-gray-400">Cancelled:</span>
-                                                                <span className="font-medium text-gray-900 dark:text-white">{formatTimestamp(viewModal.interview.cancelled_at)}</span>
+                                                                <span className="text-[var(--te-text-dim)]">Cancelled:</span>
+                                                                <span className="font-medium text-[var(--te-text)]">{formatTimestamp(viewModal.interview.cancelled_at)}</span>
                                                             </div>
                                                         )}
                                                     </div>
@@ -1030,7 +1030,7 @@ const InterviewManagement = () => {
                                                 {/* Close Button */}
                                                 <button
                                                     onClick={() => setViewModal({ open: false, interview: null })}
-                                                    className="w-full px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+                                                    className="te-btn-primary w-full"
                                                 >
                                                     Close
                                                 </button>
@@ -1056,7 +1056,7 @@ const InterviewManagement = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="fixed inset-0 bg-black/50 " />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -1070,33 +1070,33 @@ const InterviewManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden transition-all">
                                     <div className="p-6">
                                         <div className="flex items-start gap-4">
-                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                                <XCircleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                                <XCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
                                             </div>
                                             <div className="flex-1">
-                                                <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                <Dialog.Title className="font-mono text-lg font-semibold text-[var(--te-text)] mb-2">
                                                     Cancel Interview Request
                                                 </Dialog.Title>
                                                 {cancelModal.interview && (
                                                     <div className="space-y-3">
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                        <p className="text-sm text-[var(--te-text-dim)]">
                                                             Cancel {formatInterviewType(cancelModal.interview.interview_type).toLowerCase()} interview for <strong>{cancelModal.interview.user_name}</strong>?
                                                         </p>
-                                                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 text-sm">
-                                                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                                                        <div className="bg-[var(--te-surface-alt)] rounded-lg p-3 text-sm">
+                                                            <div className="flex items-center gap-2 text-[var(--te-text)]">
                                                                 <CalendarDaysIcon className="h-4 w-4" />
                                                                 <span>{formatDate(cancelModal.interview.timeslot_date)}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mt-1">
+                                                            <div className="flex items-center gap-2 text-[var(--te-text)] mt-1">
                                                                 <ClockIcon className="h-4 w-4" />
                                                                 <span>{formatTime(cancelModal.interview.timeslot_time)}</span>
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                            <label className="block text-sm font-medium text-[var(--te-text)] mb-2">
                                                                 Cancellation Reason
                                                             </label>
                                                             <textarea
@@ -1104,7 +1104,7 @@ const InterviewManagement = () => {
                                                                 onChange={(e) => setCancelModal(prev => ({ ...prev, reason: e.target.value }))}
                                                                 rows={3}
                                                                 placeholder="Please provide a reason for cancellation..."
-                                                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                                                className="te-textarea"
                                                             />
                                                         </div>
                                                     </div>
@@ -1112,18 +1112,18 @@ const InterviewManagement = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex gap-3 justify-end">
+                                    <div className="bg-[var(--te-surface-alt)] px-6 py-4 flex gap-3 justify-end">
                                         <button
                                             onClick={() => setCancelModal({ open: false, interview: null, reason: '' })}
                                             disabled={submitting}
-                                            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                            className="px-4 py-2 text-sm font-semibold text-[var(--te-text)] hover:bg-[var(--te-hover)] rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             Keep Interview
                                         </button>
                                         <button
                                             onClick={handleCancel}
                                             disabled={submitting}
-                                            className="px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {submitting ? 'Cancelling...' : 'Yes, Cancel Interview'}
                                         </button>

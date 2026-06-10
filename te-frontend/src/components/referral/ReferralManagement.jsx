@@ -1,156 +1,122 @@
 import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import {
-    XMarkIcon,
-    CheckCircleIcon,
-    DocumentTextIcon,
-    BriefcaseIcon,
-    UserIcon,
-    CalendarIcon,
-    ChatBubbleLeftRightIcon,
-    ClipboardDocumentIcon,
-    DocumentDuplicateIcon,
-    PhoneIcon,
-    ArrowDownTrayIcon
-} from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckCircleIcon, DocumentTextIcon, BriefcaseIcon, UserIcon, CalendarIcon, ChatBubbleLeftRightIcon, ClipboardDocumentIcon, DocumentDuplicateIcon, PhoneIcon, ArrowDownTrayIcon } from 'icons';
 import { FormTextArea } from '../_custom/FormInputs';
 import SelectCombobox from '../_custom/SelectCombobox';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { getCompanyLogoUrl, handleCompanyLogoError } from '../../utils';
+const ReferralManagement = ({
+  referral,
+  isOpen,
+  setIsOpen,
+  onUpdate
+}) => {
+  const {
+    accessToken
+  } = useAuth();
+  const toast = useToast();
+  const [status, setStatus] = useState(referral?.status || 'Pending');
+  const [reviewNote, setReviewNote] = useState(referral?.review_note || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
-const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
-    const { accessToken } = useAuth();
-    const toast = useToast();
-    const [status, setStatus] = useState(referral?.status || 'Pending');
-    const [reviewNote, setReviewNote] = useState(referral?.review_note || '');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [copiedField, setCopiedField] = useState(null);
-
-    // Early return if no referral data
-    if (!referral) {
-        return null;
+  // Early return if no referral data
+  if (!referral) {
+    return null;
+  }
+  const statusOptions = ['Pending', 'Completed', 'Declined', 'Cancelled'];
+  const copyToClipboard = async (text, fieldName) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
+  };
 
-    const statusOptions = ['Pending', 'Completed', 'Declined', 'Cancelled'];
+  // Convert Google Drive download link to preview link
+  const getViewableResumeUrl = url => {
+    if (!url) return url;
 
-    const copyToClipboard = async (text, fieldName) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            setCopiedField(fieldName);
-            setTimeout(() => setCopiedField(null), 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
+    // If it's a Google Drive webContentLink (download), convert to view link
+    // webContentLink format: https://drive.google.com/uc?id=FILE_ID&export=download
+    // View format: https://drive.google.com/file/d/FILE_ID/view
+
+    const fileIdMatch = url.match(/[?&]id=([^&]+)/);
+    if (fileIdMatch && fileIdMatch[1]) {
+      return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
+    }
+    return url;
+  };
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await axiosInstance.patch(`/referrals/${referral.id}`, {
+        status: status,
+        review_note: reviewNote
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
         }
-    };
-
-    // Convert Google Drive download link to preview link
-    const getViewableResumeUrl = (url) => {
-        if (!url) return url;
-
-        // If it's a Google Drive webContentLink (download), convert to view link
-        // webContentLink format: https://drive.google.com/uc?id=FILE_ID&export=download
-        // View format: https://drive.google.com/file/d/FILE_ID/view
-
-        const fileIdMatch = url.match(/[?&]id=([^&]+)/);
-        if (fileIdMatch && fileIdMatch[1]) {
-            return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
-        }
-
-        return url;
-    };
-
-    const handleSubmit = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await axiosInstance.patch(
-                `/referrals/${referral.id}`,
-                {
-                    status: status,
-                    review_note: reviewNote
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
-            );
-
-            if (response.data.referral) {
-                onUpdate(response.data.referral);
-                setIsOpen(false);
-            }
-        } catch (error) {
-            console.error('Error updating referral:', error);
-            toast.error('Failed to update referral. Please try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Completed':
-                return 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700';
-            case 'Pending':
-                return 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700';
-            case 'Declined':
-                return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700';
-            case 'Cancelled':
-                return 'text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600';
-            default:
-                return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700';
-        }
-    };
-
-    return (
-        <Transition.Root show={isOpen} as={Fragment}>
+      });
+      if (response.data.referral) {
+        onUpdate(response.data.referral);
+        setIsOpen(false);
+      }
+    } catch (error) {
+      console.error('Error updating referral:', error);
+      toast.error('Failed to update referral. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const getStatusColor = status => {
+    switch (status) {
+      case 'Completed':
+        return "text-[var(--te-text)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
+      case 'Pending':
+        return 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700';
+      case 'Declined':
+        return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700';
+      case 'Cancelled':
+        return "text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
+      default:
+        return "text-[var(--te-text)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
+    }
+  };
+  return <Transition.Root show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-50" onClose={setIsOpen}>
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-80 transition-opacity" />
+                <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+
+                    <div className="fixed inset-0 bg-black/50 transition-opacity" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                            enterTo="opacity-100 translate-y-0 sm:scale-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-3xl">
+                    <div className="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0">
+                        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+
+                            <Dialog.Panel className="te-card relative transform overflow-hidden text-left transition-colors sm:my-8 sm:w-full sm:max-w-3xl">
                                 {/* Header */}
-                                <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-3 sm:px-6 py-4 sm:py-6">
+                                <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-3 py-4 sm:px-6 sm:py-6">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-2 sm:gap-3">
-                                            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-                                                <DocumentTextIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface)] sm:h-12 sm:w-12">
+                                                <DocumentTextIcon className="h-5 w-5 sm:h-6 sm:w-6 text-[var(--te-text)]" />
                                             </div>
                                             <div>
-                                                <Dialog.Title className="text-base sm:text-xl font-bold text-white">
+                                                <Dialog.Title className="text-base sm:text-xl font-bold text-[var(--te-text)]">
                                                     Referral Request
                                                 </Dialog.Title>
-                                                <p className="text-xs sm:text-sm text-blue-100 mt-0.5 sm:mt-1 hidden sm:block">
+                                                <p className="mt-1 hidden text-xs text-[var(--te-text-dim)] sm:block">
                                                     Review and manage this referral request
                                                 </p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => setIsOpen(false)}
-                                            className="rounded-lg p-1.5 sm:p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors flex-shrink-0"
-                                        >
+                                        <button onClick={() => setIsOpen(false)} className="te-icon-btn flex-shrink-0">
+
                                             <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                                         </button>
                                     </div>
@@ -159,225 +125,173 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                 {/* Content */}
                                 <div className="px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
                                     {/* Member Information */}
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4">
-                                        <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <div className="te-panel p-3 sm:p-4">
+                                        <h3 className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em] mb-3 flex items-center gap-2">
                                             <UserIcon className="h-4 w-4" />
                                             Member Information
                                         </h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                             <div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Name</p>
+                                                <p className="text-xs text-[var(--te-text-dim)]">Name</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.user_name}</p>
-                                                    <button
-                                                        onClick={() => copyToClipboard(referral.user_name, 'name')}
-                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-                                                        title="Copy name"
-                                                    >
-                                                        {copiedField === 'name' ? (
-                                                            <CheckCircleIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                                        ) : (
-                                                            <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                        )}
+                                                    <p className="font-semibold text-sm sm:text-base text-[var(--te-text)] truncate">{referral.user_name}</p>
+                                                    <button onClick={() => copyToClipboard(referral.user_name, 'name')} className="te-icon-btn flex-shrink-0" title="Copy name">
+
+                                                        {copiedField === 'name' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <ClipboardDocumentIcon className="h-4 w-4 text-[var(--te-text-dim)]" />}
+
                                                     </button>
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                                                <p className="text-xs text-[var(--te-text-dim)]">Email</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.user_email}</p>
-                                                    <button
-                                                        onClick={() => copyToClipboard(referral.user_email, 'email')}
-                                                        className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-                                                        title="Copy email"
-                                                    >
-                                                        {copiedField === 'email' ? (
-                                                            <CheckCircleIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                                        ) : (
-                                                            <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                        )}
+                                                    <p className="font-semibold text-sm sm:text-base text-[var(--te-text)] truncate">{referral.user_email}</p>
+                                                    <button onClick={() => copyToClipboard(referral.user_email, 'email')} className="te-icon-btn flex-shrink-0" title="Copy email">
+
+                                                        {copiedField === 'email' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <ClipboardDocumentIcon className="h-4 w-4 text-[var(--te-text-dim)]" />}
+
                                                     </button>
                                                 </div>
                                             </div>
-                                            {referral.phone_number && (
-                                                <div className="sm:col-span-2">
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Contact</p>
+                                            {referral.phone_number && <div className="sm:col-span-2">
+                                                    <p className="text-xs text-[var(--te-text-dim)]">Contact</p>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                                                        <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{referral.phone_number}</p>
-                                                        <button
-                                                            onClick={() => copyToClipboard(referral.phone_number, 'phone_number')}
-                                                            className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-                                                            title="Copy contact"
-                                                        >
-                                                            {copiedField === 'phone_number' ? (
-                                                                <CheckCircleIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                                            ) : (
-                                                                <ClipboardDocumentIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                                            )}
+                                                        <PhoneIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
+                                                        <p className="font-semibold text-sm sm:text-base text-[var(--te-text)]">{referral.phone_number}</p>
+                                                        <button onClick={() => copyToClipboard(referral.phone_number, 'phone_number')} className="te-icon-btn flex-shrink-0" title="Copy contact">
+
+                                                            {copiedField === 'phone_number' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <ClipboardDocumentIcon className="h-4 w-4 text-[var(--te-text-dim)]" />}
+
                                                         </button>
                                                     </div>
-                                                </div>
-                                            )}
+                                                </div>}
+
                                         </div>
                                     </div>
 
                                     {/* Position Details */}
-                                    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 p-3 sm:p-4">
-                                        <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <div className="te-panel p-3 sm:p-4">
+                                        <h3 className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em] mb-3 flex items-center gap-2">
                                             <BriefcaseIcon className="h-4 w-4" />
                                             Position Details
                                         </h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                             <div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Company</p>
+                                                <p className="text-xs text-[var(--te-text-dim)]">Company</p>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <img
-                                                        src={getCompanyLogoUrl(referral.company.name)}
-                                                        alt={referral.company.name}
-                                                        className="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600 flex-shrink-0"
-                                                        onError={handleCompanyLogoError}
-                                                    />
-                                                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{referral.company.name}</p>
+                                                    <img src={getCompanyLogoUrl(referral.company.name)} alt={referral.company.name} className="h-6 w-6 rounded object-cover border border-[var(--te-border)] flex-shrink-0" onError={handleCompanyLogoError} />
+
+                                                    <p className="font-semibold text-sm sm:text-base text-[var(--te-text)] truncate">{referral.company.name}</p>
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Role</p>
-                                                <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mt-1 truncate">{referral.role}</p>
+                                                <p className="text-xs text-[var(--te-text-dim)]">Role</p>
+                                                <p className="font-semibold text-sm sm:text-base text-[var(--te-text)] mt-1 truncate">{referral.role}</p>
                                             </div>
                                             <div className="sm:col-span-2">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">Job Title</p>
-                                                <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mt-1 break-words">{referral.job_title}</p>
+                                                <p className="text-xs text-[var(--te-text-dim)]">Job Title</p>
+                                                <p className="font-semibold text-sm sm:text-base text-[var(--te-text)] mt-1 break-words">{referral.job_title}</p>
                                             </div>
-                                            {referral.job_id && (
-                                                <div className="sm:col-span-2">
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">Job ID(s)</p>
+                                            {referral.job_id && <div className="sm:col-span-2">
+                                                    <p className="text-xs text-[var(--te-text-dim)]">Job ID(s)</p>
                                                     <div className="flex flex-wrap gap-2 mt-1">
-                                                        {referral.job_id.split(/[,;\s]+/).filter(id => id.trim()).map((id, index) => (
-                                                            <span
-                                                                key={index}
-                                                                className="inline-flex items-center px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-md border border-blue-200 dark:border-blue-700"
-                                                            >
+                                                        {referral.job_id.split(/[,;\s]+/).filter(id => id.trim()).map((id, index) => <span key={index} className="inline-flex items-center px-2.5 py-1 bg-[var(--te-surface-alt)] text-[var(--te-text)] text-xs font-medium rounded-md border border-[var(--te-border)]">
+
                                                                 {id.trim()}
-                                                            </span>
-                                                        ))}
+                                                            </span>)}
                                                     </div>
-                                                </div>
-                                            )}
+                                                </div>}
+
                                         </div>
                                     </div>
 
                                     {/* Request Details */}
                                     <div className="space-y-3">
-                                        {referral.resume && (
-                                            <div>
+                                        {referral.resume && <div>
                                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                    <label className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">
                                                         Resume
                                                     </label>
-                                                    <a
-                                                        href={referral.resume}
-                                                        download
-                                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
-                                                    >
+                                                    <a href={referral.resume} download className="te-btn-secondary te-btn-sm justify-center">
+
                                                         <ArrowDownTrayIcon className="h-4 w-4" />
                                                         Download Resume
                                                     </a>
                                                 </div>
-                                                <a
-                                                    href={getViewableResumeUrl(referral.resume)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-                                                >
+                                                <a href={getViewableResumeUrl(referral.resume)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[var(--te-text)] hover:text-[var(--te-text)] font-medium">
+
                                                     <DocumentTextIcon className="h-4 w-4" />
                                                     View Resume
                                                 </a>
-                                            </div>
-                                        )}
+                                            </div>}
 
-                                        {referral.essay && (
-                                            <div>
+
+                                        {referral.essay && <div>
                                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                                                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                                    <label className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em] flex items-center gap-2">
                                                         <DocumentDuplicateIcon className="h-4 w-4" />
                                                         Referral Essay
                                                     </label>
-                                                    <button
-                                                        onClick={() => copyToClipboard(referral.essay, 'essay')}
-                                                        className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
-                                                    >
-                                                        {copiedField === 'essay' ? (
-                                                            <>
+                                                    <button onClick={() => copyToClipboard(referral.essay, 'essay')} className="te-btn-secondary te-btn-sm justify-center">
+
+                                                        {copiedField === 'essay' ? <>
                                                                 <CheckCircleIcon className="h-4 w-4" />
                                                                 Copied!
-                                                            </>
-                                                        ) : (
-                                                            <>
+                                                            </> : <>
                                                                 <ClipboardDocumentIcon className="h-4 w-4" />
                                                                 Copy Essay
-                                                            </>
-                                                        )}
+                                                            </>}
+
                                                     </button>
                                                 </div>
-                                                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 sm:p-4 max-h-48 overflow-y-auto">
-                                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                                <div className="te-card p-3 sm:p-4 max-h-48 overflow-y-auto te-scroll">
+                                                    <p className="text-sm text-[var(--te-text-dim)] leading-relaxed whitespace-pre-wrap">
                                                         {referral.essay}
                                                     </p>
                                                 </div>
-                                            </div>
-                                        )}
+                                            </div>}
+
 
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                            <label className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em] flex items-center gap-2">
                                                 <ChatBubbleLeftRightIcon className="h-4 w-4" />
                                                 Request Note
                                             </label>
-                                            <div className="mt-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-3 sm:p-4">
-                                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                            <div className="mt-2 te-panel p-3 sm:p-4">
+                                                <p className="text-sm text-[var(--te-text-dim)] leading-relaxed">
                                                     {referral.request_note || 'No note provided'}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                            <label className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em] flex items-center gap-2">
                                                 <CalendarIcon className="h-4 w-4" />
                                                 Submission Date
                                             </label>
-                                            <p className="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">{referral.date}</p>
+                                            <p className="mt-2 text-sm font-semibold text-[var(--te-text-dim)]">{referral.date}</p>
                                         </div>
                                     </div>
 
                                     {/* Management Section */}
-                                    <div className="border-t dark:border-gray-700 pt-4 sm:pt-6 space-y-4">
+                                    <div className="border-t border-[var(--te-border)] pt-4 sm:pt-6 space-y-4">
                                         <div>
-                                            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Review & Update Status</h3>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Update the status and add feedback notes for this referral request</p>
+                                            <h3 className="text-sm font-display font-bold text-[var(--te-text)] mb-1">Review & Update Status</h3>
+                                            <p className="text-xs text-[var(--te-text-dim)]">Update the status and add feedback notes for this referral request</p>
                                         </div>
 
-                                        <SelectCombobox
-                                            label="Status"
-                                            options={statusOptions}
-                                            value={status}
-                                            onChange={setStatus}
-                                            placeholder="Select status..."
-                                            required={true}
-                                        />
+                                        <SelectCombobox label="Status" options={statusOptions} value={status} onChange={setStatus} placeholder="Select status..." required={true} />
 
-                                        <FormTextArea
-                                            label="Review Note"
-                                            field="review_note"
-                                            value={reviewNote}
-                                            handleInputChange={({ value }) => setReviewNote(value)}
-                                            required={false}
-                                            placeholder="Add any notes about your decision..."
-                                        />
+
+                                        <FormTextArea label="Review Note" field="review_note" value={reviewNote} handleInputChange={({
+                    value
+                  }) => setReviewNote(value)} required={false} placeholder="Add any notes about your decision..." />
+
 
                                         {/* Current Status Display */}
-                                        <div className="rounded-lg bg-gray-50 dark:bg-gray-700 p-3 border border-gray-200 dark:border-gray-600">
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Current Status</p>
-                                            <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full border ${getStatusColor(referral.status)}`}>
+                                        <div className="te-panel p-3">
+                                            <p className="text-xs text-[var(--te-text-dim)] mb-2">Current Status</p>
+                                            <span className={`te-chip ${getStatusColor(referral.status)}`}>
                                                 {referral.status}
                                             </span>
                                         </div>
@@ -385,30 +299,21 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="bg-gray-50 dark:bg-gray-700 px-3 sm:px-6 py-3 sm:py-4 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
-                                    <button
-                                        onClick={() => setIsOpen(false)}
-                                        className="px-6 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                                        disabled={isSubmitting}
-                                    >
+                                <div className="flex flex-col-reverse items-stretch justify-end gap-2 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-3 py-3 sm:flex-row sm:items-center sm:px-6 sm:py-4">
+                                    <button onClick={() => setIsOpen(false)} className="te-btn-secondary" disabled={isSubmitting}>
+
                                         Cancel
                                     </button>
-                                    <button
-                                        onClick={handleSubmit}
-                                        disabled={isSubmitting}
-                                        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                    <button onClick={handleSubmit} disabled={isSubmitting} className="te-btn-primary justify-center">
+
+                                        {isSubmitting ? <>
+                                                <div className="animate-spin h-4 w-4 border border-[var(--te-on-primary)] border-t-transparent rounded-md" />
                                                 Updating...
-                                            </>
-                                        ) : (
-                                            <>
+                                            </> : <>
                                                 <CheckCircleIcon className="h-5 w-5" />
                                                 Update
-                                            </>
-                                        )}
+                                            </>}
+
                                     </button>
                                 </div>
                             </Dialog.Panel>
@@ -416,8 +321,6 @@ const ReferralManagement = ({ referral, isOpen, setIsOpen, onUpdate }) => {
                     </div>
                 </div>
             </Dialog>
-        </Transition.Root>
-    );
+        </Transition.Root>;
 };
-
 export default ReferralManagement;

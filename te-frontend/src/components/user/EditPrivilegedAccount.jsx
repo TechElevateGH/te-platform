@@ -7,7 +7,7 @@ import {
     KeyIcon,
     ShieldCheckIcon,
     ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 
@@ -97,11 +97,11 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" />
+                    <div className="fixed inset-0 bg-black/60 transition-opacity" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div className="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -111,26 +111,26 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                                <div className="bg-white px-6 pt-6 pb-4">
+                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] text-left shadow-sm transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                <div className="bg-[var(--te-surface)] px-6 pt-6 pb-4">
                                     {/* Header */}
                                     <div className="flex items-start justify-between mb-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600">
-                                                <ShieldCheckIcon className="h-6 w-6 text-white" />
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--te-surface-alt)] border border-[var(--te-border)]">
+                                                <ShieldCheckIcon className="h-6 w-6 text-[var(--te-text)]" />
                                             </div>
                                             <div>
-                                                <Dialog.Title className="text-xl font-bold text-gray-900">
+                                                <Dialog.Title className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">
                                                     Edit Privileged Account
                                                 </Dialog.Title>
-                                                <p className="text-sm text-gray-600 mt-1">
+                                                <p className="text-sm text-[var(--te-text-dim)] mt-1">
                                                     Update username or reset token
                                                 </p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={onClose}
-                                            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                                            className="te-icon-btn"
                                         >
                                             <XMarkIcon className="h-5 w-5" />
                                         </button>
@@ -138,20 +138,17 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
 
                                     {/* Current Account Info */}
                                     {account && (
-                                        <div className="mb-6 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+                                        <div className="mb-6 p-4 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-xl">
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-semibold text-gray-700">Current Account</span>
-                                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${account.role === 5 ? 'bg-purple-100 text-purple-700' :
-                                                    account.role === 4 ? 'bg-blue-100 text-blue-700' :
-                                                        account.role === 3 ? 'bg-green-100 text-green-700' :
-                                                            'bg-cyan-100 text-cyan-700'
+                                                <span className="text-sm font-semibold text-[var(--te-text)]">Current Account</span>
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${'te-badge'
                                                     }`}>
                                                     {getRoleName(account.role)}
                                                 </span>
                                             </div>
-                                            <p className="text-lg font-bold text-gray-900">{account.username}</p>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                Status: <span className={`font-semibold ${account.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                                            <p className="text-lg font-bold text-[var(--te-text)]">{account.username}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">
+                                                Status: <span className={`font-semibold ${account.is_active ? 'text-[var(--te-text)]' : 'text-red-600'}`}>
                                                     {account.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </p>
@@ -160,9 +157,9 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
 
                                     {/* Error Message */}
                                     {error && (
-                                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                                        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
                                             <ExclamationTriangleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                            <p className="text-sm text-red-800 font-medium">{error}</p>
+                                            <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
                                         </div>
                                     )}
 
@@ -170,66 +167,65 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         {/* Username */}
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                                 Username
                                             </label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <UserIcon className="h-5 w-5 text-gray-400" />
+                                                    <UserIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                                 </div>
                                                 <input
                                                     type="text"
                                                     value={formData.username}
                                                     onChange={(e) => handleChange('username', e.target.value)}
-                                                    className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                                    className="te-input pl-10"
                                                     placeholder="Enter new username"
                                                 />
                                             </div>
-                                            <p className="mt-1.5 text-xs text-gray-500">
+                                            <p className="mt-1.5 text-xs text-[var(--te-text-dim)]">
                                                 Leave blank to keep current username
                                             </p>
                                         </div>
 
                                         {/* Token */}
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                                 Access Token
                                             </label>
                                             <div className="relative">
                                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <KeyIcon className="h-5 w-5 text-gray-400" />
+                                                    <KeyIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                                 </div>
                                                 <input
                                                     type="text"
                                                     value={formData.token}
                                                     onChange={(e) => handleChange('token', e.target.value)}
-                                                    className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                                                    className="te-input pl-10"
                                                     placeholder="Enter token"
                                                 />
                                             </div>
-                                            <p className="mt-1.5 text-xs text-gray-500">
+                                            <p className="mt-1.5 text-xs text-[var(--te-text-dim)]">
                                                 Current token is shown. Modify to change or leave blank to keep current.
                                             </p>
                                         </div>
 
                                         {/* Active Status Toggle */}
-                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="flex items-center justify-between p-4 bg-[var(--te-surface-alt)] rounded-lg border border-[var(--te-border)]">
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700">
+                                                <label className="block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                                     Account Status
                                                 </label>
-                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                <p className="text-xs text-[var(--te-text-dim)] mt-0.5">
                                                     {formData.is_active ? 'Account is active' : 'Account is deactivated'}
                                                 </p>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => handleChange('is_active', !formData.is_active)}
-                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${formData.is_active ? 'bg-green-600' : 'bg-gray-300'
-                                                    }`}
+                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--te-ring)] ${formData.is_active ? 'bg-[var(--te-primary)]' : 'bg-[var(--te-surface-alt)]'}`}
                                             >
                                                 <span
-                                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.is_active ? 'translate-x-5' : 'translate-x-0'
+                                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--te-surface)] ring-0 transition duration-200 ease-in-out ${formData.is_active ? 'translate-x-5' : 'translate-x-0'
                                                         }`}
                                                 />
                                             </button>
@@ -241,14 +237,14 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                                 type="button"
                                                 onClick={onClose}
                                                 disabled={loading}
-                                                className="flex-1 px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="te-btn-secondary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 type="submit"
                                                 disabled={loading}
-                                                className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                                className="te-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {loading ? (
                                                     <>

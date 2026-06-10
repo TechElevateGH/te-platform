@@ -10,13 +10,13 @@ import {
     UserGroupIcon,
     MinusIcon,
     PencilIcon
-} from '@heroicons/react/20/solid';
+} from 'icons';
 import {
     ComputerDesktopIcon,
     ChatBubbleLeftRightIcon,
     CodeBracketIcon,
     InformationCircleIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -61,28 +61,28 @@ const INTERVIEW_TYPES = {
         label: 'Behavioral',
         duration: 20,
         icon: ChatBubbleLeftRightIcon,
-        color: 'emerald',
+        color: 'mono',
         description: 'Soft skills & situational'
     },
     coding: {
         label: 'Coding',
         duration: 55,
         icon: CodeBracketIcon,
-        color: 'blue',
+        color: 'mono',
         description: 'Technical coding problems'
     },
     system_design: {
         label: 'System Design',
         duration: 55,
         icon: ComputerDesktopIcon,
-        color: 'indigo',
+        color: 'mono',
         description: 'Architecture & scalability'
     },
     one_on_one: {
         label: '1-on-1 Mentorship',
         duration: 20,
         icon: ChatBubbleLeftRightIcon,
-        color: 'purple',
+        color: 'mono',
         description: 'General mentorship & questions'
     }
 };
@@ -405,25 +405,19 @@ const TimeslotManagement = () => {
     }
 
     return (
-        <div className="space-y-6 max-w-7xl">
+        <div className="space-y-6">
             {/* Simple Stats & Action */}
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-gray-900 dark:text-white">{totalSlots}</span> total
-                    </span>
-                    <span className="text-gray-300 dark:text-gray-600">•</span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">{availableSlots}</span> available
-                    </span>
-                    <span className="text-gray-300 dark:text-gray-600">•</span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                        <span className="font-semibold text-amber-600 dark:text-amber-400">{bookedSlots}</span> booked
-                    </span>
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] sm:grid-cols-[1fr_1fr_1fr_auto]">
+                <div className="contents">
+                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{totalSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">total slots</div></div>
+                    
+                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{availableSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">available</div></div>
+                    
+                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{bookedSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">booked</div></div>
                 </div>
                 <button
                     onClick={() => setShowCreateForm(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                    className="te-btn-primary m-4 self-center"
                 >
                     <PlusIcon className="h-4 w-4" />
                     Add Availability
@@ -446,7 +440,7 @@ const TimeslotManagement = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="fixed inset-0 bg-black/50 " />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -460,11 +454,11 @@ const TimeslotManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all border border-gray-200 dark:border-gray-700">
+                                <Dialog.Panel className="te-card w-full max-w-2xl transform overflow-hidden transition-all">
                                     {/* Modal Header */}
-                                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+                                    <div className="px-6 py-4 border-b border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                         <div className="flex items-center justify-between">
-                                            <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-white">
+                                            <Dialog.Title className="font-mono text-lg font-bold text-[var(--te-text)]">
                                                 Add Interview Availability
                                             </Dialog.Title>
                                             <button
@@ -473,7 +467,7 @@ const TimeslotManagement = () => {
                                                     setFormData({ date: '', start_time: '', mode: 'single' });
                                                     setSlotCount(1);
                                                 }}
-                                                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                className="te-icon-btn"
                                             >
                                                 <XMarkIcon className="h-5 w-5" />
                                             </button>
@@ -481,11 +475,11 @@ const TimeslotManagement = () => {
                                     </div>
 
                                     {/* Modal Body */}
-                                    <div className="px-6 py-6 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+                                    <div className="px-6 py-6 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto te-scroll">
                                         {/* Interview Type */}
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                                Available Interview Types <span className="text-gray-500 font-normal">(Select one or more)</span>
+                                            <label className="mb-3 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
+                                                Available Interview Types <span className="text-[var(--te-text-dim)] font-normal">(Select one or more)</span>
                                             </label>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {Object.entries(INTERVIEW_TYPES).map(([key, type]) => {
@@ -496,82 +490,82 @@ const TimeslotManagement = () => {
                                                             key={key}
                                                             type="button"
                                                             onClick={() => toggleInterviewType(key)}
-                                                            className={`p-4 rounded-xl border-2 transition-all ${isSelected
-                                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md'
-                                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                                            className={`p-4 rounded-lg border transition-all ${isSelected
+                                                                ? 'border-[var(--te-border-strong)] bg-[var(--te-hover)] '
+                                                                : 'border-[var(--te-border)] hover:border-[var(--te-border)] hover:bg-[var(--te-surface-alt)]'
                                                                 }`}
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <div className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${isSelected
-                                                                    ? 'bg-blue-500 border-blue-500'
-                                                                    : 'border-gray-300 dark:border-gray-600'
+                                                                <div className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center ${isSelected
+                                                                    ? 'bg-[var(--te-primary)] border-[var(--te-border-strong)]'
+                                                                    : 'border-[var(--te-border)]'
                                                                     }`}>
                                                                     {isSelected && (
-                                                                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <svg className="w-3 h-3 text-[var(--te-on-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                                                         </svg>
                                                                     )}
                                                                 </div>
-                                                                <Icon className={`h-5 w-5 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
+                                                                <Icon className={`h-5 w-5 ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
                                                                 <div className="flex-1 text-left">
-                                                                    <div className={`text-sm font-semibold ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                                    <div className={`text-sm font-semibold ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'}`}>
                                                                         {type.label}
                                                                     </div>
-                                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{type.duration} min</p>
+                                                                    <p className="text-xs text-[var(--te-text-dim)]">{type.duration} min</p>
                                                                 </div>
                                                             </div>
                                                         </button>
                                                     );
                                                 })}
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-2">
                                                 Selected types: {selectedInterviewTypes.map(t => INTERVIEW_TYPES[t].label).join(', ')}
                                             </p>
                                         </div>
 
                                         {/* Slot Count */}
-                                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <div className="flex items-center justify-between p-4 bg-[var(--te-surface-alt)] rounded-lg">
+                                            <label className="text-sm font-semibold text-[var(--te-text)]">
                                                 Number of Members
                                             </label>
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     type="button"
                                                     onClick={() => setSlotCount(Math.max(1, slotCount - 1))}
-                                                    className="p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40"
+                                                    className="p-2 rounded-lg border border-[var(--te-border)] hover:bg-[var(--te-hover)] transition-colors disabled:opacity-40"
                                                     disabled={slotCount <= 1}
                                                 >
-                                                    <MinusIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                                    <MinusIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                                 </button>
-                                                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 min-w-[80px] justify-center">
-                                                    <UserGroupIcon className="h-4 w-4 text-blue-500" />
-                                                    <span className="text-lg font-bold text-gray-900 dark:text-white">{slotCount}</span>
+                                                <div className="flex items-center gap-2 px-4 py-2 bg-[var(--te-surface)] rounded-lg border border-[var(--te-border)] min-w-[80px] justify-center">
+                                                    <UserGroupIcon className="h-4 w-4 text-[var(--te-text)]" />
+                                                    <span className="font-mono text-lg font-bold text-[var(--te-text)]">{slotCount}</span>
                                                 </div>
                                                 <button
                                                     type="button"
                                                     onClick={() => setSlotCount(slotCount + 1)}
-                                                    className="p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                                    className="p-2 rounded-lg border border-[var(--te-border)] hover:bg-[var(--te-hover)] transition-colors"
                                                 >
-                                                    <PlusIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                                    <PlusIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                                 </button>
-                                                <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                                                <span className="text-sm text-[var(--te-text-dim)] ml-2">
                                                     {slotCount === 1 ? 'can book' : 'can book'}
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Schedule Type Toggle */}
-                                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-                                            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        <div className="flex items-center justify-between p-4 bg-[var(--te-surface-alt)] rounded-lg">
+                                            <label className="text-sm font-semibold text-[var(--te-text)]">
                                                 Schedule Type
                                             </label>
-                                            <div className="inline-flex rounded-lg bg-gray-200 dark:bg-gray-700 p-1">
+                                            <div className="inline-flex rounded-lg bg-[var(--te-hover)] p-1">
                                                 <button
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, mode: 'single' }))}
                                                     className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${formData.mode === 'single'
-                                                        ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                                        ? 'bg-[var(--te-surface)] text-[var(--te-text)] '
+                                                        : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                                         }`}
                                                 >
                                                     Single Slot
@@ -580,8 +574,8 @@ const TimeslotManagement = () => {
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, mode: 'bulk' }))}
                                                     className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${formData.mode === 'bulk'
-                                                        ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                                        ? 'bg-[var(--te-surface)] text-[var(--te-text)] '
+                                                        : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                                         }`}
                                                 >
                                                     Recurring
@@ -589,15 +583,15 @@ const TimeslotManagement = () => {
                                             </div>
                                         </div>                                        {formData.mode === 'single' ? (
                                             <form onSubmit={handleCreateSingle} className="space-y-5">
-                                                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                                                    <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                                                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                <div className="flex items-start gap-2 p-3 bg-[var(--te-hover)] rounded-lg border border-[var(--te-border)]">
+                                                    <InformationCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
+                                                    <p className="text-sm text-[var(--te-text)]">
                                                         Enter times in your local timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). They will be converted to UTC for storage.
                                                     </p>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                             Date
                                                         </label>
                                                         <input
@@ -605,34 +599,34 @@ const TimeslotManagement = () => {
                                                             value={formData.date}
                                                             min={new Date().toISOString().split('T')[0]}
                                                             onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                                                            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                            className="te-input"
                                                             required
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                             Start Time (Your Local Time)
                                                         </label>
                                                         <input
                                                             type="time"
                                                             value={formData.start_time}
                                                             onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
-                                                            className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                            className="te-input"
                                                             required
                                                         />
                                                     </div>
                                                 </div>
 
                                                 {formData.start_time && selectedInterviewTypes.length > 0 && (
-                                                    <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                                                        <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                                                    <div className="flex items-start gap-3 p-4 bg-[var(--te-surface-alt)] rounded-lg border border-[var(--te-border)]">
+                                                        <InformationCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
                                                         <div className="text-sm">
-                                                            <p className="font-semibold text-blue-900 dark:text-blue-200 mb-1">
+                                                            <p className="font-semibold text-[var(--te-text)] mb-1">
                                                                 {formData.start_time} - {calculateEndTime(formData.start_time)}
-                                                                <span className="font-normal text-blue-700 dark:text-blue-300"> (up to {Math.max(...selectedInterviewTypes.map(t => INTERVIEW_TYPES[t]?.duration || 20))} min)</span>
+                                                                <span className="font-normal text-[var(--te-text)]"> (up to {Math.max(...selectedInterviewTypes.map(t => INTERVIEW_TYPES[t]?.duration || 20))} min)</span>
                                                             </p>
                                                             {slotCount > 1 && (
-                                                                <p className="text-blue-700 dark:text-blue-300">
+                                                                <p className="text-[var(--te-text)]">
                                                                     {slotCount} members can book this time slot
                                                                 </p>
                                                             )}
@@ -643,22 +637,22 @@ const TimeslotManagement = () => {
                                                 <button
                                                     type="submit"
                                                     disabled={creating}
-                                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="te-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     {creating ? 'Creating...' : slotCount > 1 ? `Create ${slotCount} Slots` : 'Create Slot'}
                                                 </button>
                                             </form>
                                         ) : (
                                             <form onSubmit={handleCreateBulk} className="space-y-5">
-                                                <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                                                    <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                                                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                <div className="flex items-start gap-2 p-3 bg-[var(--te-hover)] rounded-lg border border-[var(--te-border)]">
+                                                    <InformationCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
+                                                    <p className="text-sm text-[var(--te-text)]">
                                                         Enter times in your local timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). They will be converted to UTC for storage.
                                                     </p>
                                                 </div>
                                                 {/* Date Range */}
                                                 <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                         Date Range
                                                     </label>
                                                     <div className="grid grid-cols-2 gap-3">
@@ -668,10 +662,10 @@ const TimeslotManagement = () => {
                                                                 value={bulkData.start_date}
                                                                 min={new Date().toISOString().split('T')[0]}
                                                                 onChange={(e) => setBulkData(prev => ({ ...prev, start_date: e.target.value }))}
-                                                                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                                className="te-input"
                                                                 required
                                                             />
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Start date</p>
+                                                            <p className="text-xs text-[var(--te-text-dim)] mt-1.5">Start date</p>
                                                         </div>
                                                         <div>
                                                             <input
@@ -679,17 +673,17 @@ const TimeslotManagement = () => {
                                                                 value={bulkData.end_date}
                                                                 min={bulkData.start_date || new Date().toISOString().split('T')[0]}
                                                                 onChange={(e) => setBulkData(prev => ({ ...prev, end_date: e.target.value }))}
-                                                                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                                                className="te-input"
                                                                 required
                                                             />
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">End date</p>
+                                                            <p className="text-xs text-[var(--te-text-dim)] mt-1.5">End date</p>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Days */}
                                                 <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                         Select Days
                                                     </label>
                                                     <div className="flex flex-wrap gap-2">
@@ -699,8 +693,8 @@ const TimeslotManagement = () => {
                                                                 type="button"
                                                                 onClick={() => toggleDay(day)}
                                                                 className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${bulkData.days.includes(day)
-                                                                    ? 'bg-blue-600 text-white shadow-md'
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] '
+                                                                    : 'bg-[var(--te-hover)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                                     }`}
                                                             >
                                                                 {day.slice(0, 3)}
@@ -711,7 +705,7 @@ const TimeslotManagement = () => {
 
                                                 {/* Times */}
                                                 <div>
-                                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                         Select Times
                                                     </label>
                                                     <div className="flex flex-wrap gap-2">
@@ -721,8 +715,8 @@ const TimeslotManagement = () => {
                                                                 type="button"
                                                                 onClick={() => toggleTime(time)}
                                                                 className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${bulkData.times.includes(time)
-                                                                    ? 'bg-blue-600 text-white shadow-md'
-                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] '
+                                                                    : 'bg-[var(--te-hover)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                                     }`}
                                                             >
                                                                 {time}
@@ -732,9 +726,9 @@ const TimeslotManagement = () => {
                                                 </div>
 
                                                 {bulkData.times.length > 0 && bulkData.days.length > 0 && bulkData.start_date && bulkData.end_date && (
-                                                    <div className="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                                                        <InformationCircleIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                                                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+                                                    <div className="flex items-start gap-3 p-4 bg-[var(--te-surface-alt)] rounded-lg border border-[var(--te-border)]">
+                                                        <InformationCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
+                                                        <p className="text-sm font-semibold text-[var(--te-text)]">
                                                             Will create: {bulkData.times.length} time(s) × {bulkData.days.length} day(s) × {slotCount} slot(s)
                                                         </p>
                                                     </div>
@@ -743,7 +737,7 @@ const TimeslotManagement = () => {
                                                 <button
                                                     type="submit"
                                                     disabled={creating || bulkData.times.length === 0}
-                                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="te-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     {creating ? 'Creating...' : 'Create Slots'}
                                                 </button>
@@ -761,13 +755,13 @@ const TimeslotManagement = () => {
             <div className="max-w-4xl">
                 <div className="space-y-3">
                     {upcomingDates.length === 0 ? (
-                        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-                            <CalendarIcon className="h-10 w-10 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                            <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-1">No Upcoming Slots</h4>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Create your first availability slot</p>
+                        <div className="te-card flex flex-col items-center py-14">
+                            <CalendarIcon className="mb-3 h-10 w-10 text-[var(--te-text-dim)]" />
+                            <h4 className="text-base font-semibold text-[var(--te-text)] mb-1">No Upcoming Slots</h4>
+                            <p className="text-[var(--te-text-dim)] text-sm mb-4">Create your first availability slot</p>
                             <button
                                 onClick={() => setShowCreateForm(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                                className="te-btn-secondary te-btn-sm"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 Add Availability
@@ -782,15 +776,15 @@ const TimeslotManagement = () => {
                             return (
                                 <div
                                     key={date}
-                                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
+                                    className="te-card overflow-hidden"
                                 >
-                                    <div className={`px-4 py-2.5 border-b border-gray-100 dark:border-gray-700 flex items-center gap-2 ${isToday ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-50 dark:bg-gray-900/50'}`}>
-                                        <CalendarIcon className={`h-4 w-4 ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`} />
-                                        <span className={`text-sm font-semibold ${isToday ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                                    <div className={`px-4 py-2.5 border-b border-[var(--te-border)] flex items-center gap-2 ${isToday ? 'bg-[var(--te-hover)]' : 'bg-[var(--te-surface-alt)]'}`}>
+                                        <CalendarIcon className={`h-4 w-4 ${isToday ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
+                                        <span className={`text-sm font-semibold ${isToday ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'}`}>
                                             {dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                                            {isToday && <span className="ml-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">Today</span>}
+                                            {isToday && <span className="ml-2 text-xs bg-[var(--te-primary)] text-[var(--te-on-primary)] px-2 py-0.5 rounded-md">Today</span>}
                                         </span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                                        <span className="text-xs text-[var(--te-text-dim)] ml-auto">
                                             {slots.length} slot{slots.length !== 1 ? 's' : ''}
                                         </span>
                                     </div>
@@ -801,23 +795,23 @@ const TimeslotManagement = () => {
                                                 <div
                                                     key={slot.id}
                                                     className={`inline-flex flex-col gap-1.5 px-3 py-2 rounded-lg text-sm transition-all ${slot.is_available
-                                                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800'
-                                                        : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'
+                                                        ? 'bg-[var(--te-hover)] border border-[var(--te-border)]'
+                                                        : 'bg-[var(--te-surface-alt)] border border-[var(--te-border)]'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <ClockIcon className={`h-3.5 w-3.5 ${slot.is_available ? 'text-emerald-500 dark:text-emerald-400' : 'text-amber-500 dark:text-amber-400'}`} />
-                                                        <span className={`font-semibold ${slot.is_available ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                                                        <ClockIcon className={`h-3.5 w-3.5 ${slot.is_available ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
+                                                        <span className={`font-semibold ${slot.is_available ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`}>
                                                             {formatTimeForDisplay(slot.start_time, slot.date)}
                                                         </span>
                                                         {!slot.is_available && (
-                                                            <span className="text-xs px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 rounded text-amber-700 dark:text-amber-300">Booked</span>
+                                                            <span className="text-xs px-1.5 py-0.5 bg-[var(--te-hover)] rounded text-[var(--te-text-dim)]">Booked</span>
                                                         )}
                                                         {slot.is_available && (
                                                             <div className="flex gap-1">
                                                                 <button
                                                                     onClick={() => handleEdit(slot)}
-                                                                    className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                                    className="p-1 text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors rounded hover:bg-[var(--te-hover)]"
                                                                     title="Edit timeslot"
                                                                 >
                                                                     <PencilIcon className="h-3.5 w-3.5" />
@@ -825,7 +819,7 @@ const TimeslotManagement = () => {
                                                                 <button
                                                                     onClick={() => handleDelete(slot.id)}
                                                                     disabled={deletingId === slot.id}
-                                                                    className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                                    className="p-1 text-[var(--te-text-dim)] hover:text-[var(--te-text-dim)] disabled:opacity-50 transition-colors rounded hover:bg-[var(--te-hover)]"
                                                                     title="Delete timeslot"
                                                                 >
                                                                     <TrashIcon className="h-3.5 w-3.5" />
@@ -842,8 +836,8 @@ const TimeslotManagement = () => {
                                                                     <span
                                                                         key={type}
                                                                         className={`text-xs px-1.5 py-0.5 rounded ${slot.is_available
-                                                                            ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
-                                                                            : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+                                                                            ? 'bg-[var(--te-hover)] text-[var(--te-text)]'
+                                                                            : 'bg-[var(--te-hover)] text-[var(--te-text-dim)]'
                                                                             }`}
                                                                     >
                                                                         {typeInfo.label}
@@ -875,7 +869,7 @@ const TimeslotManagement = () => {
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="fixed inset-0 bg-black/50 " />
                     </Transition.Child>
 
                     <div className="fixed inset-0 overflow-y-auto">
@@ -889,42 +883,42 @@ const TimeslotManagement = () => {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all">
+                                <Dialog.Panel className="te-card w-full max-w-lg transform overflow-hidden transition-all">
                                     <div className="p-6">
-                                        <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                                        <Dialog.Title className="text-xl font-bold text-[var(--te-text)] mb-4">
                                             Edit Timeslot
                                         </Dialog.Title>
 
                                         <div className="space-y-4">
                                             {/* Date */}
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                     Date
                                                 </label>
                                                 <input
                                                     type="date"
                                                     value={editFormData.date}
                                                     onChange={(e) => setEditFormData(prev => ({ ...prev, date: e.target.value }))}
-                                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="te-input"
                                                 />
                                             </div>
 
                                             {/* Time */}
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                     Start Time
                                                 </label>
                                                 <input
                                                     type="time"
                                                     value={editFormData.start_time}
                                                     onChange={(e) => setEditFormData(prev => ({ ...prev, start_time: e.target.value }))}
-                                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="te-input"
                                                 />
                                             </div>
 
                                             {/* Interview Types */}
                                             <div>
-                                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                                <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                                                     Interview Types
                                                 </label>
                                                 <div className="grid grid-cols-2 gap-2">
@@ -933,19 +927,19 @@ const TimeslotManagement = () => {
                                                             key={key}
                                                             type="button"
                                                             onClick={() => toggleEditInterviewType(key)}
-                                                            className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                                                            className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
                                                                 editFormData.interview_types.includes(key)
-                                                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                                                    ? 'border-[var(--te-border-strong)] bg-[var(--te-hover)]'
+                                                                    : 'border-[var(--te-border)] hover:border-[var(--te-border)]'
                                                             }`}
                                                         >
                                                             {editFormData.interview_types.includes(key) && (
-                                                                <CheckIcon className="h-4 w-4 text-blue-500" />
+                                                                <CheckIcon className="h-4 w-4 text-[var(--te-text)]" />
                                                             )}
                                                             <span className={`text-sm font-medium ${
                                                                 editFormData.interview_types.includes(key)
-                                                                    ? 'text-blue-700 dark:text-blue-300'
-                                                                    : 'text-gray-700 dark:text-gray-300'
+                                                                    ? 'text-[var(--te-text)]'
+                                                                    : 'text-[var(--te-text)]'
                                                             }`}>
                                                                 {type.label}
                                                             </span>
@@ -956,18 +950,18 @@ const TimeslotManagement = () => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex gap-3 justify-end">
+                                    <div className="bg-[var(--te-surface-alt)] px-6 py-4 flex gap-3 justify-end">
                                         <button
                                             onClick={() => setEditingSlot(null)}
                                             disabled={updating}
-                                            className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50"
+                                            className="te-btn-secondary disabled:opacity-50"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             onClick={handleUpdateSlot}
                                             disabled={updating || !editFormData.date || !editFormData.start_time || editFormData.interview_types.length === 0}
-                                            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {updating ? 'Updating...' : 'Update Timeslot'}
                                         </button>

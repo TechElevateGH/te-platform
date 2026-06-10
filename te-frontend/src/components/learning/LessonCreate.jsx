@@ -94,7 +94,7 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
             requestHandler={createLearningLessonRequest}
             isSubmitting={isSubmitting}
             children={<div className="flex flex-1 flex-col justify-between">
-                <div className="divide-y divide-gray-200 px-4 sm:px-6">
+                <div className="divide-y divide-[var(--te-border)] px-4 sm:px-6">
                     <div className="space-y-6 pb-5 pt-6">
 
                         {showSuccessFeedback &&
@@ -140,15 +140,15 @@ const LessonCreate = ({ setAddLesson, lessonCategories }) => {
                                         uploadFileRequest={uploadFileRequest}
                                     /> :
                                     <div className='flex'>
-                                        <p className="mt-1 text-sm  text-gray-600 w-2/3">{file.name ?? ""}</p>
-                                        <button onClick={() => handleInputChange({ field: "link", value: "" })}>X</button>
+                                        <p className="mt-1 text-sm text-[var(--te-text-dim)] w-2/3">{file.name ?? ""}</p>
+                                        <button className="te-icon-btn" onClick={() => handleInputChange({ field: "link", value: "" })}>X</button>
                                     </div>
                                 ) :
                                 <FormInput label="Link" field="link" handleInputChange={handleInputChange} />
                         }
 
                         {(lessonData.format === "Document (File)" && uploadingFile) &&
-                            <div className="flex text-sm -mt-6">
+                            <div className="flex text-sm -mt-6 text-[var(--te-text-dim)]">
                                 <span className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                                     🌎
                                 </span>

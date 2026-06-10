@@ -9,216 +9,231 @@ import {
     BuildingOfficeIcon,
     AcademicCapIcon,
     CheckBadgeIcon
-} from '@heroicons/react/24/outline'
+} from 'icons'
+
+const platformSignals = [
+    { label: 'curated roles', value: '120+', icon: BriefcaseIcon },
+    { label: 'remote-first', value: '68%', icon: MapPinIcon },
+    { label: 'verified companies', value: '40+', icon: CheckBadgeIcon },
+    { label: 'launch status', value: 'soon', icon: ClockIcon }
+]
+
+const featurePreview = [
+    {
+        title: 'Curated Opportunities',
+        description: 'Hand-picked job opportunities from top companies, vetted for quality and fit with your skills and experience.',
+        icon: BriefcaseIcon
+    },
+    {
+        title: 'Smart Notifications',
+        description: 'Get instant alerts when new opportunities matching your preferences become available.',
+        icon: BellIcon
+    },
+    {
+        title: 'One-Click Apply',
+        description: 'Apply to multiple opportunities quickly using your saved resumes and application materials.',
+        icon: SparklesIcon
+    },
+    {
+        title: 'Salary Insights',
+        description: 'View transparent salary ranges and compensation details for informed decision-making.',
+        icon: CurrencyDollarIcon
+    },
+    {
+        title: 'Company Profiles',
+        description: 'Research companies with detailed profiles, culture insights, and employee reviews.',
+        icon: BuildingOfficeIcon
+    },
+    {
+        title: 'Skills Matching',
+        description: 'See how your skills align with job requirements and get recommendations for improvement.',
+        icon: AcademicCapIcon
+    }
+]
+
+const sampleJobs = [
+    {
+        title: 'Senior Software Engineer',
+        company: 'Tech Corp',
+        location: 'Remote',
+        salary: '$120k - $180k',
+        type: 'Full-time',
+        tags: ['React', 'Node.js', 'AWS']
+    },
+    {
+        title: 'Frontend Developer',
+        company: 'StartupXYZ',
+        location: 'New York, NY',
+        salary: '$90k - $130k',
+        type: 'Full-time',
+        tags: ['React', 'TypeScript', 'CSS']
+    },
+    {
+        title: 'Full Stack Engineer',
+        company: 'Innovation Labs',
+        location: 'San Francisco, CA',
+        salary: '$110k - $160k',
+        type: 'Full-time',
+        tags: ['Python', 'React', 'PostgreSQL']
+    }
+]
 
 const Opportunities = () => {
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
-            {/* Professional Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Job Opportunities</h1>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Discover curated job opportunities matching your profile</p>
+        <div className="min-h-screen bg-[var(--te-bg)]">
+            <header className="border-b border-[var(--te-border)] bg-[var(--te-bg)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-3xl">
+                            <span className="te-eyebrow">{'// opportunities'}</span>
+                            <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
+                                Job discovery, engineered.
+                            </h1>
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--te-text-dim)] sm:text-base">
+                                A focused pipeline for vetted roles, company context, compensation signals, and fast applications.
+                            </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-medium border border-emerald-200 dark:border-emerald-800">
-                                <ClockIcon className="h-4 w-4" />
-                                Coming Soon
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="te-badge font-mono">
+                                <ClockIcon className="h-4 w-4" /> coming soon
                             </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Search Bar Placeholder */}
-                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6 mb-8">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="flex-1 relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search job titles, companies, or keywords..."
-                                disabled
-                                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 cursor-not-allowed"
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            <div className="relative flex-1 md:w-48">
-                                <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Location"
-                                    disabled
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 cursor-not-allowed"
-                                />
-                            </div>
-                            <button
-                                disabled
-                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors cursor-not-allowed opacity-50"
-                            >
-                                Search
+                            <button disabled className="te-btn-primary te-btn-sm cursor-not-allowed opacity-60">
+                                Join waitlist
                             </button>
                         </div>
                     </div>
-                </div>
 
-                {/* Feature Preview Cards */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <BriefcaseIcon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center">
+                        <div className="relative w-full lg:max-w-xl">
+                            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                            <input
+                                type="text"
+                                placeholder="Search role, company, keyword…"
+                                disabled
+                                className="te-input pl-9 cursor-not-allowed opacity-75"
+                            />
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Curated Opportunities</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Hand-picked job opportunities from top companies, vetted for quality and fit with your skills and experience.
-                        </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <BellIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                            {['Remote', 'Full-time', 'Internship', 'New grad'].map((filter) => (
+                                <button
+                                    key={filter}
+                                    disabled
+                                    className="te-btn-secondary te-btn-sm cursor-not-allowed opacity-70"
+                                >
+                                    {filter}
+                                </button>
+                            ))}
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Smart Notifications</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Get instant alerts when new opportunities matching your preferences become available.
-                        </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <SparklesIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">One-Click Apply</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Apply to multiple opportunities quickly using your saved resumes and application materials.
-                        </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <CurrencyDollarIcon className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Salary Insights</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            View transparent salary ranges and compensation details for informed decision-making.
-                        </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <BuildingOfficeIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Company Profiles</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Research companies with detailed profiles, culture insights, and employee reviews.
-                        </p>
-                    </div>
-
-                    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
-                        <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center mb-4">
-                            <AcademicCapIcon className="h-6 w-6 text-pink-600 dark:text-pink-400" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Skills Matching</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            See how your skills align with job requirements and get recommendations for improvement.
-                        </p>
                     </div>
                 </div>
+            </header>
 
-                {/* Sample Job Listings */}
-                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-800">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Preview: Sample Opportunities</h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Examples of what you'll see when this feature launches</p>
+            <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] lg:grid-cols-4">
+                    {platformSignals.map((signal) => {
+                        const Icon = signal.icon
+                        return (
+                            <div key={signal.label} className="bg-[var(--te-surface)] p-4">
+                                <Icon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <div className="mt-2 font-mono text-2xl font-bold text-[var(--te-text)]">{signal.value}</div>
+                                <div className="mt-1 text-xs text-[var(--te-text-dim)]">{signal.label}</div>
+                            </div>
+                        )
+                    })}
+                </section>
+
+                <section className="mt-8">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <span className="te-eyebrow">{'// preview'}</span>
+                            <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--te-text)]">Sample opportunity feed</h2>
+                            <p className="mt-1 text-sm text-[var(--te-text-dim)]">Flat, scannable cards built for quick role triage.</p>
+                        </div>
+                        <details className="relative w-full sm:w-auto">
+                            <summary className="te-btn-secondary te-btn-sm list-none cursor-pointer select-none justify-between [&::-webkit-details-marker]:hidden">
+                                Filters <span aria-hidden="true">⌄</span>
+                            </summary>
+                            <div className="absolute right-0 z-20 mt-2 w-56 te-card p-1 shadow-sm">
+                                {['All roles', 'Remote only', 'Salary listed', 'Verified company'].map((item) => (
+                                    <button key={item} disabled className="block w-full rounded-md px-3 py-2 text-left text-sm text-[var(--te-text-dim)] cursor-not-allowed hover:bg-[var(--te-hover)]">
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
+                        </details>
                     </div>
 
-                    <div className="divide-y divide-gray-200 dark:divide-slate-800">
-                        {[
-                            {
-                                title: "Senior Software Engineer",
-                                company: "Tech Corp",
-                                location: "Remote",
-                                salary: "$120k - $180k",
-                                type: "Full-time",
-                                tags: ["React", "Node.js", "AWS"]
-                            },
-                            {
-                                title: "Frontend Developer",
-                                company: "StartupXYZ",
-                                location: "New York, NY",
-                                salary: "$90k - $130k",
-                                type: "Full-time",
-                                tags: ["React", "TypeScript", "CSS"]
-                            },
-                            {
-                                title: "Full Stack Engineer",
-                                company: "Innovation Labs",
-                                location: "San Francisco, CA",
-                                salary: "$110k - $160k",
-                                type: "Full-time",
-                                tags: ["Python", "React", "PostgreSQL"]
-                            }
-                        ].map((job, index) => (
-                            <div key={index} className="p-6 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors opacity-60 cursor-not-allowed">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{job.title}</h3>
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded text-xs font-medium">
-                                                <CheckBadgeIcon className="h-3 w-3" />
-                                                Verified
-                                            </span>
+                    <div className="mt-4 grid gap-3">
+                        {sampleJobs.map((job) => (
+                            <article key={`${job.company}-${job.title}`} className="te-card-interactive p-4 opacity-75">
+                                <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] font-mono text-sm font-bold text-[var(--te-text)] grayscale">
+                                            {job.company.slice(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                                            <span className="flex items-center gap-1">
-                                                <BuildingOfficeIcon className="h-4 w-4" />
-                                                {job.company}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <MapPinIcon className="h-4 w-4" />
-                                                {job.location}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <CurrencyDollarIcon className="h-4 w-4" />
-                                                {job.salary}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <ClockIcon className="h-4 w-4" />
-                                                {job.type}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {job.tags.map((tag, i) => (
-                                                <span key={i} className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
-                                                    {tag}
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="text-base font-semibold text-[var(--te-text)]">{job.title}</h3>
+                                                <span className="te-chip font-mono">
+                                                    <CheckBadgeIcon className="h-3.5 w-3.5" /> verified
                                                 </span>
-                                            ))}
+                                            </div>
+                                            <div className="mt-2 flex flex-wrap gap-2 font-mono text-xs text-[var(--te-text-dim)]">
+                                                <span className="te-chip"><BuildingOfficeIcon className="h-3.5 w-3.5" />{job.company}</span>
+                                                <span className="te-chip"><MapPinIcon className="h-3.5 w-3.5" />{job.location}</span>
+                                                <span className="te-chip"><CurrencyDollarIcon className="h-3.5 w-3.5" />{job.salary}</span>
+                                                <span className="te-chip"><ClockIcon className="h-3.5 w-3.5" />{job.type}</span>
+                                            </div>
+                                            <div className="mt-3 flex flex-wrap gap-1.5">
+                                                {job.tags.map((tag) => (
+                                                    <span key={tag} className="te-badge font-mono">{tag}</span>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                    <button
-                                        disabled
-                                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm transition-colors cursor-not-allowed opacity-50"
-                                    >
+                                    <button disabled className="te-btn-primary te-btn-sm cursor-not-allowed opacity-60 md:justify-self-end">
                                         Apply
                                     </button>
                                 </div>
-                            </div>
+                            </article>
                         ))}
                     </div>
-                </div>
+                </section>
 
-                {/* CTA */}
-                <div className="mt-8 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800 p-8 text-center">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Stay Tuned!</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        We're working hard to bring you the best job discovery experience. In the meantime, explore <span className="font-semibold">Applications</span> and <span className="font-semibold">Referrals</span> to track your job search.
-                    </p>
-                </div>
-            </div>
+                <section className="mt-8 grid grid-cols-1 border-l border-t border-[var(--te-border)] sm:grid-cols-2 lg:grid-cols-3">
+                    {featurePreview.map((feature, index) => {
+                        const Icon = feature.icon
+                        return (
+                            <article key={feature.title} className="border-b border-r border-[var(--te-border)] bg-[var(--te-surface)] p-6 transition-colors hover:bg-[var(--te-hover)]">
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
+                                        <Icon className="h-5 w-5" strokeWidth={1.8} />
+                                    </div>
+                                    <span className="font-mono text-xs text-[var(--te-text-dim)]">{String(index + 1).padStart(2, '0')}</span>
+                                </div>
+                                <h3 className="mt-5 text-base font-semibold text-[var(--te-text)]">{feature.title}</h3>
+                                <p className="mt-2 text-sm leading-6 text-[var(--te-text-dim)]">{feature.description}</p>
+                            </article>
+                        )
+                    })}
+                </section>
+
+                <section className="mt-8 te-panel p-8">
+                    <div className="mx-auto flex max-w-xl flex-col items-center text-center">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                            <BriefcaseIcon className="h-5 w-5 text-[var(--te-text)]" />
+                        </div>
+                        <h3 className="mt-4 font-mono text-lg font-bold text-[var(--te-text)]">opportunities feed initializing</h3>
+                        <p className="mt-2 text-sm leading-6 text-[var(--te-text-dim)]">
+                            While the marketplace comes online, use Applications and Referrals to keep your search system organized.
+                        </p>
+                        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                            <a href="/applications" className="te-btn-secondary te-btn-sm">Open Applications</a>
+                            <a href="/referrals" className="te-btn-ghost te-btn-sm">Review Referrals</a>
+                        </div>
+                    </div>
+                </section>
+            </main>
         </div>
     )
 }

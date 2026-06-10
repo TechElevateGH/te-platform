@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { XMarkIcon, ClipboardIcon, CheckIcon, DocumentTextIcon, UserIcon } from '@heroicons/react/20/solid'
-import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ClipboardIcon, CheckIcon, DocumentTextIcon, UserIcon } from 'icons'
+import { PencilSquareIcon } from 'icons'
 import { copyTextToClipboard } from '../../utils'
 import { useData } from '../../context/DataContext'
 import axiosInstance from '../../axiosConfig'
@@ -75,17 +75,17 @@ const ReferralEssay = () => {
     return (
         <div className="space-y-6">
             {/* Cover Letter Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="te-card overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 px-6 py-4 border-b border-gray-200">
+                <div className="bg-[var(--te-surface-alt)] px-6 py-4 border-b border-[var(--te-border)]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                <DocumentTextIcon className="h-5 w-5 text-blue-600" />
+                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface)]">
+                                <DocumentTextIcon className="h-5 w-5 text-[var(--te-text)]" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Cover Letter</h3>
-                                <p className="text-xs text-gray-600">First person - for job applications</p>
+                                <h3 className="font-display text-lg font-bold text-[var(--te-text)]">Cover Letter</h3>
+                                <p className="text-xs text-[var(--te-text-dim)]">First person - for job applications</p>
                             </div>
                         </div>
 
@@ -94,13 +94,13 @@ const ReferralEssay = () => {
                             {!updateCoverLetter && userInfo?.cover_letter && (
                                 <button
                                     onClick={handleCopyCover}
-                                    className="p-2 hover:bg-white rounded-lg transition-all"
+                                    className="te-icon-btn"
                                     title="Copy to clipboard"
                                 >
                                     {copiedCover ? (
-                                        <CheckIcon className="h-5 w-5 text-green-600" />
+                                        <CheckIcon className="h-5 w-5 text-[var(--te-text)]" />
                                     ) : (
-                                        <ClipboardIcon className="h-5 w-5 text-gray-600" />
+                                        <ClipboardIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                     )}
                                 </button>
                             )}
@@ -108,7 +108,7 @@ const ReferralEssay = () => {
                             {!updateCoverLetter ? (
                                 <button
                                     onClick={() => setUpdateCoverLetter(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-all border border-blue-200"
+                                    className="te-btn-secondary te-btn-sm gap-2"
                                 >
                                     <PencilSquareIcon className="h-4 w-4" />
                                     Edit
@@ -116,7 +116,7 @@ const ReferralEssay = () => {
                             ) : (
                                 <button
                                     onClick={() => setUpdateCoverLetter(false)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
+                                    className="te-btn-secondary te-btn-sm gap-2"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
                                     Cancel
@@ -132,24 +132,24 @@ const ReferralEssay = () => {
                         <div>
                             {userInfo?.cover_letter && userInfo.cover_letter !== "" ? (
                                 <div className="prose prose-sm max-w-none">
-                                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                    <p className="text-[var(--te-text-dim)] leading-relaxed whitespace-pre-wrap">
                                         {userInfo.cover_letter}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <DocumentTextIcon className="h-8 w-8 text-blue-400" />
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                        <DocumentTextIcon className="h-8 w-8 text-[var(--te-text-dim)]" />
                                     </div>
-                                    <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                    <h4 className="font-display text-sm font-semibold text-[var(--te-text)] mb-1">
                                         No cover letter added
                                     </h4>
-                                    <p className="text-xs text-gray-500 mb-4">
+                                    <p className="text-xs text-[var(--te-text-dim)] mb-4">
                                         Write in first person (I, me, my)
                                     </p>
                                     <button
                                         onClick={() => setUpdateCoverLetter(true)}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
+                                        className="te-btn-primary te-btn-sm gap-2"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />
                                         Add Cover Letter
@@ -159,8 +159,8 @@ const ReferralEssay = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <p className="text-xs text-blue-800 font-medium">
+                            <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                <p className="text-xs text-[var(--te-text)] font-medium">
                                     💡 Write in <strong>first person</strong>: "I am a software engineer with 5 years of experience..."
                                 </p>
                             </div>
@@ -168,19 +168,19 @@ const ReferralEssay = () => {
                                 rows={10}
                                 name="cover_letter"
                                 id="cover_letter"
-                                className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm font-medium resize-none"
+                                className="te-textarea resize-none min-h-60"
                                 placeholder="I am writing to express my interest in..."
                                 defaultValue={userInfo?.cover_letter || ''}
                                 onChange={(e) => setCoverLetterBody(e.target.value)}
                             />
 
                             <div className="flex items-center justify-between">
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-[var(--te-text-dim)]">
                                     {coverLetterBody?.length || 0} characters
                                 </p>
                                 <button
                                     type="button"
-                                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-cyan-700 active:scale-95 transition-all duration-200"
+                                    className="te-btn-primary"
                                     onClick={updateCoverLetterRequest}
                                 >
                                     Save Cover Letter
@@ -192,17 +192,17 @@ const ReferralEssay = () => {
             </div>
 
             {/* Referral Essay Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="te-card overflow-hidden">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
+                <div className="bg-[var(--te-surface-alt)] px-6 py-4 border-b border-[var(--te-border)]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                                <UserIcon className="h-5 w-5 text-purple-600" />
+                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface)]">
+                                <UserIcon className="h-5 w-5 text-[var(--te-text)]" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900">Referral Essay</h3>
-                                <p className="text-xs text-gray-600">Third person - used for referral requests</p>
+                                <h3 className="font-display text-lg font-bold text-[var(--te-text)]">Referral Essay</h3>
+                                <p className="text-xs text-[var(--te-text-dim)]">Third person - used for referral requests</p>
                             </div>
                         </div>
 
@@ -211,13 +211,13 @@ const ReferralEssay = () => {
                             {!updateReferralEssay && userInfo?.essay && (
                                 <button
                                     onClick={handleCopyReferral}
-                                    className="p-2 hover:bg-white rounded-lg transition-all"
+                                    className="te-icon-btn"
                                     title="Copy to clipboard"
                                 >
                                     {copiedReferral ? (
-                                        <CheckIcon className="h-5 w-5 text-green-600" />
+                                        <CheckIcon className="h-5 w-5 text-[var(--te-text)]" />
                                     ) : (
-                                        <ClipboardIcon className="h-5 w-5 text-gray-600" />
+                                        <ClipboardIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                     )}
                                 </button>
                             )}
@@ -225,7 +225,7 @@ const ReferralEssay = () => {
                             {!updateReferralEssay ? (
                                 <button
                                     onClick={() => setUpdateReferralEssay(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-purple-700 text-sm font-semibold rounded-lg hover:bg-purple-50 transition-all border border-purple-200"
+                                    className="te-btn-secondary te-btn-sm gap-2"
                                 >
                                     <PencilSquareIcon className="h-4 w-4" />
                                     Edit
@@ -233,7 +233,7 @@ const ReferralEssay = () => {
                             ) : (
                                 <button
                                     onClick={() => setUpdateReferralEssay(false)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-all border border-gray-200"
+                                    className="te-btn-secondary te-btn-sm gap-2"
                                 >
                                     <XMarkIcon className="h-4 w-4" />
                                     Cancel
@@ -249,24 +249,24 @@ const ReferralEssay = () => {
                         <div>
                             {userInfo?.essay && userInfo.essay !== "" ? (
                                 <div className="prose prose-sm max-w-none">
-                                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                    <p className="text-[var(--te-text-dim)] leading-relaxed whitespace-pre-wrap">
                                         {userInfo.essay}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <UserIcon className="h-8 w-8 text-purple-400" />
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                        <UserIcon className="h-8 w-8 text-[var(--te-text-dim)]" />
                                     </div>
-                                    <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                                    <h4 className="font-display text-sm font-semibold text-[var(--te-text)] mb-1">
                                         No referral essay added
                                     </h4>
-                                    <p className="text-xs text-gray-500 mb-4">
+                                    <p className="text-xs text-[var(--te-text-dim)] mb-4">
                                         Write in third person (he/she, him/her)
                                     </p>
                                     <button
                                         onClick={() => setUpdateReferralEssay(true)}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg transition-all"
+                                        className="te-btn-primary te-btn-sm gap-2"
                                     >
                                         <PencilSquareIcon className="h-4 w-4" />
                                         Add Referral Essay
@@ -276,8 +276,8 @@ const ReferralEssay = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                                <p className="text-xs text-purple-800 font-medium">
+                            <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                <p className="text-xs text-[var(--te-text)] font-medium">
                                     💡 Write in <strong>third person</strong>: "[Name] is a software engineer with 5 years of experience..." This will be used when requesting referrals.
                                 </p>
                             </div>
@@ -285,19 +285,19 @@ const ReferralEssay = () => {
                                 rows={10}
                                 name="referral_essay"
                                 id="referral_essay"
-                                className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm font-medium resize-none"
+                                className="te-textarea resize-none min-h-60"
                                 placeholder="[Your name] is a passionate software engineer with expertise in..."
                                 defaultValue={userInfo?.essay || ''}
                                 onChange={(e) => setReferralEssayBody(e.target.value)}
                             />
 
                             <div className="flex items-center justify-between">
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-[var(--te-text-dim)]">
                                     {referralEssayBody?.length || 0} characters
                                 </p>
                                 <button
                                     type="button"
-                                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:from-purple-700 hover:to-pink-700 active:scale-95 transition-all duration-200"
+                                    className="te-btn-primary"
                                     onClick={updateReferralEssayRequest}
                                 >
                                     Save Referral Essay

@@ -15,9 +15,8 @@ This module provides three distinct authentication flows:
 
 3. **Referrer Login** (POST /auth/referrer-login)
    - For Referrers (role=2)
-   - Requires: token ONLY (no username)
+   - Requires: username + token
    - Returns: Access token + user info + company info
-   - Note: Referrers are assigned to a specific company
 
 4. **Google OAuth Login** (GET /auth/google/login)
    - Initiates Google OAuth flow
@@ -26,13 +25,15 @@ This module provides three distinct authentication flows:
 5. **Google OAuth Callback** (GET /auth/google/callback)
    - Handles callback from Google
    - Creates or authenticates user
-   - Returns: Access token
+   - Returns: Access token via short-lived auth code exchange
 """
 
+import re
 from datetime import timedelta
 from typing import Any
 import secrets
 import logging
+import uuid
 
 import app.core.security as security
 import app.database.session as session
@@ -40,7 +41,8 @@ import app.ents.user.crud as user_crud
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from app.core.settings import settings
-from fastapi import APIRouter, Depends, HTTPException, status
+from app.main import limiter
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
 from google.oauth2 import id_token
@@ -53,7 +55,9 @@ logger = logging.getLogger(__name__)
 
 
 @auth_router.post("/login")
+@limiter.limit("10/minute")
 def login_access_token(
+    request: Request,
     data: user_schema.UserLogin,
     db: Database = Depends(session.get_db),
 ) -> Any:
@@ -106,7 +110,9 @@ def login_access_token(
 @auth_router.post(
     "/password/reset-request", response_model=user_schema.PasswordResetRequestResponse
 )
+@limiter.limit("5/minute")
 def request_password_reset(
+    request: Request,
     data: user_schema.PasswordResetRequest,
     db: Database = Depends(session.get_db),
 ) -> Any:
@@ -123,13 +129,14 @@ def request_password_reset(
     """
     from app.utilities.email import send_password_reset_email
 
-    # Check if user exists
+    # Check if user exists — always return success to prevent user enumeration
     user = user_crud.read_user_by_email(db, email=data.email)
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No account found with this email address.",
+        # Return the same success response to prevent email enumeration
+        return user_schema.PasswordResetRequestResponse(
+            success=True,
+            message="If an account exists with this email, a reset code has been sent.",
         )
 
     # For OAuth users without password, allow them to set one
@@ -152,7 +159,7 @@ def request_password_reset(
 
     return user_schema.PasswordResetRequestResponse(
         success=True,
-        message="Password reset code sent to your email. Please check your inbox.",
+        message="If an account exists with this email, a reset code has been sent.",
     )
 
 
@@ -229,7 +236,9 @@ def complete_password_reset(
 
 
 @auth_router.post("/management-login")
+@limiter.limit("10/minute")
 def management_login_access_token(
+    request: Request,
     data: user_schema.LeadLogin,
     db: Database = Depends(session.get_db),
 ) -> Any:
@@ -244,9 +253,9 @@ def management_login_access_token(
     """
     logger.info(f"Management login attempt for user: {data.username}")
 
-    # Find user in privileged_users collection (case-insensitive)
+    # Find user in privileged_users collection (case-insensitive, injection-safe)
     user_data = db.privileged_users.find_one(
-        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+        {"username": {"$regex": f"^{re.escape(data.username)}$", "$options": "i"}}
     )
     if not user_data:
         raise HTTPException(
@@ -254,7 +263,6 @@ def management_login_access_token(
         )
 
     user = user_models.PrivilegedUser(**user_data)
-    print(user)
 
     # Only allow Volunteer (3), Lead (4), and Admin (5) to use this endpoint
     if user.role not in [
@@ -267,8 +275,8 @@ def management_login_access_token(
             detail="This endpoint is for management users only. Referrers should use /auth/referrer-login",
         )
 
-    # Verify token matches
-    if not user.lead_token or user.lead_token != data.token:
+    # Verify token using bcrypt (no plaintext comparison)
+    if not security.verify_password(data.token, user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
         )
@@ -296,26 +304,31 @@ def management_login_access_token(
 
 
 @auth_router.post("/referrer-login")
+@limiter.limit("10/minute")
 def referrer_login_access_token(
+    request: Request,
     data: user_schema.ReferrerLogin,
     db: Database = Depends(session.get_db),
 ) -> Any:
     """
-    Referrer login with token only (no username required).
+    Referrer login with username and token.
 
-    Referrers authenticate using only their secure token.
+    Referrers authenticate using their username and secure token.
     The token uniquely identifies the referrer and their assigned company.
 
+    - **username**: Referrer's username
     - **token**: Secure token provided during account creation
     - Returns: Access token and user information including assigned company
     """
-    logger.info("Referrer login attempt")
+    logger.info(f"Referrer login attempt for user: {data.username}")
 
-    # Find user by token in privileged_users collection
-    user_data = db.privileged_users.find_one({"lead_token": data.token})
+    # Find user by username (case-insensitive, injection-safe)
+    user_data = db.privileged_users.find_one(
+        {"username": {"$regex": f"^{re.escape(data.username)}$", "$options": "i"}}
+    )
     if not user_data:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
         )
 
     user = user_models.PrivilegedUser(**user_data)
@@ -325,6 +338,12 @@ def referrer_login_access_token(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This endpoint is for Referrer users only. Management users should use /auth/management-login",
+        )
+
+    # Verify token using bcrypt (no plaintext comparison)
+    if not security.verify_password(data.token, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid username or token"
         )
 
     # Check if user is active
@@ -414,7 +433,6 @@ def google_login() -> Any:
             detail="Google OAuth is not configured",
         )
 
-    # Build Google OAuth authorization URL
     # Generate anti-CSRF state token
     state = secrets.token_urlsafe(24)
     params = {
@@ -429,30 +447,45 @@ def google_login() -> Any:
 
     auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
     # Set secure cookie with state for verification in callback (5 min expiry)
+    is_production = not settings.DOMAIN.startswith("http://localhost")
     response = RedirectResponse(url=auth_url)
     response.set_cookie(
         key="oauth_state",
         value=state,
         max_age=300,
         httponly=True,
-        secure=False,  # Set True in production with HTTPS
+        secure=is_production,
         samesite="lax",
     )
     return response
 
 
 @auth_router.get("/google/callback")
-async def google_callback(code: str, db: Database = Depends(session.get_db)) -> Any:
+async def google_callback(
+    code: str,
+    state: str = "",
+    request: Request = None,
+    db: Database = Depends(session.get_db),
+) -> Any:
     """
     Handle Google OAuth callback.
 
     Exchanges authorization code for user info and creates/authenticates user.
+    Uses short-lived auth code exchange to avoid passing JWT in URL.
     """
     if not settings.GOOGLE_OAUTH_CLIENT_ID or not settings.GOOGLE_OAUTH_CLIENT_SECRET:
         raise HTTPException(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Google OAuth is not configured",
         )
+
+    # Validate OAuth state parameter to prevent CSRF
+    if request:
+        stored_state = request.cookies.get("oauth_state")
+        if not stored_state or stored_state != state:
+            logger.warning("OAuth state mismatch — possible CSRF attempt")
+            frontend_url = settings.DOMAIN
+            return RedirectResponse(url=f"{frontend_url}/login?error=oauth_failed")
 
     try:
         # Exchange authorization code for tokens
@@ -509,9 +542,9 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
         existing_user = db.member_users.find_one({"google_id": google_user_id})
 
         if not existing_user:
-            # Check if user exists with this email (case-insensitive for legacy users)
+            # Check if user exists with this email (case-insensitive, injection-safe)
             existing_user = db.member_users.find_one(
-                {"email": {"$regex": f"^{email}$", "$options": "i"}}
+                {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}}
             )
 
             if existing_user:
@@ -584,12 +617,31 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
             user_id_str, expires_delta=access_token_expires
         )
 
-        # Redirect to frontend with token
-        frontend_url = settings.DOMAIN
-        redirect_url = f"{frontend_url}/auth/callback?token={access_token}&user_id={user_id_str}&role={user.role}"
+        # Store a short-lived one-time auth code instead of passing JWT in URL
+        from datetime import datetime, timezone
 
-        logger.info(f"Redirecting to: {redirect_url}")
-        return RedirectResponse(url=redirect_url)
+        auth_code = secrets.token_urlsafe(48)
+        db.oauth_codes.insert_one(
+            {
+                "code": auth_code,
+                "access_token": access_token,
+                "user_id": user_id_str,
+                "role": user.role,
+                "created_at": datetime.now(timezone.utc),
+                "used": False,
+            }
+        )
+        # TTL index should be created on startup for auto-expiry
+
+        # Redirect to frontend with auth code (NOT the JWT)
+        frontend_url = settings.DOMAIN
+        redirect_url = f"{frontend_url}/auth/callback?code={auth_code}"
+
+        logger.info("Redirecting to frontend with auth code")
+        response = RedirectResponse(url=redirect_url)
+        # Clear the OAuth state cookie
+        response.delete_cookie("oauth_state")
+        return response
 
     except Exception as e:
         logger.error(f"Google OAuth error: {str(e)}")
@@ -599,15 +651,51 @@ async def google_callback(code: str, db: Database = Depends(session.get_db)) -> 
         return RedirectResponse(url=error_url)
 
 
-#     if not user:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The user with this username does not exist in the system.",
-#         )
-#     elif not user.crud.is_user_active(user):
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     hashed_password = get_password_hash(new_password)
-#     user.hashed_password = hashed_password  # type: ignore  Column--warning
-#     db.add(user)
-#     db.commit()
-#     return {"schemas.Msg": "Password updated successfully"}
+from fastapi import Request as FastAPIRequest
+from pydantic import BaseModel as PydanticBaseModel
+
+
+class ExchangeCodeRequest(PydanticBaseModel):
+    code: str
+
+
+@auth_router.post("/exchange-code")
+def exchange_oauth_code(
+    data: ExchangeCodeRequest,
+    db: Database = Depends(session.get_db),
+) -> Any:
+    """
+    Exchange a short-lived OAuth auth code for an access token.
+
+    This endpoint is called by the frontend after the OAuth callback redirect.
+    The auth code is single-use and expires after 60 seconds.
+    """
+    from datetime import datetime, timezone
+
+    code_doc = db.oauth_codes.find_one({"code": data.code, "used": False})
+    if not code_doc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired auth code",
+        )
+
+    # Check expiry (60 seconds)
+    created_at = code_doc.get("created_at")
+    if created_at:
+        age = (datetime.now(timezone.utc) - created_at.replace(tzinfo=timezone.utc)).total_seconds()
+        if age > 60:
+            db.oauth_codes.update_one({"_id": code_doc["_id"]}, {"$set": {"used": True}})
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Auth code expired",
+            )
+
+    # Mark as used (single-use)
+    db.oauth_codes.update_one({"_id": code_doc["_id"]}, {"$set": {"used": True}})
+
+    return {
+        "access_token": code_doc["access_token"],
+        "token_type": "bearer",
+        "user_id": code_doc["user_id"],
+        "role": code_doc["role"],
+    }

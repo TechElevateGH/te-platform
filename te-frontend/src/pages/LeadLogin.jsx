@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheckIcon, KeyIcon, UserIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, KeyIcon, UserIcon, ArrowLeftIcon } from 'icons';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
@@ -59,49 +59,49 @@ const LeadLogin = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                {/* Back to Member Login */}
+        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+            <div className="relative max-w-md w-full">
                 <button
                     onClick={() => navigate('/login')}
-                    className="flex items-center gap-2 text-sm font-medium text-blue-200 hover:text-white transition-colors"
+                    className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors"
                 >
                     <ArrowLeftIcon className="h-4 w-4" />
-                    Back to Member Login
+                    Back to member login
                 </button>
 
-                {/* Header */}
-                <div className="text-center">
-                    <div className="flex justify-center">
-                        <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
-                            <ShieldCheckIcon className="h-12 w-12 text-white" />
-                        </div>
-                    </div>
-                    <h2 className="mt-6 text-3xl font-bold text-white">
-                        Management Login
-                    </h2>
-                    <p className="mt-2 text-sm text-blue-200">
-                        Enter your username and access token
-                    </p>
+                <div className="flex items-center justify-center mb-8">
+                    <img
+                        src="/te-mark.svg"
+                        alt="TechElevate Logo"
+                        className="h-20 w-20 select-none"
+                    />
                 </div>
 
-                {/* Login Form */}
-                <div className="mt-8 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                <div className="bg-[var(--te-surface)] rounded-2xl shadow-sm border border-[var(--te-border)] p-8">
+                    <div className="text-center mb-8">
+                        <p className="te-eyebrow mb-2">Management</p>
+                        <h2 className="text-3xl font-bold text-[var(--te-text)]">
+                            Management Login
+                        </h2>
+                        <p className="mt-2 text-sm text-[var(--te-text-dim)]">
+                            Enter your username and access token.
+                        </p>
+                    </div>
+
+                    <form className="space-y-5" onSubmit={handleLogin}>
                         {error && (
-                            <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-3 rounded-lg text-sm">
+                            <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-800 dark:text-red-200">
                                 {error}
                             </div>
                         )}
 
-                        {/* Username Field */}
                         <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-blue-100 mb-2">
+                            <label htmlFor="username" className="block text-sm font-semibold text-[var(--te-text)] mb-2">
                                 Username
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <UserIcon className="h-5 w-5 text-blue-300" />
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <UserIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                 </div>
                                 <input
                                     id="username"
@@ -110,20 +110,19 @@ const LeadLogin = () => {
                                     required
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="te-input pl-12"
                                     placeholder="Enter your username"
                                 />
                             </div>
                         </div>
 
-                        {/* Token Field */}
                         <div>
-                            <label htmlFor="token" className="block text-sm font-medium text-blue-100 mb-2">
+                            <label htmlFor="token" className="block text-sm font-semibold text-[var(--te-text)] mb-2">
                                 Access Token
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <KeyIcon className="h-5 w-5 text-blue-300" />
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <KeyIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                 </div>
                                 <input
                                     id="token"
@@ -132,59 +131,42 @@ const LeadLogin = () => {
                                     required
                                     value={token}
                                     onChange={(e) => setToken(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                    className="te-input pl-12 font-mono text-sm"
                                     placeholder="Enter your access token"
                                 />
                             </div>
                         </div>
 
-                        {/* Submit Button */}
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="group relative w-full flex items-center justify-center gap-2 px-4 py-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                                        <span>Authenticating...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <ShieldCheckIcon className="h-5 w-5" />
-                                        <span>Sign In</span>
-                                    </>
-                                )}
-                            </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="te-btn-primary te-btn-lg w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
+                                    <span>Authenticating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ShieldCheckIcon className="h-5 w-5" />
+                                    <span>Sign in</span>
+                                </>
+                            )}
+                        </button>
+
+                        <div className="te-panel p-4 text-xs text-[var(--te-text-dim)]">
+                            <strong className="text-[var(--te-text)]">Note:</strong> Management accounts can only be created by Admins. If you need access, please contact your administrator.
                         </div>
 
-                        {/* Info Box */}
-                        <div className="mt-6 bg-blue-500/20 border border-blue-400/30 rounded-lg p-4">
-                            <p className="text-xs text-blue-100">
-                                <strong>Note:</strong> Management accounts can only be created by Admins. If you need access, please contact your administrator.
-                            </p>
-                        </div>
-
-                        {/* Alternative Login Links */}
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                            <p className="text-center text-xs text-blue-200 mb-3">
-                                Not a lead or admin?
-                            </p>
+                        <div className="pt-5 border-t border-[var(--te-border)] text-center">
+                            <p className="text-xs text-[var(--te-text-dim)] mb-3">Not a lead or admin?</p>
                             <div className="flex gap-3 justify-center">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/login')}
-                                    className="text-xs font-medium text-blue-200 hover:text-white transition-colors underline"
-                                >
+                                <button type="button" onClick={() => navigate('/login')} className="te-link text-xs font-medium">
                                     Member Login
                                 </button>
-                                <span className="text-blue-300">•</span>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/referrer-login')}
-                                    className="text-xs font-medium text-blue-200 hover:text-white transition-colors underline"
-                                >
+                                <span className="text-[var(--te-text-dim)]">/</span>
+                                <button type="button" onClick={() => navigate('/referrer-login')} className="te-link text-xs font-medium">
                                     Referrer Access
                                 </button>
                             </div>

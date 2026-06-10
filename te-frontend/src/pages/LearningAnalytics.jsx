@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import axios from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import { useDarkMode } from '../context/DarkModeContext';
 import {
     ChartBarIcon,
     XMarkIcon,
@@ -14,14 +13,13 @@ import {
     ClockIcon,
     TrophyIcon,
     ArrowTrendingUpIcon
-} from '@heroicons/react/24/outline';
-import { CheckCircleIcon as CheckCircleSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
+} from 'icons';
+import { CheckCircleIcon as CheckCircleSolidIcon, BookmarkIcon as BookmarkSolidIcon } from 'icons';
 
 export default function LearningAnalytics() {
     const { userRole: authUserRole } = useAuth();
     const userRole = authUserRole ? parseInt(authUserRole) : 0;
     const isLeadOrAdmin = userRole >= 4;
-    const { darkMode } = useDarkMode();
 
     const [adminStatistics, setAdminStatistics] = useState(null);
     const [allMembersProgress, setAllMembersProgress] = useState([]);
@@ -212,113 +210,115 @@ export default function LearningAnalytics() {
     if (!isLeadOrAdmin) return null;
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden">
+        <div className="min-h-screen bg-[var(--te-bg)]">
             {/* Sticky Header */}
-            <div className={`sticky top-0 z-10 ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+            <div className="sticky top-0 z-10 border-b border-[var(--te-border)] bg-[var(--te-surface)]">
                 {/* Title Bar */}
-                <div className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                                <ChartBarIcon className="w-6 h-6 text-white" />
+                <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                    <div className="flex items-end justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                <ChartBarIcon className="w-6 h-6 text-[var(--te-text)]" />
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Learning Analytics</h1>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">Track member progress and engagement</p>
+                                <p className="te-eyebrow mb-2">{'// analytics'}</p>
+                                <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">Learning Analytics</h1>
+                                <p className="mt-2 text-sm leading-relaxed text-[var(--te-text-dim)]">Track member progress, topic adoption, and engagement signals.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Stats Bar */}
-                <div className={`px-6 py-3 border-t ${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                    <div className="flex items-center gap-4 text-sm flex-wrap">
-                        <div className="flex items-center gap-2">
-                            <UserGroupIcon className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-600 dark:text-gray-400">Total:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">{stats.totalMembers}</span>
+                <div className="border-t border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                    <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-[var(--te-border)] px-4 sm:grid-cols-3 sm:px-6 lg:grid-cols-6 lg:px-8">
+                        <div className="bg-[var(--te-surface-alt)] py-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <UserGroupIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Total</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalMembers}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FireIcon className="w-4 h-4 text-green-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Active:</span>
-                            <span className="font-semibold text-green-600 dark:text-green-400">{stats.activeMembers}</span>
-                            <span className="text-xs text-gray-500">({stats.engagementRate}%)</span>
+                        <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <FireIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Active</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.activeMembers} <span className="text-xs text-[var(--te-text-dim)]">({stats.engagementRate}%)</span></span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircleSolidIcon className="w-4 h-4 text-amber-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Completions:</span>
-                            <span className="font-semibold text-amber-600 dark:text-amber-400">{stats.totalCompletions}</span>
+                        <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <CheckCircleSolidIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Completions</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalCompletions}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <ClockIcon className="w-4 h-4 text-blue-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Time:</span>
-                            <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.totalTimeFormatted}</span>
+                        <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <ClockIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Time</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalTimeFormatted}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <TrophyIcon className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Best Streak:</span>
-                            <span className="font-semibold text-orange-600 dark:text-orange-400">{stats.maxStreak} days</span>
+                        <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <TrophyIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Best Streak</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.maxStreak} days</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <ArrowTrendingUpIcon className="w-4 h-4 text-indigo-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Active Streaks:</span>
-                            <span className="font-semibold text-indigo-600 dark:text-indigo-400">{stats.activeStreaks}</span>
+                        <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
+                            <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                <ArrowTrendingUpIcon className="w-4 h-4" />
+                                <span className="font-mono text-[10px] uppercase tracking-wide">Streaks</span>
+                            </div>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.activeStreaks}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-auto">
-                <div className="max-w-7xl mx-auto px-6 py-6">
+            <div>
+                <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-24">
-                            <div className="relative">
-                                <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 dark:border-gray-700 border-t-indigo-600"></div>
-                                <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-indigo-400 opacity-20"></div>
+                            <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                <ChartBarIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
                             </div>
-                            <p className={`mt-6 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Loading analytics...</p>
+                            <p className="mt-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Loading analytics...</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             {/* Search, Sort, and View Switcher Bar */}
-                            <div className={`rounded-lg border p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                            <div className="te-card p-4">
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     {/* Search */}
                                     <div className="flex-1">
                                         <div className="relative">
-                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--te-text-dim)]" />
                                             <input
                                                 type="text"
                                                 placeholder={viewMode === 'member' ? 'Search members...' : 'Search topics...'}
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode
-                                                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                                                    } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                                                className="te-input pl-10"
                                             />
                                         </div>
                                     </div>
 
                                     {/* View Switcher */}
-                                    <div className={`flex rounded-lg p-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                    <div className="flex rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-1">
                                         <button
                                             onClick={() => setViewMode('member')}
-                                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'member'
-                                                ? 'bg-indigo-600 text-white shadow-sm'
-                                                : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                                                }`}
+                                            className={`te-btn-sm ${viewMode === 'member' ? 'te-btn-primary' : 'te-btn-ghost'}`}
                                         >
                                             <UserIcon className="w-4 h-4 inline mr-1.5" />
                                             Members
                                         </button>
                                         <button
                                             onClick={() => setViewMode('topic')}
-                                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'topic'
-                                                ? 'bg-indigo-600 text-white shadow-sm'
-                                                : darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                                                }`}
+                                            className={`te-btn-sm ${viewMode === 'topic' ? 'te-btn-primary' : 'te-btn-ghost'}`}
                                         >
                                             <AcademicCapIcon className="w-4 h-4 inline mr-1.5" />
                                             Topics
@@ -332,10 +332,7 @@ export default function LearningAnalytics() {
                                                 <select
                                                     value={categoryFilter}
                                                     onChange={(e) => setCategoryFilter(e.target.value)}
-                                                    className={`px-3 py-2 rounded-lg border text-sm ${darkMode
-                                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                                        : 'bg-white border-gray-300 text-gray-900'
-                                                        } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                                                    className="te-select"
                                                 >
                                                     {categories.map(cat => (
                                                         <option key={cat} value={cat}>
@@ -350,10 +347,7 @@ export default function LearningAnalytics() {
                                                         setSortBy(by);
                                                         setSortOrder(order);
                                                     }}
-                                                    className={`px-3 py-2 rounded-lg border text-sm ${darkMode
-                                                        ? 'bg-gray-700 border-gray-600 text-white'
-                                                        : 'bg-white border-gray-300 text-gray-900'
-                                                        } focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                                                    className="te-select"
                                                 >
                                                     <option value="name-asc">Name (A-Z)</option>
                                                     <option value="name-desc">Name (Z-A)</option>
@@ -366,12 +360,7 @@ export default function LearningAnalytics() {
                                         )}
                                         <button
                                             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                            className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${showAdvancedFilters
-                                                ? 'bg-indigo-600 text-white border-indigo-600'
-                                                : darkMode
-                                                    ? 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
-                                                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                                                }`}
+                                            className={`te-btn-sm ${showAdvancedFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}
                                         >
                                             <AdjustmentsHorizontalIcon className="w-4 h-4 inline mr-1.5" />
                                             Filters
@@ -384,9 +373,9 @@ export default function LearningAnalytics() {
                             {/* Analytics Cards - Category Breakdown & Weekly Activity */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 {/* Category Breakdown */}
-                                <div className={`rounded-lg border p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                                    <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        <AcademicCapIcon className="w-4 h-4 text-indigo-500" />
+                                <div className="te-card p-4">
+                                    <h3 className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold uppercase tracking-wide text-[var(--te-text)]">
+                                        <AcademicCapIcon className="w-4 h-4 text-[var(--te-text)]" />
                                         Category Breakdown
                                     </h3>
                                     <div className="space-y-3">
@@ -394,22 +383,15 @@ export default function LearningAnalytics() {
                                             stats.categoryStats.slice(0, 5).map((cat, idx) => {
                                                 const maxCompletions = Math.max(...stats.categoryStats.map(c => c.completions));
                                                 const percentage = maxCompletions > 0 ? (cat.completions / maxCompletions) * 100 : 0;
-                                                const colors = [
-                                                    'from-indigo-500 to-blue-500',
-                                                    'from-emerald-500 to-teal-500',
-                                                    'from-amber-500 to-orange-500',
-                                                    'from-pink-500 to-rose-500',
-                                                    'from-purple-500 to-violet-500',
-                                                ];
                                                 return (
                                                     <div key={cat.category}>
                                                         <div className="flex justify-between text-xs mb-1">
-                                                            <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{cat.category}</span>
-                                                            <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{cat.completions} completions</span>
+                                                            <span className="text-[var(--te-text)]">{cat.category}</span>
+                                                            <span className="font-medium text-[var(--te-text)]">{cat.completions} completions</span>
                                                         </div>
-                                                        <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                                        <div className="h-2 overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                                             <div
-                                                                className={`h-full rounded-full bg-gradient-to-r ${colors[idx % colors.length]}`}
+                                                                className="h-full rounded-lg bg-[var(--te-text)]"
                                                                 style={{ width: `${percentage}%` }}
                                                             />
                                                         </div>
@@ -417,15 +399,15 @@ export default function LearningAnalytics() {
                                                 );
                                             })
                                         ) : (
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">No category data available</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] py-4">No category data available</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Weekly Activity */}
-                                <div className={`rounded-lg border p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                                    <h3 className={`text-sm font-semibold mb-3 flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500" />
+                                <div className="te-card p-4">
+                                    <h3 className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold uppercase tracking-wide text-[var(--te-text)]">
+                                        <ArrowTrendingUpIcon className="w-4 h-4 text-[var(--te-text)]" />
                                         Weekly Activity
                                     </h3>
                                     <div className="flex items-end justify-between h-24 gap-1">
@@ -439,54 +421,53 @@ export default function LearningAnalytics() {
                                                         <div className="relative w-full flex justify-center mb-1">
                                                             <div
                                                                 className={`w-6 rounded-t transition-all ${height > 0
-                                                                    ? 'bg-gradient-to-t from-emerald-600 to-emerald-400'
-                                                                    : darkMode ? 'bg-gray-700' : 'bg-gray-200'
+                                                                    ? 'bg-[var(--te-text)]' : 'bg-[var(--te-surface-alt)]'
                                                                     }`}
                                                                 style={{ height: `${Math.max(height, 4)}%`, minHeight: '4px' }}
                                                                 title={`${day.active_members} active members`}
                                                             />
                                                             {height > 0 && (
-                                                                <span className="absolute -top-4 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                                                                <span className="absolute -top-4 text-[10px] font-medium text-[var(--te-text)]">
                                                                     {day.active_members}
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <span className={`text-[10px] ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{dayLabel}</span>
+                                                        <span className="text-[10px] text-[var(--te-text-dim)]">{dayLabel}</span>
                                                     </div>
                                                 );
                                             })
                                         ) : (
                                             Array.from({ length: 7 }).map((_, idx) => (
                                                 <div key={idx} className="flex-1 flex flex-col items-center">
-                                                    <div className={`w-6 h-4 rounded-t ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} />
-                                                    <span className={`text-[10px] mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>-</span>
+                                                    <div className={`w-6 h-4 rounded-t bg-[var(--te-surface-alt)]`} />
+                                                    <span className="mt-1 text-[10px] text-[var(--te-text-dim)]">-</span>
                                                 </div>
                                             ))
                                         )}
                                     </div>
-                                    <div className={`mt-2 pt-2 border-t text-center ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">Last 7 days activity</span>
+                                    <div className="mt-2 border-t border-[var(--te-border)] pt-2">
+                                        <span className="text-xs text-[var(--te-text-dim)]">Last 7 days activity</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Table */}
-                            <div className={`rounded-lg border overflow-hidden ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                            <div className="te-card overflow-hidden">
                                 <div className="overflow-x-auto">
                                     {viewMode === 'member' ? (
                                         /* Member View Table */
-                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead className={darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}>
+                                        <table className="min-w-full divide-y divide-[var(--te-border)]">
+                                            <thead className="bg-[var(--te-surface-alt)]">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Member</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Completed</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Time Spent</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Streak</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Sessions</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Last Active</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Member</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Completed</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Time Spent</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Streak</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Sessions</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Last Active</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tbody className="divide-y divide-[var(--te-border)]">
                                                 {filteredMembers.length > 0 ? (
                                                     filteredMembers.map((member, idx) => (
                                                         <tr
@@ -495,22 +476,22 @@ export default function LearningAnalytics() {
                                                                 setSelectedMember(member);
                                                                 setShowModal(true);
                                                             }}
-                                                            className={`cursor-pointer transition-colors ${darkMode ? 'hover:bg-gray-700/30' : 'hover:bg-gray-50'}`}
+                                                            className="cursor-pointer transition-colors hover:bg-[var(--te-hover)]"
                                                         >
                                                             <td className="px-4 py-2.5">
                                                                 <div>
-                                                                    <p className="text-xs font-medium text-gray-900 dark:text-white">{member.full_name}</p>
-                                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{member.email}</p>
+                                                                    <p className="text-xs font-medium text-[var(--te-text)] ">{member.full_name}</p>
+                                                                    <p className="text-xs text-[var(--te-text-dim)]">{member.email}</p>
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded text-xs font-medium">
+                                                                <span className="te-chip text-xs">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {member.completed_count}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded text-xs font-medium">
+                                                                <span className="te-chip text-xs">
                                                                     <ClockIcon className="w-3 h-3" />
                                                                     {member.total_time_formatted || '0h 0m'}
                                                                 </span>
@@ -518,24 +499,24 @@ export default function LearningAnalytics() {
                                                             <td className="px-4 py-2.5">
                                                                 <div className="flex items-center gap-1">
                                                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${member.current_streak > 0
-                                                                        ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400'
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
+                                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
                                                                         }`}>
                                                                         <FireIcon className="w-3 h-3" />
                                                                         {member.current_streak || 0}
                                                                     </span>
                                                                     {member.longest_streak > 0 && member.longest_streak > member.current_streak && (
-                                                                        <span className="text-xs text-gray-400" title="Best streak">
+                                                                        <span className="text-xs text-[var(--te-text-dim)]" title="Best streak">
                                                                             (max: {member.longest_streak})
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">{member.session_count || 0}</span>
+                                                                <span className="text-xs text-[var(--te-text)]  font-medium">{member.session_count || 0}</span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                                <p className="text-xs text-[var(--te-text-dim)]">
                                                                     {member.last_activity_date || (member.last_updated ? new Date(member.last_updated).toLocaleDateString() : 'Never')}
                                                                 </p>
                                                             </td>
@@ -543,7 +524,7 @@ export default function LearningAnalytics() {
                                                     ))
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan="6" className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <td colSpan="6" className="px-4 py-6 text-sm text-[var(--te-text-dim)]">
                                                             {searchQuery ? 'No members found matching your search' : 'No member progress data available'}
                                                         </td>
                                                     </tr>
@@ -552,16 +533,16 @@ export default function LearningAnalytics() {
                                         </table>
                                     ) : (
                                         /* Topic View Table */
-                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                            <thead className={darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}>
+                                        <table className="min-w-full divide-y divide-[var(--te-border)]">
+                                            <thead className="bg-[var(--te-surface-alt)]">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Topic</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Category</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Completed By</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-300">Bookmarked By</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Topic</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Category</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Completed By</th>
+                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Bookmarked By</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tbody className="divide-y divide-[var(--te-border)]">
                                                 {filteredTopics.length > 0 ? (
                                                     filteredTopics.map((topic, idx) => (
                                                         <tr
@@ -570,25 +551,24 @@ export default function LearningAnalytics() {
                                                                 setSelectedTopic(topic);
                                                                 setShowModal(true);
                                                             }}
-                                                            className={`cursor-pointer transition-colors ${darkMode ? 'hover:bg-gray-700/30' : 'hover:bg-gray-50'}`}
+                                                            className="cursor-pointer transition-colors hover:bg-[var(--te-hover)]"
                                                         >
                                                             <td className="px-4 py-2.5">
-                                                                <p className="text-xs font-medium text-gray-900 dark:text-white">{topic.name}</p>
+                                                                <p className="text-xs font-medium text-[var(--te-text)] ">{topic.name}</p>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
-                                                                    }`}>
+                                                                <span className="te-chip text-xs">
                                                                     {topic.category}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded text-xs font-medium">
+                                                                <span className="te-chip text-xs">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {topic.completed.length}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-xs font-medium">
+                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] rounded text-xs font-medium">
                                                                     <BookmarkSolidIcon className="w-3 h-3" />
                                                                     {topic.bookmarked.length}
                                                                 </span>
@@ -597,7 +577,7 @@ export default function LearningAnalytics() {
                                                     ))
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan="4" className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                        <td colSpan="4" className="px-4 py-6 text-sm text-[var(--te-text-dim)]">
                                                             {searchQuery ? 'No topics found matching your search' : 'No topic data available'}
                                                         </td>
                                                     </tr>
@@ -615,7 +595,7 @@ export default function LearningAnalytics() {
             {/* Modal for Member or Topic Details */}
             {showModal && (selectedMember || selectedTopic) && (
                 <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/50  z-50 flex items-center justify-center p-4"
                     onClick={() => {
                         setShowModal(false);
                         setSelectedMember(null);
@@ -623,19 +603,17 @@ export default function LearningAnalytics() {
                     }}
                 >
                     <div
-                        className={`max-w-2xl w-full max-h-[80vh] overflow-y-auto rounded-lg border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                            }`}
+                        className="te-card max-w-2xl w-full max-h-[80vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className={`sticky top-0 px-6 py-4 border-b ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
-                            }`}>
+                        <div className="sticky top-0 border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    <h3 className="text-lg font-semibold text-[var(--te-text)] ">
                                         {selectedMember ? selectedMember.full_name : selectedTopic?.name}
                                     </h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="text-sm text-[var(--te-text-dim)]">
                                         {selectedMember ? selectedMember.email : selectedTopic?.category}
                                     </p>
                                 </div>
@@ -645,8 +623,7 @@ export default function LearningAnalytics() {
                                         setSelectedMember(null);
                                         setSelectedTopic(null);
                                     }}
-                                    className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-                                        }`}
+                                    className="te-icon-btn"
                                 >
                                     <XMarkIcon className="w-5 h-5" />
                                 </button>
@@ -660,44 +637,44 @@ export default function LearningAnalytics() {
                                 <div className="space-y-4">
                                     {/* Stats Summary */}
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedMember.completed_count}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Completed</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.completed_count}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Completed</p>
                                         </div>
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedMember.total_time_formatted || '0h'}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Time Spent</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.total_time_formatted || '0h'}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Time Spent</p>
                                         </div>
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{selectedMember.current_streak || 0}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Current Streak</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.current_streak || 0}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Current Streak</p>
                                         </div>
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{selectedMember.session_count || 0}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Sessions</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.session_count || 0}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Sessions</p>
                                         </div>
                                     </div>
 
                                     {/* Streak Info */}
                                     {(selectedMember.current_streak > 0 || selectedMember.longest_streak > 0) && (
-                                        <div className={`p-3 rounded-lg ${darkMode ? 'bg-orange-900/20 border-orange-800/50' : 'bg-orange-50 border-orange-200'} border`}>
-                                            <h4 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-2">
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)] mb-2 flex items-center gap-2">
                                                 <TrophyIcon className="w-4 h-4" />
                                                 Streak Stats
                                             </h4>
                                             <div className="flex items-center gap-4 text-sm">
                                                 <div>
-                                                    <span className="text-gray-600 dark:text-gray-400">Current: </span>
-                                                    <span className="font-bold text-orange-600 dark:text-orange-400">{selectedMember.current_streak || 0} days</span>
+                                                    <span className="text-[var(--te-text-dim)]">Current: </span>
+                                                    <span className="font-bold text-[var(--te-text)]">{selectedMember.current_streak || 0} days</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-gray-600 dark:text-gray-400">Best: </span>
-                                                    <span className="font-bold text-orange-600 dark:text-orange-400">{selectedMember.longest_streak || 0} days</span>
+                                                    <span className="text-[var(--te-text-dim)]">Best: </span>
+                                                    <span className="font-bold text-[var(--te-text)]">{selectedMember.longest_streak || 0} days</span>
                                                 </div>
                                                 {selectedMember.last_activity_date && (
                                                     <div>
-                                                        <span className="text-gray-600 dark:text-gray-400">Last: </span>
-                                                        <span className="font-medium text-gray-800 dark:text-gray-200">{selectedMember.last_activity_date}</span>
+                                                        <span className="text-[var(--te-text-dim)]">Last: </span>
+                                                        <span className="font-medium text-[var(--te-text)] ">{selectedMember.last_activity_date}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -707,28 +684,28 @@ export default function LearningAnalytics() {
                                     {/* Category Breakdown */}
                                     {selectedMember.category_breakdown && Object.keys(selectedMember.category_breakdown).length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                <AcademicCapIcon className="w-4 h-4 text-indigo-600" />
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
+                                                <AcademicCapIcon className="w-4 h-4 text-[var(--te-text)]" />
                                                 Progress by Category
                                             </h4>
                                             <div className="space-y-2 max-h-48 overflow-y-auto">
                                                 {Object.entries(selectedMember.category_breakdown).map(([category, data], idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`flex items-center justify-between px-3 py-2 rounded ${darkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}
+                                                        className="flex items-center justify-between border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-3 py-2"
                                                     >
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">{category}</span>
+                                                        <span className="text-sm font-medium text-[var(--te-text)]  truncate flex-1">{category}</span>
                                                         <div className="flex items-center gap-3 flex-shrink-0">
-                                                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                                            <span className="text-xs text-[var(--te-text)] font-medium">
                                                                 ✓ {data.completed}
                                                             </span>
                                                             {data.in_progress > 0 && (
-                                                                <span className="text-xs text-blue-600 dark:text-blue-400">
+                                                                <span className="text-xs text-[var(--te-text)]">
                                                                     ◐ {data.in_progress}
                                                                 </span>
                                                             )}
                                                             {data.time_seconds > 0 && (
-                                                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                <span className="text-xs text-[var(--te-text-dim)]">
                                                                     {Math.floor(data.time_seconds / 60)}m
                                                                 </span>
                                                             )}
@@ -742,24 +719,24 @@ export default function LearningAnalytics() {
                                     {/* Completed Topics */}
                                     {selectedMember.completed_topics && selectedMember.completed_topics.length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                <CheckCircleSolidIcon className="w-4 h-4 text-green-600" />
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
+                                                <CheckCircleSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
                                                 Completed Topics ({selectedMember.completed_topics.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
                                                 {selectedMember.completed_topics.map((topic, idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`flex items-center justify-between px-2.5 py-1.5 rounded ${darkMode ? 'bg-gray-700/20 hover:bg-gray-700/30' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}
+                                                        className="flex items-center justify-between border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2.5 py-1.5 transition-colors hover:bg-[var(--te-hover)]"
                                                     >
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">{topic.topic_name}</span>
+                                                        <span className="text-sm font-medium text-[var(--te-text)]  truncate flex-1">{topic.topic_name}</span>
                                                         <div className="flex items-center gap-2">
                                                             {topic.count > 1 && (
-                                                                <span className={`text-xs px-1.5 py-0.5 rounded font-semibold ${darkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                                                                <span className="te-chip text-xs">
                                                                     ×{topic.count}
                                                                 </span>
                                                             )}
-                                                            <span className={`text-xs px-2 py-0.5 rounded ml-2 flex-shrink-0 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                            <span className="te-chip ml-2 flex-shrink-0 text-xs">
                                                                 {topic.category || 'Uncategorized'}
                                                             </span>
                                                         </div>
@@ -772,18 +749,18 @@ export default function LearningAnalytics() {
                                     {/* Bookmarked Topics */}
                                     {selectedMember.bookmarked_topics && selectedMember.bookmarked_topics.length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                <BookmarkSolidIcon className="w-4 h-4 text-amber-600" />
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
+                                                <BookmarkSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
                                                 Bookmarked Topics ({selectedMember.bookmarked_topics.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
                                                 {selectedMember.bookmarked_topics.map((topic, idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`flex items-center justify-between px-2.5 py-1.5 rounded ${darkMode ? 'bg-gray-700/20 hover:bg-gray-700/30' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}
+                                                        className="flex items-center justify-between border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2.5 py-1.5 transition-colors hover:bg-[var(--te-hover)]"
                                                     >
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate flex-1">{topic.topic_name}</span>
-                                                        <span className={`text-xs px-2 py-0.5 rounded ml-2 flex-shrink-0 ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                        <span className="text-sm font-medium text-[var(--te-text)]  truncate flex-1">{topic.topic_name}</span>
+                                                        <span className="te-chip ml-2 flex-shrink-0 text-xs">
                                                             {topic.category || 'Uncategorized'}
                                                         </span>
                                                     </div>
@@ -797,42 +774,42 @@ export default function LearningAnalytics() {
                                 <div className="space-y-4">
                                     {/* Stats Summary */}
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedTopic.completed.length}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Completed By</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedTopic.completed.length}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Completed By</p>
                                         </div>
-                                        <div className={`p-3 rounded-lg text-center ${darkMode ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
-                                            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{selectedTopic.bookmarked.length}</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Bookmarked By</p>
+                                        <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedTopic.bookmarked.length}</p>
+                                            <p className="text-xs text-[var(--te-text-dim)] mt-1">Bookmarked By</p>
                                         </div>
                                     </div>
 
                                     {/* Members who completed */}
                                     {selectedTopic.completed.length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                <CheckCircleSolidIcon className="w-4 h-4 text-green-600" />
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
+                                                <CheckCircleSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
                                                 Completed By ({selectedTopic.completed.length} {selectedTopic.completed.length === 1 ? 'member' : 'members'})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
                                                 {selectedTopic.completed.map((member, idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`px-2.5 py-2 rounded ${darkMode ? 'bg-gray-700/20 hover:bg-gray-700/30' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}
+                                                        className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2.5 py-2 transition-colors hover:bg-[var(--te-hover)]"
                                                     >
                                                         <div className="flex items-center justify-between gap-3">
                                                             <div className="flex-1 min-w-0">
-                                                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{member.name}</p>
-                                                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{member.email}</p>
+                                                                <p className="text-sm font-medium text-[var(--te-text)]  truncate">{member.name}</p>
+                                                                <p className="text-xs text-[var(--te-text-dim)] truncate">{member.email}</p>
                                                             </div>
                                                             <div className="flex items-center gap-2 flex-shrink-0">
                                                                 {member.count > 1 && (
-                                                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold ${darkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                                                                    <span className="te-chip text-xs">
                                                                         ×{member.count}
                                                                     </span>
                                                                 )}
                                                                 {member.completed_at && (
-                                                                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                                                    <span className="text-xs text-[var(--te-text-dim)] whitespace-nowrap">
                                                                         {new Date(member.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                                                     </span>
                                                                 )}
@@ -847,18 +824,18 @@ export default function LearningAnalytics() {
                                     {/* Members who bookmarked */}
                                     {selectedTopic.bookmarked.length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                                <BookmarkSolidIcon className="w-4 h-4 text-amber-600" />
+                                            <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
+                                                <BookmarkSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
                                                 Bookmarked By ({selectedTopic.bookmarked.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
                                                 {selectedTopic.bookmarked.map((member, idx) => (
                                                     <div
                                                         key={idx}
-                                                        className={`px-2.5 py-2 rounded ${darkMode ? 'bg-gray-700/20 hover:bg-gray-700/30' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}
+                                                        className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2.5 py-2 transition-colors hover:bg-[var(--te-hover)]"
                                                     >
-                                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{member.name}</p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{member.email}</p>
+                                                        <p className="text-sm font-medium text-[var(--te-text)]  truncate">{member.name}</p>
+                                                        <p className="text-xs text-[var(--te-text-dim)] truncate">{member.email}</p>
                                                     </div>
                                                 ))}
                                             </div>

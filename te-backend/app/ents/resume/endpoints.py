@@ -1,4 +1,7 @@
+import logging
 from typing import Any, Dict
+
+logger = logging.getLogger(__name__)
 
 import app.database.session as session
 import app.ents.resume.crud as resume_crud
@@ -311,7 +314,7 @@ def create_resume_review_request(
         )
     except Exception as e:
         # Log error but don't fail the request
-        print(f"Failed to send resume review request email: {e}")
+        logger.error(f"Failed to send resume review request email: {e}")
 
     return {
         "message": "Resume review request submitted successfully",
@@ -397,7 +400,7 @@ def update_resume_review_request(
             )
         except Exception as e:
             # Log error but don't fail the request
-            print(f"Failed to send resume review completed email: {e}")
+            logger.error(f"Failed to send resume review completed email: {e}")
 
     return {
         "message": "Resume review request updated successfully",

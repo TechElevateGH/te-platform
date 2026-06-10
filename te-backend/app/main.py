@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from app.core.settings import settings
 from app.ents.api import api_router
 from fastapi import FastAPI, Request, status
@@ -8,12 +10,68 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 import time
 from fastapi.middleware.gzip import GZipMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Rate limiter instance (shared across the app)
+limiter = Limiter(key_func=get_remote_address)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan: startup and shutdown logic."""
+    # --- Startup ---
+    from app.database.session import mongodb, client
+
+    # Test MongoDB connection
+    try:
+        mongodb.command("ping")
+        logger.info("✓ MongoDB connection successful")
+        logger.info(f"✓ Connected to database: {mongodb.name}")
+    except Exception as e:
+        logger.error(f"✗ MongoDB connection failed: {e}")
+        yield
+        return
+
+    # Seed initial data and run security migrations
+    from app.database.init_db import init_db
+
+    try:
+        init_db(mongodb)
+        logger.info("✓ Initial data seeded successfully")
+    except Exception as e:
+        logger.warning(f"Could not seed initial data: {e}")
+
+    # Start background tasks scheduler
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from app.core.background_tasks import send_meeting_reminders
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        send_meeting_reminders, "interval", minutes=5, id="meeting_reminders"
+    )
+    scheduler.start()
+    logger.info(
+        "✓ Background tasks scheduler started (meeting reminders every 5 minutes)"
+    )
+    app.state.scheduler = scheduler
+
+    yield
+
+    # --- Shutdown ---
+    if hasattr(app.state, "scheduler"):
+        app.state.scheduler.shutdown()
+        logger.info("✓ Background tasks scheduler shutdown")
+
+    client.close()
+    logger.info("✓ MongoDB connection closed")
 
 
 def create_app():
@@ -25,6 +83,7 @@ def create_app():
         openapi_url=f"{settings.API_STR}/openapi.json",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
         openapi_tags=[
             {
                 "name": "Authentication",
@@ -41,12 +100,7 @@ def create_app():
 
 
 def enable_cors(app):
-    """Configure CORS with expanded origins and explicit methods.
-
-    Returning 400 on preflight usually means Starlette rejected either the
-    origin, requested method, or requested headers. We explicitly list the
-    common methods and add 127.0.0.1 variations to be safe during local dev.
-    """
+    """Configure CORS with explicit origins and methods."""
     if settings.BACKEND_CORS_ORIGINS:
         extra_dev_origins = [
             "http://127.0.0.1:3000",
@@ -62,49 +116,22 @@ def enable_cors(app):
             CORSMiddleware,
             allow_origins=allow_origins,
             allow_credentials=True,
-            allow_methods=["*"],  # Allow all methods including OPTIONS
-            allow_headers=["*"],
-            expose_headers=["*"],
-            max_age=3600,  # Cache preflight response for 1 hour
+            allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+            allow_headers=["Authorization", "Content-Type", "Accept"],
+            expose_headers=["Content-Length"],
+            max_age=3600,
         )
 
 
 app = create_app()
 enable_cors(app)
 
+# Rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Enable gzip compression for large HTML (documentation) to speed up mobile loads
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-
-# Perform a MongoDB connectivity check on startup for observability
-@app.on_event("startup")
-async def verify_mongodb_connection():
-    try:
-        from app.database.session import client  # reuse existing client
-
-        client.admin.command("ping")
-        logger.info("MongoDB ping successful on startup")
-    except Exception as e:
-        logger.error(f"MongoDB ping failed on startup: {e}")
-
-
-# Middleware to handle OPTIONS requests before they hit authentication
-@app.middleware("http")
-async def options_handler(request: Request, call_next):
-    """Handle OPTIONS preflight requests directly to avoid authentication issues."""
-    if request.method == "OPTIONS":
-        return JSONResponse(
-            content={"status": "ok"},
-            status_code=200,
-            headers={
-                "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
-                "Access-Control-Allow-Credentials": "true",
-                "Access-Control-Max-Age": "3600",
-            },
-        )
-    return await call_next(request)
 
 
 app.include_router(api_router, prefix=settings.API_STR)
@@ -113,61 +140,8 @@ app.include_router(api_router, prefix=settings.API_STR)
 # Health check endpoint for cold start detection and monitoring
 @app.get("/health", tags=["Health"])
 async def health_check():
-    """
-    Health check endpoint to verify service is running.
-    Useful for:
-    - Cold start warmup
-    - Load balancer health checks
-    - Monitoring and uptime checks
-    """
+    """Health check endpoint to verify service is running."""
     return {"status": "healthy", "service": "te-backend", "version": "1.0.0"}
-
-
-@app.get("/debug/db", tags=["Health"])
-async def debug_database():
-    """
-    Database diagnostic endpoint - helps debug MongoDB connection issues
-    Returns collection counts and connection status
-    """
-    from app.database.session import mongodb
-
-    try:
-        # Test connection
-        mongodb.command("ping")
-
-        # Get collection counts
-        collections_info = {}
-        for collection_name in [
-            "member_users",
-            "privileged_users",
-            "applications",
-            "referrals",
-            "referral_companies",
-        ]:
-            try:
-                count = mongodb[collection_name].count_documents({})
-                collections_info[collection_name] = count
-            except Exception as e:
-                collections_info[collection_name] = f"Error: {str(e)}"
-
-        return {
-            "status": "connected",
-            "database_name": mongodb.name,
-            "collections": collections_info,
-            "mongodb_uri_configured": bool(settings.MONGODB_URI),
-            "mongodb_uri_prefix": settings.MONGODB_URI[:20] + "..."
-            if settings.MONGODB_URI
-            else "NOT SET",
-        }
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "database_name": settings.MONGODB_DB_NAME
-            if hasattr(settings, "MONGODB_DB_NAME")
-            else "NOT SET",
-            "mongodb_uri_configured": bool(getattr(settings, "MONGODB_URI", None)),
-        }
 
 
 # Error Handlers
@@ -212,62 +186,8 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"] = (
         "max-age=31536000; includeSubDomains"
     )
     return response
-
-
-@app.on_event("startup")
-def on_startup():
-    """Initialize MongoDB connection and seed initial data"""
-    from app.database.session import mongodb
-
-    # Test MongoDB connection
-    try:
-        mongodb.command("ping")
-        logger.info("✓ MongoDB connection successful")
-        logger.info(f"✓ Connected to database: {mongodb.name}")
-    except Exception as e:
-        logger.error(f"✗ MongoDB connection failed: {e}")
-        return
-
-    # Seed initial data
-    from app.database.init_db import init_db
-
-    try:
-        init_db(mongodb)
-        logger.info("✓ Initial data seeded successfully")
-    except Exception as e:
-        logger.warning(f"Could not seed initial data: {e}")
-
-    # Start background tasks scheduler
-    from apscheduler.schedulers.asyncio import AsyncIOScheduler
-    from app.core.background_tasks import send_meeting_reminders
-
-    scheduler = AsyncIOScheduler()
-    # Run meeting reminder check every 5 minutes
-    scheduler.add_job(
-        send_meeting_reminders, "interval", minutes=5, id="meeting_reminders"
-    )
-    scheduler.start()
-    logger.info(
-        "✓ Background tasks scheduler started (meeting reminders every 5 minutes)"
-    )
-
-    # Store scheduler instance for shutdown
-    app.state.scheduler = scheduler
-
-
-@app.on_event("shutdown")
-def on_shutdown():
-    """Close MongoDB connection and shutdown scheduler"""
-    from app.database.session import client
-
-    # Shutdown scheduler if it exists
-    if hasattr(app.state, "scheduler"):
-        app.state.scheduler.shutdown()
-        logger.info("✓ Background tasks scheduler shutdown")
-
-    client.close()
-    logger.info("✓ MongoDB connection closed")

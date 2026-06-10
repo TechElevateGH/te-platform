@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import ResumeReviews from "./ResumeReviews";
-import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon, ChevronDownIcon, ClipboardIcon, UserIcon } from '@heroicons/react/20/solid'
-import { TrashIcon, DocumentTextIcon, PencilSquareIcon, ArchiveBoxIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, PaperClipIcon, CheckIcon, XMarkIcon, ChevronDownIcon, ClipboardIcon, UserIcon, EyeIcon } from 'icons'
+import { TrashIcon, DocumentTextIcon, PencilSquareIcon, ArchiveBoxIcon, ArrowUturnLeftIcon } from 'icons'
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
 import FileCreate from "../components/file/FileCreate";
@@ -255,35 +255,48 @@ const ResumesAndEssays = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
-            {/* Professional Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-                    <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-[var(--te-bg)] text-[var(--te-text)]">
+            <div className="border-b border-[var(--te-border)] bg-[var(--te-surface)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Resumes & Essays</h1>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your resumes, cover letters, and referral essays</p>
+                            <span className="te-eyebrow">{'// resumes'}</span>
+                            <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
+                                Resumes & Essays
+                            </h1>
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--te-text-dim)]">
+                                Manage targeted resume files, cover letters, referral essays, and review requests in one clean workspace.
+                            </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {/* Modern Tab Switcher */}
-                            <div className="inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-slate-800 rounded-lg">
+                        <div className="flex flex-col items-stretch gap-3 sm:items-end">
+                            {isMember && (
+                                <button
+                                    type="button"
+                                    className="te-btn-primary gap-2"
+                                    onClick={() => setAddFile(true)}
+                                >
+                                    <PlusIcon className="h-4 w-4" />
+                                    Upload Resume
+                                </button>
+                            )}
+                            <div className="inline-flex items-center border border-[var(--te-border)] bg-[var(--te-surface)] p-1">
                                 <button
                                     onClick={() => setActiveTab('resumes')}
-                                    className={`relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'resumes'
-                                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                        : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                                    className={`px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'resumes'
+                                        ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
+                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                         }`}
                                 >
-                                    My Resumes
+                                    Files
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('reviews')}
-                                    className={`relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'reviews'
-                                        ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                        : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                                    className={`px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'reviews'
+                                        ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
+                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                         }`}
                                 >
-                                    Resume Reviews
+                                    Reviews
                                 </button>
                             </div>
                         </div>
@@ -292,7 +305,7 @@ const ResumesAndEssays = () => {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 <div className="lg:grid lg:grid-cols-12 lg:gap-6">
                     {/* Main Content Section with Tabs - now on the left */}
                     <div className="lg:col-span-7 mb-6 lg:mb-0">
@@ -300,14 +313,17 @@ const ResumesAndEssays = () => {
                         {activeTab === 'resumes' ? (
                             <div className="space-y-4">
                                 {/* Header with Actions */}
-                                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-4 transition-colors">
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">My Resumes</h2>
+                                <div className="te-card p-5">
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <span className="te-eyebrow">{'// files'}</span>
+                                            <h2 className="mt-2 font-display text-xl font-bold text-[var(--te-text)]">Resume library</h2>
+                                        </div>
                                         {isMember && (
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-all shadow-sm text-sm"
+                                                    className="te-btn-primary te-btn-sm gap-1.5"
                                                     onClick={() => setShowReviewModal(true)}
                                                 >
                                                     <DocumentTextIcon className="h-4 w-4" />
@@ -315,7 +331,7 @@ const ResumesAndEssays = () => {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-all shadow-sm text-sm"
+                                                    className="te-btn-primary te-btn-sm gap-1.5"
                                                     onClick={() => setAddFile(true)}
                                                 >
                                                     <PlusIcon className="h-4 w-4" />
@@ -327,21 +343,21 @@ const ResumesAndEssays = () => {
                                 </div>
 
                                 {/* Resumes List */}
-                                <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden transition-colors">
-                                    <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-                                        <div className="inline-flex items-center gap-1 rounded-lg bg-white dark:bg-slate-900 p-1 border border-gray-200 dark:border-slate-700">
+                                <div className="te-card overflow-hidden">
+                                    <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
+                                        <div className="inline-flex items-center gap-1 rounded-lg bg-[var(--te-surface)] p-1 border border-[var(--te-border)]">
                                             <button
                                                 type="button"
                                                 onClick={() => setResumeView('active')}
                                                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'active'
-                                                    ? 'bg-indigo-600 text-white shadow-sm'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                                                    ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
+                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                     }`}
                                             >
                                                 Active
-                                                <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${resumeView === 'active'
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                                                <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${resumeView === 'active'
+                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
                                                     }`}>
                                                     {activeResumesCount}
                                                 </span>
@@ -350,15 +366,15 @@ const ResumesAndEssays = () => {
                                                 type="button"
                                                 onClick={() => setResumeView('archived')}
                                                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'archived'
-                                                    ? 'bg-amber-600 text-white shadow-sm'
-                                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800'
+                                                    ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
+                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                     }`}
                                                 title={!hasArchivedResumes ? 'No archived resumes yet' : undefined}
                                             >
                                                 Archived
-                                                <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${resumeView === 'archived'
-                                                    ? 'bg-white/20 text-white'
-                                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                                                <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${resumeView === 'archived'
+                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
                                                     }`}>
                                                     {archivedResumesCount}
                                                 </span>
@@ -371,12 +387,12 @@ const ResumesAndEssays = () => {
                                             hasActiveResumes || resumes.length === 0 ? (
                                                 <EmptyResumes onUploadClick={() => setAddFile(true)} />
                                             ) : (
-                                                <div className="px-6 py-10 text-center text-sm text-gray-800 dark:text-gray-200 space-y-3">
+                                                <div className="px-6 py-10 text-center text-sm text-[var(--te-text)] space-y-3">
                                                     <p>All of your resumes are currently archived.</p>
                                                     {isMember && (
                                                         <button
                                                             type="button"
-                                                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg  hover:shadow-indigo-600 shadow-lg/40 transition-all"
+                                                            className="te-btn-primary te-btn-sm gap-1.5"
                                                             onClick={() => setAddFile(true)}
                                                         >
                                                             <PlusIcon className="h-4 w-4" />
@@ -386,183 +402,139 @@ const ResumesAndEssays = () => {
                                                 </div>
                                             )
                                         ) : (
-                                            <div className="px-6 py-10 text-center text-sm text-gray-800 dark:text-gray-200">
+                                            <div className="px-6 py-10 text-center text-sm text-[var(--te-text)]">
                                                 <p>No archived resumes yet. Archive a resume to keep it accessible without cluttering your active list.</p>
                                             </div>
                                         )
                                     ) : (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full">
-                                                <thead>
-                                                    <tr className="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                            <div className="flex items-center gap-2">
-                                                                <DocumentTextIcon className="h-4 w-4" />
-                                                                Resume Details
-                                                            </div>
-                                                        </th>
-                                                        <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-                                                            Actions
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                                    {displayedResumes.map((file) => {
-                                                        const isEditing = editingResumeId === file.id;
-                                                        const isUpdating = updatingResumeId === file.id;
-                                                        const isDeleting = deletingFileId === file.id;
-                                                        const disableOtherActions = Boolean(editingResumeId) && !isEditing;
+                                        <div className="grid grid-cols-1 gap-px border-t border-[var(--te-border)] bg-[var(--te-border)] sm:grid-cols-2">
+                                            {displayedResumes.map((file) => {
+                                                const isEditing = editingResumeId === file.id;
+                                                const isUpdating = updatingResumeId === file.id;
+                                                const isDeleting = deletingFileId === file.id;
+                                                const disableOtherActions = Boolean(editingResumeId) && !isEditing;
 
-                                                        return (
-                                                            <tr
-                                                                key={file.id}
-                                                                onClick={() => {
-                                                                    if (!isEditing) {
-                                                                        setSelectedResume(file);
-                                                                        setShowResumeModal(true);
-                                                                    }
-                                                                }}
-                                                                className={`hover:bg-gradient-to-r hover:from-indigo-100/40 hover:via-blue-100/40 hover:to-violet-100/40 dark:hover:from-indigo-900/50 dark:hover:via-blue-900/50 dark:hover:to-violet-900/50 transition-all duration-150 group ${!isEditing ? 'cursor-pointer' : ''}`}
-                                                            >
-                                                                <td className="px-6 py-4">
-                                                                    <div className="flex items-start gap-3">
-                                                                        <div className="flex-shrink-0 w-10 h-10 bg-indigo-200 dark:bg-indigo-900/60 border  dark: rounded-lg flex items-center justify-center">
-                                                                            <PaperClipIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                                return (
+                                                    <article
+                                                        key={file.id}
+                                                        onClick={() => {
+                                                            if (!isEditing) {
+                                                                setSelectedResume(file);
+                                                                setShowResumeModal(true);
+                                                            }
+                                                        }}
+                                                        className={`group bg-[var(--te-surface)] p-5 transition-colors hover:bg-[var(--te-hover)] ${!isEditing ? 'cursor-pointer' : ''}`}
+                                                    >
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                                                <PaperClipIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1 space-y-3">
+                                                                {isEditing ? (
+                                                                    <>
+                                                                        <input
+                                                                            type="text"
+                                                                            className="te-input font-semibold"
+                                                                            value={editedResumeName}
+                                                                            onChange={(event) => setEditedResumeName(event.target.value)}
+                                                                            autoFocus
+                                                                        />
+                                                                        <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRenameSubmit(file)}
+                                                                                disabled={isUpdating}
+                                                                                className="te-btn-primary te-btn-sm gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                            >
+                                                                                {isUpdating ? 'Saving...' : (<><CheckIcon className="h-4 w-4" />Save</>)}
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={handleRenameCancel}
+                                                                                disabled={isUpdating}
+                                                                                className="te-btn-secondary te-btn-sm gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                            >
+                                                                                <XMarkIcon className="h-4 w-4" />
+                                                                                Cancel
+                                                                            </button>
                                                                         </div>
-                                                                        <div className="flex-1 space-y-2">
-                                                                            {isEditing ? (
-                                                                                <>
-                                                                                    <input
-                                                                                        type="text"
-                                                                                        className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                                                                        value={editedResumeName}
-                                                                                        onChange={(event) => setEditedResumeName(event.target.value)}
-                                                                                        autoFocus
-                                                                                    />
-                                                                                    <div className="flex flex-wrap items-center gap-2">
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={() => handleRenameSubmit(file)}
-                                                                                            disabled={isUpdating}
-                                                                                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 text-xs font-semibold text-white shadow  disabled:opacity-60 disabled:cursor-not-allowed"
-                                                                                        >
-                                                                                            {isUpdating ? (
-                                                                                                <>
-                                                                                                    <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
-                                                                                                    Saving...
-                                                                                                </>
-                                                                                            ) : (
-                                                                                                <>
-                                                                                                    <CheckIcon className="h-4 w-4" />
-                                                                                                    Save
-                                                                                                </>
-                                                                                            )}
-                                                                                        </button>
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={handleRenameCancel}
-                                                                                            disabled={isUpdating}
-                                                                                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-60 disabled:cursor-not-allowed"
-                                                                                        >
-                                                                                            <XMarkIcon className="h-4 w-4" />
-                                                                                            Cancel
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </>
-                                                                            ) : (
-                                                                                <>
-                                                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                                                        <a
-                                                                                            href={file.link}
-                                                                                            target="_blank"
-                                                                                            rel="noopener noreferrer"
-                                                                                            onClick={(e) => e.stopPropagation()}
-                                                                                            className="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                                                                        >
-                                                                                            {file.name}
-                                                                                        </a>
-                                                                                        {file.archived && (
-                                                                                            <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-0.5 text-[11px] font-semibold">
-                                                                                                Archived
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-800 dark:text-gray-200">
-                                                                                        <span>Uploaded {file.date || '—'}</span>
-                                                                                        {file.role && <span>Target role: {file.role}</span>}
-                                                                                        {file.notes && <span className="truncate max-w-[220px] sm:max-w-none">Notes: {file.notes}</span>}
-                                                                                    </div>
-                                                                                </>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                                                                    {canDelete && (
-                                                                        <div className="flex flex-wrap items-center gap-2">
-                                                                            {!isEditing && (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => handleRenameClick(file)}
-                                                                                    disabled={disableOtherActions || isUpdating || isDeleting}
-                                                                                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 dark:border-emerald-700 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-emerald-50 dark:hover:bg-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <div className="flex items-start justify-between gap-3">
+                                                                            <div className="min-w-0">
+                                                                                <a
+                                                                                    href={file.link}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                    className="te-link break-words font-semibold"
                                                                                 >
-                                                                                    <PencilSquareIcon className="h-4 w-4" />
-                                                                                    Rename
-                                                                                </button>
-                                                                            )}
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => handleArchiveToggle(file)}
-                                                                                disabled={isUpdating || isDeleting}
-                                                                                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow transition-all disabled:opacity-60 disabled:cursor-not-allowed ${file.archived
-                                                                                    ? 'bg-gradient-to-r bg-emerald-600 text-white hover:bg-emerald-700'
-                                                                                    : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600'}
-                                                                                `}
+                                                                                    {file.name}
+                                                                                </a>
+                                                                                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-[var(--te-text-dim)]">
+                                                                                    <span>{file.date || 'No date'}</span>
+                                                                                    {file.role && <span>{file.role}</span>}
+                                                                                    {file.archived && <span className="te-chip text-[11px]">Archived</span>}
+                                                                                </div>
+                                                                            </div>
+                                                                            <a
+                                                                                href={file.link}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                className="te-icon-btn flex-shrink-0"
+                                                                                title="View resume"
                                                                             >
-                                                                                {isUpdating ? (
-                                                                                    <>
-                                                                                        <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
-                                                                                        Updating...
-                                                                                    </>
-                                                                                ) : file.archived ? (
-                                                                                    <>
-                                                                                        <ArrowUturnLeftIcon className="h-4 w-4" />
-                                                                                        Restore
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <ArchiveBoxIcon className="h-4 w-4" />
-                                                                                        Archive
-                                                                                    </>
-                                                                                )}
-                                                                            </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => handleDeleteClick(file.id, file.name)}
-                                                                                disabled={isDeleting || isUpdating}
-                                                                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60 disabled:cursor-not-allowed"
-                                                                            >
-                                                                                {isDeleting ? (
-                                                                                    <>
-                                                                                        <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full" />
-                                                                                        Deleting...
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <TrashIcon className="h-4 w-4" />
-                                                                                        Delete
-                                                                                    </>
-                                                                                )}
-                                                                            </button>
+                                                                                <EyeIcon className="h-4 w-4" />
+                                                                            </a>
                                                                         </div>
-                                                                    )}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
+                                                                        {file.notes && (
+                                                                            <p className="line-clamp-2 text-sm leading-6 text-[var(--te-text-dim)]">
+                                                                                {file.notes}
+                                                                            </p>
+                                                                        )}
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {canDelete && (
+                                                            <div className="mt-4 flex items-center justify-end gap-2 border-t border-[var(--te-border)] pt-4" onClick={(e) => e.stopPropagation()}>
+                                                                {!isEditing && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRenameClick(file)}
+                                                                        disabled={disableOtherActions || isUpdating || isDeleting}
+                                                                        className="te-icon-btn disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                        title="Rename"
+                                                                    >
+                                                                        <PencilSquareIcon className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleArchiveToggle(file)}
+                                                                    disabled={isUpdating || isDeleting}
+                                                                    className="te-icon-btn disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                    title={file.archived ? 'Restore' : 'Archive'}
+                                                                >
+                                                                    {file.archived ? <ArrowUturnLeftIcon className="h-4 w-4" /> : <ArchiveBoxIcon className="h-4 w-4" />}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleDeleteClick(file.id, file.name)}
+                                                                    disabled={isDeleting || isUpdating}
+                                                                    className="te-icon-btn disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                    title="Delete"
+                                                                >
+                                                                    <TrashIcon className="h-4 w-4" />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </article>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -577,29 +549,29 @@ const ResumesAndEssays = () => {
                     {/* Essays Section - now on the right with compact expandable cards */}
                     <div className="lg:col-span-5 space-y-4">
                         {/* Cover Letter Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                        <div className="te-card overflow-hidden">
                             <button
                                 onClick={() => setExpandedCoverLetter(!expandedCoverLetter)}
-                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-800/50 transition-colors"
+                                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--te-hover)] transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                                        <DocumentTextIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                        <DocumentTextIcon className="h-5 w-5 text-[var(--te-text)]" />
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cover Letter</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        <h3 className="font-display text-sm font-bold text-[var(--te-text)]">Cover Letter</h3>
+                                        <p className="text-xs text-[var(--te-text-dim)]">
                                             {userInfo?.cover_letter ? 'First person - for job applications' : 'No cover letter added'}
                                         </p>
                                     </div>
                                 </div>
                                 <ChevronDownIcon
-                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedCoverLetter ? 'rotate-180' : ''}`}
+                                    className={`h-5 w-5 text-[var(--te-text-dim)] transition-transform duration-200 ${expandedCoverLetter ? 'rotate-180' : ''}`}
                                 />
                             </button>
 
                             {expandedCoverLetter && (
-                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                <div className="px-6 pb-6 border-t border-[var(--te-border)]">
                                     <div className="pt-4">
                                         {editingCoverLetter ? (
                                             <div className="space-y-3">
@@ -608,19 +580,19 @@ const ResumesAndEssays = () => {
                                                     onChange={(e) => setCoverLetterText(e.target.value)}
                                                     placeholder="Write your cover letter in first person (I, me, my)..."
                                                     rows="10"
-                                                    className="w-full px-4 py-3 border border-indigo-300 dark:border-indigo-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                                                    className="te-textarea resize-none"
                                                 />
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={handleSaveCoverLetter}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg  transition-colors shadow-md"
+                                                        className="te-btn-primary gap-1.5"
                                                     >
                                                         <CheckIcon className="h-4 w-4" />
                                                         Save
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingCoverLetter(false)}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                                        className="te-btn-secondary gap-1.5"
                                                     >
                                                         Cancel
                                                     </button>
@@ -629,7 +601,7 @@ const ResumesAndEssays = () => {
                                         ) : userInfo?.cover_letter && userInfo.cover_letter !== "" ? (
                                             <div className="space-y-3">
                                                 <div className="max-h-60 overflow-y-auto">
-                                                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                                                    <p className="text-sm text-[var(--te-text)] leading-relaxed whitespace-pre-wrap">
                                                         {userInfo.cover_letter}
                                                     </p>
                                                 </div>
@@ -639,7 +611,7 @@ const ResumesAndEssays = () => {
                                                             navigator.clipboard.writeText(userInfo.cover_letter);
                                                             setToast({ message: 'Cover letter copied to clipboard!', type: 'success' });
                                                         }}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-md"
+                                                        className="te-btn-primary te-btn-sm gap-1.5"
                                                     >
                                                         <ClipboardIcon className="h-4 w-4" />
                                                         Copy
@@ -647,7 +619,7 @@ const ResumesAndEssays = () => {
                                                     {isMember && (
                                                         <button
                                                             onClick={() => setEditingCoverLetter(true)}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border border-indigo-200 dark:border-indigo-700"
+                                                            className="te-btn-secondary te-btn-sm gap-1.5"
                                                         >
                                                             <PencilSquareIcon className="h-4 w-4" />
                                                             Edit
@@ -657,13 +629,13 @@ const ResumesAndEssays = () => {
                                             </div>
                                         ) : (
                                             <div className="text-center py-6">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                <p className="text-xs text-[var(--te-text-dim)] mb-3">
                                                     Write in first person (I, me, my)
                                                 </p>
                                                 {isMember && (
                                                     <button
                                                         onClick={() => setEditingCoverLetter(true)}
-                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                        className="te-btn-primary te-btn-sm gap-1.5"
                                                     >
                                                         <PencilSquareIcon className="h-4 w-4" />
                                                         Add Cover Letter
@@ -677,29 +649,29 @@ const ResumesAndEssays = () => {
                         </div>
 
                         {/* Referral Essay Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/50 overflow-hidden transition-all">
+                        <div className="te-card overflow-hidden">
                             <button
                                 onClick={() => setExpandedReferralEssay(!expandedReferralEssay)}
-                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-800/50 transition-colors"
+                                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--te-hover)] transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-                                        <UserIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                        <UserIcon className="h-5 w-5 text-[var(--te-text)]" />
                                     </div>
                                     <div className="text-left">
-                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Referral Essay</h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        <h3 className="font-display text-sm font-bold text-[var(--te-text)]">Referral Essay</h3>
+                                        <p className="text-xs text-[var(--te-text-dim)]">
                                             {userInfo?.referral_essay ? 'Third person - used for referral requests' : 'No referral essay added'}
                                         </p>
                                     </div>
                                 </div>
                                 <ChevronDownIcon
-                                    className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${expandedReferralEssay ? 'rotate-180' : ''}`}
+                                    className={`h-5 w-5 text-[var(--te-text-dim)] transition-transform duration-200 ${expandedReferralEssay ? 'rotate-180' : ''}`}
                                 />
                             </button>
 
                             {expandedReferralEssay && (
-                                <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
+                                <div className="px-6 pb-6 border-t border-[var(--te-border)]">
                                     <div className="pt-4">
                                         {editingReferralEssay ? (
                                             <div className="space-y-3">
@@ -708,19 +680,19 @@ const ResumesAndEssays = () => {
                                                     onChange={(e) => setReferralEssayText(e.target.value)}
                                                     placeholder="Write your referral essay in third person (he, she, they)..."
                                                     rows="10"
-                                                    className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                                                    className="te-textarea resize-none"
                                                 />
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         onClick={handleSaveReferralEssay}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg  transition-colors shadow-md"
+                                                        className="te-btn-primary gap-1.5"
                                                     >
                                                         <CheckIcon className="h-4 w-4" />
                                                         Save
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingReferralEssay(false)}
-                                                        className="flex items-center gap-1.5 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                                        className="te-btn-secondary gap-1.5"
                                                     >
                                                         Cancel
                                                     </button>
@@ -729,7 +701,7 @@ const ResumesAndEssays = () => {
                                         ) : userInfo?.referral_essay && userInfo.referral_essay !== "" ? (
                                             <div className="space-y-3">
                                                 <div className="max-h-60 overflow-y-auto">
-                                                    <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                                                    <p className="text-sm text-[var(--te-text)] leading-relaxed whitespace-pre-wrap">
                                                         {userInfo.referral_essay}
                                                     </p>
                                                 </div>
@@ -739,7 +711,7 @@ const ResumesAndEssays = () => {
                                                             navigator.clipboard.writeText(userInfo.referral_essay);
                                                             setToast({ message: 'Referral essay copied to clipboard!', type: 'success' });
                                                         }}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                                                        className="te-btn-secondary te-btn-sm gap-1.5"
                                                     >
                                                         <ClipboardIcon className="h-4 w-4" />
                                                         Copy
@@ -747,7 +719,7 @@ const ResumesAndEssays = () => {
                                                     {isMember && (
                                                         <button
                                                             onClick={() => setEditingReferralEssay(true)}
-                                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border border-indigo-200 dark:border-indigo-700"
+                                                            className="te-btn-secondary te-btn-sm gap-1.5"
                                                         >
                                                             <PencilSquareIcon className="h-4 w-4" />
                                                             Edit
@@ -757,13 +729,13 @@ const ResumesAndEssays = () => {
                                             </div>
                                         ) : (
                                             <div className="text-center py-6">
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                <p className="text-xs text-[var(--te-text-dim)] mb-3">
                                                     Write in third person (he, she, they)
                                                 </p>
                                                 {isMember && (
                                                     <button
                                                         onClick={() => setEditingReferralEssay(true)}
-                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                                                        className="te-btn-primary te-btn-sm gap-1.5"
                                                     >
                                                         <PencilSquareIcon className="h-4 w-4" />
                                                         Add Referral Essay
@@ -790,8 +762,8 @@ const ResumesAndEssays = () => {
                 message={
                     <div>
                         <p className="mb-2">Are you sure you want to delete</p>
-                        <p className="font-semibold text-gray-900">"{confirmDelete.fileName}"?</p>
-                        <p className="mt-2 text-xs text-gray-500">This action cannot be undone.</p>
+                        <p className="font-semibold text-[var(--te-text)]">"{confirmDelete.fileName}"?</p>
+                        <p className="mt-2 text-xs text-[var(--te-text-dim)]">This action cannot be undone.</p>
                     </div>
                 }
                 confirmText="Delete Resume"
@@ -806,16 +778,16 @@ const ResumesAndEssays = () => {
             {/* Resume Review Request Modal */}
             {showReviewModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-t-2xl">
+                    <div className="te-panel max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold flex items-center gap-2">
+                                <h2 className="font-display text-xl font-bold text-[var(--te-text)] flex items-center gap-2">
                                     <DocumentTextIcon className="h-6 w-6" />
                                     Request Resume Review
                                 </h2>
                                 <button
                                     onClick={() => setShowReviewModal(false)}
-                                    className="text-white hover:bg-white/20 rounded p-1 transition-colors"
+                                    className="te-icon-btn"
                                 >
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -826,16 +798,16 @@ const ResumesAndEssays = () => {
 
                         <form onSubmit={handleReviewSubmit} className="p-6 space-y-4">
                             {/* Important Info Banner */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                            <div className="bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">
+                                        <h3 className="text-sm font-semibold text-[var(--te-text)] text-[var(--te-text-dim)] mb-1">
                                             Important: Grant Edit Access
                                         </h3>
-                                        <p className="text-xs text-blue-800 dark:text-blue-300">
+                                        <p className="text-xs text-[var(--te-text)] text-[var(--te-text-dim)]">
                                             Please ensure <span className="font-semibold">info@techelevate.org</span> has <span className="font-semibold">Edit access</span> to your Google Doc so our reviewers can add comments and suggestions directly to your resume.
                                         </p>
                                     </div>
@@ -843,7 +815,7 @@ const ResumesAndEssays = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                                <label className="block text-sm font-semibold text-[var(--te-text)] mb-1.5">
                                     Google Docs Resume Link *
                                 </label>
                                 <input
@@ -852,12 +824,12 @@ const ResumesAndEssays = () => {
                                     value={reviewFormData.resume_link}
                                     onChange={(e) => setReviewFormData({ ...reviewFormData, resume_link: e.target.value })}
                                     placeholder="https://docs.google.com/document/d/..."
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="te-input"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                                <label className="block text-sm font-semibold text-[var(--te-text)] mb-1.5">
                                     Target Job Title *
                                 </label>
                                 <input
@@ -866,19 +838,19 @@ const ResumesAndEssays = () => {
                                     value={reviewFormData.job_title}
                                     onChange={(e) => setReviewFormData({ ...reviewFormData, job_title: e.target.value })}
                                     placeholder="e.g., Software Engineer, Data Analyst"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="te-input"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                                <label className="block text-sm font-semibold text-[var(--te-text)] mb-1.5">
                                     Experience Level *
                                 </label>
                                 <select
                                     required
                                     value={reviewFormData.level}
                                     onChange={(e) => setReviewFormData({ ...reviewFormData, level: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="te-input"
                                 >
                                     <option value="Intern">Intern</option>
                                     <option value="Entry Level">Entry Level (0-2 years)</option>
@@ -889,7 +861,7 @@ const ResumesAndEssays = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1.5">
+                                <label className="block text-sm font-semibold text-[var(--te-text)] mb-1.5">
                                     Additional Notes (Optional)
                                 </label>
                                 <textarea
@@ -897,7 +869,7 @@ const ResumesAndEssays = () => {
                                     onChange={(e) => setReviewFormData({ ...reviewFormData, notes: e.target.value })}
                                     placeholder="Any specific areas you'd like feedback on?"
                                     rows="3"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    className="te-input"
                                 ></textarea>
                             </div>
 
@@ -905,13 +877,13 @@ const ResumesAndEssays = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowReviewModal(false)}
-                                    className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                    className="te-btn-secondary flex-1"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-gradient-to-r bg-indigo-600 hover:bg-indigo-700 transition-all shadow-lg"
+                                    className="te-btn-primary flex-1"
                                 >
                                     Submit Request
                                 </button>
@@ -924,22 +896,22 @@ const ResumesAndEssays = () => {
             {/* Resume Details Modal */}
             {selectedResume && showResumeModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowResumeModal(false)}>
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                    <div className="te-panel max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         {/* Header */}
-                        <div className="sticky top-0 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-t-2xl">
+                        <div className="sticky top-0 border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                                    <div className="flex h-12 w-12 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
                                         <PaperClipIcon className="h-7 w-7" />
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-bold">{selectedResume.name}</h2>
-                                        <p className="text-sm text-indigo-100">Resume Details</p>
+                                        <h2 className="font-display text-xl font-bold text-[var(--te-text)]">{selectedResume.name}</h2>
+                                        <p className="text-sm text-[var(--te-text-dim)]">Resume Details</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setShowResumeModal(false)}
-                                    className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                                    className="te-icon-btn"
                                 >
                                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -952,34 +924,34 @@ const ResumesAndEssays = () => {
                         <div className="p-6 space-y-6">
                             {/* File Information */}
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-[var(--te-text)] mb-4 flex items-center gap-2">
                                     <DocumentTextIcon className="h-5 w-5" />
                                     File Information
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">File Name</p>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white break-all">{selectedResume.name}</p>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">File Name</p>
+                                        <p className="text-sm font-medium text-[var(--te-text)] break-all">{selectedResume.name}</p>
                                     </div>
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Upload Date</p>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedResume.date || 'Not available'}</p>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Upload Date</p>
+                                        <p className="text-sm font-medium text-[var(--te-text)]">{selectedResume.date || 'Not available'}</p>
                                     </div>
                                     {selectedResume.role && (
-                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Target Role</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedResume.role}</p>
+                                        <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
+                                            <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Target Role</p>
+                                            <p className="text-sm font-medium text-[var(--te-text)]">{selectedResume.role}</p>
                                         </div>
                                     )}
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Status</p>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
+                                        <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Status</p>
+                                        <p className="text-sm font-medium text-[var(--te-text)]">
                                             {selectedResume.archived ? (
-                                                <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200 px-2 py-1 text-xs font-semibold">
+                                                <span className="te-chip text-xs">
                                                     Archived
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200 px-2 py-1 text-xs font-semibold">
+                                                <span className="inline-flex items-center rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] px-2 py-1 text-xs font-semibold">
                                                     Active
                                                 </span>
                                             )}
@@ -991,20 +963,20 @@ const ResumesAndEssays = () => {
                             {/* Notes */}
                             {selectedResume.notes && (
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Notes</h3>
-                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                        <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{selectedResume.notes}</p>
+                                    <h3 className="text-lg font-bold text-[var(--te-text)] mb-4">Notes</h3>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
+                                        <p className="text-sm text-[var(--te-text)] whitespace-pre-wrap">{selectedResume.notes}</p>
                                     </div>
                                 </div>
                             )}
 
                             {/* Actions */}
-                            <div className="pt-4 border-t border-gray-200 dark:border-slate-700 space-y-3">
+                            <div className="pt-4 border-t border-[var(--te-border)] space-y-3">
                                 <a
                                     href={selectedResume.link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold  transition-all shadow-lg"
+                                    className="te-btn-primary w-full gap-2"
                                 >
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -1018,10 +990,7 @@ const ResumesAndEssays = () => {
                                                 handleArchiveToggle(selectedResume);
                                                 setShowResumeModal(false);
                                             }}
-                                            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold transition-all ${selectedResume.archived
-                                                ? 'text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60'
-                                                : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50'
-                                                }`}
+                                            className="te-btn-secondary gap-2"
                                         >
                                             {selectedResume.archived ? (
                                                 <>
@@ -1040,7 +1009,7 @@ const ResumesAndEssays = () => {
                                                 handleDeleteClick(selectedResume.id, selectedResume.name);
                                                 setShowResumeModal(false);
                                             }}
-                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-semibold hover:bg-red-100 dark:hover:bg-red-900/50 transition-all"
+                                            className="te-btn-danger gap-2"
                                         >
                                             <TrashIcon className="h-4 w-4" />
                                             Delete

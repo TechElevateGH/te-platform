@@ -1,5 +1,9 @@
+import logging
 from typing import Any, Dict, Optional
 from bson import ObjectId
+
+logger = logging.getLogger(__name__)
+
 import app.database.session as session
 import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
@@ -354,7 +358,7 @@ def create_member_user(
     except Exception as e:
         # Log error but don't fail registration
         # User can request verification code later
-        print(f"Failed to send verification email: {e}")
+        logger.error(f"Failed to send verification email: {e}")
 
     return {"user": user_schema.MemberUserRead(**vars(new_user))}
 

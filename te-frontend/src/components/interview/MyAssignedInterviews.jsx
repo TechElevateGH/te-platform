@@ -7,24 +7,24 @@ import {
     CheckCircleIcon,
     ChatBubbleLeftRightIcon,
     LinkIcon
-} from '@heroicons/react/20/solid';
+} from 'icons';
 import axiosInstance from '../../axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
-    behavioral: { bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', border: 'border-green-200 dark:border-green-700' },
-    coding: { bg: 'bg-orange-50 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-300', border: 'border-orange-200 dark:border-orange-700' },
-    one_on_one: { bg: 'bg-purple-50 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-300', border: 'border-purple-200 dark:border-purple-700' },
+    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    one_on_one: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', border: 'border-amber-200 dark:border-amber-700' },
-    confirmed: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', border: 'border-emerald-200 dark:border-emerald-700' },
-    completed: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-200 dark:border-blue-700' },
-    cancelled: { bg: 'bg-gray-50 dark:bg-gray-700/50', text: 'text-gray-600 dark:text-gray-400', border: 'border-gray-200 dark:border-gray-600' },
+    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -221,10 +221,12 @@ const MyAssignedInterviews = () => {
 
     if (interviews.length === 0) {
         return (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
-                <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Assigned Interviews</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="te-card flex flex-col items-center py-14">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                    <CalendarIcon className="h-6 w-6 text-[var(--te-text-dim)]" />
+                </div>
+                <h3 className="font-mono text-lg font-bold text-[var(--te-text)] mb-2">No assigned interviews</h3>
+                <p className="text-sm text-[var(--te-text-dim)]">
                     You don&apos;t have any interviews assigned to you yet.
                 </p>
             </div>
@@ -232,42 +234,36 @@ const MyAssignedInterviews = () => {
     }
 
     const renderInterviewCard = (interview) => {
-        const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.technical;
+        const typeColors = INTERVIEW_TYPE_COLORS[interview.interview_type] || INTERVIEW_TYPE_COLORS.coding;
         const statusColors = STATUS_COLORS[interview.status] || STATUS_COLORS.pending;
 
         return (
             <div
                 key={interview.id}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all"
+                className="te-card-interactive grid gap-4 p-4 md:grid-cols-[180px_1fr_auto]"
             >
-                {/* Card Header */}
-                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center gap-2 mb-2">
-                        <UserIcon className="h-4 w-4 text-gray-400" />
-                        <span className="font-bold text-gray-900 dark:text-white truncate">{interview.user_name}</span>
+                <div className="font-mono">
+                    <div className="text-sm font-semibold text-[var(--te-text)]">{formatDateWithDay(interview.timeslot_date)}</div>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-[var(--te-text-dim)]">
+                        <ClockIcon className="h-3.5 w-3.5" />
+                        {formatTime(interview.timeslot_time)}
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${typeColors.bg} ${typeColors.text}`}>
-                            {formatInterviewType(interview.interview_type)}
-                        </span>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors.bg} ${statusColors.text}`}>
-                            {formatStatus(interview.status)}
-                        </span>
-                    </div>
+                    <div className="mt-1 text-xs text-[var(--te-text-dim)]">{interview.duration_minutes} min</div>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-4 space-y-3">
-                    {/* Date & Time */}
-                    <div className="space-y-1.5">
-                        <div className="flex items-center gap-2 text-sm">
-                            <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span className="font-semibold text-gray-900 dark:text-white">{formatDateWithDay(interview.timeslot_date)}</span>
+                <div className="min-w-0 space-y-3">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <UserIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                            <span className="font-semibold text-[var(--te-text)] truncate">{interview.user_name}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                            <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-600 dark:text-gray-400">{formatTime(interview.timeslot_time)}</span>
-                            <span className="text-xs text-gray-500">({interview.duration_minutes} min)</span>
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                            <span className={`te-chip border ${typeColors.border} ${typeColors.bg} ${typeColors.text}`}>
+                            {formatInterviewType(interview.interview_type)}
+                            </span>
+                            <span className={`te-chip border ${statusColors.border} ${statusColors.bg} ${statusColors.text}`}>
+                            {formatStatus(interview.status)}
+                            </span>
                         </div>
                     </div>
 
@@ -275,17 +271,17 @@ const MyAssignedInterviews = () => {
                     {interview.pending_companies && interview.pending_companies.length > 0 && (
                         <div>
                             <div className="flex items-center gap-1.5 mb-1.5">
-                                <BuildingOfficeIcon className="h-3.5 w-3.5 text-gray-400" />
-                                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Companies</span>
+                                <BuildingOfficeIcon className="h-3.5 w-3.5 text-[var(--te-text-dim)]" />
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Companies</span>
                             </div>
                             <div className="flex flex-wrap gap-1">
                                 {interview.pending_companies.slice(0, 2).map((company, idx) => (
-                                    <span key={idx} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full truncate max-w-[120px]">
+                                    <span key={idx} className="te-chip max-w-[160px] truncate">
                                         {company}
                                     </span>
                                 ))}
                                 {interview.pending_companies.length > 2 && (
-                                    <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
+                                    <span className="te-chip text-[var(--te-text-dim)]">
                                         +{interview.pending_companies.length - 2}
                                     </span>
                                 )}
@@ -295,56 +291,57 @@ const MyAssignedInterviews = () => {
 
                     {/* Notes Preview */}
                     {interview.notes && (
-                        <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-lg">
+                        <div className="te-panel line-clamp-2 p-3 text-xs text-[var(--te-text-dim)]">
                             {interview.notes}
                         </div>
                     )}
 
                     {/* Feedback Given */}
                     {interview.interviewer_feedback && (
-                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                        <div className="te-panel p-3">
                             <div className="flex items-center gap-1.5 mb-1.5">
-                                <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Your Feedback</span>
+                                <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 text-[var(--te-text)]" />
+                                <span className="text-xs font-semibold text-[var(--te-text)]">Your Feedback</span>
                             </div>
-                            <p className="text-xs text-blue-900 dark:text-blue-200 line-clamp-3">
+                            <p className="text-xs text-[var(--te-text)] line-clamp-3">
                                 {interview.interviewer_feedback}
                             </p>
                         </div>
                     )}
 
                     {/* Actions */}
-                    <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                        {interview.meeting_notes && interview.meeting_notes.startsWith('http') && interview.status === 'confirmed' && (
-                            <a
-                                href={interview.meeting_notes}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                </div>
+
+                <div className="flex items-start gap-2 md:justify-end">
+                    {interview.meeting_notes && interview.meeting_notes.startsWith('http') && interview.status === 'confirmed' && (
+                        <a
+                            href={interview.meeting_notes}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="te-btn-primary te-btn-sm"
+                        >
+                            <LinkIcon className="h-3.5 w-3.5" />
+                            Join
+                        </a>
+                    )}
+                    {interview.status === 'confirmed' && (
+                        <>
+                            <button
+                                onClick={() => setEditNotesModal({ open: true, interview, notes: interview.meeting_notes || '' })}
+                                className="te-btn-secondary te-btn-sm"
                             >
-                                <LinkIcon className="h-3.5 w-3.5" />
-                                Join Interview
-                            </a>
-                        )}
-                        {interview.status === 'confirmed' && (
-                            <>
-                                <button
-                                    onClick={() => setEditNotesModal({ open: true, interview, notes: interview.meeting_notes || '' })}
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
-                                >
-                                    <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
-                                    Edit Notes
-                                </button>
-                                <button
-                                    onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                                >
-                                    <CheckCircleIcon className="h-3.5 w-3.5" />
-                                    Complete
-                                </button>
-                            </>
-                        )}
-                    </div>
+                                <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
+                                Notes
+                            </button>
+                            <button
+                                onClick={() => setCompleteModal({ open: true, interview, feedback: '' })}
+                                className="te-btn-primary te-btn-sm"
+                            >
+                                <CheckCircleIcon className="h-3.5 w-3.5" />
+                                Complete
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         );
@@ -354,24 +351,24 @@ const MyAssignedInterviews = () => {
         <div className="space-y-4">
             {/* Controls */}
             {interviews.length > 0 && (
-                <div className="flex flex-wrap gap-3 items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                <div className="te-card flex flex-wrap gap-3 items-center justify-between p-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sort by:</span>
+                        <span className="text-sm font-semibold text-[var(--te-text)]">Sort by:</span>
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="text-sm px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="te-select py-1.5 text-sm"
                         >
                             <option value="date">Date</option>
                             <option value="type">Type</option>
                         </select>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Group by:</span>
+                        <span className="text-sm font-semibold text-[var(--te-text)]">Group by:</span>
                         <select
                             value={groupBy}
                             onChange={(e) => setGroupBy(e.target.value)}
-                            className="text-sm px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="te-select py-1.5 text-sm"
                         >
                             <option value="week">Week</option>
                             <option value="month">Month</option>
@@ -384,17 +381,17 @@ const MyAssignedInterviews = () => {
             {/* Upcoming Interviews */}
             {upcomingInterviews.length > 0 && (
                 <div className="space-y-6">
-                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Upcoming</h4>
+                    <h4 className="te-eyebrow">{'// upcoming'}</h4>
                     {Object.entries(groupedUpcoming).map(([label, groupInterviews]) => (
                         <div key={label}>
                             {groupBy !== 'none' && (
-                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-3 flex items-center gap-2">
+                                <h5 className="text-xs font-bold text-[var(--te-text-dim)] uppercase mb-3 flex items-center gap-2">
                                     <span className="flex-shrink-0">{label}</span>
-                                    <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
-                                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
+                                    <span className="flex-1 h-px bg-[var(--te-hover)]"></span>
+                                    <span className="text-xs font-normal text-[var(--te-text-dim)]">{groupInterviews.length}</span>
                                 </h5>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 gap-3">
                                 {groupInterviews.map(renderInterviewCard)}
                             </div>
                         </div>
@@ -405,17 +402,17 @@ const MyAssignedInterviews = () => {
             {/* Past Interviews */}
             {pastInterviews.length > 0 && (
                 <div className="space-y-6">
-                    <h4 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase">Past</h4>
+                    <h4 className="te-eyebrow">{'// past'}</h4>
                     {Object.entries(groupedPast).map(([label, groupInterviews]) => (
                         <div key={label}>
                             {groupBy !== 'none' && (
-                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-3 flex items-center gap-2">
+                                <h5 className="text-xs font-bold text-[var(--te-text-dim)] uppercase mb-3 flex items-center gap-2">
                                     <span className="flex-shrink-0">{label}</span>
-                                    <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
-                                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">{groupInterviews.length}</span>
+                                    <span className="flex-1 h-px bg-[var(--te-hover)]"></span>
+                                    <span className="text-xs font-normal text-[var(--te-text-dim)]">{groupInterviews.length}</span>
                                 </h5>
                             )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 gap-3">
                                 {groupInterviews.map(renderInterviewCard)}
                             </div>
                         </div>
@@ -426,9 +423,9 @@ const MyAssignedInterviews = () => {
             {/* Complete Modal */}
             {completeModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Complete Interview</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div className="te-card max-w-md w-full p-6">
+                        <h3 className="font-mono text-lg font-bold text-[var(--te-text)] mb-4">Complete Interview</h3>
+                        <p className="text-sm text-[var(--te-text-dim)] mb-4">
                             Mark this interview with <strong>{completeModal.interview?.user_name}</strong> as completed and provide feedback.
                         </p>
                         <textarea
@@ -436,19 +433,19 @@ const MyAssignedInterviews = () => {
                             onChange={(e) => setCompleteModal(prev => ({ ...prev, feedback: e.target.value }))}
                             placeholder="Enter feedback for the member..."
                             rows={5}
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none mb-4"
+                            className="te-textarea mb-4"
                         />
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setCompleteModal({ open: false, interview: null, feedback: '' })}
-                                className="flex-1 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                                className="te-btn-secondary flex-1"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleComplete}
                                 disabled={submitting}
-                                className="flex-1 py-2.5 text-sm font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                className="te-btn-primary flex-1 disabled:opacity-50"
                             >
                                 {submitting ? 'Completing...' : 'Mark Complete'}
                             </button>
@@ -460,9 +457,9 @@ const MyAssignedInterviews = () => {
             {/* Edit Notes Modal */}
             {editNotesModal.open && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Update Meeting Notes</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div className="te-card max-w-md w-full p-6">
+                        <h3 className="font-mono text-lg font-bold text-[var(--te-text)] mb-4">Update Meeting Notes</h3>
+                        <p className="text-sm text-[var(--te-text-dim)] mb-4">
                             Update the meeting details for <strong>{editNotesModal.interview?.user_name}</strong>. The member will be notified via email.
                         </p>
                         <textarea
@@ -470,19 +467,19 @@ const MyAssignedInterviews = () => {
                             onChange={(e) => setEditNotesModal(prev => ({ ...prev, notes: e.target.value }))}
                             placeholder="Enter meeting link or details..."
                             rows={4}
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 resize-none mb-4"
+                            className="te-textarea mb-4"
                         />
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setEditNotesModal({ open: false, interview: null, notes: '' })}
-                                className="flex-1 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                                className="te-btn-secondary flex-1"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleUpdateNotes}
                                 disabled={submitting}
-                                className="flex-1 py-2.5 text-sm font-bold bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 transition-colors disabled:opacity-50"
+                                className="te-btn-primary flex-1 disabled:opacity-50"
                             >
                                 {submitting ? 'Updating...' : 'Update Notes'}
                             </button>

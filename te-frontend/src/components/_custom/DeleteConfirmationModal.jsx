@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { ExclamationTriangleIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, TrashIcon } from 'icons';
 
 const DeleteConfirmationModal = ({
     isOpen,
@@ -24,7 +24,7 @@ const DeleteConfirmationModal = ({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black bg-opacity-25 dark:bg-opacity-50" />
+                    <div className="fixed inset-0 bg-black/40" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
@@ -38,15 +38,15 @@ const DeleteConfirmationModal = ({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700">
+                            <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden p-6 text-left align-middle shadow-sm transition-all">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                    <div className="flex-shrink-0 w-12 h-12 rounded-md bg-[var(--te-surface-alt)] border border-[var(--te-border)] flex items-center justify-center">
                                         <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400" />
                                     </div>
                                     <div>
                                         <Dialog.Title
                                             as="h3"
-                                            className="text-lg font-semibold leading-6 text-gray-900 dark:text-white"
+                                            className="text-lg font-semibold leading-6 text-[var(--te-text)]"
                                         >
                                             {title}
                                         </Dialog.Title>
@@ -54,14 +54,14 @@ const DeleteConfirmationModal = ({
                                 </div>
 
                                 <div className="mt-4">
-                                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    <p className="text-sm text-[var(--te-text-dim)]">
                                         {message || `Are you sure you want to permanently delete ${itemCount === 1 ? 'this' : 'these'} ${itemCount} ${itemType}${itemCount > 1 ? 's' : ''}?`}
                                     </p>
-                                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                                        <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+                                    <div className="mt-3 p-3 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg">
+                                        <p className="text-sm font-semibold text-[var(--te-text)]">
                                             ⚠️ This action cannot be undone
                                         </p>
-                                        <p className="text-xs text-red-700 dark:text-red-400 mt-1">
+                                        <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                             The {itemType}{itemCount > 1 ? 's' : ''} will be permanently removed from the database and cannot be recovered.
                                         </p>
                                     </div>
@@ -70,7 +70,7 @@ const DeleteConfirmationModal = ({
                                 <div className="mt-6 flex justify-end gap-3">
                                     <button
                                         type="button"
-                                        className="inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                                        className="te-btn-secondary"
                                         onClick={onClose}
                                         disabled={isDeleting}
                                     >
@@ -78,7 +78,7 @@ const DeleteConfirmationModal = ({
                                     </button>
                                     <button
                                         type="button"
-                                        className="inline-flex items-center justify-center rounded-lg border border-transparent bg-red-600 dark:bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        className="te-btn-danger"
                                         onClick={onConfirm}
                                         disabled={isDeleting}
                                     >

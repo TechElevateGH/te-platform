@@ -3,10 +3,10 @@ import {
     FolderIcon,
     UserGroupIcon,
     SparklesIcon,
-} from '@heroicons/react/24/outline'
+} from 'icons'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from "../../axiosConfig"
-import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon, VideoCameraIcon } from '@heroicons/react/20/solid'
+import { BriefcaseIcon, DocumentIcon, CodeBracketIcon, ComputerDesktopIcon, BookOpenIcon, VideoCameraIcon } from 'icons'
 import Applications from '../../pages/Applications'
 import Interviews from '../../pages/Interviews'
 import Sidebar from '../_custom/Sidebar'
@@ -324,31 +324,31 @@ const Workspace = ({ setLogin }) => {
 
     if (isGuest && showGuestPrompt) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center px-4">
-                <div className="max-w-xl w-full bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-2xl p-8 space-y-6">
+            <div className="min-h-screen te-grid-bg flex items-center justify-center px-4">
+                <div className="max-w-xl w-full te-card p-8 space-y-6">
                     <div className="flex items-center gap-4">
-                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white flex items-center justify-center shadow-lg">
+                        <div className="h-14 w-14 rounded-lg bg-[var(--te-surface-alt)] border border-[var(--te-border)] text-[var(--te-text)] flex items-center justify-center">
                             <SparklesIcon className="h-8 w-8" />
                         </div>
                         <div>
-                            <p className="text-sm uppercase tracking-wide text-blue-500 font-semibold">Guest Mode</p>
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome to TechElevate Workspace</h2>
+                            <p className="te-eyebrow">Guest Mode</p>
+                            <h2 className="text-2xl font-bold text-[var(--te-text)] mt-0.5">Welcome to TechElevate</h2>
                         </div>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p className="text-[var(--te-text-dim)] leading-relaxed">
                         You&apos;re exploring the workspace in guest mode. You can preview Learning and Practice resources,
                         but core career features (Applications, Resumes, Referrals, Opportunities) require a full account.
                     </p>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <button
                             onClick={handleGuestSignIn}
-                            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold py-3 shadow-lg hover:opacity-95 transition"
+                            className="te-btn-primary te-btn-lg w-full"
                         >
                             Sign in to unlock everything
                         </button>
                         <button
                             onClick={handleGuestContinue}
-                            className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100 font-semibold py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                            className="te-btn-secondary te-btn-lg w-full"
                         >
                             Continue as Guest
                         </button>
@@ -360,7 +360,7 @@ const Workspace = ({ setLogin }) => {
 
     return (
         <>
-            <div className="bg-[#fafafa] dark:bg-gray-950 transition-colors">
+            <div className="bg-theme transition-colors">
                 <Sidebar
                     navigation={navigation}
                     content={content}
@@ -373,8 +373,8 @@ const Workspace = ({ setLogin }) => {
                 {/* Workspace Navbar */}
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
-                <div className="md:pl-28">
-                    <main className="min-h-screen bg-[#fafafa] dark:bg-gray-950 pt-20 transition-colors">
+                <div className="md:pl-60">
+                    <main className="min-h-screen bg-theme pt-16 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :
                                 content === "Learning Analytics" ? <LearningAnalytics /> :

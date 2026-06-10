@@ -1,26 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HomeIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import { MoonIcon, SunIcon } from '@heroicons/react/24/solid';
+import { HomeIcon, Bars3Icon } from 'icons';
+import { MoonIcon, SunIcon } from 'icons';
 
 const DARK_THEME_VARS = {
-    '--bg-primary': '#0f172a',
-    '--bg-secondary': '#1e293b',
-    '--bg-tertiary': '#334155',
-    '--surface': '#1e293b',
-    '--border': 'rgba(148, 163, 184, 0.1)',
-    '--bg': 'rgba(15, 23, 42, 0.85)',
-    '--text': '#ffffff',
-    '--text-secondary': 'rgba(255, 255, 255, 0.72)',
-    '--text-muted': 'rgba(255, 255, 255, 0.56)',
+    '--bg-primary': '#191919',
+    '--bg-secondary': '#202020',
+    '--bg-tertiary': '#2a2a2a',
+    '--surface': '#202020',
+    '--border': 'rgba(255, 255, 255, 0.12)',
+    '--bg': 'rgba(25, 25, 25, 0.85)',
+    '--text': '#ededec',
+    '--text-secondary': 'rgba(237, 237, 236, 0.72)',
+    '--text-muted': 'rgba(237, 237, 236, 0.56)',
     '--heading': '#ffffff',
-    '--accent': '#3b82f6',
-    '--accent-hover': '#2563eb',
-    '--accent-cyan': '#06b6d4',
-    '--accent-purple': '#a855f7',
-    '--link': '#60a5fa',
+    '--accent': '#ededec',
+    '--accent-hover': '#ffffff',
+    '--accent-blue': '#c9c9c7',
+    '--accent-soft': 'rgba(255, 255, 255, 0.18)',
+    '--link': '#ededec',
     '--code-bg': 'rgba(0, 0, 0, 0.4)',
-    '--success': '#10b981',
+    '--success': '#ededec',
     '--warning': '#f59e0b',
     '--error': '#ef4444',
     '--sidebar-width': '280px',
@@ -28,16 +28,20 @@ const DARK_THEME_VARS = {
 
 const LIGHT_THEME_VARS = {
     '--bg-primary': '#ffffff',
-    '--bg-secondary': '#f8fafc',
-    '--bg-tertiary': '#e2e8f0',
-    '--surface': '#f8fafc',
-    '--border': 'rgba(15, 23, 42, 0.08)',
+    '--bg-secondary': '#f7f7f6',
+    '--bg-tertiary': '#e8e8e6',
+    '--surface': '#f7f7f6',
+    '--border': 'rgba(15, 15, 15, 0.10)',
     '--bg': 'rgba(255, 255, 255, 0.9)',
-    '--text': '#0f172a',
-    '--text-secondary': '#475569',
-    '--text-muted': '#64748b',
-    '--heading': '#0f172a',
-    '--link': '#3b82f6',
+    '--text': '#1f2024',
+    '--text-secondary': '#4a4a4a',
+    '--text-muted': '#6b6b6b',
+    '--heading': '#111111',
+    '--accent': '#1f1f1f',
+    '--accent-hover': '#000000',
+    '--accent-blue': '#3a3a3a',
+    '--accent-soft': 'rgba(15, 15, 15, 0.08)',
+    '--link': '#1f1f1f',
     '--code-bg': 'rgba(0, 0, 0, 0.05)',
 };
 
@@ -338,8 +342,8 @@ const Documentation = () => {
                 container.style.setProperty(key, value);
             });
 
-            container.style.backgroundColor = docsTheme === 'light' ? '#f8fafc' : '#020617';
-            container.style.color = docsTheme === 'light' ? '#0f172a' : '#e2e8f0';
+            container.style.backgroundColor = 'var(--bg-primary)';
+            container.style.color = 'var(--text)';
         }
     }, [docsTheme, htmlContent]);
 
@@ -470,8 +474,9 @@ const Documentation = () => {
                 overlay.style.opacity = '1';
                 overlay.style.visibility = 'visible';
                 overlay.style.pointerEvents = 'auto';
-                sidebar.style.backgroundColor = docsTheme === 'light' ? '#ffffff' : '#000000';
-                sidebar.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.45)';
+                sidebar.style.backgroundColor = 'var(--bg-primary)';
+                sidebar.style.boxShadow = 'none';
+                sidebar.style.borderRight = '1px solid var(--border)';
                 sidebar.style.zIndex = '70';
             } else {
                 overlay.style.opacity = '0';
@@ -479,6 +484,7 @@ const Documentation = () => {
                 overlay.style.pointerEvents = 'none';
                 sidebar.style.backgroundColor = '';
                 sidebar.style.boxShadow = '';
+                sidebar.style.borderRight = '';
                 sidebar.style.zIndex = '';
             }
         };
@@ -552,28 +558,30 @@ const Documentation = () => {
             overlay.remove();
             sidebar.style.backgroundColor = '';
             sidebar.style.boxShadow = '';
+            sidebar.style.borderRight = '';
             sidebar.style.zIndex = '';
         };
     }, [htmlContent, docsTheme]);
 
-    const isDarkTheme = docsTheme !== 'light';
-    const wrapperClass = `min-h-screen flex flex-col ${isDarkTheme ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`;
-    const headerClass = `border-b backdrop-blur ${isDarkTheme ? 'border-slate-800 bg-slate-900/80' : 'border-slate-200 bg-white/90'}`;
-    const subtitleClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
-    const navButtonClass = `flex h-10 w-10 items-center justify-center rounded-lg border border-transparent transition-colors ${isDarkTheme ? 'text-slate-300 hover:border-slate-700 hover:text-white' : 'text-slate-500 hover:border-slate-300 hover:text-slate-900'
-        }`;
-    const loaderTextClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
-    const skeletonBaseClass = isDarkTheme ? 'bg-slate-800/60' : 'bg-slate-200';
-    const skeletonMidClass = isDarkTheme ? 'bg-slate-800/50' : 'bg-slate-200/90';
-    const skeletonLowClass = isDarkTheme ? 'bg-slate-800/40' : 'bg-slate-200/80';
-    const errorCardClass = `rounded-xl border px-6 py-6 text-center shadow max-w-md w-full backdrop-blur ${isDarkTheme ? 'border-slate-800/80 bg-slate-900/80 text-white' : 'border-slate-200 bg-white/90 text-slate-900'
-        }`;
-    const errorTextClass = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
-    const inlineBannerClass = `mx-auto mb-4 w-full max-w-5xl rounded-xl border px-4 py-3 text-sm backdrop-blur ${isDarkTheme ? 'border-slate-800 bg-slate-900/70 text-slate-100' : 'border-slate-200 bg-white text-slate-900'}`;
-    const inlineBannerTextMuted = isDarkTheme ? 'text-slate-400' : 'text-slate-500';
-    const inlineBannerAccent = isDarkTheme ? 'text-sky-300' : 'text-sky-600';
-    const inlineButtonClass = `rounded-lg border px-3 py-1 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-100 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-50'}`;
-    const inlinePrimaryButtonClass = 'rounded-lg bg-sky-500 px-3 py-1 text-xs font-semibold text-slate-900 hover:bg-sky-400';
+    const themeVars = {
+        ...DARK_THEME_VARS,
+        ...(docsTheme === 'light' ? LIGHT_THEME_VARS : DARK_THEME_VARS),
+    };
+    const wrapperClass = 'te-docs-shell min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text)]';
+    const headerClass = 'sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)] backdrop-blur';
+    const subtitleClass = 'te-eyebrow text-[var(--text-muted)]';
+    const navButtonClass = 'inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]';
+    const loaderTextClass = 'font-mono text-sm uppercase tracking-[0.18em] text-[var(--text-muted)]';
+    const skeletonBaseClass = 'bg-[var(--bg-tertiary)]';
+    const skeletonMidClass = 'bg-[var(--border)]';
+    const skeletonLowClass = 'bg-[var(--code-bg)]';
+    const errorCardClass = 'w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-6 text-center text-[var(--text)] shadow-sm';
+    const errorTextClass = 'text-[var(--text-muted)]';
+    const inlineBannerClass = 'mx-auto mb-4 w-full max-w-5xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text)] shadow-sm';
+    const inlineBannerTextMuted = 'text-[var(--text-muted)]';
+    const inlineBannerAccent = 'font-mono uppercase tracking-[0.18em] text-[var(--accent)]';
+    const inlineButtonClass = 'te-btn-secondary te-btn-sm';
+    const inlinePrimaryButtonClass = 'te-btn-primary te-btn-sm';
     const hasContent = Boolean(htmlContent);
     const showSkeleton = isLoading && !hasContent;
     const showBlockingError = Boolean(error) && !hasContent;
@@ -584,22 +592,124 @@ const Documentation = () => {
     const cacheLabel = cachedAt ? formatCacheTimestamp(cachedAt) : '';
 
     return (
-        <div className={wrapperClass}>
+        <div className={wrapperClass} style={themeVars}>
+            <style>{`
+                .te-docs-shell {
+                    color: var(--text);
+                    background: var(--bg-primary);
+                }
+                .te-docs-shell .te-docs-content,
+                .te-docs-shell .te-docs-content * {
+                    border-color: var(--border);
+                }
+                .te-docs-shell .te-docs-content {
+                    min-height: 100%;
+                    background: var(--bg-primary);
+                    color: var(--text);
+                    font-family: var(--font-sans, 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif);
+                }
+                .te-docs-shell .te-docs-content h1,
+                .te-docs-shell .te-docs-content h2,
+                .te-docs-shell .te-docs-content h3,
+                .te-docs-shell .te-docs-content h4,
+                .te-docs-shell .te-docs-content h5,
+                .te-docs-shell .te-docs-content h6 {
+                    color: var(--heading);
+                    font-family: var(--font-display, 'JetBrains Mono', ui-monospace, monospace);
+                    letter-spacing: -0.03em;
+                }
+                .te-docs-shell .te-docs-content a {
+                    color: var(--link);
+                    text-decoration-color: var(--border);
+                    text-underline-offset: 3px;
+                }
+                .te-docs-shell .te-docs-content a:hover {
+                    color: var(--accent-hover);
+                    background: var(--accent-soft);
+                }
+                .te-docs-shell .te-docs-content code,
+                .te-docs-shell .te-docs-content pre,
+                .te-docs-shell .te-docs-content kbd,
+                .te-docs-shell .te-docs-content samp {
+                    font-family: var(--font-mono, 'JetBrains Mono', ui-monospace, monospace);
+                }
+                .te-docs-shell .te-docs-content pre,
+                .te-docs-shell .te-docs-content code {
+                    background: var(--code-bg);
+                    color: var(--text);
+                    border-color: var(--border);
+                }
+                .te-docs-shell .te-docs-content pre {
+                    border: 1px solid var(--border);
+                    border-radius: 1rem;
+                    box-shadow: none;
+                }
+                .te-docs-shell .te-docs-content table,
+                .te-docs-shell .te-docs-content th,
+                .te-docs-shell .te-docs-content td,
+                .te-docs-shell .te-docs-content blockquote {
+                    border-color: var(--border);
+                }
+                .te-docs-shell .te-docs-content blockquote,
+                .te-docs-shell .te-docs-content .card,
+                .te-docs-shell .te-docs-content .panel {
+                    background: var(--surface);
+                    color: var(--text);
+                    border-color: var(--border);
+                    box-shadow: none;
+                }
+                .te-docs-shell .te-docs-content #sidebar,
+                .te-docs-shell .te-docs-content aside,
+                .te-docs-shell .te-docs-content nav {
+                    background: var(--bg-primary);
+                    border-color: var(--border);
+                    color: var(--text-secondary);
+                }
+                .te-docs-shell .te-docs-content #sidebar a,
+                .te-docs-shell .te-docs-content nav a {
+                    color: var(--text-secondary);
+                    border-radius: 0.75rem;
+                }
+                .te-docs-shell .te-docs-content #sidebar a:hover,
+                .te-docs-shell .te-docs-content nav a:hover,
+                .te-docs-shell .te-docs-content #sidebar a.active,
+                .te-docs-shell .te-docs-content nav a.active,
+                .te-docs-shell .te-docs-content #sidebar [aria-current='page'],
+                .te-docs-shell .te-docs-content nav [aria-current='page'] {
+                    background: var(--accent-soft);
+                    color: var(--accent);
+                }
+                .te-docs-shell .te-docs-content button,
+                .te-docs-shell .te-docs-content input,
+                .te-docs-shell .te-docs-content select,
+                .te-docs-shell .te-docs-content textarea {
+                    border-color: var(--border);
+                    box-shadow: none;
+                }
+                .te-docs-shell .te-docs-content button:not(.sidebar-toggle):not(.theme-toggle) {
+                    background: var(--surface);
+                    color: var(--text);
+                }
+                .te-docs-shell .te-docs-content button:hover {
+                    background: var(--accent-soft);
+                    color: var(--accent);
+                }
+            `}</style>
             <header className={headerClass}>
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                     <button
                         type="button"
                         onClick={() => navigate('/')}
-                        className="flex items-center gap-3 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-lg"
+                        className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]"
                     >
                         <img
-                            src="/te-logo.png"
+                            src="/te-mark.svg"
                             alt="TechElevate logo"
                             className="h-10 w-10 select-none"
                         />
                         <div className="flex flex-col text-left">
-                            <span className={`text-xs font-medium uppercase tracking-widest ${subtitleClass}`}>TechElevate</span>
-                            <span className="text-base font-semibold">Documentation</span>
+                            <span className={subtitleClass}>TechElevate</span>
+                            <span className="font-mono text-base font-semibold uppercase tracking-[-0.02em] text-[var(--heading)]">Documentation</span>
                         </div>
                     </button>
                     <div className="flex items-center gap-2">
@@ -641,7 +751,7 @@ const Documentation = () => {
                     <div className="flex h-full items-center justify-center px-4">
                         <div className="w-full max-w-md space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 animate-spin rounded-full border-4 border-t-transparent ${isDarkTheme ? 'border-sky-500' : 'border-sky-400'}`} />
+                                <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--accent)]" />
                                 <p className={`text-sm ${loaderTextClass}`}>Loading documentation…</p>
                             </div>
                             <div className="space-y-2">
@@ -654,21 +764,20 @@ const Documentation = () => {
                 ) : showBlockingError ? (
                     <div className="flex h-full items-center justify-center px-4">
                         <div className={errorCardClass}>
-                            <h2 className="text-base font-semibold">{attempts > 0 ? 'Retrying…' : 'Load issue'}</h2>
+                            <h2 className="font-mono text-base font-semibold uppercase tracking-[-0.02em] text-[var(--heading)]">{attempts > 0 ? 'Retrying…' : 'Load issue'}</h2>
                             <p className={`mt-2 text-xs sm:text-sm ${errorTextClass}`}>{error}</p>
                             <div className="mt-4 flex flex-wrap gap-2 justify-center">
                                 <button
                                     type="button"
                                     onClick={fetchDocumentation}
-                                    className="rounded-lg bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-900 hover:bg-sky-400"
+                                    className="te-btn-primary te-btn-sm"
                                 >
                                     Retry now
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => navigate('/')}
-                                    className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
-                                        }`}
+                                    className="te-btn-secondary te-btn-sm"
                                 >
                                     Back home
                                 </button>
@@ -676,8 +785,7 @@ const Documentation = () => {
                                     href={documentationUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`rounded-lg border px-4 py-2 text-xs font-semibold transition-colors ${isDarkTheme ? 'border-slate-700 text-slate-200 hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
-                                        }`}
+                                    className="te-btn-secondary te-btn-sm"
                                 >
                                     Open docs
                                 </a>
@@ -732,7 +840,7 @@ const Documentation = () => {
                         <div
                             ref={contentRef}
                             dangerouslySetInnerHTML={{ __html: htmlContent }}
-                            className="w-full h-full"
+                            className="te-docs-content w-full h-full"
                         />
                     </div>
                 )}

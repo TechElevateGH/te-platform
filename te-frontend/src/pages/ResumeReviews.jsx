@@ -20,7 +20,7 @@ import {
     XCircleIcon,
     UserGroupIcon,
     MagnifyingGlassIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 import { trackEvent } from '../analytics/events';
 
 const ResumeReviews = () => {
@@ -374,13 +374,13 @@ const ResumeReviews = () => {
 
     const getStatusColor = (status) => {
         const colors = {
-            'Pending': 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800',
-            'In Review': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
-            'Completed': 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800',
-            'Declined': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800',
-            'Cancelled': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600'
+            'Pending': 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
+            'In Review': 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
+            'Completed': 'bg-[var(--te-text)] text-[var(--te-on-primary)] border-[var(--te-text)]',
+            'Declined': 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]',
+            'Cancelled': 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]'
         };
-        return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
+        return colors[status] || 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]';
     };
 
     const filteredReviews = reviews.filter(review => {
@@ -448,25 +448,23 @@ const ResumeReviews = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="flex h-screen items-center justify-center bg-[var(--te-bg)]">
                 <Loading />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
-            {/* Sticky Header */}
-            <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
-                <div className="max-w-7xl mx-auto px-4">
-                    {/* Title Row */}
-                    <div className="flex items-center justify-between py-4 border-b border-gray-100 dark:border-gray-700">
+        <div className="min-h-screen h-full bg-[var(--te-bg)] text-[var(--te-text)]">
+            <header className="border-b border-[var(--te-border)] bg-[var(--te-surface)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                <DocumentTextIcon className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+                            <span className="te-eyebrow">{'// reviews'}</span>
+                            <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Resume Reviews
                             </h1>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--te-text-dim)]">
                                 {isVolunteerOrAbove ? 'Review member resumes and provide feedback' : 'Request professional resume review'}
                             </p>
                         </div>
@@ -477,35 +475,35 @@ const ResumeReviews = () => {
                                     <div className="relative">
                                         <button
                                             onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                            className="te-btn-secondary te-btn-sm gap-1.5"
                                         >
                                             <AdjustmentsHorizontalIcon className="h-4 w-4" />
                                             Columns
                                         </button>
                                         {showColumnSelector && (
-                                            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-50">
-                                                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-600">
-                                                    <span className="text-xs font-bold text-gray-900 dark:text-white">Visible Columns</span>
-                                                    <button onClick={() => setShowColumnSelector(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <div className="absolute right-0 mt-2 w-56 bg-[var(--te-surface)] rounded-lg shadow-sm border border-[var(--te-border)] p-3 z-50">
+                                                <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--te-border)]">
+                                                    <span className="text-xs font-bold text-[var(--te-text)]">Visible Columns</span>
+                                                    <button onClick={() => setShowColumnSelector(false)} className="te-icon-btn">
                                                         <XMarkIcon className="h-4 w-4" />
                                                     </button>
                                                 </div>
                                                 <div className="space-y-2 max-h-80 overflow-y-auto">
                                                     {Object.keys(visibleColumns).map(col => (
-                                                        <label key={col} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 rounded cursor-pointer">
+                                                        <label key={col} className="flex items-center gap-2 px-2 py-1.5 hover:bg-[var(--te-hover)] rounded cursor-pointer">
                                                             <input
                                                                 type="checkbox"
                                                                 checked={visibleColumns[col]}
                                                                 onChange={() => toggleColumn(col)}
-                                                                className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500"
+                                                                className="h-4 w-4 rounded border-[var(--te-border)] text-[var(--te-text)] focus:ring-[var(--te-ring)]"
                                                             />
-                                                            <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                            <span className="text-sm text-[var(--te-text-dim)] capitalize">{col.replace(/([A-Z])/g, ' $1').trim()}</span>
                                                         </label>
                                                     ))}
                                                 </div>
-                                                <div className="flex gap-2 mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
-                                                    <button onClick={resetColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-500">Reset</button>
-                                                    <button onClick={showAllColumns} className="flex-1 px-2 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded hover:bg-emerald-700">Show All</button>
+                                                <div className="flex gap-2 mt-3 pt-2 border-t border-[var(--te-border)]">
+                                                    <button onClick={resetColumns} className="te-btn-secondary te-btn-sm flex-1">Reset</button>
+                                                    <button onClick={showAllColumns} className="te-btn-primary te-btn-sm flex-1">Show All</button>
                                                 </div>
                                             </div>
                                         )}
@@ -514,7 +512,7 @@ const ResumeReviews = () => {
                                     {/* Export CSV */}
                                     <button
                                         onClick={exportToCSV}
-                                        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                        className="te-btn-secondary te-btn-sm gap-1.5"
                                     >
                                         <ArrowDownTrayIcon className="h-4 w-4" />
                                         Export
@@ -525,7 +523,7 @@ const ResumeReviews = () => {
                             {/* Request Button */}
                             <button
                                 onClick={() => setShowRequestForm(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-600 text-white text-sm font-semibold rounded-lg hover:from-emerald-600 hover:to-blue-700 transition-all shadow-lg shadow-emerald-500/30"
+                                className="te-btn-primary"
                             >
                                 <PlusIcon className="h-4 w-4" />
                                 Request Review
@@ -535,29 +533,26 @@ const ResumeReviews = () => {
 
                     {/* Stats Bar */}
                     {isVolunteerOrAbove && (
-                        <div className="flex items-center gap-6 py-2 text-sm">
-                            <div className="flex items-center gap-2">
-                                <ChartBarIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                <span className="text-gray-500 dark:text-gray-400">Total:</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
+                        <div className="mt-6 grid grid-cols-2 gap-px border border-[var(--te-border)] bg-[var(--te-border)] sm:grid-cols-4">
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <ChartBarIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Total</span>
+                                <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.total}</span>
                             </div>
-                            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-                            <div className="flex items-center gap-2">
-                                <ClockIcon className="h-4 w-4 text-yellow-500" />
-                                <span className="text-gray-500 dark:text-gray-400">Pending:</span>
-                                <span className="font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Pending</span>
+                                <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.pending}</span>
                             </div>
-                            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-                            <div className="flex items-center gap-2">
-                                <SparklesIcon className="h-4 w-4 text-blue-500" />
-                                <span className="text-gray-500 dark:text-gray-400">In Review:</span>
-                                <span className="font-bold text-blue-600 dark:text-blue-400">{stats.inReview}</span>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <SparklesIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">In Review</span>
+                                <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.inReview}</span>
                             </div>
-                            <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
-                            <div className="flex items-center gap-2">
-                                <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                <span className="text-gray-500 dark:text-gray-400">Completed:</span>
-                                <span className="font-bold text-green-600 dark:text-green-400">{stats.completed}</span>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <CheckCircleIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Completed</span>
+                                <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.completed}</span>
                             </div>
                         </div>
                     )}
@@ -566,14 +561,14 @@ const ResumeReviews = () => {
 
             {/* Tabs (for Volunteers and above) */}
             {isVolunteerOrAbove && (
-                <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                    <div className="max-w-7xl mx-auto px-4">
-                        <nav className="flex space-x-8" aria-label="Tabs">
+                <div className="border-b border-[var(--te-border)] bg-[var(--te-surface)]">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <nav className="flex gap-6 overflow-x-auto te-scroll" aria-label="Tabs">
                             <button
                                 onClick={() => setActiveTab('all')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'all'
-                                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                     }`}
                             >
                                 All Requests
@@ -581,13 +576,13 @@ const ResumeReviews = () => {
                             <button
                                 onClick={() => setActiveTab('myAssignments')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'myAssignments'
-                                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                     }`}
                             >
                                 My Assignments
                                 {myAssignedReviews.length > 0 && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                    <span className="ml-2 px-2 py-0.5 text-xs rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)]">
                                         {myAssignedReviews.length}
                                     </span>
                                 )}
@@ -596,13 +591,13 @@ const ResumeReviews = () => {
                                 <button
                                     onClick={() => setActiveTab('assignments')}
                                     className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assignments'
-                                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
-                                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                        : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                         }`}
                                 >
                                     All Assignments
                                     {allAssignments.length > 0 && (
-                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                        <span className="ml-2 px-2 py-0.5 text-xs rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)]">
                                             {allAssignments.length}
                                         </span>
                                     )}
@@ -613,21 +608,21 @@ const ResumeReviews = () => {
                 </div>
             )}
 
-            <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 {/* My Requests Section */}
                 {!isVolunteerOrAbove && myRequests.length > 0 && (
                     <div className="mb-6">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                            <h2 className="text-lg font-bold text-[var(--te-text)] flex items-center gap-2">
+                                <ChatBubbleLeftRightIcon className="h-5 w-5 text-[var(--te-text)]" />
                                 My Resume Review Requests
                             </h2>
                             <div className="flex items-center gap-3">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter:</label>
+                                <label className="text-sm font-medium text-[var(--te-text-dim)]">Filter:</label>
                                 <select
                                     value={myRequestsStatusFilter}
                                     onChange={(e) => setMyRequestsStatusFilter(e.target.value)}
-                                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 transition-colors"
+                                    className="te-select py-1.5"
                                 >
                                     <option value="active">Active (Pending + In Review)</option>
                                     <option value="">All Statuses</option>
@@ -648,11 +643,11 @@ const ResumeReviews = () => {
                             }).map(request => (
                                 <div
                                     key={request.id}
-                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow relative"
+                                    className="te-card-interactive p-4 relative"
                                 >
                                     {request.feedback && request.feedback.trim() && !seenReviewFeedback.has(request.id) && (
-                                        <span className="absolute -top-2 -right-2 flex h-5 w-5 bg-red-500 rounded-full items-center justify-center">
-                                            <span className="text-white text-[10px] font-bold">!</span>
+                                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center border border-[var(--te-border-strong)] bg-[var(--te-surface)]">
+                                            <span className="font-mono text-[10px] font-bold text-[var(--te-text)]">!</span>
                                         </span>
                                     )}
                                     <div className="flex items-start justify-between">
@@ -661,24 +656,24 @@ const ResumeReviews = () => {
                                             onClick={() => handleReviewClick(request)}
                                         >
                                             <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="font-semibold text-gray-900 dark:text-white">{request.job_title}</h3>
-                                                <span className={`px-2 py-1 text-xs font-bold rounded-full border ${getStatusColor(request.status)}`}>
+                                                <h3 className="font-semibold text-[var(--te-text)]">{request.job_title}</h3>
+                                                <span className={`px-2 py-1 text-xs font-bold rounded-md border ${getStatusColor(request.status)}`}>
                                                     {request.status}
                                                 </span>
-                                                <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                <span className="px-2 py-1 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] rounded">
                                                     {request.level}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            <p className="text-sm text-[var(--te-text-dim)] mb-2">
                                                 Submitted: {request.submitted_date}
                                             </p>
                                             {request.feedback && (
-                                                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+                                                <div className="mt-3 p-3 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded">
                                                     <div className="flex items-start gap-2">
-                                                        <span className="inline-flex rounded-full h-2 w-2 mt-1 bg-blue-500"></span>
+                                                        <span className="inline-flex rounded-md h-2 w-2 mt-1 bg-[var(--te-border-strong)]"></span>
                                                         <div className="flex-1">
-                                                            <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Feedback from {request.reviewer_name}</p>
-                                                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{request.feedback}</p>
+                                                            <p className="text-xs font-semibold text-[var(--te-text)] mb-1">Feedback from {request.reviewer_name}</p>
+                                                            <p className="text-sm text-[var(--te-text-dim)] line-clamp-2">{request.feedback}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -691,7 +686,7 @@ const ResumeReviews = () => {
                                                     e.stopPropagation();
                                                     handleCancelReview(request.id, request.job_title);
                                                 }}
-                                                className="ml-3 p-2 text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 rounded transition-colors"
+                                                className="te-icon-btn ml-3"
                                                 title="Cancel request"
                                             >
                                                 <XCircleIcon className="h-5 w-5" />
@@ -708,29 +703,29 @@ const ResumeReviews = () => {
                 {isVolunteerOrAbove && (
                     <>
                         {/* Search and Sort Bar */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 mb-3 transition-colors">
+                        <div className="te-card rounded-lg p-2 mb-3 transition-colors">
                             <div className="flex items-center gap-3">
                                 {/* Global Search */}
                                 <div className="flex-1 relative">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--te-text-dim)]" />
                                     <input
                                         type="text"
                                         placeholder="Search reviews (member, email, job title)..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        className="te-input pl-9"
                                     />
                                 </div>
 
                                 {/* Sort Dropdown */}
                                 <div className="flex items-center gap-2">
-                                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    <label className="text-xs font-medium text-[var(--te-text-dim)] whitespace-nowrap">
                                         Sort by:
                                     </label>
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                                        className="te-select"
                                     >
                                         <option value="date_desc">Newest First</option>
                                         <option value="date_asc">Oldest First</option>
@@ -744,22 +739,19 @@ const ResumeReviews = () => {
                                 {/* Advanced Filters Button */}
                                 <button
                                     onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
-                                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                        }`}
+                                    className={`te-btn-sm gap-1.5 ${showAdvancedFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}
                                 >
                                     <AdjustmentsHorizontalIcon className="h-4 w-4" />
                                     Filters
                                     {(statusFilter || levelFilter) && (
-                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
+                                        <span className="ml-1 px-1.5 py-0.5 text-xs bg-[var(--te-surface-alt)] rounded-md">
                                             {[statusFilter, levelFilter].filter(Boolean).length}
                                         </span>
                                     )}
                                 </button>
 
                                 {/* Results Count */}
-                                <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                <div className="text-xs font-medium text-[var(--te-text-dim)] whitespace-nowrap">
                                     {sortedReviews.length} of {reviews.length}
                                 </div>
                             </div>
@@ -767,16 +759,16 @@ const ResumeReviews = () => {
 
                         {/* Advanced Filters Panel */}
                         {showAdvancedFilters && (
-                            <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                            <div className="te-card rounded-lg p-3 mb-3 transition-colors">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-[var(--te-text)]" />
+                                        <h3 className="text-sm font-bold text-[var(--te-text)]">Advanced Filters</h3>
                                     </div>
                                     {(statusFilter || levelFilter) && (
                                         <button
                                             onClick={clearAllFilters}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            className="te-btn-danger te-btn-sm gap-1"
                                         >
                                             <XMarkIcon className="h-3.5 w-3.5" />
                                             Clear All
@@ -787,13 +779,13 @@ const ResumeReviews = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {/* Status Filter */}
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-xs font-medium text-[var(--te-text-dim)] mb-1">
                                             Status
                                         </label>
                                         <select
                                             value={statusFilter}
                                             onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            className="te-select"
                                         >
                                             <option value="">All Statuses</option>
                                             <option value="Pending">Pending</option>
@@ -806,13 +798,13 @@ const ResumeReviews = () => {
 
                                     {/* Level Filter */}
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-xs font-medium text-[var(--te-text-dim)] mb-1">
                                             Level
                                         </label>
                                         <select
                                             value={levelFilter}
                                             onChange={(e) => setLevelFilter(e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            className="te-select"
                                         >
                                             <option value="">All Levels</option>
                                             <option value="Intern">Intern</option>
@@ -830,16 +822,16 @@ const ResumeReviews = () => {
 
                 {/* All Requests Table (for Volunteers and above) */}
                 {isVolunteerOrAbove && activeTab === 'all' && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                    <div className="te-card rounded-lg overflow-hidden shadow-sm transition-colors">
                         {/* Bulk Actions Bar */}
                         {isLeadOrAbove && selectedReviewIds.size > 0 && (
-                            <div className="px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
-                                <span className="text-sm font-medium text-emerald-900 dark:text-emerald-300">
+                            <div className="px-4 py-3 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] flex items-center justify-between">
+                                <span className="text-sm font-medium text-[var(--te-text)] text-[var(--te-text-dim)]">
                                     {selectedReviewIds.size} review{selectedReviewIds.size !== 1 ? 's' : ''} selected
                                 </span>
                                 <button
                                     onClick={() => handleOpenAssignModal('bulk')}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded transition-colors"
+                                    className="te-btn-primary te-btn-sm"
                                 >
                                     <UserGroupIcon className="h-4 w-4" />
                                     Assign Selected
@@ -850,63 +842,63 @@ const ResumeReviews = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600 transition-colors">
+                                    <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] transition-colors">
                                         {isLeadOrAbove && (
                                             <th className="px-4 py-3 text-left w-12">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedReviewIds.size === sortedReviews.length && sortedReviews.length > 0}
                                                     onChange={toggleSelectAll}
-                                                    className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                    className="h-4 w-4 rounded border-[var(--te-border)] text-[var(--te-text)] focus:ring-[var(--te-ring)]"
                                                 />
                                             </th>
                                         )}
                                         {visibleColumns.member && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Member
                                             </th>
                                         )}
                                         {visibleColumns.email && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Email
                                             </th>
                                         )}
                                         {visibleColumns.jobTitle && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Job Title
                                             </th>
                                         )}
                                         {visibleColumns.level && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Level
                                             </th>
                                         )}
                                         {visibleColumns.status && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Status
                                             </th>
                                         )}
                                         {visibleColumns.date && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Submitted
                                             </th>
                                         )}
                                         {visibleColumns.reviewer && (
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Reviewer
                                             </th>
                                         )}
                                         {visibleColumns.actions && (
-                                            <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                            <th className="px-4 py-3 text-right text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                                 Actions
                                             </th>
                                         )}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                                <tbody className="divide-y divide-[var(--te-border)] transition-colors">
                                     {sortedReviews.length === 0 ? (
                                         <tr>
-                                            <td colSpan="8" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            <td colSpan="8" className="px-4 py-12 text-center text-sm text-[var(--te-text-dim)]">
                                                 No resume review requests found
                                             </td>
                                         </tr>
@@ -914,7 +906,7 @@ const ResumeReviews = () => {
                                         sortedReviews.map((review) => (
                                             <tr
                                                 key={review.id}
-                                                className="hover:bg-gradient-to-r hover:from-emerald-50/30 hover:to-blue-50/30 dark:hover:from-emerald-900/20 dark:hover:to-blue-900/20 transition-all"
+                                                className="hover:bg-[var(--te-hover)] transition-all"
                                             >
                                                 {isLeadOrAbove && (
                                                     <td className="px-4 py-3">
@@ -922,48 +914,48 @@ const ResumeReviews = () => {
                                                             type="checkbox"
                                                             checked={selectedReviewIds.has(review.id)}
                                                             onChange={() => toggleReviewSelection(review.id)}
-                                                            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                            className="h-4 w-4 rounded border-[var(--te-border)] text-[var(--te-text)] focus:ring-[var(--te-ring)]"
                                                         />
                                                     </td>
                                                 )}
                                                 {visibleColumns.member && (
                                                     <td className="px-4 py-3">
-                                                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        <span className="text-sm font-medium text-[var(--te-text)]">
                                                             {review.user_name}
                                                         </span>
                                                     </td>
                                                 )}
                                                 {visibleColumns.email && (
                                                     <td className="px-4 py-3">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                        <span className="text-xs text-[var(--te-text-dim)]">
                                                             {review.user_email}
                                                         </span>
                                                     </td>
                                                 )}
                                                 {visibleColumns.jobTitle && (
                                                     <td className="px-4 py-3">
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                                                        <span className="text-sm text-[var(--te-text-dim)]">
                                                             {review.job_title}
                                                         </span>
                                                     </td>
                                                 )}
                                                 {visibleColumns.level && (
                                                     <td className="px-4 py-3">
-                                                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                        <span className="px-2 py-1 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] rounded">
                                                             {review.level}
                                                         </span>
                                                     </td>
                                                 )}
                                                 {visibleColumns.status && (
                                                     <td className="px-4 py-3">
-                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(review.status)}`}>
+                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border ${getStatusColor(review.status)}`}>
                                                             {review.status}
                                                         </span>
                                                     </td>
                                                 )}
                                                 {visibleColumns.date && (
                                                     <td className="px-4 py-3">
-                                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                                        <span className="text-sm text-[var(--te-text-dim)]">
                                                             {review.submitted_date}
                                                         </span>
                                                     </td>
@@ -972,17 +964,17 @@ const ResumeReviews = () => {
                                                     <td className="px-4 py-3">
                                                         {review.reviewer_name ? (
                                                             <div className="text-xs">
-                                                                <div className="font-medium text-gray-900 dark:text-white">
+                                                                <div className="font-medium text-[var(--te-text)]">
                                                                     {review.reviewer_name}
                                                                 </div>
                                                                 {review.assigned_date && (
-                                                                    <div className="text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                    <div className="text-[var(--te-text-dim)] mt-0.5">
                                                                         {review.assigned_date}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs text-gray-400 dark:text-gray-500 italic">Unassigned</span>
+                                                            <span className="text-xs text-[var(--te-text-dim)] italic">Unassigned</span>
                                                         )}
                                                     </td>
                                                 )}
@@ -993,7 +985,7 @@ const ResumeReviews = () => {
                                                                 href={review.resume_link}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
+                                                                className="te-btn-primary te-btn-sm gap-1"
                                                             >
                                                                 <EyeIcon className="h-3.5 w-3.5" />
                                                                 View
@@ -1003,7 +995,7 @@ const ResumeReviews = () => {
                                                             {isLeadOrAbove && review.status === 'Pending' && !review.reviewer_name && (
                                                                 <button
                                                                     onClick={() => handleOpenAssignModal('single', review)}
-                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                                    className="te-btn-primary te-btn-sm gap-1"
                                                                 >
                                                                     <UserGroupIcon className="h-3.5 w-3.5" />
                                                                     Assign
@@ -1024,7 +1016,7 @@ const ResumeReviews = () => {
                                                                             }
                                                                         });
                                                                     }}
-                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors"
+                                                                    className="te-btn-primary te-btn-sm"
                                                                 >
                                                                     Start Review
                                                                 </button>
@@ -1043,7 +1035,7 @@ const ResumeReviews = () => {
                                                                             }
                                                                         });
                                                                     }}
-                                                                    className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
+                                                                    className="te-btn-primary te-btn-sm"
                                                                 >
                                                                     Complete
                                                                 </button>
@@ -1062,54 +1054,54 @@ const ResumeReviews = () => {
 
                 {/* My Assignments Tab (for Volunteers and Leads) */}
                 {isVolunteerOrAbove && activeTab === 'myAssignments' && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div className="te-card rounded-lg overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
-                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                    <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Member</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Job Title</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Level</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Assigned Date</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody className="divide-y divide-[var(--te-border)]">
                                     {myAssignedReviews.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            <td colSpan="6" className="px-4 py-12 text-center text-sm text-[var(--te-text-dim)]">
                                                 No reviews assigned to you yet
                                             </td>
                                         </tr>
                                     ) : (
                                         myAssignedReviews.map((review) => (
-                                            <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                            <tr key={review.id} className="hover:bg-[var(--te-hover)] transition-colors">
                                                 <td className="px-4 py-3">
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                        <div className="text-sm font-medium text-[var(--te-text)]">{review.user_name}</div>
+                                                        <div className="text-xs text-[var(--te-text-dim)]">{review.user_email}</div>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                <td className="px-4 py-3 text-sm text-[var(--te-text-dim)]">{review.job_title}</td>
                                                 <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                    <span className="px-2 py-1 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] rounded">
                                                         {review.level}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(review.status)}`}>
+                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border ${getStatusColor(review.status)}`}>
                                                         {review.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                <td className="px-4 py-3 text-sm text-[var(--te-text-dim)]">{review.assigned_date}</td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <a
                                                             href={review.resume_link}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
+                                                            className="te-btn-primary te-btn-sm gap-1"
                                                         >
                                                             <EyeIcon className="h-3.5 w-3.5" />
                                                             View
@@ -1128,7 +1120,7 @@ const ResumeReviews = () => {
                                                                         }
                                                                     });
                                                                 }}
-                                                                className="px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700 transition-colors"
+                                                                className="te-btn-primary te-btn-sm"
                                                             >
                                                                 Complete
                                                             </button>
@@ -1146,66 +1138,66 @@ const ResumeReviews = () => {
 
                 {/* All Assignments Tab (for Admin only) */}
                 {isAdmin && activeTab === 'assignments' && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">All Assignments</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <div className="te-card rounded-lg overflow-hidden shadow-sm">
+                        <div className="px-6 py-4 border-b border-[var(--te-border)]">
+                            <h3 className="text-lg font-bold text-[var(--te-text)]">All Assignments</h3>
+                            <p className="text-sm text-[var(--te-text-dim)] mt-1">
                                 Overview of all resume review assignments
                             </p>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Member</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Level</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned To</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Assigned Date</th>
-                                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                    <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Member</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Job Title</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Level</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Assigned To</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Assigned Date</th>
+                                        <th className="px-4 py-3 text-right text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tbody className="divide-y divide-[var(--te-border)]">
                                     {allAssignments.length === 0 ? (
                                         <tr>
-                                            <td colSpan="7" className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            <td colSpan="7" className="px-4 py-12 text-center text-sm text-[var(--te-text-dim)]">
                                                 No assignments yet
                                             </td>
                                         </tr>
                                     ) : (
                                         allAssignments.map((review) => (
-                                            <tr key={review.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                            <tr key={review.id} className="hover:bg-[var(--te-hover)] transition-colors">
                                                 <td className="px-4 py-3">
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
-                                                        <div className="text-xs text-gray-500 dark:text-gray-400">{review.user_email}</div>
+                                                        <div className="text-sm font-medium text-[var(--te-text)]">{review.user_name}</div>
+                                                        <div className="text-xs text-[var(--te-text-dim)]">{review.user_email}</div>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{review.job_title}</td>
+                                                <td className="px-4 py-3 text-sm text-[var(--te-text-dim)]">{review.job_title}</td>
                                                 <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                    <span className="px-2 py-1 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] rounded">
                                                         {review.level}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                    <div className="text-sm font-medium text-[var(--te-text)]">
                                                         {review.reviewer_name}
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusColor(review.status)}`}>
+                                                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md border ${getStatusColor(review.status)}`}>
                                                         {review.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{review.assigned_date}</td>
+                                                <td className="px-4 py-3 text-sm text-[var(--te-text-dim)]">{review.assigned_date}</td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <a
                                                             href={review.resume_link}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700 transition-colors flex items-center gap-1"
+                                                            className="te-btn-primary te-btn-sm gap-1"
                                                         >
                                                             <EyeIcon className="h-3.5 w-3.5" />
                                                             View
@@ -1225,8 +1217,8 @@ const ResumeReviews = () => {
             {/* Request Form Modal */}
             {showRequestForm && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-4 rounded-t-2xl">
+                    <div className="te-panel max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] text-[var(--te-text)] px-6 py-4 rounded-t-lg">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <DocumentTextIcon className="h-6 w-6" />
@@ -1234,7 +1226,7 @@ const ResumeReviews = () => {
                                 </h2>
                                 <button
                                     onClick={() => setShowRequestForm(false)}
-                                    className="text-white hover:bg-white/20 rounded p-1"
+                                    className="te-icon-btn text-[var(--te-text)] hover:bg-[var(--te-hover)]"
                                 >
                                     <XMarkIcon className="h-5 w-5" />
                                 </button>
@@ -1243,7 +1235,7 @@ const ResumeReviews = () => {
 
                         <form onSubmit={handleSubmitRequest} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-[var(--te-text-dim)] mb-1.5">
                                     Google Docs Resume Link *
                                 </label>
                                 <input
@@ -1252,15 +1244,15 @@ const ResumeReviews = () => {
                                     value={formData.resume_link}
                                     onChange={(e) => setFormData({ ...formData, resume_link: e.target.value })}
                                     placeholder="https://docs.google.com/document/d/..."
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="te-input"
                                 />
-                                <p className="mt-1 text-xs text-left text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-xs text-left text-[var(--te-text-dim)]">
                                     Make sure your resume is shared with "Anyone with the link can view"
                                 </p>
                             </div>
 
                             <div>
-                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-[var(--te-text-dim)] mb-1.5">
                                     Target Job Title *
                                 </label>
                                 <input
@@ -1269,19 +1261,19 @@ const ResumeReviews = () => {
                                     value={formData.job_title}
                                     onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
                                     placeholder="e.g., Software Engineer, Data Analyst"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="te-input"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-[var(--te-text-dim)] mb-1.5">
                                     Experience Level *
                                 </label>
                                 <select
                                     required
                                     value={formData.level}
                                     onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="te-select"
                                 >
                                     <option value="Intern">Intern</option>
                                     <option value="Entry Level">Entry Level (0-2 years)</option>
@@ -1292,7 +1284,7 @@ const ResumeReviews = () => {
                             </div>
 
                             <div>
-                                <label className="block text-left text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                <label className="block text-left text-sm font-semibold text-[var(--te-text-dim)] mb-1.5">
                                     Additional Notes (Optional)
                                 </label>
                                 <textarea
@@ -1300,7 +1292,7 @@ const ResumeReviews = () => {
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     placeholder="Any specific areas you'd like feedback on?"
                                     rows="3"
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="te-textarea resize-none"
                                 ></textarea>
                             </div>
 
@@ -1308,13 +1300,13 @@ const ResumeReviews = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowRequestForm(false)}
-                                    className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                                    className="te-btn-secondary flex-1"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors shadow-lg"
+                                    className="te-btn-primary flex-1"
                                 >
                                     Submit Request
                                 </button>
@@ -1327,8 +1319,8 @@ const ResumeReviews = () => {
             {/* Assignment Modal */}
             {showAssignModal && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full">
-                        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white px-6 py-4 rounded-t-2xl">
+                    <div className="te-panel max-w-md w-full">
+                        <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] text-[var(--te-text)] px-6 py-4 rounded-t-lg">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold flex items-center gap-2">
                                     <UserGroupIcon className="h-6 w-6" />
@@ -1336,7 +1328,7 @@ const ResumeReviews = () => {
                                 </h2>
                                 <button
                                     onClick={() => setShowAssignModal(false)}
-                                    className="text-white hover:bg-white/20 rounded p-1"
+                                    className="te-icon-btn text-[var(--te-text)] hover:bg-[var(--te-hover)]"
                                 >
                                     <XMarkIcon className="h-5 w-5" />
                                 </button>
@@ -1345,20 +1337,20 @@ const ResumeReviews = () => {
 
                         <div className="p-6 space-y-4">
                             <div>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                <p className="text-sm text-[var(--te-text-dim)] mb-4">
                                     {assignMode === 'bulk'
                                         ? `Assign ${selectedReviewIds.size} review${selectedReviewIds.size !== 1 ? 's' : ''} to:`
                                         : `Assign "${reviewToAssign?.job_title}" review to:`
                                     }
                                 </p>
 
-                                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                <label className="block text-sm font-semibold text-[var(--te-text-dim)] mb-2">
                                     Select Reviewer
                                 </label>
                                 <select
                                     value={selectedAssignee}
                                     onChange={(e) => setSelectedAssignee(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                                    className="te-select"
                                 >
                                     <option value="">-- Select a volunteer or lead --</option>
                                     {assignableUsers.map(user => (
@@ -1373,7 +1365,7 @@ const ResumeReviews = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowAssignModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                    className="te-btn-secondary flex-1"
                                 >
                                     Cancel
                                 </button>
@@ -1381,7 +1373,7 @@ const ResumeReviews = () => {
                                     type="button"
                                     onClick={handleAssignSubmit}
                                     disabled={!selectedAssignee}
-                                    className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="te-btn-primary flex-1"
                                 >
                                     Assign
                                 </button>
@@ -1394,51 +1386,51 @@ const ResumeReviews = () => {
             {/* Resume Review Details Modal */}
             {selectedReview && (
                 <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={() => setSelectedReview(null)}>
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <div className="bg-gradient-to-r from-emerald-500 to-blue-600 dark:from-emerald-700 dark:to-blue-700 px-6 py-5">
+                    <div className="te-panel max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-6 py-5">
                             <div className="flex items-start justify-between mb-4">
                                 <div>
-                                    <h2 className="text-xl font-bold text-white mb-1">Resume Review</h2>
-                                    <p className="text-sm text-white/95 font-medium">{selectedReview.job_title}</p>
+                                    <h2 className="font-display text-xl font-bold text-[var(--te-text)] mb-1">Resume Review</h2>
+                                    <p className="text-sm font-medium text-[var(--te-text-dim)]">{selectedReview.job_title}</p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedReview(null)}
-                                    className="text-white/70 hover:text-white transition-colors p-1.5 hover:bg-white/10 rounded-lg"
+                                    className="te-icon-btn"
                                 >
                                     <XMarkIcon className="h-6 w-6" />
                                 </button>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className={`px-3 py-1.5 text-xs font-bold rounded-full border ${getStatusColor(selectedReview.status)}`}>
+                                <span className={`px-3 py-1.5 text-xs font-bold rounded-md border ${getStatusColor(selectedReview.status)}`}>
                                     {selectedReview.status}
                                 </span>
-                                <span className="text-xs text-white/80 font-medium">Submitted {selectedReview.submitted_date}</span>
+                                <span className="font-mono text-xs text-[var(--te-text-dim)]">Submitted {selectedReview.submitted_date}</span>
                             </div>
                         </div>
 
                         <div className="p-6 space-y-6 max-h-[calc(90vh-200px)] overflow-y-auto">
                             {/* Info Grid */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Level</p>
-                                    <p className="text-base font-bold text-gray-900 dark:text-white">{selectedReview.level}</p>
+                                <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                    <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-2">Level</p>
+                                    <p className="text-base font-bold text-[var(--te-text)]">{selectedReview.level}</p>
                                 </div>
                                 {selectedReview.reviewer_name && (
-                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Reviewer</p>
-                                        <p className="text-base font-bold text-gray-900 dark:text-white">{selectedReview.reviewer_name}</p>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                        <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-2">Reviewer</p>
+                                        <p className="text-base font-bold text-[var(--te-text)]">{selectedReview.reviewer_name}</p>
                                     </div>
                                 )}
                             </div>
 
                             {/* Resume Link */}
                             <div>
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Resume</p>
+                                <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-3">Resume</p>
                                 <a
                                     href={selectedReview.resume_link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border-2 border-emerald-200 dark:border-emerald-700 rounded-xl transition-all hover:shadow-lg hover:shadow-emerald-500/20"
+                                    className="group te-btn-secondary group"
                                 >
                                     <DocumentTextIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
                                     View Resume
@@ -1448,9 +1440,9 @@ const ResumeReviews = () => {
                             {/* Notes */}
                             {selectedReview.notes && (
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Your Notes</p>
-                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedReview.notes}</p>
+                                    <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-3">Your Notes</p>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                        <p className="text-sm text-[var(--te-text-dim)] leading-relaxed whitespace-pre-wrap">{selectedReview.notes}</p>
                                     </div>
                                 </div>
                             )}
@@ -1458,11 +1450,11 @@ const ResumeReviews = () => {
                             {/* Feedback */}
                             {selectedReview.feedback && selectedReview.feedback.trim() && (
                                 <div>
-                                    <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-3">
+                                    <p className="text-xs font-semibold text-[var(--te-text)] uppercase tracking-wider mb-3">
                                         Feedback from {selectedReview.reviewer_name || 'Reviewer'}
                                     </p>
-                                    <div className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20 rounded-xl p-4 border-2 border-emerald-200 dark:border-emerald-800 shadow-sm">
-                                        <p className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
+                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border-2 border-[var(--te-border)] shadow-sm">
+                                        <p className="text-sm text-[var(--te-text)] leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
                                     </div>
                                 </div>
                             )}
@@ -1470,16 +1462,16 @@ const ResumeReviews = () => {
                             {/* Member Info (for volunteers and above) */}
                             {isVolunteerOrAbove && (
                                 <div>
-                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Member Information</p>
+                                    <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-3">Member Information</p>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Name</p>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedReview.member_name}</p>
+                                        <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                            <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-2">Name</p>
+                                            <p className="text-sm font-bold text-[var(--te-text)]">{selectedReview.member_name}</p>
                                         </div>
                                         {selectedReview.member_email && (
-                                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-900/30 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Email</p>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-white break-all">{selectedReview.member_email}</p>
+                                            <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                                <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wider mb-2">Email</p>
+                                                <p className="text-sm font-bold text-[var(--te-text)] break-all">{selectedReview.member_email}</p>
                                             </div>
                                         )}
                                     </div>

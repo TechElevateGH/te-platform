@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react'
 import { Combobox, Transition } from '@headlessui/react'
-import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, ChevronUpDownIcon } from 'icons'
 
 const SelectCombobox = ({
     label,
@@ -36,18 +36,18 @@ const SelectCombobox = ({
             setQuery('');
         }}>
             <div className="relative">
-                <Combobox.Label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 transition-colors">
+                <Combobox.Label className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors">
                     {label} {required && <span className="text-red-500">*</span>}
                 </Combobox.Label>
 
                 <div className="relative">
-                    <div className="relative w-full cursor-default overflow-hidden rounded-xl bg-white dark:bg-gray-700 text-left shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 focus-within:ring-2 focus-within:ring-blue-600 dark:focus-within:ring-blue-500 transition-all">
+                    <div className="relative w-full cursor-default overflow-hidden rounded-md bg-[var(--te-surface)] text-left border border-[var(--te-border)] focus-within:border-[var(--te-accent)] focus-within:shadow-[0_0_0_3px_var(--te-ring)] transition-colors">
                         {Icon && (
-                            <Icon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+                            <Icon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--te-text-dim)]" />
                         )}
 
                         <Combobox.Input
-                            className={`w-full border-none py-2.5 ${Icon ? 'pl-11' : 'pl-4'} pr-10 text-sm leading-5 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-0 bg-transparent font-medium`}
+                            className={`w-full border-none py-2.5 ${Icon ? 'pl-11' : 'pl-4'} pr-10 text-sm leading-5 text-[var(--te-text)] placeholder:text-[var(--te-text-dim)] focus:ring-0 bg-transparent font-medium`}
                             displayValue={(val) => val}
                             onChange={(event) => setQuery(event.target.value)}
                             onKeyDown={(event) => {
@@ -77,9 +77,9 @@ const SelectCombobox = ({
                             required={required}
                         />
 
-                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors rounded-r-xl">
+                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-3 hover:bg-[var(--te-hover)] transition-colors rounded-r-md">
                             <ChevronUpDownIcon
-                                className="h-5 w-5 text-gray-400 dark:text-gray-500"
+                                className="h-5 w-5 text-[var(--te-text-dim)]"
                                 aria-hidden="true"
                             />
                         </Combobox.Button>
@@ -91,29 +91,29 @@ const SelectCombobox = ({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <Combobox.Options className="absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white dark:bg-gray-700 py-1.5 text-base shadow-xl ring-1 ring-black dark:ring-gray-600 ring-opacity-5 focus:outline-none sm:text-sm">
+                        <Combobox.Options className="te-scroll absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded-md bg-[var(--te-surface)] py-1.5 text-base shadow-sm border border-[var(--te-border)] focus:outline-none sm:text-sm">
                             {/* Always show custom value option if user is typing a new one */}
                             {isCustomValue && query !== '' && (
                                 <Combobox.Option
                                     value={query}
                                     className={({ active }) =>
-                                        `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                                        `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-[var(--te-hover)]' : ''
                                         }`
                                     }
                                 >
                                     {({ selected, active }) => (
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-sm font-semibold truncate ${active ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+                                                <p className={`text-sm font-semibold truncate ${active ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'
                                                     }`}>
                                                     Add "{query}"
                                                 </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-300 truncate">
+                                                <p className="text-xs text-[var(--te-text-dim)] truncate">
                                                     Press Enter to add custom value
                                                 </p>
                                             </div>
                                             {selected && (
-                                                <CheckIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 ml-3" aria-hidden="true" />
+                                                <CheckIcon className="h-5 w-5 text-[var(--te-text)] ml-3" aria-hidden="true" />
                                             )}
                                         </div>
                                     )}
@@ -123,7 +123,7 @@ const SelectCombobox = ({
                             {/* Show filtered options */}
                             {filteredOptions.length === 0 && !isCustomValue && query !== '' ? (
                                 <div className="relative cursor-default select-none px-4 py-3">
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">No options found.</p>
+                                    <p className="text-sm text-[var(--te-text-dim)]">No options found.</p>
                                 </div>
                             ) : (
                                 filteredOptions.map((option) => (
@@ -131,18 +131,18 @@ const SelectCombobox = ({
                                         key={option}
                                         value={option}
                                         className={({ active }) =>
-                                            `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-blue-50 dark:bg-blue-900/30' : ''
+                                            `relative cursor-pointer select-none px-4 py-2.5 transition-colors ${active ? 'bg-[var(--te-hover)]' : ''
                                             }`
                                         }
                                     >
                                         {({ selected, active }) => (
                                             <div className="flex items-center justify-between">
-                                                <span className={`block truncate text-sm font-medium ${active ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+                                                <span className={`block truncate text-sm font-medium ${active ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'
                                                     }`}>
                                                     {option}
                                                 </span>
                                                 {selected && (
-                                                    <CheckIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 ml-3" aria-hidden="true" />
+                                                    <CheckIcon className="h-5 w-5 text-[var(--te-text)] ml-3" aria-hidden="true" />
                                                 )}
                                             </div>
                                         )}
@@ -154,7 +154,7 @@ const SelectCombobox = ({
                 </div>
 
                 {/* Helpful hint */}
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">
+                <p className="mt-1.5 text-xs text-[var(--te-text-dim)] font-medium transition-colors">
                     Select from options or type your own
                 </p>
             </div>

@@ -1,4 +1,3 @@
-from datetime import date
 from enum import Enum
 from typing import Annotated, Optional
 
@@ -20,8 +19,9 @@ class LeadLogin(BaseModel):
 
 
 class ReferrerLogin(BaseModel):
-    """Schema for Referrer login with token only (no username required)"""
+    """Schema for Referrer login with username and token"""
 
+    username: str
     token: str
 
 
@@ -83,29 +83,29 @@ class PrivilegedUserUpdate(BaseModel):
 
 class MemberUserBase(BaseModel):
     email: EmailStr
-    first_name: str
-    middle_name: str = ""
-    last_name: str
-    full_name: str = ""
+    first_name: str = Field(max_length=100)
+    middle_name: str = Field(default="", max_length=100)
+    last_name: str = Field(max_length=100)
+    full_name: str = Field(default="", max_length=300)
     image: str = ""
-    phone_number: str = ""
-    address: str = ""
-    university: str = ""
-    referral_essay: str = ""  # Referral essay text
-    cover_letter: str = ""  # Cover letter text
-    resumes: list = []  # List of embedded Resume objects
-    applications: list = []  # List of embedded Application objects
+    phone_number: str = Field(default="", max_length=30)
+    address: str = Field(default="", max_length=500)
+    university: str = Field(default="", max_length=200)
+    referral_essay: str = Field(default="", max_length=10000)
+    cover_letter: str = Field(default="", max_length=10000)
+    resumes: list = []
+    applications: list = []
     mentor_id: Optional[int] = None
     is_active: bool = True
-    email_verified: bool = False  # Email verification status
-    slack_joined: bool = False  # Whether user has joined Slack workspace
+    email_verified: bool = False
+    slack_joined: bool = False
     role: UserRoles = UserRoles.member
-    start_date: str = date.today().strftime("%d-%m-%Y")
+    start_date: str = ""
     end_date: str = ""
 
 
 class MemberUserCreate(MemberUserBase):
-    password: str
+    password: str = Field(min_length=8, max_length=128)
 
 
 class MemberUserUpdate(BaseModel):
@@ -124,11 +124,11 @@ class MemberUserRead(MemberUserBase): ...
 
 
 class Essay(BaseModel):
-    essay: str
+    essay: str = Field(max_length=10000)
 
 
 class CoverLetter(BaseModel):
-    cover_letter: str
+    cover_letter: str = Field(max_length=10000)
 
 
 class PasswordResetRequest(BaseModel):

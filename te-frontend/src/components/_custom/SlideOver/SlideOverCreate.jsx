@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from 'icons'
 const SlideOverForm = ({
     title,
     setHandler,
@@ -74,7 +74,7 @@ const SlideOverForm = ({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-950/60 dark:bg-gray-950/80 backdrop-blur-md transition-all" />
+                    <div className="fixed inset-0 bg-black/40 transition-all" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -88,7 +88,7 @@ const SlideOverForm = ({
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all w-full max-w-2xl">
+                            <Dialog.Panel className="te-card relative transform overflow-hidden shadow-sm transition-all w-full max-w-2xl">
                                 <form
                                     ref={formRef}
                                     className="flex flex-col"
@@ -96,15 +96,15 @@ const SlideOverForm = ({
                                     onSubmit={submitFormHandler}
                                 >
                                     {/* Premium Header */}
-                                    <div className="relative bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 px-6 py-5">
-                                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+                                    <div className="relative bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-6 py-5">
+                                        <div className="absolute inset-0 opacity-30" />
                                         <div className="relative flex items-center justify-between">
-                                            <Dialog.Title className="text-xl font-bold text-white">
+                                            <Dialog.Title className="text-xl font-bold text-[var(--te-text)]">
                                                 {title}
                                             </Dialog.Title>
                                             <button
                                                 type="button"
-                                                className="rounded-lg p-1.5 text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+                                                className="te-icon-btn"
                                                 onClick={() => { setOpen(false); }}
                                             >
                                                 <XMarkIcon className="h-5 w-5" />
@@ -113,24 +113,24 @@ const SlideOverForm = ({
                                     </div>
 
                                     {/* Content */}
-                                    <div className="max-h-[calc(100vh-16rem)] overflow-y-auto bg-gray-50/30 dark:bg-gray-900/30 transition-colors">
+                                    <div className="te-scroll max-h-[calc(100vh-16rem)] overflow-y-auto bg-[var(--te-surface)] transition-colors">
                                         {children}
                                     </div>
 
                                     {/* Premium Footer */}
-                                    <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-6 py-4 transition-colors">
+                                    <div className="flex items-center justify-end gap-3 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-6 py-4 transition-colors">
                                         <button
                                             type="button"
-                                            className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-xl transition-all duration-200 border border-gray-200 dark:border-gray-600"
+                                            className="te-btn-secondary"
                                             onClick={() => { setOpen(false) }}
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className={`px-6 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-blue-600/25 ${(isSubmitting || isSubmitDisabled)
-                                                ? 'bg-blue-600/60 text-white cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 active:scale-[0.98]'
+                                            className={`te-btn-primary ${(isSubmitting || isSubmitDisabled)
+                                                ? 'cursor-not-allowed'
+                                                : ''
                                                 }`}
                                             disabled={isSubmitting || isSubmitDisabled}
                                         >

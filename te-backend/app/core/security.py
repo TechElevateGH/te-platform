@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional, Union
 
 import app.ents.user.crud as user_crud
@@ -33,9 +33,9 @@ def create_access_token(
     """Returns an access token with `subject` that expires after `expires_delta`."""
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(subject)}
@@ -53,7 +53,7 @@ def generate_password_reset_token(
     expires_minutes: int = 15,
 ) -> str:
     delta = timedelta(minutes=expires_minutes)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expire = now + delta
     payload = {"exp": expire, "nbf": now, "sub": email, "stage": stage}
     if reset_id:
@@ -95,4 +95,8 @@ def authenticate(db: Database, *, email: str, password: str) -> user_models.Memb
     return user
 
 
-def is_superuser(user) -> bool: ...
+def is_superuser(user) -> bool:
+    """Check if user is an admin (role = 5)."""
+    from app.core.permissions import get_user_role
+
+    return get_user_role(user) >= 5

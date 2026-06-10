@@ -7,7 +7,7 @@ import {
     EnvelopeIcon,
     LockClosedIcon,
     ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const EmailChangeForm = ({ currentEmail, onCancel }) => {
     const navigate = useNavigate();
@@ -54,15 +54,15 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Change Email Address</h3>
+        <div className="te-panel p-6">
+            <h3 className="mb-4 font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Change Email Address</h3>
 
             {/* Warning */}
-            <div className="mb-6 rounded-xl bg-amber-50 p-4 border border-amber-200">
+            <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4">
                 <div className="flex">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-amber-400 flex-shrink-0" />
+                    <ExclamationTriangleIcon className="h-5 w-5 text-[var(--te-text-dim)] flex-shrink-0" />
                     <div className="ml-3">
-                        <p className="text-sm text-amber-800">
+                        <p className="text-sm text-[var(--te-text-dim)]">
                             You will need to verify your new email address before the change takes effect.
                             A verification code will be sent to your new email.
                         </p>
@@ -71,10 +71,10 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
             </div>
 
             {error && (
-                <div className="mb-6 rounded-xl bg-red-50 p-4 border border-red-200">
+                <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
                     <div className="flex">
                         <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0" />
-                        <p className="ml-3 text-sm text-red-800">{error}</p>
+                        <p className="ml-3 text-sm text-red-800 dark:text-red-200">{error}</p>
                     </div>
                 </div>
             )}
@@ -82,37 +82,37 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Current email (read-only) */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                         Current Email
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                            <EnvelopeIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                         </div>
                         <input
                             type="email"
                             value={currentEmail}
                             disabled
-                            className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed"
+                            className="te-input pl-12 bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] cursor-not-allowed"
                         />
                     </div>
                 </div>
 
                 {/* New email */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                         New Email Address *
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                            <EnvelopeIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                         </div>
                         <input
                             type="email"
                             required
                             value={newEmail}
                             onChange={(e) => setNewEmail(e.target.value)}
-                            className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            className="te-input pl-12"
                             placeholder="new@example.com"
                         />
                     </div>
@@ -120,23 +120,23 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
 
                 {/* Password confirmation */}
                 <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                         Confirm Password *
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                            <LockClosedIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                         </div>
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            className="te-input pl-12"
                             placeholder="Enter your password"
                         />
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-[var(--te-text-dim)]">
                         Enter your password to confirm this change
                     </p>
                 </div>
@@ -146,14 +146,14 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+                        className="te-btn-secondary flex-1"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        className="te-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {loading ? (
                             <div className="flex items-center gap-2">
@@ -161,11 +161,11 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
-                                <span>Sending...</span>
+                                <span>Sending…</span>
                             </div>
                         ) : (
                             <>
-                                <span>Request Change</span>
+                                <span>Request change</span>
                                 <CheckCircleIcon className="h-5 w-5" />
                             </>
                         )}

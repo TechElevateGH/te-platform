@@ -8,25 +8,17 @@ import {
     XMarkIcon,
     PlayCircleIcon,
     ArrowRightIcon
-} from '@heroicons/react/20/solid'
+} from 'icons'
 import axiosInstance from "../../axiosConfig";
 import { useAuth } from "../../context/AuthContext";
 import { Loading } from "../_custom/Loading";
 
 const INTERVIEW_TYPES = [
-    { id: 'system_design', name: 'System Design', duration: 55, description: 'Architecture & system design', color: 'blue' },
-    { id: 'behavioral', name: 'Behavioral', duration: 20, description: 'STAR method questions', color: 'green' },
-    { id: 'coding', name: 'Coding', duration: 55, description: 'Live coding & algorithms', color: 'orange' },
-    { id: 'one_on_one', name: '1-on-1 Mentorship', duration: 20, description: 'General questions & mentorship', color: 'purple' },
+    { id: 'system_design', name: 'System Design', duration: 55, description: 'Architecture & system design', color: 'mono' },
+    { id: 'behavioral', name: 'Behavioral', duration: 20, description: 'STAR method questions', color: 'mono' },
+    { id: 'coding', name: 'Coding', duration: 55, description: 'Live coding & algorithms', color: 'mono' },
+    { id: 'one_on_one', name: '1-on-1 Mentorship', duration: 20, description: 'General questions & mentorship', color: 'mono' },
 ];
-
-const TYPE_COLORS = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
-    green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
-    indigo: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300',
-    orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300',
-};
 
 const PREP_VIDEO_URL = "https://www.youtube.com/watch?v=FYUXYcJfOMM";
 
@@ -223,13 +215,14 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
 
     if (submitSuccess) {
         return (
-            <div className="py-6">
-                <div className="flex flex-col items-center text-center">
-                    <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
-                        <CheckCircleIcon className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+            <div className="py-8">
+                <div className="te-panel p-6">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                        <CheckCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Meeting Scheduled!</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+                    <p className="te-eyebrow">{'// submitted'}</p>
+                    <h3 className="mt-2 font-mono text-lg font-semibold text-[var(--te-text)]">Meeting scheduled</h3>
+                    <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--te-text-dim)]">
                         Your {sessionType === 'one_on_one' ? '1-on-1 session' : 'mock interview'} request has been submitted. You&apos;ll receive a confirmation email once a volunteer is assigned.
                     </p>
                 </div>
@@ -241,17 +234,18 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
     if (!hasWatchedVideo && sessionType !== 'one_on_one') {
         return (
             <div className="space-y-6">
-                <div className="text-left">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-                        Before You Schedule
+                <div>
+                    <span className="te-eyebrow">{'// prerequisite'}</span>
+                    <h3 className="mt-2 font-mono text-base font-semibold text-[var(--te-text)]">
+                        Before you schedule
                     </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--te-text-dim)]">
                         Please watch this interview preparation video first. It covers essential tips that will help you make the most of your mock interview session.
                     </p>
                 </div>
 
                 {/* Video Embed */}
-                <div className="aspect-video w-full rounded-lg overflow-hidden bg-gray-900">
+                <div className="aspect-video w-full overflow-hidden rounded-lg border border-[var(--te-border)] bg-black">
                     <iframe
                         src="https://www.youtube.com/embed/FYUXYcJfOMM?t=1836"
                         title="Interview Preparation Video"
@@ -267,7 +261,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                         href={PREP_VIDEO_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        className="te-link inline-flex items-center gap-1.5 text-sm"
                     >
                         <PlayCircleIcon className="h-4 w-4" />
                         Open in YouTube
@@ -275,7 +269,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                     <button
                         type="button"
                         onClick={() => setHasWatchedVideo(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="te-btn-primary te-btn-sm"
                     >
                         Continue to Schedule
                         <ArrowRightIcon className="h-4 w-4" />
@@ -290,30 +284,29 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
             {/* Interview Type Selection - Only show for mock interviews */}
             {sessionType !== 'one_on_one' && (
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-3">
+                    <label className="mb-3 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                         Interview Type
                     </label>
                     <div className="grid grid-cols-3 gap-3">
                         {availableInterviewTypes.map((type) => {
                             const isSelected = formData.interview_type === type.id;
-                            const colorClasses = TYPE_COLORS[type.color];
                             return (
                                 <button
                                     key={type.id}
                                     type="button"
                                     onClick={() => handleInputChange('interview_type', type.id)}
-                                    className={`relative p-3 rounded-lg border text-left transition-all ${isSelected
-                                        ? colorClasses
-                                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                    className={`relative rounded-lg border p-3 text-left transition-colors ${isSelected
+                                        ? 'border-[var(--te-primary)] bg-[var(--te-primary)] text-[var(--te-on-primary)]'
+                                        : 'border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text)] hover:bg-[var(--te-hover)]'
                                         }`}
                                 >
                                     {isSelected && (
                                         <CheckCircleIcon className="absolute top-2 right-2 h-4 w-4" />
                                     )}
-                                    <p className={`text-sm font-medium ${isSelected ? '' : 'text-gray-900 dark:text-white'}`}>
+                                    <p className="font-mono text-sm font-medium">
                                         {type.name}
                                     </p>
-                                    <p className={`text-xs mt-0.5 ${isSelected ? 'opacity-80' : 'text-gray-500 dark:text-gray-400'}`}>
+                                    <p className={`mt-1 text-xs ${isSelected ? 'opacity-80' : 'text-[var(--te-text-dim)]'}`}>
                                         {type.duration} min
                                     </p>
                                 </button>
@@ -322,9 +315,9 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                     </div>
 
                     {/* Duration Info */}
-                    <div className="flex items-start gap-2 mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <InformationCircleIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                    <div className="mt-3 flex items-start gap-2 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                        <InformationCircleIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-[var(--te-text-dim)] text-left">
                             {selectedType?.name} sessions are {selectedType?.duration} minutes long.
                             {selectedType?.id === 'behavioral' && ' Focus on past experiences using the STAR method.'}
                         </p>
@@ -334,10 +327,10 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
 
             {/* Timeslot Selection */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-2">
-                    Select Timeslot <span className="text-red-500">*</span>
+                <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
+                    Select Timeslot <span className="text-[var(--te-text-dim)]">*</span>
                 </label>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-left">
+                <p className="text-xs text-[var(--te-text-dim)] mb-3 text-left">
                     Times shown in your timezone: {userTimezone}
                 </p>
 
@@ -346,18 +339,18 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                         <Loading />
                     </div>
                 ) : availableTimeslots.length === 0 ? (
-                    <div className="flex flex-col items-center py-8 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
-                            <CalendarIcon className="h-6 w-6 text-gray-400" />
+                    <div className="te-panel flex flex-col items-center py-8">
+                        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)]">
+                            <CalendarIcon className="h-6 w-6 text-[var(--te-text-dim)]" />
                         </div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">No timeslots available</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Check back later for new slots</p>
+                        <p className="text-sm font-medium text-[var(--te-text-dim)]">No timeslots available</p>
+                        <p className="text-xs text-[var(--te-text-dim)] mt-1">Check back later for new slots</p>
                     </div>
                 ) : (
-                    <div className="space-y-4 max-h-56 overflow-y-auto">
+                    <div className="max-h-56 space-y-4 overflow-y-auto te-scroll">
                         {Object.entries(groupedTimeslots).sort(([a], [b]) => a.localeCompare(b)).map(([date, slots]) => (
                             <div key={date}>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 text-left">
+                                <p className="mb-2 font-mono text-xs font-medium text-[var(--te-text-dim)]">
                                     {formatDate(date)}
                                 </p>
                                 <div className="flex flex-wrap gap-2">
@@ -368,12 +361,12 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                                                 key={slot.id}
                                                 type="button"
                                                 onClick={() => handleInputChange('timeslot_id', slot.id)}
-                                                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-all ${isSelected
-                                                    ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-600 text-blue-700 dark:text-blue-300'
-                                                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500'
+                                                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 font-mono text-sm transition-colors ${isSelected
+                                                    ? 'border-[var(--te-primary)] bg-[var(--te-primary)] text-[var(--te-on-primary)]'
+                                                    : 'border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text)] hover:bg-[var(--te-hover)]'
                                                     }`}
                                             >
-                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400'}`} />
+                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
                                                 <span className="font-medium">{formatTime(slot.start_time, slot.date)} - {calculateEndTime(slot.start_time, slot.date, formData.interview_type)}</span>
                                             </button>
                                         );
@@ -388,10 +381,10 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
             {/* Pending Companies - Only for mock interviews */}
             {sessionType !== 'one_on_one' && (
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
-                        Pending Interviews <span className="text-red-500">*</span>
+                    <label className="mb-1 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
+                        Pending Interviews <span className="text-[var(--te-text-dim)]">*</span>
                     </label>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-left mb-3">
+                    <p className="text-xs text-[var(--te-text-dim)] text-left mb-3">
                         List companies you have upcoming interviews with
                     </p>
 
@@ -402,12 +395,12 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                             onChange={(e) => setCompanyInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="e.g., Google, Microsoft"
-                            className="flex-1 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="te-input flex-1"
                         />
                         <button
                             type="button"
                             onClick={addCompany}
-                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors border border-gray-200 dark:border-gray-600"
+                            className="te-btn-secondary"
                         >
                             Add
                         </button>
@@ -418,13 +411,13 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                             {formData.pending_companies.map((company, index) => (
                                 <span
                                     key={index}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-md"
+                                    className="te-chip"
                                 >
                                     {company}
                                     <button
                                         type="button"
                                         onClick={() => removeCompany(company)}
-                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                                        className="text-[var(--te-text-dim)] hover:text-[var(--te-text-dim)]"
                                     >
                                         <XMarkIcon className="h-3.5 w-3.5" />
                                     </button>
@@ -440,18 +433,18 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                 {/* Earliest Interview Date - Only for mock interviews */}
                 {sessionType !== 'one_on_one' && (
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
-                            Earliest Interview Date <span className="text-red-500">*</span>
+                        <label className="mb-1 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
+                            Earliest Interview Date <span className="text-[var(--te-text-dim)]">*</span>
                         </label>
                         <input
                             type="date"
                             value={formData.earliest_interview_date}
                             onChange={(e) => handleInputChange('earliest_interview_date', e.target.value)}
                             min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-left"
+                            className="te-input"
                             required
                         />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 text-left mt-1">
+                        <p className="text-xs text-[var(--te-text-dim)] text-left mt-1">
                             When is your earliest real interview? This helps us prioritize.
                         </p>
                     </div>
@@ -459,9 +452,9 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
 
                 {/* Additional Notes / Discussion Summary */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left mb-1">
+                    <label className="mb-1 block font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[var(--te-text-dim)]">
                         {sessionType === 'one_on_one' ? 'Discussion Summary' : 'Additional Notes'}
-                        {sessionType === 'one_on_one' ? <span className="text-red-500"> *</span> : <span className="text-gray-400 font-normal"> (Optional)</span>}
+                        {sessionType === 'one_on_one' ? <span className="text-[var(--te-text-dim)]"> *</span> : <span className="text-[var(--te-text-dim)] font-normal"> (Optional)</span>}
                     </label>
                     <textarea
                         value={formData.member_notes}
@@ -470,7 +463,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                             ? "What would you like to discuss? (career advice, resume review, etc.)"
                             : "Any specific areas you want to focus on..."}
                         rows={3}
-                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        className="te-textarea"
                         required={sessionType === 'one_on_one'}
                     />
                 </div>
@@ -478,9 +471,9 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
 
             {/* Error Message */}
             {submitError && (
-                <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <ExclamationTriangleIcon className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-red-700 dark:text-red-300 text-left">{submitError}</p>
+                <div className="flex items-start gap-2 p-3 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg">
+                    <ExclamationTriangleIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-[var(--te-text)] text-left">{submitError}</p>
                 </div>
             )}
 
@@ -490,7 +483,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        className="te-btn-ghost"
                     >
                         Cancel
                     </button>
@@ -498,7 +491,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                 <button
                     type="submit"
                     disabled={isSubmitting || !formData.timeslot_id || (sessionType === 'one_on_one' && !formData.member_notes.trim()) || (sessionType !== 'one_on_one' && (formData.pending_companies.length === 0 || !formData.earliest_interview_date))}
-                    className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {isSubmitting ? 'Scheduling...' : sessionType === 'one_on_one' ? 'Schedule Session' : 'Schedule Meeting'}
                 </button>

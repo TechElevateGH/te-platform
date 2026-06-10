@@ -13,7 +13,7 @@ def send_email(
     email_to: str,
     subject_template: str = "",
     html_template: str = "",
-    environment: dict[str, Any] = {},
+    environment: dict[str, Any] | None = None,
 ) -> bool:
     """
     Send an email using SMTP configuration.
@@ -23,6 +23,9 @@ def send_email(
     if not settings.EMAILS_ENABLED:
         logger.warning(f"Emails disabled - skipping email to {email_to}")
         return False
+
+    if environment is None:
+        environment = {}
 
     try:
         message = emails.Message(

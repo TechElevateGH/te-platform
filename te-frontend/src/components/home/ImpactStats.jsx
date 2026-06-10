@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
     GlobeAltIcon,
     TrophyIcon,
     HeartIcon,
-} from '@heroicons/react/24/outline';
-import { ChartBarIcon } from '@heroicons/react/24/solid';
+} from 'icons';
 
 const stats = [
     {
@@ -13,8 +14,7 @@ const stats = [
         value: 60,
         suffix: '+',
         icon: TrophyIcon,
-        color: 'from-purple-500 to-pink-500',
-        description: 'Our people who landed their dream jobs',
+        description: 'Members who landed their dream jobs',
     },
     {
         id: 1,
@@ -22,7 +22,6 @@ const stats = [
         value: 5,
         suffix: '+',
         icon: GlobeAltIcon,
-        color: 'from-orange-500 to-red-500',
         description: 'Global presence across continents',
     },
     {
@@ -31,7 +30,6 @@ const stats = [
         value: 110,
         suffix: '+',
         icon: HeartIcon,
-        color: 'from-rose-500 to-pink-500',
         description: 'Active community participants',
     },
 ];
@@ -47,9 +45,7 @@ const AnimatedNumber = ({ value, duration = 2000 }) => {
             if (!startTime) startTime = timestamp;
             const progress = timestamp - startTime;
             const percentage = Math.min(progress / duration, 1);
-
             setCount(Math.floor(value * percentage));
-
             if (percentage < 1) {
                 animationFrame = requestAnimationFrame(animate);
             }
@@ -64,6 +60,8 @@ const AnimatedNumber = ({ value, duration = 2000 }) => {
 
 const ImpactStats = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -88,85 +86,56 @@ const ImpactStats = () => {
     }, []);
 
     return (
-        <div id="impact" className="relative bg-white dark:bg-gray-900 py-24 sm:py-32 overflow-hidden transition-colors">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-500/20 dark:to-cyan-500/20 rounded-full blur-3xl opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl opacity-50"></div>
-            </div>
-
-            <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        <section id="impact" className="bg-[var(--te-bg)] py-24 sm:py-28 border-b border-[var(--te-border)]">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section header */}
-                <div className="mx-auto max-w-2xl text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border border-blue-100 dark:border-blue-800 mb-4">
-                        <ChartBarIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Our Impact</span>
-                    </div>
-                    <h2 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
-                        Making a{' '}
-                        <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                            real difference
-                        </span>
+                <div className="max-w-2xl mb-14">
+                    <span className="te-eyebrow">{'// impact'}</span>
+                    <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--te-text)]">
+                        Real people, real outcomes
                     </h2>
-                    <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-                        Our platform empowers talented individuals to achieve their dreams in the tech industry.
+                    <p className="mt-4 text-base sm:text-lg leading-relaxed text-[var(--te-text-dim)]">
+                        Every number here is a person who found their path into tech through TechElevate.
                     </p>
                 </div>
 
-                {/* Stats layout */}
-                <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-8">
-                    {stats.map((stat, index) => (
-                        <div
-                            key={stat.id}
-                            className="group relative flex-1 min-w-[240px] max-w-xs"
-                            style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                            <div className="relative flex h-full w-full flex-col items-center justify-start bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden p-8 text-center hover:-translate-y-3 group-hover:bg-gradient-to-br group-hover:from-gray-900 group-hover:to-gray-800 group-hover:border-transparent">
-                                {/* Icon */}
-                                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${stat.color} mb-6 shadow-lg group-hover:scale-125 group-hover:shadow-2xl transition-all duration-300`}>
-                                    <stat.icon className="h-8 w-8 text-white" />
-                                </div>
-
-                                {/* Number */}
-                                <div className={`text-5xl font-bold mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-300`}>
-                                    {isVisible && <AnimatedNumber value={stat.value} />}
-                                    {stat.suffix}
-                                </div>
-
-                                {/* Label */}
-                                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-white group-hover:font-extrabold transition-all duration-300">
-                                    {stat.name}
-                                </div>
-
-                                {/* Description */}
-                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed group-hover:text-gray-100 group-hover:font-semibold transition-all duration-300">
-                                    {stat.description}
-                                </p>
-
-                                {/* Decorative gradient border */}
-                                <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br ${stat.color} -z-10 blur-2xl`}></div>
+                {/* Stats grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)]">
+                    {stats.map((stat) => (
+                        <div key={stat.id} className="bg-[var(--te-surface)] p-8">
+                            <div className="flex items-center justify-between">
+                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
+                                    <stat.icon className="h-5 w-5" strokeWidth={1.8} />
+                                </span>
                             </div>
+                            <div className="mt-6 font-mono text-5xl font-bold tracking-tight text-[var(--te-text)]">
+                                {isVisible ? <AnimatedNumber value={stat.value} /> : 0}
+                                {stat.suffix}
+                            </div>
+                            <div className="mt-3 text-base font-semibold text-[var(--te-text)]">
+                                {stat.name}
+                            </div>
+                            <p className="mt-1 text-sm leading-relaxed text-[var(--te-text-dim)]">
+                                {stat.description}
+                            </p>
                         </div>
                     ))}
                 </div>
 
-                {/* Bottom section */}
-                <div className="mt-20 text-center">
-                    <div className="inline-flex flex-col gap-4">
-                        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                            These numbers represent <span className="font-semibold text-gray-900 dark:text-white">real people</span> with
-                            <span className="font-semibold text-gray-900 dark:text-white"> real dreams</span> who found their path through TechElevate.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-4">
-                            <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-                                Be Part of Our Impact
-                            </button>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Join us in changing lives</span>
-                        </div>
-                    </div>
+                {/* Bottom CTA */}
+                <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <button
+                        onClick={() => navigate(isAuthenticated ? '/workspace' : '/register')}
+                        className="te-btn-primary te-btn-lg"
+                    >
+                        Be part of our impact <span aria-hidden="true">→</span>
+                    </button>
+                    <span className="font-mono text-xs text-[var(--te-text-dim)]">
+                        {'// join us in changing lives'}
+                    </span>
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

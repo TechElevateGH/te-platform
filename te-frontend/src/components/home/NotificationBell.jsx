@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNotifications } from '../../context/NotificationContext';
-import { BellIcon, CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { BellAlertIcon } from '@heroicons/react/24/solid';
+import { BellIcon, CheckIcon, TrashIcon } from 'icons';
+import { BellAlertIcon } from 'icons';
 
 const NotificationBell = () => {
     const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
@@ -70,13 +70,13 @@ const NotificationBell = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group"
+                className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
                 title="Notifications"
             >
                 {unreadCount > 0 ? (
                     <BellAlertIcon className="h-6 w-6 text-red-600 dark:text-red-400 animate-pulse" />
                 ) : (
-                    <BellIcon className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+                    <BellIcon className="h-6 w-6 text-slate-600 dark:text-slate-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
                 )}
 
                 {unreadCount > 0 && (
@@ -90,11 +90,11 @@ const NotificationBell = () => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in-down">
+                <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 animate-fade-in-down">
                     {/* Header */}
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                                 Notifications
                                 {unreadCount > 0 && (
                                     <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full">
@@ -115,7 +115,7 @@ const NotificationBell = () => {
                                     )}
                                     <button
                                         onClick={clearAll}
-                                        className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                        className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
                                         title="Clear all"
                                     >
                                         <TrashIcon className="h-4 w-4" />
@@ -129,26 +129,26 @@ const NotificationBell = () => {
                     <div className="max-h-96 overflow-y-auto">
                         {notifications.filter(n => !n.read).length === 0 ? (
                             <div className="px-4 py-8 text-center">
-                                <BellIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No notifications</p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">You're all caught up!</p>
+                                <BellIcon className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No notifications</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">You're all caught up!</p>
                             </div>
                         ) : (
                             notifications.filter(n => !n.read).map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 transition-colors bg-red-50/50 dark:bg-red-900/10"
+                                    className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 transition-colors bg-red-50/50 dark:bg-red-900/10"
                                 >
                                     <div className="flex items-start gap-3">
                                         <span className="flex-shrink-0 mt-1.5 h-2 w-2 rounded-full bg-red-600"></span>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
+                                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-0.5">
                                                 {notification.title}
                                             </p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                            <p className="text-xs text-slate-600 dark:text-slate-300 mb-1">
                                                 {notification.message}
                                             </p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                                            <p className="text-xs text-slate-400 dark:text-slate-500">
                                                 {formatTimestamp(notification.timestamp)}
                                             </p>
                                         </div>

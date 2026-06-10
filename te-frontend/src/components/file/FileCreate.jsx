@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BriefcaseIcon } from '@heroicons/react/20/solid'
+import { BriefcaseIcon } from 'icons'
 import axiosInstance from "../../axiosConfig";
 import { useData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
@@ -116,10 +116,10 @@ const FileCreate = ({ setFileUpload }) => {
                         }
 
                         {/* Continuous Upload Toggle */}
-                        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex items-start justify-between gap-4">
+                        <div className="te-card flex items-start justify-between gap-4 p-4">
                             <div>
-                                <p className="text-sm font-semibold text-gray-900 dark:text-white">Keep uploader open</p>
-                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Stay on this form after a successful upload so you can immediately add another file.</p>
+                                <p className="text-sm font-semibold text-[var(--te-text)]">Keep uploader open</p>
+                                <p className="text-xs text-[var(--te-text-dim)] mt-1">Stay on this form after a successful upload so you can immediately add another file.</p>
                             </div>
                             <label className="inline-flex items-center cursor-pointer select-none">
                                 <span className="sr-only">Toggle continuous uploads</span>
@@ -130,8 +130,8 @@ const FileCreate = ({ setFileUpload }) => {
                                     onChange={(event) => setContinueUploading(event.target.checked)}
                                     disabled={isSubmitting}
                                 />
-                                <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${continueUploading ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'} ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}>
-                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ${continueUploading ? 'translate-x-5' : 'translate-x-1'}`} />
+                                <span className={`relative inline-flex h-6 w-11 items-center rounded-md transition-colors duration-200 ${continueUploading ? 'bg-[var(--te-text)]' : 'bg-[var(--te-surface-alt)]'} ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                    <span className={`inline-block h-5 w-5 transform rounded-md bg-[var(--te-surface)] shadow-sm transition-transform duration-200 ${continueUploading ? 'translate-x-5' : 'translate-x-1'}`} />
                                 </span>
                             </label>
                         </div>
@@ -141,7 +141,7 @@ const FileCreate = ({ setFileUpload }) => {
                                 <>
                                     {/* File Upload */}
                                     <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                             {fileData.document_type} File
                                         </h3>
                                         <FileUpload
@@ -151,14 +151,14 @@ const FileCreate = ({ setFileUpload }) => {
                                             required={true}
                                             accept=".pdf"
                                         />
-                                        <p className="text-xs text-gray-500 font-medium">
+                                        <p className="text-xs text-[var(--te-text-dim)] font-medium">
                                             Only PDF files are accepted
                                         </p>
                                     </div>
 
                                     {/* Role Field */}
                                     <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                             Role Information
                                         </h3>
                                         <SelectCombobox
@@ -170,28 +170,28 @@ const FileCreate = ({ setFileUpload }) => {
                                             icon={BriefcaseIcon}
                                             required={true}
                                         />
-                                        <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                                        <p className="mt-1.5 text-xs text-[var(--te-text-dim)] font-medium">
                                             What position is this resume tailored for?
                                         </p>
                                     </div>
 
                                     {/* Notes Field */}
                                     <div className="space-y-4">
-                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
                                             Additional Notes
                                         </h3>
                                         <div className="relative">
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                                Notes <span className="text-gray-400 text-xs font-normal">(Optional)</span>
+                                            <label className="block text-sm font-semibold text-[var(--te-text-dim)] mb-2">
+                                                Notes <span className="text-[var(--te-text-dim)] text-xs font-normal">(Optional)</span>
                                             </label>
                                             <textarea
                                                 value={fileData.notes}
                                                 onChange={(e) => handleInputChange({ field: 'notes', value: e.target.value })}
                                                 placeholder="Add any notes about this resume version..."
                                                 rows={4}
-                                                className="w-full px-4 py-2.5 bg-surface dark:bg-surface border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-te-cyan focus:border-transparent transition-all text-sm font-medium resize-none"
+                                                className="te-textarea resize-none"
                                             />
-                                            <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                                            <p className="mt-1.5 text-xs text-[var(--te-text-dim)] font-medium">
                                                 Example: Updated for tech companies, emphasized ML projects
                                             </p>
                                         </div>

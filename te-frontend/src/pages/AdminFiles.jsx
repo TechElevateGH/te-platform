@@ -15,7 +15,7 @@ import {
     UserCircleIcon,
     CheckCircleIcon,
     ClockIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const AdminFiles = () => {
     const { accessToken, userRole } = useAuth();
@@ -293,24 +293,32 @@ const AdminFiles = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <Loading />
+            <div className="flex min-h-screen items-center justify-center bg-[var(--te-bg)]">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                        <FolderIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
+                    </div>
+                    <Loading />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
+        <div className="min-h-screen h-full bg-[var(--te-bg)] transition-colors">
             {/* Header with Stats and Actions */}
-            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between gap-4">
+            <header className="sticky top-0 z-10 border-b border-[var(--te-border)] bg-[var(--te-surface)] transition-colors">
+                <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h1 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <FolderIcon className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                            <p className="te-eyebrow mb-2">{'// files'}</p>
+                            <h1 className="flex items-center gap-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">
+                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                    <FolderIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                </span>
                                 Member Files & Resume Reviews
                             </h1>
-                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--te-text-dim)]">
                                 Manage member files, essays, and assign resume review requests
                             </p>
                         </div>
@@ -321,7 +329,7 @@ const AdminFiles = () => {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                    className="te-btn-secondary te-btn-sm"
                                 >
                                     <EyeIcon className="h-4 w-4" />
                                     Columns ({visibleColumnCount}/{columnConfig.length})
@@ -334,15 +342,15 @@ const AdminFiles = () => {
                                             onClick={() => setShowColumnSelector(false)}
                                         />
 
-                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
-                                            <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                                        <div className="absolute right-0 mt-2 w-64 bg-[var(--te-surface)] border border-[var(--te-border)] rounded-lg  z-20">
+                                            <div className="p-3 border-b border-[var(--te-border)]">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                                                    <h3 className="text-sm font-bold text-[var(--te-text)]">
                                                         Manage Columns
                                                     </h3>
                                                     <button
                                                         onClick={() => setShowColumnSelector(false)}
-                                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                        className="te-icon-btn"
                                                     >
                                                         <XMarkIcon className="h-4 w-4" />
                                                     </button>
@@ -350,13 +358,13 @@ const AdminFiles = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={showAllColumns}
-                                                        className="flex-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                                        className="te-btn-ghost te-btn-sm flex-1"
                                                     >
                                                         Show All
                                                     </button>
                                                     <button
                                                         onClick={resetColumns}
-                                                        className="flex-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors"
+                                                        className="te-btn-secondary te-btn-sm flex-1"
                                                     >
                                                         Reset
                                                     </button>
@@ -367,15 +375,15 @@ const AdminFiles = () => {
                                                 {columnConfig.map(column => (
                                                     <label
                                                         key={column.key}
-                                                        className="flex items-center gap-2 px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer transition-colors"
+                                                        className="flex items-center gap-2 px-2 py-2 hover:bg-[var(--te-hover)] rounded cursor-pointer transition-colors"
                                                     >
                                                         <input
                                                             type="checkbox"
                                                             checked={visibleColumns[column.key]}
                                                             onChange={() => toggleColumn(column.key)}
-                                                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
+                                                            className="h-4 w-4 text-[var(--te-text)] border-[var(--te-border)] rounded focus:ring-2 focus:ring-[var(--te-ring)]"
                                                         />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
+                                                        <span className="text-sm text-[var(--te-text)] flex-1">
                                                             {column.label}
                                                         </span>
                                                     </label>
@@ -389,7 +397,7 @@ const AdminFiles = () => {
                             <button
                                 onClick={exportToCSV}
                                 disabled={sortedUsers.length === 0}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="te-btn-secondary te-btn-sm"
                             >
                                 <ArrowDownTrayIcon className="h-4 w-4" />
                                 Export CSV
@@ -400,14 +408,14 @@ const AdminFiles = () => {
             </header>
 
             {/* Tabs */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[72px] z-10">
-                <div className="max-w-7xl mx-auto px-4">
-                    <nav className="flex gap-4">
+            <div className="sticky top-[105px] z-10 border-b border-[var(--te-border)] bg-[var(--te-surface)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <nav className="flex gap-2 py-3">
                         <button
                             onClick={() => setActiveTab('files')}
-                            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'files'
-                                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            className={`te-btn-sm ${activeTab === 'files'
+                                ? 'te-btn-primary'
+                                : 'te-btn-secondary'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
@@ -417,16 +425,16 @@ const AdminFiles = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('reviews')}
-                            className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'reviews'
-                                ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                            className={`te-btn-sm ${activeTab === 'reviews'
+                                ? 'te-btn-primary'
+                                : 'te-btn-secondary'
                                 }`}
                         >
                             <div className="flex items-center gap-2">
                                 <DocumentTextIcon className="h-4 w-4" />
                                 Resume Reviews
                                 {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
-                                    <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full">
+                                    <span className="te-chip text-xs">
                                         {resumeReviews.filter(r => r.status === 'Pending').length}
                                     </span>
                                 )}
@@ -436,42 +444,48 @@ const AdminFiles = () => {
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
                 {activeTab === 'files' && (
                     <>
                         {/* Stats Bar for Member Files */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="flex items-center gap-6 flex-wrap text-xs">
-                                <div className="flex items-center gap-2">
-                                    <UserGroupIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Members:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{stats.totalUsers}</span>
+                        <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] md:grid-cols-4">
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <UserGroupIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Members</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">Resumes:</span>
-                                    <span className="font-bold text-blue-700 dark:text-blue-400">{stats.totalResumes}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalUsers}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <DocumentIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Resumes</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentIcon className="h-4 w-4 text-purple-500" />
-                                    <span className="font-medium text-purple-600 dark:text-purple-400">Essays:</span>
-                                    <span className="font-bold text-purple-700 dark:text-purple-400">{stats.totalEssays}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalResumes}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <DocumentIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Essays</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <ChartBarIcon className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-600 dark:text-green-400">Total Files:</span>
-                                    <span className="font-bold text-green-700 dark:text-green-400">{stats.totalFiles}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalEssays}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <ChartBarIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Total Files</span>
                                 </div>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalFiles}</span>
                             </div>
                         </div>
 
                         {/* Filters Bar */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
+                        <div className="te-card p-3 mb-3 transition-colors">
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                                 {/* Member Filter */}
                                 <div className="md:col-span-5">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    <label className="block text-xs font-medium text-[var(--te-text-dim)] mb-1.5">
                                         Member Name or Email
                                     </label>
                                     <input
@@ -479,19 +493,19 @@ const AdminFiles = () => {
                                         placeholder="Filter by member name or email..."
                                         value={memberFilter}
                                         onChange={(e) => setMemberFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        className="te-input"
                                     />
                                 </div>
 
                                 {/* File Type Filter */}
                                 <div className="md:col-span-3">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    <label className="block text-xs font-medium text-[var(--te-text-dim)] mb-1.5">
                                         File Type
                                     </label>
                                     <select
                                         value={fileTypeFilter}
                                         onChange={(e) => setFileTypeFilter(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        className="te-select"
                                     >
                                         <option value="">All Types</option>
                                         <option value="resume">Resumes Only</option>
@@ -501,13 +515,13 @@ const AdminFiles = () => {
 
                                 {/* Sort Dropdown */}
                                 <div className="md:col-span-4">
-                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1.5">
+                                    <label className="block text-xs font-medium text-[var(--te-text-dim)] mb-1.5">
                                         Sort by
                                     </label>
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 transition-colors"
+                                        className="te-select"
                                     >
                                         <option value="name_asc">Name (A-Z)</option>
                                         <option value="name_desc">Name (Z-A)</option>
@@ -521,22 +535,22 @@ const AdminFiles = () => {
 
                             {/* Active Filters & Clear */}
                             {hasActiveFilters && (
-                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <div className="mt-3 pt-3 border-t border-[var(--te-border)] flex items-center justify-between">
                                     <div className="flex items-center gap-2 flex-wrap">
                                         {memberFilter && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            <span className="inline-flex items-center gap-1 te-chip text-xs">
                                                 Member: {memberFilter}
                                             </span>
                                         )}
                                         {fileTypeFilter && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                                            <span className="inline-flex items-center gap-1 te-chip text-xs">
                                                 Type: {fileTypeFilter === 'resume' ? 'Resumes' : 'Essays'}
                                             </span>
                                         )}
                                     </div>
                                     <button
                                         onClick={clearAllFilters}
-                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                        className="te-btn-danger te-btn-sm"
                                     >
                                         <XMarkIcon className="h-3.5 w-3.5" />
                                         Clear All
@@ -545,7 +559,7 @@ const AdminFiles = () => {
                             )}
 
                             {/* Results Count */}
-                            <div className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
+                            <div className="mt-3 font-mono text-xs font-medium uppercase tracking-wide text-[var(--te-text-dim)]">
                                 Showing {sortedUsers.length} of {users.filter(u => u.resumes?.length > 0 || u.essays?.length > 0).length} members with files
                             </div>
                         </div>
@@ -553,10 +567,10 @@ const AdminFiles = () => {
                         {/* Mobile Member Cards */}
                         <div className="space-y-3 md:hidden">
                             {sortedUsers.length === 0 ? (
-                                <div className="border border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 p-6 text-center">
-                                    <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">No files found</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Try adjusting your filters</p>
+                                <div className="border border-dashed border-[var(--te-border)] rounded-lg bg-[var(--te-surface)] p-6 text-center">
+                                    <FolderIcon className="h-8 w-8 text-[var(--te-text-dim)] mx-auto mb-2" />
+                                    <p className="text-sm font-semibold text-[var(--te-text)]">No files found</p>
+                                    <p className="text-xs text-[var(--te-text-dim)]">Try adjusting your filters</p>
                                 </div>
                             ) : (
                                 sortedUsers.map(user => {
@@ -568,7 +582,7 @@ const AdminFiles = () => {
                                         <div
                                             key={user.id}
                                             onClick={() => handleOpenMemberModal(user)}
-                                            className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 space-y-3 cursor-pointer transition hover:border-blue-300 dark:hover:border-blue-500"
+                                            className="bg-[var(--te-surface)] rounded-lg border border-[var(--te-border)]  p-4 space-y-3 cursor-pointer transition hover:border-[var(--te-border-strong)] "
                                             role="button"
                                             tabIndex={0}
                                             onKeyDown={(e) => {
@@ -581,38 +595,38 @@ const AdminFiles = () => {
                                         >
                                             <div className="flex items-start justify-between gap-3">
                                                 <div>
-                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.full_name || 'Unnamed Member'}</p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email || 'No email provided'}</p>
+                                                    <p className="text-sm font-semibold text-[var(--te-text)]">{user.full_name || 'Unnamed Member'}</p>
+                                                    <p className="text-xs text-[var(--te-text-dim)]">{user.email || 'No email provided'}</p>
                                                 </div>
-                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400">
+                                                <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-lg bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]">
                                                     {totalFiles} file{totalFiles === 1 ? '' : 's'}
                                                 </span>
                                             </div>
 
                                             <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]">
                                                     Resumes: {resumeCount}
                                                 </span>
-                                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                                                <span className="inline-flex items-center px-2 py-1 rounded-lg bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]">
                                                     Essays: {essayCount}
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center justify-between text-xs">
-                                                <span className="text-gray-500 dark:text-gray-400">Tap to view details</span>
+                                                <span className="text-[var(--te-text-dim)]">Tap to view details</span>
                                                 {resumeCount > 0 ? (
                                                     <a
                                                         href={user.resumes[0].url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 font-semibold"
+                                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--te-surface-alt)] text-[var(--te-text)] font-semibold"
                                                     >
                                                         <EyeIcon className="h-3.5 w-3.5" />
                                                         Latest Resume
                                                     </a>
                                                 ) : (
-                                                    <span className="text-gray-400 dark:text-gray-500">No resumes yet</span>
+                                                    <span className="text-[var(--te-text-dim)]">No resumes yet</span>
                                                 )}
                                             </div>
                                         </div>
@@ -622,50 +636,50 @@ const AdminFiles = () => {
                         </div>
 
                         {/* Files Table */}
-                        <div className="hidden md:block bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+                        <div className="hidden md:block bg-[var(--te-surface)] rounded border border-[var(--te-border)] overflow-hidden transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                                        <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
                                             {visibleColumns.member && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Member
                                                 </th>
                                             )}
                                             {visibleColumns.email && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Email
                                                 </th>
                                             )}
                                             {visibleColumns.resumes && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Resumes
                                                 </th>
                                             )}
                                             {visibleColumns.essays && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Essays
                                                 </th>
                                             )}
                                             {visibleColumns.totalFiles && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Total
                                                 </th>
                                             )}
                                             {visibleColumns.actions && (
-                                                <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                                <th className="px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[var(--te-text)]">
                                                     Actions
                                                 </th>
                                             )}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <tbody className="divide-y divide-[var(--te-border)]">
                                         {sortedUsers.length === 0 ? (
                                             <tr>
                                                 <td colSpan={Math.max(visibleColumnCount, 1)} className="px-3 py-6 text-center">
-                                                    <FolderIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No files found</p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <FolderIcon className="h-8 w-8 text-[var(--te-text-dim)] mx-auto mb-2" />
+                                                    <p className="text-sm font-medium text-[var(--te-text)]">No files found</p>
+                                                    <p className="text-xs text-[var(--te-text-dim)] mt-0.5">
                                                         {users.length === 0
                                                             ? 'No members have uploaded files yet'
                                                             : 'Try adjusting your filters'}
@@ -686,39 +700,39 @@ const AdminFiles = () => {
                                                     tabIndex={0}
                                                     role="button"
                                                     aria-label={`View files for ${user.full_name || 'member'}`}
-                                                    className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
+                                                    className="hover:bg-[var(--te-hover)] transition-all cursor-pointer"
                                                 >
                                                     {visibleColumns.member && (
                                                         <td className="px-3 py-2">
-                                                            <span className="text-xs font-semibold text-gray-900 dark:text-white">
+                                                            <span className="text-xs font-semibold text-[var(--te-text)]">
                                                                 {user.full_name}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.email && (
                                                         <td className="px-3 py-2">
-                                                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                            <span className="text-xs text-[var(--te-text-dim)]">
                                                                 {user.email}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.resumes && (
                                                         <td className="px-3 py-2">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                                                            <span className="te-chip text-xs">
                                                                 {user.resumes?.length || 0}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.essays && (
                                                         <td className="px-3 py-2">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400">
+                                                            <span className="te-chip text-xs">
                                                                 {user.essays?.length || 0}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.totalFiles && (
                                                         <td className="px-3 py-2">
-                                                            <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
+                                                            <span className="te-chip text-xs">
                                                                 {(user.resumes?.length || 0) + (user.essays?.length || 0)}
                                                             </span>
                                                         </td>
@@ -732,14 +746,14 @@ const AdminFiles = () => {
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
                                                                         onClick={(e) => e.stopPropagation()}
-                                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                                                        className="te-btn-ghost te-btn-sm"
                                                                     >
                                                                         <EyeIcon className="h-3.5 w-3.5" />
                                                                         View
                                                                     </a>
                                                                 )}
                                                                 {((user.resumes?.length || 0) + (user.essays?.length || 0)) > 0 && (
-                                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    <span className="text-xs text-[var(--te-text-dim)]">
                                                                         {(user.resumes?.length || 0) + (user.essays?.length || 0)} file{((user.resumes?.length || 0) + (user.essays?.length || 0)) !== 1 ? 's' : ''}
                                                                     </span>
                                                                 )}
@@ -760,82 +774,88 @@ const AdminFiles = () => {
                 {activeTab === 'reviews' && (
                     <>
                         {/* Stats Bar for Resume Reviews */}
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                            <div className="flex items-center gap-6 flex-wrap text-xs">
-                                <div className="flex items-center gap-2">
-                                    <ChartBarIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-medium text-gray-600 dark:text-gray-400">Total Requests:</span>
-                                    <span className="font-bold text-gray-900 dark:text-white">{resumeReviews.length}</span>
+                        <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] md:grid-cols-4">
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <ChartBarIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Requests</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <ClockIcon className="h-4 w-4 text-yellow-500" />
-                                    <span className="font-medium text-yellow-600 dark:text-yellow-400">Pending:</span>
-                                    <span className="font-bold text-yellow-700 dark:text-yellow-400">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.length}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <ClockIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Pending</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <DocumentTextIcon className="h-4 w-4 text-blue-500" />
-                                    <span className="font-medium text-blue-600 dark:text-blue-400">In Review:</span>
-                                    <span className="font-bold text-blue-700 dark:text-blue-400">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <DocumentTextIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">In Review</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                                    <span className="font-medium text-green-600 dark:text-green-400">Completed:</span>
-                                    <span className="font-bold text-green-700 dark:text-green-400">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
+                            </div>
+                            <div className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <CheckCircleIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Completed</span>
                                 </div>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm transition-colors">
+                        <div className="te-card overflow-hidden transition-colors">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-600">
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Member</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Job Title</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Level</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Status</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Submitted</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Reviewer</th>
+                                        <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Member</th>
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Job Title</th>
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Level</th>
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Status</th>
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Submitted</th>
+                                            <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Reviewer</th>
                                             {isAdmin && (
-                                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">Actions</th>
+                                                <th className="px-4 py-3 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">Actions</th>
                                             )}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tbody className="divide-y divide-[var(--te-border)]">
                                         {resumeReviews.length === 0 ? (
                                             <tr>
-                                                <td colSpan={isAdmin ? "7" : "6"} className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                                                <td colSpan={isAdmin ? "7" : "6"} className="px-4 py-12 text-center text-sm text-[var(--te-text-dim)]">
                                                     No resume review requests found
                                                 </td>
                                             </tr>
                                         ) : (
                                             resumeReviews.map((review) => (
-                                                <tr key={review.id} className="hover:bg-purple-50/30 dark:hover:bg-purple-900/10 transition-colors">
+                                                <tr key={review.id} className="hover:bg-[var(--te-hover)] transition-colors">
                                                     <td className="px-4 py-3">
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-900 dark:text-white">{review.user_name}</div>
-                                                            <div className="text-xs text-gray-600 dark:text-gray-400">{review.user_email}</div>
+                                                            <div className="text-sm font-medium text-[var(--te-text)]">{review.user_name}</div>
+                                                            <div className="text-xs text-[var(--te-text-dim)]">{review.user_email}</div>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300">{review.job_title}</span>
+                                                        <span className="text-sm text-[var(--te-text)]">{review.job_title}</span>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex justify-start">
-                                                            <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                                                            <span className="te-chip text-xs">
                                                                 {review.level}
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex justify-start">
-                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${review.status === 'Pending'
-                                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg ${review.status === 'Pending'
+                                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
                                                                 : review.status === 'In Review'
-                                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
                                                                     : review.status === 'Completed'
-                                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
                                                                 }`}>
                                                                 {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
                                                                 {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
@@ -844,10 +864,10 @@ const AdminFiles = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <span className="text-sm text-gray-600 dark:text-gray-400">{review.submitted_date}</span>
+                                                        <span className="text-sm text-[var(--te-text-dim)]">{review.submitted_date}</span>
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                        <span className="text-xs text-[var(--te-text-dim)]">
                                                             {review.reviewer_name || 'Unassigned'}
                                                         </span>
                                                     </td>
@@ -856,7 +876,7 @@ const AdminFiles = () => {
                                                             <div className="flex items-center justify-start gap-2">
                                                                 <button
                                                                     onClick={() => handleViewReview(review)}
-                                                                    className="px-2.5 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                                    className="te-btn-primary te-btn-sm"
                                                                 >
                                                                     <EyeIcon className="h-3.5 w-3.5" />
                                                                     View
@@ -865,7 +885,7 @@ const AdminFiles = () => {
                                                                     <div className="relative">
                                                                         <button
                                                                             onClick={() => setAssigningReview(assigningReview === review.id ? null : review.id)}
-                                                                            className="px-2.5 py-1.5 bg-purple-600 text-white text-xs font-semibold rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                                                                            className="te-btn-primary te-btn-sm"
                                                                         >
                                                                             <UserCircleIcon className="h-3.5 w-3.5" />
                                                                             Assign
@@ -877,17 +897,17 @@ const AdminFiles = () => {
                                                                                     className="fixed inset-0 z-10"
                                                                                     onClick={() => setAssigningReview(null)}
                                                                                 />
-                                                                                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-3 z-20 max-h-64 overflow-y-auto">
-                                                                                    <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-2">Assign to Reviewer</h4>
+                                                                                <div className="absolute right-0 mt-2 w-64 te-card p-3 z-20 max-h-64 overflow-y-auto">
+                                                                                    <h4 className="text-xs font-bold text-[var(--te-text)] mb-2">Assign to Reviewer</h4>
                                                                                     <div className="space-y-1">
                                                                                         {privilegedUsers.map(user => (
                                                                                             <button
                                                                                                 key={user.id}
                                                                                                 onClick={() => handleAssignReview(review.id, user.id, user.full_name)}
-                                                                                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded transition-colors"
+                                                                                                className="w-full text-left px-3 py-2 text-sm text-[var(--te-text)] hover:bg-[var(--te-hover)] rounded transition-colors"
                                                                                             >
                                                                                                 <div className="font-medium">{user.full_name}</div>
-                                                                                                <div className="text-xs text-gray-500 dark:text-gray-400">{user.email}</div>
+                                                                                                <div className="text-xs text-[var(--te-text-dim)]">{user.email}</div>
                                                                                             </button>
                                                                                         ))}
                                                                                     </div>
@@ -914,41 +934,41 @@ const AdminFiles = () => {
             {/* Member Detail Modal */}
             {showMemberModal && selectedMember && (
                 <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
                     onClick={handleCloseMemberModal}
                 >
                     <div
-                        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-2xl w-full border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto"
+                        className="bg-[var(--te-surface)] rounded-lg  max-w-2xl w-full border border-[var(--te-border)] max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-900">
+                        <div className="px-6 py-4 border-b border-[var(--te-border)] flex items-center justify-between sticky top-0 bg-[var(--te-surface)]">
                             <div>
-                                <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Member</p>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedMember.full_name || 'Member Details'}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{selectedMember.email}</p>
+                                <p className="text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Member</p>
+                                <h3 className="text-xl font-bold text-[var(--te-text)]">{selectedMember.full_name || 'Member Details'}</h3>
+                                <p className="text-sm text-[var(--te-text-dim)]">{selectedMember.email}</p>
                             </div>
                             <button
                                 onClick={handleCloseMemberModal}
-                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="te-icon-btn"
                                 aria-label="Close member details"
                             >
-                                <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                <XMarkIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                             </button>
                         </div>
 
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Resumes</p>
-                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{selectedMember.resumes?.length || 0}</p>
+                                <div className="bg-[var(--te-surface-alt)] rounded-lg p-3 border border-[var(--te-border)]">
+                                    <p className="text-xs text-[var(--te-text-dim)]">Resumes</p>
+                                    <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.resumes?.length || 0}</p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Essays</p>
-                                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{selectedMember.essays?.length || 0}</p>
+                                <div className="bg-[var(--te-surface-alt)] rounded-lg p-3 border border-[var(--te-border)]">
+                                    <p className="text-xs text-[var(--te-text-dim)]">Essays</p>
+                                    <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.essays?.length || 0}</p>
                                 </div>
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Files</p>
-                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                <div className="bg-[var(--te-surface-alt)] rounded-lg p-3 border border-[var(--te-border)]">
+                                    <p className="text-xs text-[var(--te-text-dim)]">Total Files</p>
+                                    <p className="text-2xl font-bold text-[var(--te-text)]">
                                         {(selectedMember.resumes?.length || 0) + (selectedMember.essays?.length || 0)}
                                     </p>
                                 </div>
@@ -956,8 +976,8 @@ const AdminFiles = () => {
 
                             <div className="space-y-4">
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                        <DocumentIcon className="h-4 w-4 text-blue-500" />
+                                    <h4 className="text-sm font-semibold text-[var(--te-text)] mb-2 flex items-center gap-2">
+                                        <DocumentIcon className="h-4 w-4 text-[var(--te-text)]" />
                                         Resumes
                                     </h4>
                                     {selectedMember.resumes?.length ? (
@@ -965,21 +985,21 @@ const AdminFiles = () => {
                                             {selectedMember.resumes.map((resume, index) => (
                                                 <div
                                                     key={resume.id || index}
-                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)]"
                                                 >
                                                     <div>
-                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        <p className="text-sm font-semibold text-[var(--te-text)]">
                                                             {resume.name || resume.file_name || `Resume ${index + 1}`}
                                                         </p>
                                                         {resume.uploaded_at && (
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">Uploaded {resume.uploaded_at}</p>
+                                                            <p className="text-xs text-[var(--te-text-dim)]">Uploaded {resume.uploaded_at}</p>
                                                         )}
                                                     </div>
                                                     <a
                                                         href={resume.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                                        className="te-btn-primary te-btn-sm"
                                                     >
                                                         <EyeIcon className="h-4 w-4" />
                                                         View
@@ -988,13 +1008,13 @@ const AdminFiles = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic">No resumes uploaded yet.</p>
+                                        <p className="text-sm text-[var(--te-text-dim)] italic">No resumes uploaded yet.</p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                        <DocumentTextIcon className="h-4 w-4 text-purple-500" />
+                                    <h4 className="text-sm font-semibold text-[var(--te-text)] mb-2 flex items-center gap-2">
+                                        <DocumentTextIcon className="h-4 w-4 text-[var(--te-text)]" />
                                         Essays
                                     </h4>
                                     {selectedMember.essays?.length ? (
@@ -1002,21 +1022,21 @@ const AdminFiles = () => {
                                             {selectedMember.essays.map((essay, index) => (
                                                 <div
                                                     key={essay.id || index}
-                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)]"
                                                 >
                                                     <div>
-                                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                        <p className="text-sm font-semibold text-[var(--te-text)]">
                                                             {essay.name || essay.file_name || `Essay ${index + 1}`}
                                                         </p>
                                                         {essay.uploaded_at && (
-                                                            <p className="text-xs text-gray-500 dark:text-gray-400">Uploaded {essay.uploaded_at}</p>
+                                                            <p className="text-xs text-[var(--te-text-dim)]">Uploaded {essay.uploaded_at}</p>
                                                         )}
                                                     </div>
                                                     <a
                                                         href={essay.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                                                        className="te-btn-primary te-btn-sm"
                                                     >
                                                         <EyeIcon className="h-4 w-4" />
                                                         View
@@ -1025,7 +1045,7 @@ const AdminFiles = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 italic">No essays uploaded yet.</p>
+                                        <p className="text-sm text-[var(--te-text-dim)] italic">No essays uploaded yet.</p>
                                     )}
                                 </div>
                             </div>
@@ -1033,7 +1053,7 @@ const AdminFiles = () => {
                             <div className="flex justify-end pt-2">
                                 <button
                                     onClick={handleCloseMemberModal}
-                                    className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                    className="te-btn-secondary"
                                 >
                                     Close
                                 </button>
@@ -1046,27 +1066,27 @@ const AdminFiles = () => {
             {/* Resume Review Modal */}
             {showReviewModal && selectedReview && (
                 <div
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
                     onClick={handleCloseReviewModal}
                 >
                     <div
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700"
+                        className="bg-[var(--te-surface)] rounded-lg  max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-[var(--te-border)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Modal Header */}
-                        <div className="sticky top-0 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 z-10">
+                        <div className="sticky top-0 px-6 py-4 border-b border-[var(--te-border)] bg-[var(--te-surface)] z-10">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Resume Review Request</h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <h3 className="text-lg font-bold text-[var(--te-text)]">Resume Review Request</h3>
+                                    <p className="text-sm text-[var(--te-text-dim)] mt-1">
                                         Submitted on {selectedReview.submitted_date}
                                     </p>
                                 </div>
                                 <button
                                     onClick={handleCloseReviewModal}
-                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    className="te-icon-btn"
                                 >
-                                    <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                                    <XMarkIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                 </button>
                             </div>
                         </div>
@@ -1074,32 +1094,32 @@ const AdminFiles = () => {
                         {/* Modal Content */}
                         <div className="p-6 space-y-6">
                             {/* Request Information */}
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Request Information</h4>
+                            <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                <h4 className="text-sm font-bold text-[var(--te-text)] mb-3">Request Information</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Member</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.user_name}</p>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400">{selectedReview.user_email}</p>
+                                        <label className="text-xs font-medium text-[var(--te-text-dim)]">Member</label>
+                                        <p className="text-sm font-semibold text-[var(--te-text)] mt-1">{selectedReview.user_name}</p>
+                                        <p className="text-xs text-[var(--te-text-dim)]">{selectedReview.user_email}</p>
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Target Job Title</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.job_title}</p>
+                                        <label className="text-xs font-medium text-[var(--te-text-dim)]">Target Job Title</label>
+                                        <p className="text-sm font-semibold text-[var(--te-text)] mt-1">{selectedReview.job_title}</p>
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Experience Level</label>
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.level}</p>
+                                        <label className="text-xs font-medium text-[var(--te-text-dim)]">Experience Level</label>
+                                        <p className="text-sm font-semibold text-[var(--te-text)] mt-1">{selectedReview.level}</p>
                                     </div>
                                     <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Current Status</label>
+                                        <label className="text-xs font-medium text-[var(--te-text-dim)]">Current Status</label>
                                         <div className="mt-1">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full ${selectedReview.status === 'Pending'
-                                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg ${selectedReview.status === 'Pending'
+                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
                                                 : selectedReview.status === 'In Review'
-                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
                                                     : selectedReview.status === 'Completed'
-                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
                                                 }`}>
                                                 {selectedReview.status}
                                             </span>
@@ -1107,23 +1127,23 @@ const AdminFiles = () => {
                                     </div>
                                     {selectedReview.reviewer_name && (
                                         <div className="col-span-2">
-                                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Assigned To</label>
-                                            <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{selectedReview.reviewer_name}</p>
+                                            <label className="text-xs font-medium text-[var(--te-text-dim)]">Assigned To</label>
+                                            <p className="text-sm font-semibold text-[var(--te-text)] mt-1">{selectedReview.reviewer_name}</p>
                                         </div>
                                     )}
                                     {selectedReview.notes && (
                                         <div className="col-span-2">
-                                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Member Notes</label>
-                                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{selectedReview.notes}</p>
+                                            <label className="text-xs font-medium text-[var(--te-text-dim)]">Member Notes</label>
+                                            <p className="text-sm text-[var(--te-text)] mt-1">{selectedReview.notes}</p>
                                         </div>
                                     )}
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div className="mt-4 pt-4 border-t border-[var(--te-border)]">
                                     <a
                                         href={selectedReview.resume_link}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                                        className="te-btn-primary"
                                     >
                                         <DocumentIcon className="h-4 w-4" />
                                         Open Resume
@@ -1132,18 +1152,18 @@ const AdminFiles = () => {
                             </div>
 
                             {/* Review Form */}
-                            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Review & Feedback</h4>
+                            <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border border-[var(--te-border)]">
+                                <h4 className="text-sm font-bold text-[var(--te-text)] mb-3">Review & Feedback</h4>
 
                                 {/* Status Selector */}
                                 <div className="mb-4">
-                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label className="block text-xs font-medium text-[var(--te-text)] mb-2">
                                         Update Status
                                     </label>
                                     <select
                                         value={reviewStatus}
                                         onChange={(e) => setReviewStatus(e.target.value)}
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className="te-select"
                                     >
                                         <option value="Pending">Pending</option>
                                         <option value="In Review">In Review</option>
@@ -1154,7 +1174,7 @@ const AdminFiles = () => {
 
                                 {/* Feedback Textarea */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label className="block text-xs font-medium text-[var(--te-text)] mb-2">
                                         Feedback & Comments
                                     </label>
                                     <textarea
@@ -1162,9 +1182,9 @@ const AdminFiles = () => {
                                         onChange={(e) => setReviewFeedback(e.target.value)}
                                         rows={8}
                                         placeholder="Provide detailed feedback on the resume, including strengths, areas for improvement, formatting suggestions, content recommendations, etc."
-                                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                        className="te-textarea"
                                     />
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    <p className="text-xs text-[var(--te-text-dim)] mt-2">
                                         {reviewFeedback.length} characters
                                     </p>
                                 </div>
@@ -1172,21 +1192,21 @@ const AdminFiles = () => {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="sticky bottom-0 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-end gap-3">
+                        <div className="sticky bottom-0 px-6 py-4 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] flex items-center justify-end gap-3">
                             <button
                                 onClick={handleCloseReviewModal}
-                                className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                className="te-btn-secondary"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSubmitReview}
                                 disabled={submittingReview}
-                                className="px-4 py-2 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="te-btn-primary"
                             >
                                 {submittingReview ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                                        <div className="animate-spin rounded-lg h-4 w-4 border-2 border-[var(--te-on-primary)] border-t-transparent" />
                                         Saving...
                                     </>
                                 ) : (

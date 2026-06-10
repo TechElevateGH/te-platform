@@ -6,6 +6,10 @@ from pymongo.database import Database
 import certifi
 
 # MongoDB client with SSL certificate and fallback options
+import logging
+
+_db_logger = logging.getLogger(__name__)
+
 try:
     # Try with certifi first (most secure)
     client = MongoClient(
@@ -15,7 +19,7 @@ try:
         connectTimeoutMS=10000,
     )
 except Exception as e:
-    print(f"Failed with certifi, trying with default SSL context: {e}")
+    _db_logger.warning(f"Failed with certifi, trying with default SSL context: {e}")
     # Fallback: Use default SSL context
     client = MongoClient(
         settings.MONGODB_URI,

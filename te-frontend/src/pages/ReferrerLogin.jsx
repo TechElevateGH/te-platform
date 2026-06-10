@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BuildingOfficeIcon, KeyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { BuildingOfficeIcon, KeyIcon, ArrowLeftIcon } from 'icons';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
 
@@ -53,49 +53,49 @@ const ReferrerLogin = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                {/* Back to Member Login */}
+        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+            <div className="relative max-w-md w-full">
                 <button
                     onClick={() => navigate('/login')}
-                    className="flex items-center gap-2 text-sm font-medium text-emerald-200 hover:text-white transition-colors"
+                    className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors"
                 >
                     <ArrowLeftIcon className="h-4 w-4" />
-                    Back to Member Login
+                    Back to member login
                 </button>
 
-                {/* Header */}
-                <div className="text-center">
-                    <div className="flex justify-center">
-                        <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl shadow-xl">
-                            <BuildingOfficeIcon className="h-12 w-12 text-white" />
-                        </div>
-                    </div>
-                    <h2 className="mt-6 text-3xl font-bold text-white">
-                        Company Referrer Access
-                    </h2>
-                    <p className="mt-2 text-sm text-emerald-200">
-                        Enter your secure access token to continue
-                    </p>
+                <div className="flex items-center justify-center mb-8">
+                    <img
+                        src="/te-mark.svg"
+                        alt="TechElevate Logo"
+                        className="h-20 w-20 select-none"
+                    />
                 </div>
 
-                {/* Login Form */}
-                <div className="mt-8 bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                <div className="bg-[var(--te-surface)] rounded-2xl shadow-sm border border-[var(--te-border)] p-8">
+                    <div className="text-center mb-8">
+                        <p className="te-eyebrow mb-2">Referrer</p>
+                        <h2 className="text-3xl font-bold text-[var(--te-text)]">
+                            Company Referrer Access
+                        </h2>
+                        <p className="mt-2 text-sm text-[var(--te-text-dim)]">
+                            Enter your secure access token to continue.
+                        </p>
+                    </div>
+
+                    <form className="space-y-5" onSubmit={handleLogin}>
                         {error && (
-                            <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-3 rounded-lg text-sm">
+                            <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-800 dark:text-red-200">
                                 {error}
                             </div>
                         )}
 
-                        {/* Token Field */}
                         <div>
-                            <label htmlFor="token" className="block text-sm font-medium text-emerald-100 mb-2">
+                            <label htmlFor="token" className="block text-sm font-semibold text-[var(--te-text)] mb-2">
                                 Access Token
                             </label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <KeyIcon className="h-5 w-5 text-emerald-300" />
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <KeyIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                 </div>
                                 <input
                                     id="token"
@@ -105,67 +105,50 @@ const ReferrerLogin = () => {
                                     value={token}
                                     onChange={(e) => setToken(e.target.value)}
                                     autoComplete="off"
-                                    className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-lg bg-white/5 text-white placeholder-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono text-sm"
+                                    className="te-input pl-12 font-mono text-sm"
                                     placeholder="Enter your secure token"
                                 />
                             </div>
-                            <p className="mt-2 text-xs text-emerald-200">
-                                This token was provided to you by your administrator
+                            <p className="mt-2 text-xs text-[var(--te-text-dim)]">
+                                This token was provided to you by your administrator.
                             </p>
                         </div>
 
-                        {/* Submit Button */}
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="group relative w-full flex items-center justify-center gap-2 px-4 py-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                                        <span>Authenticating...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <BuildingOfficeIcon className="h-5 w-5" />
-                                        <span>Access Referrals Portal</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="te-btn-primary te-btn-lg w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
+                                    <span>Authenticating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <BuildingOfficeIcon className="h-5 w-5" />
+                                    <span>Access Referrals Portal</span>
+                                </>
+                            )}
+                        </button>
 
-                        {/* Info Box */}
-                        <div className="mt-6 bg-emerald-500/20 border border-emerald-400/30 rounded-lg p-4">
-                            <p className="text-xs text-emerald-100 mb-2">
-                                <strong>For Company Referrers:</strong>
-                            </p>
-                            <ul className="text-xs text-emerald-100 space-y-1 list-disc list-inside">
+                        <div className="te-panel p-4 text-xs text-[var(--te-text-dim)]">
+                            <p className="font-semibold text-[var(--te-text)] mb-2">For Company Referrers:</p>
+                            <ul className="space-y-1 list-disc list-inside">
                                 <li>No username required - just use your token</li>
-                                <li>Access is limited to your company's referral requests</li>
-                                <li>Contact an admin if you've lost your token</li>
+                                <li>Access is limited to your company&apos;s referral requests</li>
+                                <li>Contact an admin if you&apos;ve lost your token</li>
                             </ul>
                         </div>
 
-                        {/* Alternative Login Links */}
-                        <div className="mt-6 pt-6 border-t border-white/10">
-                            <p className="text-center text-xs text-emerald-200 mb-3">
-                                Not a referrer?
-                            </p>
+                        <div className="pt-5 border-t border-[var(--te-border)] text-center">
+                            <p className="text-xs text-[var(--te-text-dim)] mb-3">Not a referrer?</p>
                             <div className="flex gap-3 justify-center">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/login')}
-                                    className="text-xs font-medium text-emerald-200 hover:text-white transition-colors underline"
-                                >
+                                <button type="button" onClick={() => navigate('/login')} className="te-link text-xs font-medium">
                                     Member Login
                                 </button>
-                                <span className="text-emerald-300">•</span>
-                                <button
-                                    type="button"
-                                    onClick={() => navigate('/lead-login')}
-                                    className="text-xs font-medium text-emerald-200 hover:text-white transition-colors underline"
-                                >
+                                <span className="text-[var(--te-text-dim)]">/</span>
+                                <button type="button" onClick={() => navigate('/lead-login')} className="te-link text-xs font-medium">
                                     Management Login
                                 </button>
                             </div>
@@ -173,12 +156,9 @@ const ReferrerLogin = () => {
                     </form>
                 </div>
 
-                {/* Security Note */}
-                <div className="text-center">
-                    <p className="text-xs text-emerald-300">
-                        🔒 Your access token is encrypted and secure
-                    </p>
-                </div>
+                <p className="mt-6 text-center text-xs text-[var(--te-text-dim)]">
+                    Your access token is encrypted and secure.
+                </p>
             </div>
         </div>
     );

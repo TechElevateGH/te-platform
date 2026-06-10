@@ -9,7 +9,7 @@ import {
     CheckCircleIcon,
     ExclamationCircleIcon,
     BuildingOfficeIcon,
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const CreateLeadAdmin = ({ show, onClose, userRole }) => {
     const { accessToken } = useAuth();
@@ -186,19 +186,19 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="te-card w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] shadow-sm">
                 {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                <div className="sticky top-0 flex items-center justify-between border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4 text-[var(--te-text)]">
                     <div className="flex items-center gap-2">
                         <ShieldCheckIcon className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">
+                        <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">
                             Create Management Account
                         </h2>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors"
+                        className="te-icon-btn"
                     >
                         <XMarkIcon className="h-5 w-5" />
                     </button>
@@ -206,47 +206,47 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
 
                 {/* Success Message - Show Created Credentials */}
                 {createdCredentials && (
-                    <div className="p-6 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
+                    <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] p-6">
                         <div className="flex items-start gap-3 mb-4">
-                            <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                            <CheckCircleIcon className="h-6 w-6 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
                             <div>
-                                <h3 className="font-bold text-green-900 dark:text-green-300 mb-1">
+                                <h3 className="font-bold text-[var(--te-text)] mb-1">
                                     Account Created Successfully!
                                 </h3>
-                                <p className="text-sm text-green-700 dark:text-green-400">
+                                <p className="text-sm text-[var(--te-text-dim)]">
                                     Save these credentials - the token won't be shown again.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-gray-700 rounded-lg p-4 space-y-2 border border-green-300 dark:border-green-700">
+                        <div className="bg-[var(--te-surface)] rounded-lg p-4 space-y-2 border border-[var(--te-border)]">
                             <div>
-                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Username:</span>
-                                <p className="font-mono text-sm font-bold text-gray-900 dark:text-white">
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Username:</span>
+                                <p className="font-mono text-sm font-bold text-[var(--te-text)]">
                                     {createdCredentials.username}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Token:</span>
-                                <p className="font-mono text-sm font-bold text-blue-600 dark:text-blue-400">
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Token:</span>
+                                <p className="font-mono text-sm font-bold text-[var(--te-text)]">
                                     {createdCredentials.token}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Role:</span>
-                                <p className="text-sm text-gray-900 dark:text-white">{createdCredentials.role}</p>
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Role:</span>
+                                <p className="text-sm text-[var(--te-text)]">{createdCredentials.role}</p>
                             </div>
                             {createdCredentials.company && (
                                 <div>
-                                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Company:</span>
-                                    <p className="text-sm text-gray-900 dark:text-white">{createdCredentials.company}</p>
+                                    <span className="text-xs font-semibold text-[var(--te-text-dim)]">Company:</span>
+                                    <p className="text-sm text-[var(--te-text)]">{createdCredentials.company}</p>
                                 </div>
                             )}
                         </div>
 
                         <button
                             onClick={handleCopyCredentials}
-                            className="w-full mt-4 px-4 py-2.5 bg-green-600 dark:bg-green-700 text-white font-semibold rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                            className="te-btn-primary mt-4 w-full"
                         >
                             {copied ? (
                                 <>
@@ -263,7 +263,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
 
                         <button
                             onClick={() => setCreatedCredentials(null)}
-                            className="w-full mt-2 px-4 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                            className="te-btn-secondary mt-2 w-full"
                         >
                             Create Another Account
                         </button>
@@ -272,10 +272,10 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
+                    <div className="border-b border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
                         <div className="flex items-start gap-3">
                             <ExclamationCircleIcon className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+                            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                         </div>
                     </div>
                 )}
@@ -285,7 +285,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                     <form onSubmit={handleSubmit} className="p-6 space-y-4">
                         {/* Account Type Selector */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Account Type *
                             </label>
                             <div className={`grid ${isLead ? 'grid-cols-2' : 'grid-cols-3'} gap-3`}>
@@ -297,9 +297,9 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                             setAccountType('management');
                                             setFormData({ ...formData, company_id: '', role: '4' });
                                         }}
-                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'management'
-                                            ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-mono text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${accountType === 'management'
+                                            ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] shadow-none'
+                                            : 'bg-[var(--te-surface-alt)]  text-[var(--te-text)] hover:bg-[var(--te-hover)] border border-[var(--te-border)]'
                                             }`}
                                     >
                                         <ShieldCheckIcon className="h-5 w-5" />
@@ -315,9 +315,9 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                             setAccountType('volunteer');
                                             setFormData({ ...formData, company_id: '', role: '3' });
                                         }}
-                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'volunteer'
-                                            ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-mono text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${accountType === 'volunteer'
+                                            ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] shadow-none'
+                                            : 'bg-[var(--te-surface-alt)]  text-[var(--te-text)] hover:bg-[var(--te-hover)] border border-[var(--te-border)]'
                                             }`}
                                     >
                                         <ShieldCheckIcon className="h-5 w-5" />
@@ -332,9 +332,9 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                         setAccountType('referrer');
                                         setFormData({ ...formData, role: '2' });
                                     }}
-                                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all ${accountType === 'referrer'
-                                        ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-md'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600'
+                                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-mono text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${accountType === 'referrer'
+                                        ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] shadow-none'
+                                        : 'bg-[var(--te-surface-alt)]  text-[var(--te-text)] hover:bg-[var(--te-hover)] border border-[var(--te-border)]'
                                         }`}
                                 >
                                     <BuildingOfficeIcon className="h-5 w-5" />
@@ -347,7 +347,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                         {accountType && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                         Username *
                                     </label>
                                     <input
@@ -357,10 +357,10 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                         onChange={(e) =>
                                             setFormData({ ...formData, username: e.target.value })
                                         }
-                                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        className="te-input"
                                         placeholder="e.g., love"
                                     />
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                         {accountType === 'referrer'
                                             ? 'Internal identifier (not used for login)'
                                             : 'Username for login authentication'
@@ -369,7 +369,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                         Token *
                                     </label>
                                     <input
@@ -377,10 +377,10 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                         required
                                         value={formData.token}
                                         onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-mono placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        className="te-input font-mono"
                                         placeholder="e.g., peace"
                                     />
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                         {accountType === 'referrer'
                                             ? 'Referrers authenticate with token only'
                                             : accountType === 'volunteer'
@@ -392,13 +392,13 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
 
                                 {accountType === 'management' ? (
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             Role *
                                         </label>
                                         <select
                                             value={formData.role}
                                             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                                            className="te-select"
                                         >
                                             <option value="3">Volunteer</option>
                                             <option value="4">Lead</option>
@@ -406,24 +406,24 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                         </select>
                                     </div>
                                 ) : accountType === 'volunteer' ? (
-                                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                                        <p className="text-sm text-green-700 dark:text-green-400">
+                                    <div className="bg-[var(--te-surface-alt)]  border border-[var(--te-border)] rounded-lg p-4">
+                                        <p className="text-sm text-[var(--te-text-dim)]">
                                             <span className="font-semibold">Role:</span> Volunteer (3)
                                         </p>
-                                        <p className="text-xs text-green-600 dark:text-green-500 mt-1">
+                                        <p className="text-xs text-[var(--te-text)] text-[var(--te-text-dim)] mt-1">
                                             We really appreciate our Volunteers!
                                         </p>
                                     </div>
                                 ) : accountType === 'referrer' ? (
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             Assigned Company *
                                         </label>
                                         <select
                                             value={formData.company_id}
                                             onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
                                             required
-                                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 focus:border-cyan-500 dark:focus:border-cyan-400"
+                                            className="te-select"
                                         >
                                             <option value="">Select a company...</option>
                                             {companies.map((company) => (
@@ -432,7 +432,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                                 </option>
                                             ))}
                                         </select>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                             Referrer will manage referrals for this company
                                         </p>
                                     </div>
@@ -442,7 +442,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="te-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {loading ? (
                                             <>
@@ -459,7 +459,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                                     <button
                                         type="button"
                                         onClick={handleClose}
-                                        className="px-6 py-2.5 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                        className="te-btn-secondary px-6"
                                     >
                                         Cancel
                                     </button>

@@ -1,10 +1,16 @@
 .vscode
 __pycache__
 .ruff_cache
+.DS_Store
 
-# All .env files
+# All .env files (at every level)
 .env
-.env*
+.env.*
+.env.local
+**/.env
+**/.env.*
+**/.env.local
+*.env
 
 # Credentials and secrets
 *_creds.json
@@ -14,4 +20,7 @@ google_drive_creds.json
 
 # venv files
 venv/
+
+# Audit reports (generated)
+.copilot-audit-report.md
 

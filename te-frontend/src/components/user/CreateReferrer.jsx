@@ -8,7 +8,7 @@ import {
     ClipboardDocumentIcon,
     CheckCircleIcon,
     ExclamationCircleIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const CreateReferrer = ({ show, onClose }) => {
     const { accessToken } = useAuth();
@@ -110,17 +110,17 @@ const CreateReferrer = ({ show, onClose }) => {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="te-card w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] shadow-sm">
                 {/* Header */}
-                <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                <div className="sticky top-0 flex items-center justify-between border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4 text-[var(--te-text)]">
                     <div className="flex items-center gap-2">
                         <BuildingOfficeIcon className="h-6 w-6" />
-                        <h2 className="text-xl font-bold">Create Referrer Account</h2>
+                        <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Create Referrer Account</h2>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors"
+                        className="te-icon-btn"
                     >
                         <XMarkIcon className="h-5 w-5" />
                     </button>
@@ -128,45 +128,45 @@ const CreateReferrer = ({ show, onClose }) => {
 
                 {/* Success Message */}
                 {createdCredentials && (
-                    <div className="p-6 bg-green-50 border-b border-green-200">
+                    <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] p-6">
                         <div className="flex items-start gap-3 mb-4">
-                            <CheckCircleIcon className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+                            <CheckCircleIcon className="h-6 w-6 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
                             <div>
-                                <h3 className="font-bold text-green-900 mb-1">
+                                <h3 className="font-bold text-[var(--te-text)] mb-1">
                                     Referrer Account Created Successfully!
                                 </h3>
-                                <p className="text-sm text-green-700">
+                                <p className="text-sm text-[var(--te-text-dim)]">
                                     Save these credentials - the token won't be shown again.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg p-4 space-y-2 border border-green-300">
+                        <div className="bg-[var(--te-surface)] rounded-lg p-4 space-y-2 border border-[var(--te-border)]">
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Username:</span>
-                                <p className="font-mono text-sm font-bold text-gray-900">
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Username:</span>
+                                <p className="font-mono text-sm font-bold text-[var(--te-text)]">
                                     {createdCredentials.username}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Token:</span>
-                                <p className="font-mono text-sm font-bold text-purple-600">
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Token:</span>
+                                <p className="font-mono text-sm font-bold text-[var(--te-text)]">
                                     {createdCredentials.token}
                                 </p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Company:</span>
-                                <p className="text-sm text-gray-900">{createdCredentials.company_name}</p>
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Company:</span>
+                                <p className="text-sm text-[var(--te-text)]">{createdCredentials.company_name}</p>
                             </div>
                             <div>
-                                <span className="text-xs font-semibold text-gray-600">Role:</span>
-                                <p className="text-sm text-gray-900">Referrer</p>
+                                <span className="text-xs font-semibold text-[var(--te-text-dim)]">Role:</span>
+                                <p className="text-sm text-[var(--te-text)]">Referrer</p>
                             </div>
                         </div>
 
                         <button
                             onClick={handleCopyCredentials}
-                            className="w-full mt-4 px-4 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            className="te-btn-primary mt-4 w-full"
                         >
                             {copied ? (
                                 <>
@@ -183,7 +183,7 @@ const CreateReferrer = ({ show, onClose }) => {
 
                         <button
                             onClick={() => setCreatedCredentials(null)}
-                            className="w-full mt-2 px-4 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                            className="te-btn-secondary mt-2 w-full"
                         >
                             Create Another Referrer
                         </button>
@@ -192,10 +192,10 @@ const CreateReferrer = ({ show, onClose }) => {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="p-4 bg-red-50 border-b border-red-200">
+                    <div className="border-b border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
                         <div className="flex items-start gap-3">
                             <ExclamationCircleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                            <p className="text-sm text-red-700">{error}</p>
+                            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                         </div>
                     </div>
                 )}
@@ -204,7 +204,7 @@ const CreateReferrer = ({ show, onClose }) => {
                 {!createdCredentials && (
                     <form onSubmit={handleSubmit} className="p-6 space-y-4">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Username *
                             </label>
                             <input
@@ -214,16 +214,16 @@ const CreateReferrer = ({ show, onClose }) => {
                                 onChange={(e) =>
                                     setFormData({ ...formData, username: e.target.value })
                                 }
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                className="te-input"
                                 placeholder="e.g., google_referrer"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                 Username for login authentication
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Token *
                             </label>
                             <input
@@ -231,23 +231,23 @@ const CreateReferrer = ({ show, onClose }) => {
                                 required
                                 value={formData.token}
                                 onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 font-mono"
+                                className="te-input font-mono"
                                 placeholder="e.g., mysecuretoken123"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                 Access token for authentication (minimum 8 characters recommended)
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <label className="mb-1.5 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Assigned Company *
                             </label>
                             <select
                                 required
                                 value={formData.company_id}
                                 onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                className="te-select"
                             >
                                 <option value="">Select a company...</option>
                                 {companies.map((company) => (
@@ -256,7 +256,7 @@ const CreateReferrer = ({ show, onClose }) => {
                                     </option>
                                 ))}
                             </select>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-[var(--te-text-dim)] mt-1">
                                 Referrer will only see referral requests for this company
                             </p>
                         </div>
@@ -265,7 +265,7 @@ const CreateReferrer = ({ show, onClose }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="te-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {loading ? (
                                     <>
@@ -282,7 +282,7 @@ const CreateReferrer = ({ show, onClose }) => {
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                                className="te-btn-secondary px-6"
                             >
                                 Cancel
                             </button>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowPathIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, CheckCircleIcon, XCircleIcon } from 'icons';
 import axiosInstance from '../../axiosConfig';
 import SlackInviteModal from '../_custom/SlackInviteModal';
 
@@ -167,25 +167,19 @@ const OAuthCallback = () => {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center py-12 px-4 transition-colors">
-                {/* Background decoration */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-500/30 rounded-full blur-3xl"></div>
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 dark:bg-cyan-500/30 rounded-full blur-3xl"></div>
-                </div>
-
+            <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 transition-colors">
                 <div className="relative max-w-md w-full">
-                    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8">
+                    <div className="bg-[var(--te-surface)] rounded-lg shadow-sm border border-[var(--te-border)] p-8">
                         <div className="text-center">
                             {status === 'processing' && (
                                 <>
                                     <div className="flex justify-center mb-4">
-                                        <ArrowPathIcon className="h-16 w-16 text-blue-600 dark:text-blue-400 animate-spin" />
+                                        <ArrowPathIcon className="h-16 w-16 text-[var(--te-text)] animate-spin" />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                    <h2 className="text-2xl font-bold text-[var(--te-text)] mb-2">
                                         Completing Sign In
                                     </h2>
-                                    <p className="text-gray-600 dark:text-gray-400">
+                                    <p className="text-[var(--te-text-dim)]">
                                         Please wait while we verify your account...
                                     </p>
                                 </>
@@ -194,14 +188,14 @@ const OAuthCallback = () => {
                             {status === 'success' && (
                                 <>
                                     <div className="flex justify-center mb-4">
-                                        <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                            <CheckCircleIcon className="h-10 w-10 text-green-600 dark:text-green-400" />
+                                        <div className="h-16 w-16 rounded-full bg-[var(--te-surface-alt)] flex items-center justify-center">
+                                            <CheckCircleIcon className="h-10 w-10 text-[var(--te-text)]" />
                                         </div>
                                     </div>
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                    <h2 className="text-2xl font-bold text-[var(--te-text)] mb-2">
                                         Success!
                                     </h2>
-                                    <p className="text-gray-600 dark:text-gray-400">
+                                    <p className="text-[var(--te-text-dim)]">
                                         Redirecting to your workspace...
                                     </p>
                                 </>
@@ -210,14 +204,14 @@ const OAuthCallback = () => {
                             {status === 'error' && (
                                 <>
                                     <div className="flex justify-center mb-4">
-                                        <div className="h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                        <div className="h-16 w-16 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
                                             <XCircleIcon className="h-10 w-10 text-red-600 dark:text-red-400" />
                                         </div>
                                     </div>
-                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                    <h2 className="text-2xl font-bold text-[var(--te-text)] mb-2">
                                         Authentication Failed
                                     </h2>
-                                    <p className="text-gray-600 dark:text-gray-400">
+                                    <p className="text-[var(--te-text-dim)]">
                                         Redirecting to login page...
                                     </p>
                                 </>

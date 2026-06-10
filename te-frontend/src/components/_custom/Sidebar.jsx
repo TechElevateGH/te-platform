@@ -1,501 +1,157 @@
-import { Fragment, useState, useEffect, useRef } from 'react'
+import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import {
-    XMarkIcon,
-    ChevronRightIcon,
-    ChevronDownIcon,
-    ArrowLeftOnRectangleIcon
-} from '@heroicons/react/24/outline'
+import { XMarkIcon, ArrowLeftOnRectangleIcon } from 'icons'
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-const Sidebar = ({ navigation, content, setContent, setLogin, sidebarOpen, setSidebarOpen }) => {
+const GROUP_LABELS = {
+    career: 'Workspace',
+    interview: 'Support',
+    learn: 'Learning',
+    analytics: 'Insights',
+    accounts: 'Admin',
+}
+
+const ROLE_LABELS = { 5: 'Admin', 4: 'Lead', 3: 'Volunteer', 2: 'Referrer' }
+
+const getRoleLabel = (userRole, isGuest) => {
+    if (isGuest) return 'Guest'
+    const n = parseInt(userRole)
+    if (!n || n < 2) return null
+    if (n >= 5) return ROLE_LABELS[5]
+    if (n >= 4) return ROLE_LABELS[4]
+    if (n >= 3) return ROLE_LABELS[3]
+    return ROLE_LABELS[2]
+}
+
+const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
     const { logout, userRole, isGuest } = useAuth();
-    const [isExpanded, setIsExpanded] = useState(false)
-    const [showScrollIndicator, setShowScrollIndicator] = useState(false)
-    const sidebarContentRef = useRef(null)
 
-    useEffect(() => {
-        const checkScroll = () => {
-            if (sidebarContentRef.current) {
-                const { scrollTop, scrollHeight, clientHeight } = sidebarContentRef.current
-                setShowScrollIndicator(scrollHeight > clientHeight && scrollTop < scrollHeight - clientHeight - 10)
-            }
-        }
+    const groups = ['career', 'interview', 'learn', 'analytics', 'accounts']
+        .map((key) => ({ key, label: GROUP_LABELS[key], items: navigation.filter((item) => item.type === key) }))
+        .filter((group) => group.items.length > 0)
 
-        const sidebar = sidebarContentRef.current
-        if (sidebar) {
-            checkScroll()
-            sidebar.addEventListener('scroll', checkScroll)
-            return () => sidebar.removeEventListener('scroll', checkScroll)
-        }
-    }, [isExpanded])
+    const roleLabel = getRoleLabel(userRole, isGuest)
 
-    const careerItems = navigation.filter((item) => item.type === "career");
-    const interviewItems = navigation.filter((item) => item.type === "interview");
-    const learningItems = navigation.filter((item) => item.type === "learn");
-    const accountItems = navigation.filter((item) => item.type === "accounts");
-    const analyticsItems = navigation.filter((item) => item.type === "analytics");
+    const navButton = (item, onClick) => {
+        const active = item.name === content
+        return (
+            <button
+                onClick={onClick}
+                className={classNames(
+                    'group flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-sm transition-colors duration-150',
+                    active
+                        ? 'bg-[var(--te-accent-soft)] font-medium text-[var(--te-accent)]'
+                        : 'font-normal text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
+                )}
+            >
+                <item.icon
+                    className="h-[18px] w-[18px] flex-shrink-0"
+                    strokeWidth={active ? 2.1 : 1.8}
+                    aria-hidden="true"
+                />
+                <span className="flex-1 truncate text-left">{item.name}</span>
+            </button>
+        )
+    }
+
+    const renderBody = (onItemClick) => (
+        <>
+            <nav className="te-scroll flex-1 overflow-y-auto px-3 py-4">
+                <div className="flex flex-col gap-y-5">
+                    {groups.map((group) => (
+                        <div key={group.key}>
+                            <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">
+                                {group.label}
+                            </p>
+                            <ul className="space-y-0.5">
+                                {group.items.map((item) => (
+                                    <li key={item.name}>{navButton(item, () => onItemClick(item.name))}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            </nav>
+
+            <div className="mt-auto border-t border-[var(--te-border)] p-3">
+                {roleLabel && (
+                    <div className="mb-1 flex items-center justify-between rounded-md px-2.5 py-1.5">
+                        <span className="text-xs font-medium text-[var(--te-text-dim)]">
+                            {roleLabel}{isGuest ? ' mode' : ' access'}
+                        </span>
+                    </div>
+                )}
+                <button
+                    onClick={() => { logout(); navigate(isGuest ? '/login' : '/'); setSidebarOpen(false) }}
+                    className="group flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-sm font-normal text-[var(--te-text-dim)] transition-colors hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]"
+                >
+                    <ArrowLeftOnRectangleIcon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                    <span>{isGuest ? 'Exit guest mode' : 'Log out'}</span>
+                </button>
+            </div>
+        </>
+    )
 
     return (
         <>
-            <div className="">
-                {/* Mobile sidebar */}
-                <Transition.Root show={sidebarOpen} as={Fragment}>
-                    <Dialog as="div" className="relative z-50 md:hidden" onClose={setSidebarOpen}>
+            {/* ===================== Mobile sidebar ===================== */}
+            <Transition.Root show={sidebarOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-50 md:hidden" onClose={setSidebarOpen}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="transition-opacity ease-linear duration-200"
+                        enterFrom="opacity-0" enterTo="opacity-100"
+                        leave="transition-opacity ease-linear duration-200"
+                        leaveFrom="opacity-100" leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 flex">
                         <Transition.Child
                             as={Fragment}
-                            enter="transition-opacity ease-linear duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="transition-opacity ease-linear duration-300"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
+                            enter="transition ease-in-out duration-200 transform"
+                            enterFrom="-translate-x-full" enterTo="translate-x-0"
+                            leave="transition ease-in-out duration-200 transform"
+                            leaveFrom="translate-x-0" leaveTo="-translate-x-full"
                         >
-                            <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md" />
-                        </Transition.Child>
-
-                        <div className="fixed inset-0 flex">
-                            <Transition.Child
-                                as={Fragment}
-                                enter="transition ease-in-out duration-300 transform"
-                                enterFrom="-translate-x-full"
-                                enterTo="translate-x-0"
-                                leave="transition ease-in-out duration-300 transform"
-                                leaveFrom="translate-x-0"
-                                leaveTo="-translate-x-full"
-                            >
-                                <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                                    <Transition.Child
-                                        as={Fragment}
-                                        enter="ease-in-out duration-300"
-                                        enterFrom="opacity-0"
-                                        enterTo="opacity-100"
-                                        leave="ease-in-out duration-300"
-                                        leaveFrom="opacity-100"
-                                        leaveTo="opacity-0"
-                                    >
-                                        <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                                            <button type="button" className="-m-2.5 p-2.5 hover:bg-white/10 rounded-lg transition-all" onClick={() => setSidebarOpen(false)}>
-                                                <span className="sr-only">Close sidebar</span>
-                                                <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
-                                            </button>
-                                        </div>
-                                    </Transition.Child>
-
-                                    {/* Mobile Sidebar Content */}
-                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto scrollbar-hide bg-white dark:bg-gray-800 px-6 pb-4 transition-colors">
-                                        <div className="flex h-20 shrink-0 items-center mt-2 border-b border-gray-100 dark:border-gray-700 pb-4 transition-colors">
-                                            <button
-                                                onClick={() => navigate('/')}
-                                                className="flex items-center gap-3 group"
-                                            >
-                                                <img
-                                                    src="/te-logo.png"
-                                                    alt="TechElevate Logo"
-                                                    className="h-11 w-11 rounded-xl shadow-md group-hover:shadow-lg transition-all"
-                                                />
-                                                <div>
-                                                    <h1 className="text-lg font-bold text-gray-900 dark:text-white transition-colors">TechElevate</h1>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-300 font-medium transition-colors">Career Platform</p>
-                                                </div>
-                                            </button>
-                                        </div>
-
-                                        <nav className="flex flex-1 flex-col mt-2">
-                                            <ul className="flex flex-1 flex-col gap-y-6">
-                                                <li>
-                                                    <ul className="space-y-1">
-                                                        {navigation.map((item) => (
-                                                            <li key={item.name}>
-                                                                <button
-                                                                    onClick={() => { setContent(item.name); setSidebarOpen(false) }}
-                                                                    className={classNames(
-                                                                        item.name === content
-                                                                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
-                                                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                                                        'group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all'
-                                                                    )}
-                                                                >
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500',
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                    <span className="flex-1 text-left">{item.name}</span>
-                                                                    {item.name === content && (
-                                                                        <ChevronRightIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                                                                    )}
-                                                                </button>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </li>
-
-                                                {/* Role Badge and Logout - Mobile Only */}
-                                                <li className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-                                                    {/* Role Badge */}
-                                                    {isGuest ? (
-                                                        <div className="bg-gray-100 dark:bg-gray-700/50 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 mb-3">
-                                                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                                                                Guest Mode
-                                                            </span>
-                                                        </div>
-                                                    ) : userRole && (() => {
-                                                        const roleNum = parseInt(userRole);
-                                                        if (roleNum >= 2) {
-                                                            let roleInfo;
-                                                            if (roleNum >= 5) roleInfo = { label: 'Admin', color: 'from-purple-600 to-pink-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
-                                                            else if (roleNum >= 4) roleInfo = { label: 'Lead', color: 'from-blue-600 to-cyan-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
-                                                            else if (roleNum >= 3) roleInfo = { label: 'Volunteer', color: 'from-emerald-600 to-teal-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30' };
-                                                            else roleInfo = { label: 'Referrer', color: 'from-orange-600 to-amber-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' };
-
-                                                            return (
-                                                                <div className={`${roleInfo.bgColor} px-4 py-2 rounded-lg border border-current/20 mb-3`}>
-                                                                    <span className={`text-sm font-bold bg-gradient-to-r ${roleInfo.color} bg-clip-text text-transparent`}>
-                                                                        {roleInfo.label} Access
-                                                                    </span>
-                                                                </div>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })()}
-
-                                                    {/* Logout Button */}
-                                                    <button
-                                                        onClick={() => {
-                                                            logout();
-                                                            navigate(isGuest ? '/login' : '/');
-                                                            setSidebarOpen(false);
-                                                        }}
-                                                        className="group flex w-full items-center gap-x-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
-                                                    >
-                                                        <ArrowLeftOnRectangleIcon className="h-5 w-5 text-red-600 dark:text-red-500" />
-                                                        <span className="flex-1 text-left">{isGuest ? 'Exit Guest Mode' : 'Logout'}</span>
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </nav>
+                            <Dialog.Panel className="relative mr-16 flex w-full max-w-[17rem] flex-1">
+                                <Transition.Child
+                                    as={Fragment}
+                                    enter="ease-in-out duration-200" enterFrom="opacity-0" enterTo="opacity-100"
+                                    leave="ease-in-out duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"
+                                >
+                                    <div className="absolute left-full top-0 flex w-16 justify-center pt-4">
+                                        <button type="button" className="te-icon-btn text-white hover:bg-white/10" onClick={() => setSidebarOpen(false)}>
+                                            <span className="sr-only">Close sidebar</span>
+                                            <XMarkIcon className="h-6 w-6" strokeWidth={1.8} aria-hidden="true" />
+                                        </button>
                                     </div>
-                                </Dialog.Panel>
-                            </Transition.Child>
-                        </div>
-                    </Dialog>
-                </Transition.Root>
+                                </Transition.Child>
 
-                {/* Desktop sidebar - Collapsible */}
-                <div
-                    className={classNames(
-                        "hidden md:fixed md:top-20 md:bottom-6 md:left-6 md:z-40 md:flex md:flex-col transition-all duration-300 ease-in-out",
-                        isExpanded ? "md:w-80" : "md:w-20"
-                    )}
-                    onMouseEnter={() => setIsExpanded(true)}
-                    onMouseLeave={() => setIsExpanded(false)}
-                >
-                    <div className={classNames(
-                        "flex grow flex-col gap-y-5 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-purple-50/70 dark:from-gray-800/80 dark:via-gray-900/60 dark:to-gray-800/70 backdrop-blur-xl border border-white/60 dark:border-gray-700/60 rounded-2xl px-4 py-6 relative overflow-hidden transition-shadow duration-300",
-                        isExpanded ? "shadow-2xl shadow-blue-500/30 dark:shadow-blue-900/30" : "shadow-2xl dark:shadow-gray-900/50"
-                    )}>
-                        {/* Glassmorphism overlay */}
-                        <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 backdrop-blur-2xl rounded-2xl"></div>
-                        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2IoOTksMTAyLDI0MSkiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-60 dark:opacity-40 rounded-2xl"></div>
-
-                        {/* Scrollable content */}
-                        <div
-                            ref={sidebarContentRef}
-                            className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide"
-                        >
-                            <nav className="flex flex-1 flex-col">
-                                <ul className="flex flex-1 flex-col gap-y-7">
-                                    {careerItems.length > 0 && (
-                                        <li>
-                                            {isExpanded && (
-                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Career Tools
-                                                </div>
-                                            )}
-                                            <ul className="space-y-2">
-                                                {careerItems.map((item, index) => {
-                                                    const colors = [
-                                                        { bg: 'bg-blue-100/80 dark:bg-blue-900/40', hoverBg: 'hover:bg-blue-200/80 dark:hover:bg-blue-800/50', text: 'text-blue-800 dark:text-blue-200', icon: 'text-blue-600 dark:text-blue-400', activeBg: 'bg-gradient-to-r from-blue-600 to-indigo-600', ring: 'ring-blue-400/30' },
-                                                        { bg: 'bg-teal-100/80 dark:bg-teal-900/40', hoverBg: 'hover:bg-teal-200/80 dark:hover:bg-teal-800/50', text: 'text-teal-800 dark:text-teal-200', icon: 'text-teal-600 dark:text-teal-400', activeBg: 'bg-gradient-to-r from-teal-600 to-emerald-600', ring: 'ring-teal-400/30' },
-                                                    ];
-                                                    const color = colors[index % colors.length];
-                                                    return (
-                                                        <li key={item.name}>
-                                                            <button
-                                                                onClick={() => setContent(item.name)}
-                                                                className={classNames(
-                                                                    item.name === content
-                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
-                                                                )}
-                                                                title={!isExpanded ? item.name : ''}
-                                                            >
-                                                                <div className={classNames(
-                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                                )}>
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-white' : color.icon,
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <>
-                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                        {item.name === content && (
-                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    )}
-
-                                    {interviewItems.length > 0 && (
-                                        <li>
-                                            {isExpanded && (
-                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Career Support
-                                                </div>
-                                            )}
-                                            <ul className="space-y-2">
-                                                {interviewItems.map((item, index) => {
-                                                    const colors = [
-                                                        { bg: 'bg-purple-100/80 dark:bg-purple-900/40', hoverBg: 'hover:bg-purple-200/80 dark:hover:bg-purple-800/50', text: 'text-purple-800 dark:text-purple-200', icon: 'text-purple-600 dark:text-purple-400', activeBg: 'bg-gradient-to-r from-purple-600 to-violet-600', ring: 'ring-purple-400/30' },
-                                                        { bg: 'bg-rose-100/80 dark:bg-rose-900/40', hoverBg: 'hover:bg-rose-200/80 dark:hover:bg-rose-800/50', text: 'text-rose-800 dark:text-rose-200', icon: 'text-rose-600 dark:text-rose-400', activeBg: 'bg-gradient-to-r from-rose-600 to-pink-600', ring: 'ring-rose-400/30' },
-                                                        { bg: 'bg-amber-100/80 dark:bg-amber-900/40', hoverBg: 'hover:bg-amber-200/80 dark:hover:bg-amber-800/50', text: 'text-amber-800 dark:text-amber-200', icon: 'text-amber-600 dark:text-amber-400', activeBg: 'bg-gradient-to-r from-amber-500 to-orange-500', ring: 'ring-amber-400/30' },
-                                                    ];
-                                                    const color = colors[index % colors.length];
-                                                    return (
-                                                        <li key={item.name}>
-                                                            <button
-                                                                onClick={() => setContent(item.name)}
-                                                                className={classNames(
-                                                                    item.name === content
-                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
-                                                                )}
-                                                                title={!isExpanded ? item.name : ''}
-                                                            >
-                                                                <div className={classNames(
-                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                                )}>
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-white' : color.icon,
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <>
-                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                        {item.name === content && (
-                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    )}
-
-                                    {learningItems.length > 0 && (
-                                        <li>
-                                            {isExpanded && (
-                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Learning
-                                                </div>
-                                            )}
-                                            <ul className="space-y-2">
-                                                {learningItems.map((item, index) => {
-                                                    const colors = [
-                                                        { bg: 'bg-orange-100/80 dark:bg-orange-900/40', hoverBg: 'hover:bg-orange-200/80 dark:hover:bg-orange-800/50', text: 'text-orange-800 dark:text-orange-200', icon: 'text-orange-600 dark:text-orange-400', activeBg: 'bg-gradient-to-r from-orange-500 to-red-500', ring: 'ring-orange-400/30' },
-                                                        { bg: 'bg-red-100/80 dark:bg-red-900/40', hoverBg: 'hover:bg-red-200/80 dark:hover:bg-red-800/50', text: 'text-red-800 dark:text-red-200', icon: 'text-red-600 dark:text-red-400', activeBg: 'bg-gradient-to-r from-red-500 to-rose-500', ring: 'ring-red-400/30' },
-                                                    ];
-                                                    const color = colors[index % colors.length];
-                                                    return (
-                                                        <li key={item.name}>
-                                                            <button
-                                                                onClick={() => setContent(item.name)}
-                                                                className={classNames(
-                                                                    item.name === content
-                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
-                                                                )}
-                                                                title={!isExpanded ? item.name : ''}
-                                                            >
-                                                                <div className={classNames(
-                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                                )}>
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-white' : color.icon,
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <>
-                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                        {item.name === content && (
-                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    )}
-
-                                    {analyticsItems.length > 0 && (
-                                        <li>
-                                            {isExpanded && (
-                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Insights
-                                                </div>
-                                            )}
-                                            <ul className="space-y-2">
-                                                {analyticsItems.map((item) => {
-                                                    const color = { bg: 'bg-sky-100/80 dark:bg-sky-900/40', hoverBg: 'hover:bg-sky-200/80 dark:hover:bg-sky-800/50', text: 'text-sky-800 dark:text-sky-200', icon: 'text-sky-600 dark:text-sky-400', activeBg: 'bg-gradient-to-r from-sky-600 to-indigo-600', ring: 'ring-sky-400/30' };
-                                                    return (
-                                                        <li key={item.name}>
-                                                            <button
-                                                                onClick={() => setContent(item.name)}
-                                                                className={classNames(
-                                                                    item.name === content
-                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
-                                                                )}
-                                                                title={!isExpanded ? item.name : ''}
-                                                            >
-                                                                <div className={classNames(
-                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                                )}>
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-white' : color.icon,
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <>
-                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                        {item.name === content && (
-                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    )}
-
-                                    {accountItems.length > 0 && (
-                                        <li>
-                                            {isExpanded && (
-                                                <div className="text-xs font-semibold leading-6 text-gray-500 dark:text-gray-400 mb-3 tracking-wide uppercase">
-                                                    Accounts
-                                                </div>
-                                            )}
-                                            <ul className="space-y-2">
-                                                {accountItems.map((item) => {
-                                                    const color = { bg: 'bg-indigo-100/80 dark:bg-indigo-900/40', hoverBg: 'hover:bg-indigo-200/80 dark:hover:bg-indigo-800/50', text: 'text-indigo-800 dark:text-indigo-200', icon: 'text-indigo-600 dark:text-indigo-400', activeBg: 'bg-gradient-to-r from-indigo-600 to-purple-600', ring: 'ring-indigo-400/30' };
-                                                    return (
-                                                        <li key={item.name}>
-                                                            <button
-                                                                onClick={() => setContent(item.name)}
-                                                                className={classNames(
-                                                                    item.name === content
-                                                                        ? `${color.activeBg} text-white shadow-lg scale-[1.02] ring-2 ${color.ring}`
-                                                                        : `${color.bg} ${color.text} ${color.hoverBg} hover:scale-[1.01]`,
-                                                                    'group flex w-full items-center rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-300 backdrop-blur-sm',
-                                                                    isExpanded ? 'gap-x-3' : 'justify-center'
-                                                                )}
-                                                                title={!isExpanded ? item.name : ''}
-                                                            >
-                                                                <div className={classNames(
-                                                                    item.name === content ? 'bg-white/20 shadow-lg' : 'bg-white/50',
-                                                                    'p-2 rounded-lg transition-all duration-300 flex-shrink-0'
-                                                                )}>
-                                                                    <item.icon
-                                                                        className={classNames(
-                                                                            item.name === content ? 'text-white' : color.icon,
-                                                                            'h-5 w-5 transition-colors'
-                                                                        )}
-                                                                        aria-hidden="true"
-                                                                    />
-                                                                </div>
-                                                                {isExpanded && (
-                                                                    <>
-                                                                        <span className="flex-1 text-left whitespace-nowrap overflow-hidden">{item.name}</span>
-                                                                        {item.name === content && (
-                                                                            <ChevronRightIcon className="h-4 w-4 text-white/90 flex-shrink-0" />
-                                                                        )}
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        </li>
-                                    )}
-
-
-                                </ul>
-                            </nav>
-                        </div>
-
-                        {/* Scroll indicator with blinking down arrow */}
-                        {showScrollIndicator && (
-                            <div className="relative z-20 flex justify-center py-3 pointer-events-none">
-                                <ChevronDownIcon className="h-5 w-5 text-blue-600 animate-bounce opacity-60" />
-                            </div>
-                        )}
+                                <div className="flex grow flex-col bg-[var(--te-surface-alt)]">
+                                    <button onClick={() => navigate('/')} className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[var(--te-border)] px-5">
+                                        <img src="/te-mark.svg" alt="TechElevate" className="h-8 w-8 rounded-[9px]" />
+                                        <span className="te-wordmark text-[15px] text-[var(--te-text)]">techelevate</span>
+                                    </button>
+                                    {renderBody((name) => { setContent(name); setSidebarOpen(false) })}
+                                </div>
+                            </Dialog.Panel>
+                        </Transition.Child>
                     </div>
-                </div>
-            </div>
+                </Dialog>
+            </Transition.Root>
+
+            {/* ===================== Desktop sidebar (persistent) ===================== */}
+            <aside className="hidden md:fixed md:top-16 md:bottom-0 md:left-0 md:z-40 md:flex md:w-60 md:flex-col border-r border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                {renderBody((name) => setContent(name))}
+            </aside>
         </>
     )
 }

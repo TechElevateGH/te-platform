@@ -3,7 +3,7 @@ Background tasks for scheduled operations like email reminders.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.core.settings import settings
 from app.database.session import mongodb
@@ -29,7 +29,7 @@ async def send_meeting_reminders():
 
         # Calculate the target time window (meetings happening 25-35 minutes from now)
         # This gives us a 10-minute window to catch meetings even if the task runs slightly off schedule
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         reminder_time_start = now + timedelta(minutes=25)
         reminder_time_end = now + timedelta(minutes=35)
 

@@ -1,68 +1,73 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkedin, faSlack } from '@fortawesome/free-brands-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
-const socialLinks = [
-    { name: 'LinkedIn', icon: faLinkedin, href: 'https://www.linkedin.com/company/techelevategh/', color: 'hover:text-blue-500' },
-];
 
 const Footer = () => {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+
     return (
-        <footer className="bg-gray-900" aria-labelledby="footer-heading">
-            <h2 id="footer-heading" className="sr-only">
-                Footer
-            </h2>
-            <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
-                <div className="flex flex-col items-center text-center space-y-8">
-                    {/* Brand section */}
-                    <div className="flex flex-col items-center space-y-3">
-                        <img
-                            src="/te-logo.png"
-                            alt="TechElevate Logo"
-                            className="h-12 w-12 rounded-xl shadow-lg"
-                        />
-                        <span className="text-2xl font-bold text-white">TechElevate</span>
-                        <p className="max-w-2xl text-sm leading-6 text-gray-300">
-                            Empowering marginalized talent worldwide to excel in tech careers through mentorship, resources, and opportunities.
+        <footer className="bg-[var(--te-bg)] border-t border-[var(--te-border)]" aria-labelledby="footer-heading">
+            <h2 id="footer-heading" className="sr-only">Footer</h2>
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-14">
+                <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+                    {/* Brand */}
+                    <div className="max-w-sm">
+                        <div className="flex items-center gap-2.5">
+                            <img src="/te-mark.svg" alt="TechElevate" className="h-8 w-8 rounded-[9px]" />
+                            <span className="te-wordmark text-[15px] text-[var(--te-text)]">techelevate</span>
+                        </div>
+                        <p className="mt-4 text-sm leading-6 text-[var(--te-text-dim)]">
+                            The career workspace for aspiring engineers — mentorship, resources, and
+                            opportunities to help marginalized talent excel in tech.
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                        {socialLinks.map((item) => (
+
+                    {/* Links */}
+                    <div className="flex flex-col gap-3">
+                        <span className="te-eyebrow">{'// navigate'}</span>
+                        <button onClick={() => navigate('/documentation')} className="text-left text-sm text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors">Documentation</button>
+                        <button onClick={() => navigate(isAuthenticated ? '/workspace' : '/login')} className="text-left text-sm text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors">Workspace</button>
+                        <button onClick={() => navigate('/register')} className="text-left text-sm text-[var(--te-text-dim)] hover:text-[var(--te-text)] transition-colors">Get started</button>
+                    </div>
+
+                    {/* Social */}
+                    <div className="flex flex-col gap-3">
+                        <span className="te-eyebrow">{'// connect'}</span>
+                        <div className="flex items-center gap-2">
                             <a
-                                key={item.name}
-                                href={item.href}
-                                className={`text-gray-400 ${item.color} transition-colors duration-300`}
+                                href="https://www.linkedin.com/company/techelevategh/"
+                                className="te-icon-btn"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <span className="sr-only">{item.name}</span>
-                                <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
+                                <span className="sr-only">LinkedIn</span>
+                                <FontAwesomeIcon icon={faLinkedin} className="h-5 w-5" />
                             </a>
-                        ))}
-                        {/* Slack link for authenticated users */}
-                        {isAuthenticated && (
-                            <a
-                                href="https://join.slack.com/t/techelevateworkspace/shared_invite/zt-3ig9yhi07-XZpHhVVnlv0Cj3lTyJLAuw"
-                                className="text-gray-400 hover:text-purple-500 transition-colors duration-300"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Join our Slack workspace"
-                            >
-                                <span className="sr-only">Slack</span>
-                                <FontAwesomeIcon icon={faSlack} className="h-6 w-6" />
-                            </a>
-                        )}
+                            {isAuthenticated && (
+                                <a
+                                    href="https://join.slack.com/t/techelevateworkspace/shared_invite/zt-3ig9yhi07-XZpHhVVnlv0Cj3lTyJLAuw"
+                                    className="te-icon-btn"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Join our Slack workspace"
+                                >
+                                    <span className="sr-only">Slack</span>
+                                    <FontAwesomeIcon icon={faSlack} className="h-5 w-5" />
+                                </a>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Bottom section */}
-                <div className="mt-12 border-t border-white/10 pt-8 flex flex-col items-center gap-4 text-center">
-                    <p className="text-xs leading-5 text-gray-400">
-                        &copy; {new Date().getFullYear()} TechElevate. All rights reserved.
+                {/* Bottom */}
+                <div className="mt-12 border-t border-[var(--te-border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <p className="font-mono text-xs text-[var(--te-text-dim)]">
+                        &copy; {new Date().getFullYear()} techelevate — all rights reserved
                     </p>
-                    <span className="text-xs text-gray-400">
-                        Built with ❤️
+                    <span className="font-mono text-xs text-[var(--te-text-dim)]">
+                        built with care · v1.0
                     </span>
                 </div>
             </div>

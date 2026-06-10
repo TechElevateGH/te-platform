@@ -1,9 +1,12 @@
+import logging
 import app.ents.referral.models as referral_models
 import app.ents.referral.schema as referral_schema
 import app.ents.user.crud as user_crud
 from typing import Optional
 from pymongo.database import Database
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 def create_referral_company(
@@ -186,6 +189,12 @@ def read_company_referrals(
 
     # Use collation for case-insensitive matching (strength=2 ignores case)
     collation = Collation(locale="en", strength=2)
+
+    # Debug: check what company names exist in referrals
+    all_company_names = db.referrals.distinct("company_name")
+    logger.debug(f"All company_name values in referrals: {all_company_names}")
+    logger.debug(f"Searching for company_name: '{company_id}'")
+
     referrals_data = (
         db.referrals.find({"company_name": company_id})
         .collation(collation)
@@ -193,6 +202,7 @@ def read_company_referrals(
         .limit(limit)
     )
     referrals_list = [referral_models.Referral(**ref) for ref in referrals_data]
+    logger.debug(f"Found {len(referrals_list)} referrals")
 
     return referrals_list
 

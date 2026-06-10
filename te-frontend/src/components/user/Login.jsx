@@ -9,7 +9,7 @@ import {
     ArrowRightIcon,
     SunIcon,
     MoonIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 import { useDarkMode } from '../../context/DarkModeContext';
 
 const Login = () => {
@@ -125,18 +125,12 @@ const Login = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-500/30 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 dark:bg-cyan-500/30 rounded-full blur-3xl"></div>
-            </div>
-
+        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
             <div className="relative max-w-md w-full">
                 {/* Logo + Dark Mode Toggle */}
                 <div className="flex items-center justify-center mb-8 relative">
                     <img
-                        src="/te-logo.png"
+                        src="/te-mark.svg"
                         alt="TechElevate Logo"
                         className="h-20 w-20 select-none"
                     />
@@ -144,21 +138,21 @@ const Login = () => {
                         type="button"
                         onClick={toggleDarkMode}
                         aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-                        className="absolute right-0 top-1 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-white/70 dark:bg-gray-700/70 backdrop-blur-md border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all hover:scale-105 group"
+                        className="absolute right-0 top-1 te-chip hover:bg-[var(--te-hover)] transition-colors group"
                     >
                         {darkMode ? (
                             <SunIcon className="h-4 w-4 text-amber-500 group-hover:rotate-12 transition-transform" />
                         ) : (
-                            <MoonIcon className="h-4 w-4 text-indigo-500 group-hover:-rotate-12 transition-transform" />
+                            <MoonIcon className="h-4 w-4 text-[var(--te-text-dim)] group-hover:-rotate-12 transition-transform" />
                         )}
-                        <span className="text-gray-600 dark:text-gray-300 hidden sm:inline">
+                        <span className="hidden sm:inline">
                             {darkMode ? 'Light' : 'Dark'}
                         </span>
                     </button>
                 </div>
 
                 {/* Main card */}
-                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8">
+                <div className="bg-[var(--te-surface)] rounded-2xl shadow-sm border border-[var(--te-border)] p-8">
                     {/* Error message */}
                     {error && (
                         <div className="mb-6 rounded-2xl bg-red-50 dark:bg-red-900/30 p-4 border border-red-200 dark:border-red-800 animate-fade-in">
@@ -174,7 +168,7 @@ const Login = () => {
                         <button
                             type="button"
                             onClick={handleGuestLogin}
-                            className="group relative w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                            className="group relative w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
                         >
                             <span>Continue as Guest</span>
                             <ArrowRightIcon className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
@@ -187,13 +181,13 @@ const Login = () => {
                             type="button"
                             onClick={() => !oauthLoading && handleOAuthLogin('Google')}
                             aria-label="Sign in with Google"
-                            className="group relative w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-white/70 dark:bg-gray-700/70 backdrop-blur-md text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm hover:shadow-md hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                            className="group relative w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/70 dark:bg-slate-700/70 backdrop-blur-md text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm hover:shadow-md hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
                             disabled={oauthLoading}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="p-1.5 rounded-md bg-white dark:bg-gray-800 shadow-inner ring-1 ring-gray-200 dark:ring-gray-600 group-hover:scale-105 transition-transform">
+                                <div className="p-1.5 rounded-md bg-white dark:bg-slate-800 shadow-inner ring-1 ring-slate-200 dark:ring-slate-600 group-hover:scale-105 transition-transform">
                                     {oauthLoading ? (
-                                        <svg className="h-5 w-5 animate-spin text-gray-500" viewBox="0 0 24 24">
+                                        <svg className="h-5 w-5 animate-spin text-slate-500" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
@@ -212,22 +206,22 @@ const Login = () => {
                     {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                            <div className="w-full border-t border-slate-300 dark:border-slate-600"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">Or continue with email</span>
+                            <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium">Or continue with email</span>
                         </div>
                     </div>
 
                     {/* Login form */}
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 Email address
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <EnvelopeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                                    <EnvelopeIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                                 </div>
                                 <input
                                     id="email"
@@ -236,7 +230,7 @@ const Login = () => {
                                     value={loginData.username}
                                     autoComplete="email"
                                     required
-                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    className="block w-full pl-12 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white bg-white dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                     placeholder="you@example.com"
                                     onChange={(e) => handleInputChange({ name: "username", value: e.target.value })}
                                 />
@@ -245,7 +239,7 @@ const Login = () => {
 
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                <label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     Password
                                 </label>
                                 <button
@@ -257,7 +251,7 @@ const Login = () => {
                             </div>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <LockClosedIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                                    <LockClosedIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                                 </div>
                                 <input
                                     id="password"
@@ -266,7 +260,7 @@ const Login = () => {
                                     value={loginData.password}
                                     autoComplete="current-password"
                                     required
-                                    className="block w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                    className="block w-full pl-12 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white bg-white dark:bg-slate-700 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                     placeholder="••••••••"
                                     onChange={(e) => handleInputChange({ name: "password", value: e.target.value })}
                                 />
@@ -276,7 +270,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            className="te-btn-primary te-btn-lg w-full group disabled:transform-none"
                         >
                             {loading ? (
                                 <div className="flex items-center gap-2">
@@ -297,7 +291,7 @@ const Login = () => {
 
                     {/* Sign up link */}
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
                             Don't have an account?{' '}
                             <button
                                 onClick={() => navigate('/register')}
@@ -312,27 +306,27 @@ const Login = () => {
                     <div className="mt-4 text-center">
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
                             </div>
                             <div className="relative flex justify-center text-xs">
-                                <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Other Login Options</span>
+                                <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400">Other Login Options</span>
                             </div>
                         </div>
                         <div className="mt-4 flex items-center justify-center gap-6">
                             <button
                                 onClick={() => navigate('/referrer-login')}
-                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
+                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                             >
-                                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                                 Referrer Login
                             </button>
                             <button
                                 onClick={() => navigate('/lead-login')}
-                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+                                className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                             >
-                                <svg className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-5 w-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                                 Management Login
@@ -345,7 +339,7 @@ const Login = () => {
                 <div className="mt-6 text-center">
                     <button
                         onClick={() => navigate('/')}
-                        className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -6,7 +6,7 @@ import {
     CheckCircleIcon,
     EnvelopeIcon,
     ArrowPathIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const EmailVerification = () => {
     const navigate = useNavigate();
@@ -133,57 +133,50 @@ const EmailVerification = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            {/* Background decoration */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl"></div>
-            </div>
-
+        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="relative max-w-md w-full">
                 {/* Logo and header */}
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl">
-                            <EnvelopeIcon className="h-8 w-8 text-white" />
-                        </div>
+                <div className="mb-8 text-center">
+                    <div className="mb-4 flex justify-center">
+                        <img src="/te-mark.svg" alt="TechElevate Logo" className="h-20 w-20 select-none" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                        Verify Your Email
+                    <span className="te-eyebrow justify-center">{'// verification'}</span>
+                    <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">
+                        Verify your email
                     </h2>
-                    <p className="text-gray-600">
-                        We sent a 6-digit code to
+                    <p className="mt-3 text-[var(--te-text-dim)]">
+                        Enter the 6-digit code sent to
                     </p>
-                    <p className="text-blue-600 font-semibold mt-1">
+                    <p className="mt-1 font-mono text-sm font-semibold text-[var(--te-text)]">
                         {verificationType === 'email_change' ? newEmail : email}
                     </p>
                 </div>
 
                 {/* Main card */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 p-8">
+                <div className="te-card rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-8 shadow-sm">
                     {error && (
-                        <div className="mb-6 rounded-2xl bg-red-50 p-4 border border-red-200 animate-fade-in">
+                        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30 animate-fade-in">
                             <div className="flex">
                                 <XCircleIcon className="h-5 w-5 text-red-400 flex-shrink-0" />
-                                <p className="ml-3 text-sm text-red-800">{error}</p>
+                                <p className="ml-3 text-sm text-red-800 dark:text-red-200">{error}</p>
                             </div>
                         </div>
                     )}
 
                     {success && (
-                        <div className="mb-6 rounded-2xl bg-green-50 p-4 border border-green-200 animate-fade-in">
+                        <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4 animate-fade-in">
                             <div className="flex">
-                                <CheckCircleIcon className="h-5 w-5 text-green-400 flex-shrink-0" />
-                                <p className="ml-3 text-sm text-green-800">{success}</p>
+                                <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" />
+                                <p className="ml-3 text-sm text-[var(--te-text)]">{success}</p>
                             </div>
                         </div>
                     )}
 
                     {resendSuccess && (
-                        <div className="mb-6 rounded-2xl bg-blue-50 p-4 border border-blue-200 animate-fade-in">
+                        <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4 animate-fade-in">
                             <div className="flex">
-                                <CheckCircleIcon className="h-5 w-5 text-blue-400 flex-shrink-0" />
-                                <p className="ml-3 text-sm text-blue-800">{resendSuccess}</p>
+                                <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" />
+                                <p className="ml-3 text-sm text-[var(--te-text)]">{resendSuccess}</p>
                             </div>
                         </div>
                     )}
@@ -191,7 +184,7 @@ const EmailVerification = () => {
                     <form onSubmit={handleVerify}>
                         {/* Code input */}
                         <div className="mb-8">
-                            <label className="block text-sm font-semibold text-gray-700 mb-4">
+                            <label className="mb-4 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Enter Verification Code
                             </label>
                             <div className="flex justify-center gap-2">
@@ -204,12 +197,12 @@ const EmailVerification = () => {
                                         value={digit}
                                         onChange={(e) => handleCodeChange(index, e.target.value)}
                                         onKeyDown={(e) => handleKeyDown(index, e)}
-                                        className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                        className="h-14 w-12 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface)] text-center font-mono text-2xl font-bold text-[var(--te-text)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--te-ring)]"
                                         autoFocus={index === 0}
                                     />
                                 ))}
                             </div>
-                            <p className="mt-3 text-xs text-gray-500">
+                            <p className="mt-3 text-xs text-[var(--te-text-dim)]">
                                 Code expires in 15 minutes
                             </p>
                         </div>
@@ -218,7 +211,7 @@ const EmailVerification = () => {
                         <button
                             type="submit"
                             disabled={loading || success}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            className="te-btn-primary te-btn-lg w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <div className="flex items-center gap-2">
@@ -226,11 +219,11 @@ const EmailVerification = () => {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
-                                    <span>Verifying...</span>
+                                    <span>Verifying…</span>
                                 </div>
                             ) : (
                                 <>
-                                    <span>Verify Email</span>
+                                    <span>Verify email</span>
                                     <CheckCircleIcon className="h-5 w-5" />
                                 </>
                             )}
@@ -239,13 +232,13 @@ const EmailVerification = () => {
 
                     {/* Resend code */}
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-sm text-[var(--te-text-dim)] mb-2">
                             Didn't receive the code?
                         </p>
                         <button
                             onClick={handleResend}
                             disabled={resendLoading || resendCooldown > 0 || success}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="te-link inline-flex items-center gap-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <ArrowPathIcon className={`h-4 w-4 ${resendLoading ? 'animate-spin' : ''}`} />
                             {resendCooldown > 0 ? (
@@ -262,7 +255,7 @@ const EmailVerification = () => {
                     <div className="mt-6 text-center">
                         <button
                             onClick={() => navigate('/login')}
-                            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                            className="te-link inline-flex items-center gap-2 text-sm"
                         >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

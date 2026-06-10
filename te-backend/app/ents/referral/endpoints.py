@@ -1,4 +1,7 @@
+import logging
 from typing import Any, Dict, Optional, Union
+
+logger = logging.getLogger(__name__)
 
 import app.database.session as session
 import app.ents.referral.crud as referral_crud
@@ -135,7 +138,7 @@ def request_referral(
         )
     except Exception as e:
         # Log error but don't fail the request
-        print(f"Failed to send referral request email: {e}")
+        logger.error(f"Failed to send referral request email: {e}")
 
     return {"referral": referral_dependencies.parse_referral(referral)}
 
@@ -212,17 +215,21 @@ def get_referrals(
                 filter_company_id = ObjectId(filter_company_id)
 
             company = db.referral_companies.find_one({"_id": filter_company_id})
+            logger.debug(f"Company lookup result: {company}")
             if not company:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Company not found",
                 )
             company_name = company.get("name", "")
+            logger.debug(f"Company name from lookup: {company_name}")
 
+        logger.debug(f"Querying referrals for company_name: '{company_name}'")
         # Get referrals filtered by company name
         referrals = referral_crud.read_company_referrals(
             db, company_id=company_name, skip=skip, limit=limit
         )
+        logger.debug(f"Found {len(referrals)} referrals")
 
     # Lead/Admin with company_id filter
     elif company_id:
@@ -439,7 +446,7 @@ def update_referral(
                 )
             except Exception as e:
                 # Log error but don't fail the request
-                print(f"Failed to send referral completed email: {e}")
+                logger.error(f"Failed to send referral completed email: {e}")
 
     # Send email notification when feedback is added (and not completed)
     elif data.review_note and data.review_note.strip():
@@ -456,7 +463,7 @@ def update_referral(
                 )
             except Exception as e:
                 # Log error but don't fail the request
-                print(f"Failed to send referral update email: {e}")
+                logger.error(f"Failed to send referral update email: {e}")
 
     return {"referral": referral_dependencies.parse_referral_with_user(referral)}
 

@@ -1,11 +1,17 @@
 {
   "short_name": "TechElevate",
-  "name": "TechElevate Platform",
+  "name": "TechElevate — Engineering Career Workspace",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "32x32",
       "type": "image/x-icon"
+    },
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
     },
     {
       "src": "logo192.png",
@@ -20,6 +26,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#2563eb",
+  "theme_color": "#111111",
   "background_color": "#ffffff"
 }

@@ -25,6 +25,9 @@ certifi
 # Background tasks scheduler
 apscheduler==3.10.4
 
+# Rate limiting
+slowapi==0.1.9
+
 # Environment configuration helper
 python-dotenv==1.0.0
 

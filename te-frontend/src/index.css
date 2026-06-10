@@ -1,42 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import Roboto font from Google Fonts - YouTube/Google standard */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
 body {
   margin: 0;
-  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 14px; /* YouTube/Google standard base font size */
-  font-weight: 400; /* Regular weight as default */
-  line-height: 1.5;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.003em;
   scroll-behavior: smooth;
+  background: var(--te-bg);
+  color: var(--te-text);
+  text-rendering: optimizeLegibility;
 }
 
-/* Theme variables */
+/* Theme variables — clean neutral base + refined blue accent (Apple/Google-style engineering) */
 :root {
-  --te-bg: #ffffff;
-  --te-surface: #f8fafc; /* light slate-50 */
-  --te-surface-alt: #f1f5f9; /* slate-100 */
-  --te-border: #e2e8f0; /* slate-200 */
-  --te-text: #1e293b; /* slate-800 */
-  --te-text-dim: #475569; /* slate-600 */
-  --te-gradient: linear-gradient(90deg, #10b981 0%, #059669 50%, #047857 100%); /* Green gradient */
+  --te-bg: #ffffff;          /* page */
+  --te-surface: #ffffff;     /* cards / panels */
+  --te-surface-alt: #f7f7f8; /* sidebar / subtle fills */
+  --te-border: #e7e7ea;      /* hairline border */
+  --te-border-strong: #d6d7db;
+  --te-text: #1d1d1f;        /* ink (near-black, Apple) */
+  --te-text-dim: #6b6f76;    /* secondary */
+  --te-hover: rgba(15, 23, 42, 0.045);
+  --te-accent: #1a73e8;      /* refined blue — links / active states */
+  --te-accent-hover: #1664c7;
+  --te-accent-soft: #e8f0fe; /* light blue tint — selected / badge bg */
+  --te-primary: #1a73e8;     /* primary button fill (blue) */
+  --te-primary-hover: #1664c7;
+  --te-on-primary: #ffffff;  /* text on primary */
+  --te-ring: rgba(26, 115, 232, 0.32);
+  --te-gradient: linear-gradient(135deg, #1a73e8 0%, #4c9aff 100%);
 }
 
 .dark {
-  --te-bg: #0f172a; /* slate-900 */
-  --te-surface: #1e293b; /* slate-800 */
-  --te-surface-alt: #24344d; /* custom hover */
-  --te-border: #334155; /* slate-700 */
-  --te-text: #f1f5f9; /* slate-100 */
-  --te-text-dim: #94a3b8; /* slate-400 */
-  --te-gradient: linear-gradient(90deg, #10b981 0%, #059669 45%, #047857 90%); /* Green gradient */
+  --te-bg: #18191b;          /* dark page */
+  --te-surface: #202124;     /* cards (lighter than page) */
+  --te-surface-alt: #1c1d20; /* sidebar / subtle fills */
+  --te-border: #303134;      /* hairline */
+  --te-border-strong: #3c3d41;
+  --te-text: #e8eaed;        /* ink */
+  --te-text-dim: #9aa0a6;    /* secondary */
+  --te-hover: rgba(255, 255, 255, 0.06);
+  --te-accent: #5aa0ff;      /* lighter blue — links / active states on dark */
+  --te-accent-hover: #7db4ff;
+  --te-accent-soft: rgba(90, 160, 255, 0.16);
+  --te-primary: #2b7cf0;     /* primary button fill (blue) */
+  --te-primary-hover: #4a90f5;
+  --te-on-primary: #ffffff;  /* text on primary */
+  --te-ring: rgba(90, 160, 255, 0.42);
+  --te-gradient: linear-gradient(135deg, #2b7cf0 0%, #5aa0ff 100%);
 }
 
 /* Utility classes that map to variables */
@@ -56,39 +76,23 @@ body {
   color: transparent;
 }
 
-/* YouTube/Google-style button standards */
-button,
-.btn {
-  font-family: "Roboto", sans-serif;
-  font-weight: 500; /* Medium weight for buttons */
-  font-size: 14px; /* Standard YouTube button text size */
-  letter-spacing: 0.25px; /* Slight letter spacing for readability */
+/* Typography — JetBrains Mono headings (engineering/IDE feel), Plex Sans body */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--te-text);
 }
 
-/* Primary button height standard (YouTube style) */
-.btn-primary,
-button[type="submit"],
-button[type="button"] {
-  min-height: 36px; /* YouTube standard button height */
-  padding: 0 16px; /* Standard horizontal padding */
-}
+h1 { font-size: 1.625rem; line-height: 1.25; font-weight: 700; }
+h2 { font-size: 1.3125rem; line-height: 1.3; font-weight: 700; }
+h3 { font-size: 1.0625rem; line-height: 1.35; font-weight: 600; }
+h4 { font-size: 0.9375rem; line-height: 1.4; font-weight: 600; }
+h5 { font-size: 0.8125rem; font-weight: 600; }
+h6 { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* Uniform heading fonts */
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Roboto", sans-serif;
-  font-weight: 500; /* Medium weight for headings */
-  letter-spacing: 0;
-}
-
-h1 { font-size: 24px; font-weight: 400; }
-h2 { font-size: 20px; font-weight: 500; }
-h3 { font-size: 16px; font-weight: 500; }
-h4 { font-size: 14px; font-weight: 500; }
-h5 { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-h6 { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+code, .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
 
@@ -293,22 +297,168 @@ code {
 
   /* Glass morphism utility */
   .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.06);
   }
   
   .dark .glass {
-    background: rgba(17, 24, 39, 0.7);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    background: rgba(15, 23, 42, 0.72);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
   }
 
-  /* Gradient text without @apply (tool complaining) */
+  /* Gradient text without @apply (tool complaining) — monochrome */
   .gradient-text {
-    background: linear-gradient(90deg,#2563eb 0%,#06b6d4 50%,#7c3aed 100%);
+    background: var(--te-gradient);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+}
+
+/* ===================================================================
+   Notion-style component primitives — neutral, flat, sparing accent.
+   Colors are driven by CSS variables so light/dark switch automatically.
+   =================================================================== */
+@layer components {
+  .te-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em];
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--te-text-dim);
+  }
+
+  /* Cards / surfaces — flat with hairline border */
+  .te-card {
+    @apply rounded-lg;
+    background: var(--te-surface);
+    border: 1px solid var(--te-border);
+  }
+  .te-card-interactive {
+    @apply te-card transition-colors duration-150 cursor-pointer;
+  }
+  .te-card-interactive:hover {
+    background: var(--te-surface-alt);
+    border-color: var(--te-border-strong);
+  }
+  .te-panel {
+    @apply rounded-lg;
+    background: var(--te-surface);
+    border: 1px solid var(--te-border);
+  }
+
+  /* Buttons — compact, monospace (engineering/IDE), flat */
+  .te-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+  .te-btn:focus-visible { box-shadow: 0 0 0 3px var(--te-ring); }
+
+  .te-btn-primary { @apply te-btn; color: var(--te-on-primary); background: var(--te-primary); }
+  .te-btn-primary:hover { background: var(--te-primary-hover); }
+
+  .te-btn-secondary {
+    @apply te-btn;
+    color: var(--te-text);
+    background: var(--te-surface);
+    border: 1px solid var(--te-border);
+  }
+  .te-btn-secondary:hover { background: var(--te-surface-alt); border-color: var(--te-border-strong); }
+
+  .te-btn-ghost { @apply te-btn; color: var(--te-text-dim); }
+  .te-btn-ghost:hover { background: var(--te-hover); color: var(--te-text); }
+
+  .te-btn-danger { @apply te-btn text-white; background: #dc2626; }
+  .te-btn-danger:hover { background: #b91c1c; }
+
+  .te-btn-sm { @apply px-2.5 py-1.5 text-xs rounded-md gap-1.5; }
+  .te-btn-lg { @apply px-4 py-2.5 text-sm rounded-lg; }
+
+  /* Icon button */
+  .te-icon-btn {
+    @apply inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors duration-150;
+    color: var(--te-text-dim);
+    outline: none;
+  }
+  .te-icon-btn:hover { background: var(--te-hover); color: var(--te-text); }
+  .te-icon-btn:focus-visible { box-shadow: 0 0 0 3px var(--te-ring); }
+
+  /* Inputs */
+  .te-input {
+    @apply w-full rounded-md px-3 py-2 text-sm transition-colors duration-150;
+    color: var(--te-text);
+    background: var(--te-surface);
+    border: 1px solid var(--te-border);
+    outline: none;
+  }
+  .te-input::placeholder { color: var(--te-text-dim); opacity: 0.8; }
+  .te-input:focus { border-color: var(--te-accent); box-shadow: 0 0 0 3px var(--te-ring); }
+  .te-select { @apply te-input cursor-pointer; }
+  .te-textarea { @apply te-input resize-y min-h-[96px] leading-relaxed; }
+
+  /* Chips / badges — neutral by default */
+  .te-chip {
+    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium;
+    color: var(--te-text-dim);
+    background: var(--te-surface-alt);
+    border: 1px solid var(--te-border);
+  }
+  .te-badge {
+    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium;
+  }
+  .te-badge-brand {
+    @apply te-badge;
+    color: var(--te-accent);
+    background: var(--te-accent-soft);
+  }
+
+  .te-divider { height: 1px; width: 100%; background: var(--te-border); }
+
+  .te-link {
+    @apply font-medium transition-colors;
+    color: var(--te-accent);
+  }
+  .te-link:hover { color: var(--te-accent-hover); }
+}
+
+/* Thin neutral scrollbar (opt-in via .te-scroll) */
+.te-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.te-scroll::-webkit-scrollbar-track { background: transparent; }
+.te-scroll::-webkit-scrollbar-thumb { background: var(--te-border-strong); border-radius: 9999px; }
+.te-scroll::-webkit-scrollbar-thumb:hover { background: var(--te-text-dim); }
+.te-scroll { scrollbar-width: thin; scrollbar-color: var(--te-border-strong) transparent; }
+
+/* Engineering "canvas" textures — subtle dotted/grid backgrounds for workspace surfaces */
+.te-grid-bg {
+  background-color: var(--te-bg);
+  background-image: radial-gradient(var(--te-border) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+.te-lines-bg {
+  background-color: var(--te-bg);
+  background-image:
+    linear-gradient(to right, var(--te-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--te-border) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 1;
+}
+
+/* Terminal-style brand mark (used in shells) */
+.te-mark {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  background: var(--te-primary);
+  color: var(--te-on-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.te-wordmark {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }

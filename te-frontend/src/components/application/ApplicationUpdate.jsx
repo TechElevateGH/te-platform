@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from 'icons'
 import { useEffect } from 'react'
 import axiosInstance from '../../axiosConfig';
 
@@ -93,7 +93,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                             leaveFrom="opacity-100"
                             leaveTo="opacity-0"
                         >
-                            <div className="fixed inset-0 bg-gray-950/60 backdrop-blur-md transition-all" />
+                            <div className="fixed inset-0 bg-black/60 transition-all" />
                         </Transition.Child>
 
                         <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -107,32 +107,32 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                     leaveFrom="opacity-100 scale-100 translate-y-0"
                                     leaveTo="opacity-0 scale-95 translate-y-4"
                                 >
-                                    <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all w-full max-w-2xl">
+                                    <Dialog.Panel className="te-card relative w-full max-w-2xl transform overflow-hidden text-left transition-all">
                                         {/* Header */}
-                                        <div className="relative bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 px-6 py-5">
-                                            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-                                            <div className="relative flex items-center justify-between">
+                                        <div className="relative border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-6 py-5">
+                                            <div className="relative flex items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3">
                                                     <img
                                                         width="32"
                                                         height="32"
                                                         alt={application.company.name}
-                                                        className="rounded-lg ring-2 ring-white/30"
+                                                        className="rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)]"
                                                         src={getCompanyLogoUrl(application.company.name)}
                                                         onError={handleCompanyLogoError}
                                                     />
                                                     <div>
-                                                        <Dialog.Title className="text-xl font-bold text-white">
+                                                        <span className="te-eyebrow text-[10px]">{'// update application'}</span>
+                                                        <Dialog.Title className="mt-1 font-display text-xl font-semibold text-[var(--te-text)]">
                                                             {application.company.name}
                                                         </Dialog.Title>
-                                                        <p className="text-sm text-white/80">
+                                                        <p className="text-sm text-[var(--te-text-dim)]">
                                                             {application.title}, {application.role}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <button
                                                     type="button"
-                                                    className="rounded-lg p-1.5 text-white/80 hover:bg-white/20 hover:text-white transition-all duration-200"
+                                                    className="te-icon-btn"
                                                     onClick={() => setApplication(null)}
                                                 >
                                                     <XMarkIcon className="h-5 w-5" />
@@ -141,11 +141,11 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                         </div>
 
                                         {/* Content */}
-                                        <div className="max-h-[calc(100vh-16rem)] overflow-y-auto px-6 py-6 space-y-6">
+                                        <div className="max-h-[calc(100vh-16rem)] space-y-5 overflow-y-auto px-6 py-6 te-scroll">
                                             {/* Location Section */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Location</h3>
-                                                <div className="grid grid-cols-2 gap-4">
+                                            <div className="te-panel space-y-4 p-4">
+                                                <h3 className="te-eyebrow">{'// location'}</h3>
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormSelect
                                                         label="Country"
                                                         field="location.country"
@@ -164,9 +164,9 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                             </div>
 
                                             {/* Status Section */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Application Status</h3>
-                                                <div className="grid grid-cols-2 gap-4">
+                                            <div className="te-panel space-y-4 p-4">
+                                                <h3 className="te-eyebrow">{'// application status'}</h3>
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormSelect
                                                         label="Status"
                                                         field="status"
@@ -185,9 +185,9 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                             </div>
 
                                             {/* Recruiter Section */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recruiter Information</h3>
-                                                <div className="grid grid-cols-2 gap-4">
+                                            <div className="te-panel space-y-4 p-4">
+                                                <h3 className="te-eyebrow">{'// recruiter information'}</h3>
+                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormInput
                                                         label="Recruiter Name"
                                                         type='text'
@@ -206,8 +206,8 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                             </div>
 
                                             {/* Notes Section */}
-                                            <div className="space-y-4">
-                                                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Notes</h3>
+                                            <div className="te-panel space-y-4 p-4">
+                                                <h3 className="te-eyebrow">{'// notes'}</h3>
                                                 <FormInput
                                                     label="Notes"
                                                     type='text'
@@ -220,17 +220,17 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                                        <div className="flex items-center justify-end gap-3 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-6 py-4">
                                             <button
                                                 type="button"
-                                                className="rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition-all duration-200 border border-gray-300"
+                                                className="te-btn-secondary"
                                                 onClick={() => setApplication(null)}
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 type="button"
-                                                className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition-all duration-200"
+                                                className="te-btn-primary"
                                                 onClick={updateApplication}
                                             >
                                                 Save Changes
@@ -249,4 +249,3 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
 
 
 export default ApplicationUpdate;
-

@@ -13,7 +13,6 @@ import {
     CheckCircleIcon,
     ClockIcon,
     XCircleIcon,
-    ChartBarIcon,
     XMarkIcon,
     AdjustmentsHorizontalIcon,
     ArrowDownTrayIcon,
@@ -22,7 +21,7 @@ import {
     ChevronUpDownIcon,
     ChevronUpIcon,
     ChevronDownIcon
-} from '@heroicons/react/24/outline';
+} from 'icons';
 
 const ApplicationManagement = () => {
     const { accessToken, userRole } = useAuth();
@@ -37,10 +36,8 @@ const ApplicationManagement = () => {
     const [referredFilter, setReferredFilter] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [sortField, setSortField] = useState('date');
     const [sortDirection, setSortDirection] = useState('desc');
-    const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
@@ -332,750 +329,370 @@ const ApplicationManagement = () => {
     };
 
     const getStatusColor = (status) => {
+        const neutral = 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]';
         const colors = {
-            'Submitted': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
-            'HR': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
-            'Phone interview': 'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700',
-            'OA': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
-            'Final interview': 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700',
-            'Offer': 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700',
-            'Rejected': 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-700',
+            'Submitted': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
+            'HR': neutral,
+            'Phone interview': neutral,
+            'OA': neutral,
+            'Final interview': neutral,
+            'Offer': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
+            'Rejected': 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800',
         };
-        return colors[status] || 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
+        return colors[status] || neutral;
     };
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="min-h-screen bg-[var(--te-bg)] flex items-center justify-center">
                 <Loading />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen h-full bg-gray-50 dark:bg-gray-900 transition-colors">
-            {/* Header with Stats and Actions */}
-            <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-                        <div className="min-w-0 flex-1">
-                            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500 flex-shrink-0" />
-                                <span className="truncate">Member Applications</span>
+        <div className="min-h-screen bg-[var(--te-bg)] text-[var(--te-text)]">
+            <header className="sticky top-16 z-30 border-b border-[var(--te-border)] bg-[var(--te-bg)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-2xl">
+                            <span className="te-eyebrow">{'// applications admin'}</span>
+                            <h1 className="mt-3 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--te-text)]">
+                                Member applications
                             </h1>
-                            <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5 hidden sm:block">
-                                Monitor and manage all member job applications
+                            <p className="mt-2 text-sm sm:text-base leading-relaxed text-[var(--te-text-dim)]">
+                                Monitor member pipelines, inspect status changes, and export application intelligence.
                             </p>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 self-end sm:self-auto">
-                            {/* Bulk Delete Button */}
+                        <div className="flex flex-wrap items-center gap-2">
                             {isAdmin && selectedItems.length > 0 && (
-                                <button
-                                    onClick={() => handleDeleteClick()}
-                                    className="flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] md:text-xs font-semibold rounded-lg transition-colors shadow-lg shadow-red-500/30 whitespace-nowrap"
-                                >
-                                    <TrashIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                                    <span className="hidden sm:inline">Delete ({selectedItems.length})</span>
-                                    <span className="sm:hidden">Del ({selectedItems.length})</span>
+                                <button onClick={() => handleDeleteClick()} className="te-btn-danger te-btn-sm">
+                                    <TrashIcon className="h-4 w-4" />
+                                    Delete ({selectedItems.length})
                                 </button>
                             )}
 
-                            {/* Column Selector */}
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                    className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
-                                >
-                                    <EyeIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                    <span className="hidden sm:inline">Columns</span>
-                                    <span className="sm:hidden">{visibleColumnCount}</span>
-                                    <span className="hidden sm:inline">({visibleColumnCount}/{columnConfig.length})</span>
-                                </button>
-
-                                {showColumnSelector && (
-                                    <>
-                                        {/* Backdrop */}
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() => setShowColumnSelector(false)}
-                                        />
-
-                                        {/* Dropdown */}
-                                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
-                                            <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                                                        Manage Columns
-                                                    </h3>
-                                                    <button
-                                                        onClick={() => setShowColumnSelector(false)}
-                                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                                    >
-                                                        <XMarkIcon className="h-4 w-4" />
-                                                    </button>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={showAllColumns}
-                                                        className="flex-1 px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
-                                                    >
-                                                        Show All
-                                                    </button>
-                                                    <button
-                                                        onClick={resetColumns}
-                                                        className="flex-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors"
-                                                    >
-                                                        Reset
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="p-2 max-h-80 overflow-y-auto">
-                                                {columnConfig.map(column => (
-                                                    <label
-                                                        key={column.key}
-                                                        className="flex items-center gap-2 px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer transition-colors"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={visibleColumns[column.key]}
-                                                            onChange={() => toggleColumn(column.key)}
-                                                            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-                                                            {column.label}
-                                                        </span>
-                                                        {!column.default && (
-                                                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                                                                Optional
-                                                            </span>
-                                                        )}
-                                                    </label>
-                                                ))}
-                                            </div>
+                            <details className="relative">
+                                <summary className="te-btn-secondary te-btn-sm list-none cursor-pointer [&::-webkit-details-marker]:hidden">
+                                    <EyeIcon className="h-4 w-4" />
+                                    Columns ({visibleColumnCount}/{columnConfig.length})
+                                </summary>
+                                <div className="te-card absolute right-0 z-40 mt-2 w-72 overflow-hidden">
+                                    <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4">
+                                        <span className="te-eyebrow">{'// display'}</span>
+                                        <div className="mt-3 flex gap-2">
+                                            <button onClick={showAllColumns} className="te-btn-ghost te-btn-sm flex-1">Show all</button>
+                                            <button onClick={resetColumns} className="te-btn-secondary te-btn-sm flex-1">Reset</button>
                                         </div>
-                                    </>
-                                )}
-                            </div>
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto p-2 te-scroll">
+                                        {columnConfig.map(column => (
+                                            <label key={column.key} className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-[var(--te-hover)]">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={visibleColumns[column.key]}
+                                                    onChange={() => toggleColumn(column.key)}
+                                                    className="h-4 w-4 rounded border-[var(--te-border)] text-[var(--te-primary)] focus:ring-2 focus:ring-[var(--te-ring)]"
+                                                />
+                                                <span className="flex-1 text-[var(--te-text)]">{column.label}</span>
+                                                {!column.default && <span className="font-mono text-[10px] uppercase text-[var(--te-text-dim)]">Optional</span>}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            </details>
 
-                            <button
-                                onClick={exportToCSV}
-                                disabled={sortedApplications.length === 0}
-                                className="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ArrowDownTrayIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                <span className="hidden sm:inline">Export CSV</span>
-                            </button>
-                            <button
-                                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                className={`inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-colors ${showAdvancedFilters
-                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                    : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                    }`}
-                            >
-                                <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                <span className="hidden sm:inline">Filters</span>
-                                {hasActiveFilters && (
-                                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">
-                                        {[memberFilter, companyFilter, statusFilter, levelFilter, referredFilter, dateFrom, dateTo].filter(Boolean).length}
-                                    </span>
-                                )}
+                            <button onClick={exportToCSV} disabled={sortedApplications.length === 0} className="te-btn-secondary te-btn-sm disabled:cursor-not-allowed disabled:opacity-50">
+                                <ArrowDownTrayIcon className="h-4 w-4" />
+                                Export CSV
                             </button>
                         </div>
                     </div>
 
-                    {/* Stats Bar */}
-                    <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3 sm:gap-6 text-xs">
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <UserGroupIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                                <span className="font-medium text-gray-600 dark:text-gray-400 hidden sm:inline">Total:</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.total}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <CheckCircleIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
-                                <span className="font-medium text-green-600 dark:text-green-400 hidden sm:inline">Offers:</span>
-                                <span className="font-bold text-green-700 dark:text-green-400">{stats.offered}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
-                                <span className="font-medium text-blue-600 dark:text-blue-400 hidden sm:inline">Interviewing:</span>
-                                <span className="font-bold text-blue-700 dark:text-blue-400">{stats.interviewing}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <ClockIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500 flex-shrink-0" />
-                                <span className="font-medium text-amber-600 dark:text-amber-400 hidden sm:inline">Pending:</span>
-                                <span className="font-bold text-amber-700 dark:text-amber-400">{stats.submitted}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <XCircleIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
-                                <span className="font-medium text-red-600 dark:text-red-400 hidden sm:inline">Rejected:</span>
-                                <span className="font-bold text-red-700 dark:text-red-400">{stats.rejected}</span>
-                            </div>
+                    <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center">
+                        <div className="relative flex-1">
+                            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                            <input
+                                type="text"
+                                placeholder="Search member, company, or position..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="te-input w-full pl-9"
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {['', 'Submitted', 'OA', 'Phone interview', 'Final interview', 'HR', 'Offer', 'Rejected'].map((status) => (
+                                <button
+                                    key={status || 'All'}
+                                    onClick={() => setStatusFilter(status)}
+                                    className={`te-btn-sm font-mono ${statusFilter === status ? 'te-btn-primary' : 'te-btn-secondary'}`}
+                                >
+                                    {status || 'All'}
+                                </button>
+                            ))}
+
+                            <details className="relative">
+                                <summary className="te-btn-secondary te-btn-sm list-none cursor-pointer [&::-webkit-details-marker]:hidden">
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Filters
+                                    {hasActiveFilters && (
+                                        <span className="ml-1 border border-[var(--te-border)] px-1.5 py-0.5 font-mono text-[10px]">
+                                            {[memberFilter, companyFilter, statusFilter, levelFilter, referredFilter, dateFrom, dateTo].filter(Boolean).length}
+                                        </span>
+                                    )}
+                                </summary>
+                                <div className="te-card absolute right-0 z-40 mt-2 w-80 p-4">
+                                    <div className="grid gap-3">
+                                        <label className="grid gap-1.5">
+                                            <span className="te-eyebrow text-[10px]">Member</span>
+                                            <input type="text" value={memberFilter} onChange={(e) => setMemberFilter(e.target.value)} className="te-input text-sm" placeholder="Filter by member..." />
+                                        </label>
+                                        <label className="grid gap-1.5">
+                                            <span className="te-eyebrow text-[10px]">Company</span>
+                                            <input type="text" value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="te-input text-sm" placeholder="Filter by company..." />
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <label className="grid gap-1.5">
+                                                <span className="te-eyebrow text-[10px]">Level</span>
+                                                <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)} className="te-select text-sm">
+                                                    <option value="">All levels</option>
+                                                    <option value="Intern">Intern</option>
+                                                    <option value="Entry">Entry</option>
+                                                    <option value="Mid">Mid</option>
+                                                    <option value="Senior">Senior</option>
+                                                </select>
+                                            </label>
+                                            <label className="grid gap-1.5">
+                                                <span className="te-eyebrow text-[10px]">Referred</span>
+                                                <select value={referredFilter} onChange={(e) => setReferredFilter(e.target.value)} className="te-select text-sm">
+                                                    <option value="">All</option>
+                                                    <option value="yes">Referred</option>
+                                                    <option value="no">Not referred</option>
+                                                </select>
+                                            </label>
+                                            <label className="grid gap-1.5">
+                                                <span className="te-eyebrow text-[10px]">From</span>
+                                                <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="te-input text-sm" />
+                                            </label>
+                                            <label className="grid gap-1.5">
+                                                <span className="te-eyebrow text-[10px]">To</span>
+                                                <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="te-input text-sm" />
+                                            </label>
+                                        </div>
+                                        {hasActiveFilters && (
+                                            <button onClick={clearAllFilters} className="te-btn-secondary te-btn-sm justify-center">
+                                                <XMarkIcon className="h-4 w-4" />
+                                                Clear filters
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div className="max-w-7xl mx-auto px-4 py-3">
-
-                {/* Search and Sort Bar */}
-                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                    <div className="flex items-center gap-3">
-                        {/* Global Search */}
-                        <div className="flex-1 relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search applications (member, company, position)..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            />
-                        </div>
-
-                        {/* Results Count */}
-                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                            {sortedApplications.length} of {applications.length}
-                        </div>
+            <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                <div className="mb-6 overflow-hidden border border-[var(--te-border)] bg-[var(--te-border)]">
+                    <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-5">
+                        {[
+                            { label: 'Total', value: stats.total, icon: UserGroupIcon },
+                            { label: 'Offers', value: stats.offered, icon: CheckCircleIcon },
+                            { label: 'Interviewing', value: stats.interviewing, icon: ClockIcon },
+                            { label: 'Submitted', value: stats.submitted, icon: ClockIcon },
+                            { label: 'Rejected', value: stats.rejected, icon: XCircleIcon },
+                        ].map((item) => (
+                            <div key={item.label} className="bg-[var(--te-surface)] p-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="te-eyebrow text-[10px]">{item.label}</span>
+                                    <item.icon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                </div>
+                                <p className="mt-4 font-mono text-3xl font-semibold tracking-tight text-[var(--te-text)]">{item.value}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* Advanced Filters Panel */}
-                {showAdvancedFilters && (
-                    <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-3 mb-3 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <AdjustmentsHorizontalIcon className="h-4 w-4 text-blue-600 dark:text-blue-500" />
-                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Advanced Filters</h3>
-                            </div>
-                            {hasActiveFilters && (
-                                <button
-                                    onClick={clearAllFilters}
-                                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                >
-                                    <XMarkIcon className="h-3.5 w-3.5" />
-                                    Clear All
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {/* Member Filter */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Member
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Filter by member..."
-                                    value={memberFilter}
-                                    onChange={(e) => setMemberFilter(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-
-                            {/* Company Filter */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Company
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Filter by company..."
-                                    value={companyFilter}
-                                    onChange={(e) => setCompanyFilter(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-
-                            {/* Status Filter */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Status
-                                </label>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="Submitted">Submitted</option>
-                                    <option value="OA">OA</option>
-                                    <option value="Phone interview">Phone interview</option>
-                                    <option value="Final interview">Final interview</option>
-                                    <option value="HR">HR</option>
-                                    <option value="Recruiter call">Recruiter call</option>
-                                    <option value="Offer">Offer</option>
-                                    <option value="Rejected">Rejected</option>
-                                </select>
-                            </div>
-
-                            {/* Level Filter */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Level
-                                </label>
-                                <select
-                                    value={levelFilter}
-                                    onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                >
-                                    <option value="">All Levels</option>
-                                    <option value="Intern">Intern</option>
-                                    <option value="Entry">Entry</option>
-                                    <option value="Mid">Mid</option>
-                                    <option value="Senior">Senior</option>
-                                </select>
-                            </div>
-
-                            {/* Referred Filter */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Referred
-                                </label>
-                                <select
-                                    value={referredFilter}
-                                    onChange={(e) => setReferredFilter(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                >
-                                    <option value="">All</option>
-                                    <option value="yes">Referred</option>
-                                    <option value="no">Not Referred</option>
-                                </select>
-                            </div>
-
-                            {/* Date From */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Date From
-                                </label>
-                                <input
-                                    type="date"
-                                    value={dateFrom}
-                                    onChange={(e) => setDateFrom(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-
-                            {/* Date To */}
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Date To
-                                </label>
-                                <input
-                                    type="date"
-                                    value={dateTo}
-                                    onChange={(e) => setDateTo(e.target.value)}
-                                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
-                        </div>
+                <div className="te-card overflow-hidden">
+                    <div className="flex flex-col gap-2 border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">
+                            {sortedApplications.length} of {applications.length} applications
+                        </p>
+                        <p className="text-xs text-[var(--te-text-dim)]">Click any row or card to inspect details</p>
                     </div>
-                )}
 
-                {/* Applications Table */}
-                <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
-                    {/* Desktop Table - Hidden on mobile */}
-                    <div className="hidden md:block">
-                        {/* Hint Text */}
-                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                💡 Click on any row to view details
-                            </p>
-                        </div>
-
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-                                        {isAdmin && (
-                                            <th className="px-4 py-3 w-12">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedItems.length === filteredApplications.length && filteredApplications.length > 0}
-                                                    onChange={toggleSelectAll}
-                                                    className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
-                                                />
-                                            </th>
-                                        )}
-                                        {visibleColumns.company && (
-                                            <th
-                                                onClick={() => handleSort('company')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Company
-                                                    {sortField === 'company' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {visibleColumns.member && (
-                                            <th
-                                                onClick={() => handleSort('member')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Member
-                                                    {sortField === 'member' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {visibleColumns.position && (
-                                            <th
-                                                onClick={() => handleSort('position')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Position
-                                                    {sortField === 'position' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {visibleColumns.level && (
-                                            <th
-                                                onClick={() => handleSort('level')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Level
-                                                    {sortField === 'level' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {visibleColumns.location && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Location
-                                            </th>
-                                        )}
-                                        {visibleColumns.referred && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Referred
-                                            </th>
-                                        )}
-                                        {visibleColumns.recruiter && (
-                                            <th className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                                Recruiter
-                                            </th>
-                                        )}
-                                        {visibleColumns.status && (
-                                            <th
-                                                onClick={() => handleSort('status')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Status
-                                                    {sortField === 'status' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
-                                        {visibleColumns.applied && (
-                                            <th
-                                                onClick={() => handleSort('date')}
-                                                className="px-3 py-2 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    Applied
-                                                    {sortField === 'date' ? (
-                                                        sortDirection === 'asc' ?
-                                                            <ChevronUpIcon className="h-4 w-4" /> :
-                                                            <ChevronDownIcon className="h-4 w-4" />
-                                                    ) : (
-                                                        <ChevronUpDownIcon className="h-4 w-4 opacity-30" />
-                                                    )}
-                                                </div>
-                                            </th>
-                                        )}
+                    <div className="hidden md:block overflow-x-auto te-scroll">
+                        <table className="w-full">
+                            <thead className="bg-[var(--te-surface-alt)]">
+                                <tr className="border-b border-[var(--te-border)]">
+                                    {isAdmin && (
+                                        <th className="px-4 py-4 text-left">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.length === filteredApplications.length && filteredApplications.length > 0}
+                                                onChange={toggleSelectAll}
+                                                className="rounded border-[var(--te-border)] text-[var(--te-primary)] focus:ring-[var(--te-ring)] bg-[var(--te-surface)]"
+                                            />
+                                        </th>
+                                    )}
+                                    {visibleColumns.company && (
+                                        <th onClick={() => handleSort('company')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Company {sortField === 'company' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.member && (
+                                        <th onClick={() => handleSort('member')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Member {sortField === 'member' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.position && (
+                                        <th onClick={() => handleSort('position')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Position {sortField === 'position' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.level && (
+                                        <th onClick={() => handleSort('level')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Level {sortField === 'level' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.location && <th className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)]">Location</th>}
+                                    {visibleColumns.referred && <th className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)]">Referred</th>}
+                                    {visibleColumns.recruiter && <th className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)]">Recruiter</th>}
+                                    {visibleColumns.status && (
+                                        <th onClick={() => handleSort('status')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Status {sortField === 'status' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                    {visibleColumns.applied && (
+                                        <th onClick={() => handleSort('date')} className="px-4 py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)] cursor-pointer hover:bg-[var(--te-hover)]">
+                                            <div className="flex items-center gap-2">Applied {sortField === 'date' ? (sortDirection === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />) : <ChevronUpDownIcon className="h-4 w-4 opacity-40" />}</div>
+                                        </th>
+                                    )}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[var(--te-border)]">
+                                {sortedApplications.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={visibleColumnCount + (isAdmin ? 1 : 0)} className="px-4 py-16 text-center">
+                                            <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                                <BuildingOfficeIcon className="h-7 w-7 text-[var(--te-text-dim)]" />
+                                            </div>
+                                            <p className="mt-4 font-display text-lg font-semibold text-[var(--te-text)]">No applications found</p>
+                                            <p className="mt-1 text-sm text-[var(--te-text-dim)]">{applications.length === 0 ? 'No member applications yet.' : 'Try adjusting your filters.'}</p>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                    {sortedApplications.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={visibleColumnCount} className="px-3 py-6 text-center">
-                                                <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                    {applications.length === 0
-                                                        ? 'No member applications yet'
-                                                        : 'Try adjusting your filters'}
-                                                </p>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        sortedApplications.map((app) => (
-                                            <tr
-                                                key={app.id}
-                                                onClick={() => {
+                                ) : (
+                                    sortedApplications.map((app) => (
+                                        <tr
+                                            key={app.id}
+                                            onClick={() => { setSelectedApplication(app); setSelectedApplicationId(app.id); }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
                                                     setSelectedApplication(app);
                                                     setSelectedApplicationId(app.id);
-                                                }}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter' || e.key === ' ') {
-                                                        e.preventDefault();
-                                                        setSelectedApplication(app);
-                                                        setSelectedApplicationId(app.id);
-                                                    }
-                                                }}
-                                                tabIndex={0}
-                                                role="button"
-                                                aria-label={`View details for application at ${app.company}`}
-                                                className="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-cyan-50/30 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-all cursor-pointer"
-                                            >
-                                                {isAdmin && (
-                                                    <td className="px-4 py-3 w-12" onClick={(e) => e.stopPropagation()}>
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedItems.includes(app.id)}
-                                                            onChange={() => toggleSelectItem(app.id)}
-                                                            className="rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500 dark:bg-gray-700"
-                                                        />
-                                                    </td>
-                                                )}
-                                                {visibleColumns.company && (
-                                                    <td className="px-3 py-2 text-left">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="relative h-5 w-5 flex-shrink-0">
-                                                                <img
-                                                                    src={getCompanyLogoUrl(app.company)}
-                                                                    alt={app.company}
-                                                                    className="h-5 w-5 rounded object-cover border border-gray-200 dark:border-gray-700 bg-white"
-                                                                    onError={handleCompanyLogoError}
-                                                                />
-                                                            </div>
-                                                            <span className="font-semibold text-gray-900 dark:text-white text-xs">{app.company}</span>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.member && (
-                                                    <td className="px-3 py-2 text-left">
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                            role="button"
+                                            aria-label={`View details for application at ${app.company}`}
+                                            className="cursor-pointer transition-colors hover:bg-[var(--te-hover)]"
+                                        >
+                                            {isAdmin && (
+                                                <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedItems.includes(app.id)}
+                                                        onChange={() => toggleSelectItem(app.id)}
+                                                        className="rounded border-[var(--te-border)] text-[var(--te-primary)] focus:ring-[var(--te-ring)] bg-[var(--te-surface)]"
+                                                    />
+                                                </td>
+                                            )}
+                                            {visibleColumns.company && (
+                                                <td className="px-4 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <img src={getCompanyLogoUrl(app.company)} alt={app.company} className="h-8 w-8 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)] object-cover" onError={handleCompanyLogoError} />
+                                                        <span className="text-sm font-semibold text-[var(--te-text)]">{app.company}</span>
+                                                    </div>
+                                                </td>
+                                            )}
+                                            {visibleColumns.member && (
+                                                <td className="px-4 py-4">
+                                                    <p className="text-sm font-medium text-[var(--te-text)]">{app.user_name}</p>
+                                                    <p className="text-xs text-[var(--te-text-dim)]">{app.user_email}</p>
+                                                </td>
+                                            )}
+                                            {visibleColumns.position && <td className="px-4 py-4 text-sm text-[var(--te-text)]">{app.title}</td>}
+                                            {visibleColumns.level && <td className="px-4 py-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">{app.role}</td>}
+                                            {visibleColumns.location && <td className="px-4 py-4 text-sm text-[var(--te-text-dim)]">{app.location?.city && app.location?.country ? `${app.location.city}, ${app.location.country}` : app.location?.country || app.location?.city || '—'}</td>}
+                                            {visibleColumns.referred && <td className="px-4 py-4">{app.referred ? <span className="te-badge">Yes</span> : <span className="text-xs text-[var(--te-text-dim)]">—</span>}</td>}
+                                            {visibleColumns.recruiter && (
+                                                <td className="px-4 py-4">
+                                                    {app.recruiter_name ? (
                                                         <div>
-                                                            <div className="font-semibold text-gray-900 dark:text-white text-xs">{app.user_name}</div>
-                                                            <div className="text-xs text-gray-500 dark:text-gray-400">{app.user_email}</div>
+                                                            <p className="text-sm font-medium text-[var(--te-text)]">{app.recruiter_name}</p>
+                                                            {app.recruiter_email && <p className="text-xs text-[var(--te-text-dim)]">{app.recruiter_email}</p>}
                                                         </div>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.position && (
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className="text-xs text-gray-700 dark:text-gray-300">{app.title}</span>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.level && (
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{app.role}</span>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.location && (
-                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                        <p className="text-xs text-gray-700 dark:text-gray-300">
-                                                            {app.location?.city && app.location?.country
-                                                                ? `${app.location.city}, ${app.location.country}`
-                                                                : app.location?.country || app.location?.city || '—'}
-                                                        </p>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.referred && (
-                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                        {app.referred ? (
-                                                            <span className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                                Yes
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
-                                                        )}
-                                                    </td>
-                                                )}
-                                                {visibleColumns.recruiter && (
-                                                    <td className="px-3 py-2 whitespace-nowrap text-left">
-                                                        {app.recruiter_name ? (
-                                                            <div className="min-w-0">
-                                                                <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                                                                    {app.recruiter_name}
-                                                                </p>
-                                                                {app.recruiter_email && (
-                                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                                        {app.recruiter_email}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-xs text-gray-400 dark:text-gray-500">—</span>
-                                                        )}
-                                                    </td>
-                                                )}
-                                                {visibleColumns.status && (
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-full border ${getStatusColor(app.status)}`}>
-                                                            {app.status}
-                                                        </span>
-                                                    </td>
-                                                )}
-                                                {visibleColumns.applied && (
-                                                    <td className="px-3 py-2 text-left">
-                                                        <span className="text-xs text-gray-600 dark:text-gray-400">{app.date}</span>
-                                                    </td>
-                                                )}
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                                    ) : <span className="text-xs text-[var(--te-text-dim)]">—</span>}
+                                                </td>
+                                            )}
+                                            {visibleColumns.status && <td className="px-4 py-4"><span className={`te-chip border ${getStatusColor(app.status)}`}>{app.status}</span></td>}
+                                            {visibleColumns.applied && <td className="px-4 py-4 font-mono text-xs text-[var(--te-text-dim)]">{app.date}</td>}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
 
-                    {/* Mobile Card View - Hidden on desktop */}
-                    <div className="md:hidden">
-                        {/* Hint Text */}
-                        <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                💡 Tap on any card to view details
-                            </p>
-                        </div>
-
-                        <div className="space-y-2.5 p-3">
-                            {sortedApplications.length === 0 ? (
-                                <div className="p-8 text-center">
-                                    <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">No applications found</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        {applications.length === 0
-                                            ? 'No member applications yet'
-                                            : 'Try adjusting your filters'}
-                                    </p>
+                    <div className="grid gap-3 p-3 md:hidden">
+                        {sortedApplications.length === 0 ? (
+                            <div className="p-10 text-center">
+                                <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                    <BuildingOfficeIcon className="h-7 w-7 text-[var(--te-text-dim)]" />
                                 </div>
-                            ) : (
-                                sortedApplications.map((app) => (
-                                    <div
-                                        key={app.id}
-                                        onClick={() => {
-                                            setSelectedApplication(app);
-                                            setSelectedApplicationId(app.id);
-                                        }}
-                                        className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                    >
-                                        {/* Card Header */}
-                                        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-gradient-to-r from-gray-50 to-white dark:from-gray-700/50 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                            {visibleColumns.company && (
-                                                <div className="h-9 w-9 rounded border border-gray-200 dark:border-gray-600 bg-white p-1 flex-shrink-0">
-                                                    <img
-                                                        src={getCompanyLogoUrl(app.company)}
-                                                        alt={app.company}
-                                                        className="h-full w-full object-contain"
-                                                        onError={handleCompanyLogoError}
-                                                    />
+                                <p className="mt-4 font-display text-lg font-semibold text-[var(--te-text)]">No applications found</p>
+                                <p className="mt-1 text-sm text-[var(--te-text-dim)]">{applications.length === 0 ? 'No member applications yet.' : 'Try adjusting your filters.'}</p>
+                            </div>
+                        ) : (
+                            sortedApplications.map((app) => (
+                                <button
+                                    key={app.id}
+                                    onClick={() => { setSelectedApplication(app); setSelectedApplicationId(app.id); }}
+                                    className="te-card-interactive w-full p-4 text-left"
+                                >
+                                    <div className="flex items-start gap-3">
+                                        {visibleColumns.company && <img src={getCompanyLogoUrl(app.company)} alt={app.company} className="h-10 w-10 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)] object-cover" onError={handleCompanyLogoError} />}
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    {visibleColumns.company && <h3 className="truncate text-sm font-semibold text-[var(--te-text)]">{app.company}</h3>}
+                                                    {visibleColumns.position && <p className="mt-1 truncate text-sm text-[var(--te-text-dim)]">{app.title}</p>}
                                                 </div>
-                                            )}
-                                            <div className="flex-1 min-w-0">
-                                                {visibleColumns.company && (
-                                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                        {app.company}
-                                                    </h3>
-                                                )}
-                                                {visibleColumns.position && (
-                                                    <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">
-                                                        {app.title}
-                                                    </p>
-                                                )}
+                                                {visibleColumns.status && <span className={`te-chip border ${getStatusColor(app.status)}`}>{app.status}</span>}
                                             </div>
-                                            {visibleColumns.status && (
-                                                <span className={`text-[9px] font-bold rounded-md px-2 py-1 border ${getStatusColor(app.status)}`}>
-                                                    {app.status}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {/* Card Body */}
-                                        <div className="px-3 py-2.5">
-                                            {/* Member Info */}
                                             {visibleColumns.member && (
-                                                <div className="space-y-1 mb-2.5">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Member</span>
-                                                        <span className="text-xs font-semibold text-gray-900 dark:text-white truncate ml-2">
-                                                            {app.user_name}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase">Email</span>
-                                                        <span className="text-[10px] text-gray-600 dark:text-gray-400 truncate ml-2">
-                                                            {app.user_email}
-                                                        </span>
-                                                    </div>
+                                                <div className="mt-3 border-t border-[var(--te-border)] pt-3">
+                                                    <p className="text-xs font-semibold text-[var(--te-text)]">{app.user_name}</p>
+                                                    <p className="text-xs text-[var(--te-text-dim)]">{app.user_email}</p>
                                                 </div>
                                             )}
-
-                                            {/* Details */}
-                                            <div className="flex items-center gap-3 py-2 mb-2.5 border-y border-gray-100 dark:border-gray-700">
-                                                {visibleColumns.level && (
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">🎯</span>
-                                                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
-                                                            {app.role}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                {visibleColumns.applied && (
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-gray-500 dark:text-gray-400">📅</span>
-                                                        <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
-                                                            {app.date}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                {visibleColumns.referred && app.referred && (
-                                                    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-medium bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">
-                                                        Referred
-                                                    </span>
-                                                )}
+                                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-wide text-[var(--te-text-dim)]">
+                                                {visibleColumns.level && <span>{app.role}</span>}
+                                                {visibleColumns.applied && <span>{app.date}</span>}
+                                                {visibleColumns.referred && app.referred && <span className="te-badge">Referred</span>}
                                             </div>
-
-                                            {/* View Button - Removed, click card to view */}
                                         </div>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                </button>
+                            ))
+                        )}
                     </div>
                 </div>
-
-                {/* Results Count */}
-                {filteredApplications.length > 0 && (
-                    <div className="mt-2 text-center text-xs text-gray-600 dark:text-gray-400">
-                        Showing {filteredApplications.length} of {applications.length} applications
-                    </div>
-                )}
-            </div>
+            </main>
 
             {selectedApplicationId && (
                 <ApplicationInfo

@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useState } from 'react'
-import { PencilIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/20/solid'
+import { PencilIcon, TrashIcon, ArchiveBoxIcon } from 'icons'
 import { useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import axiosInstance from '../../axiosConfig';
@@ -11,13 +11,13 @@ import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } fro
 import { countries } from '../../data/jobData'
 
 export const jobStatuses = {
-    "Offer": 'text-emerald-700 bg-emerald-50 ring-emerald-600/20 border border-emerald-200',
-    "HR": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
-    "Phone interview": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
-    "Final interview": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
-    "OA": 'text-blue-700 bg-blue-50 ring-blue-600/20 border border-blue-200',
-    "Submitted": 'text-amber-700 bg-amber-50 ring-amber-600/20 border border-amber-200',
-    "Rejected": 'text-gray-700 bg-gray-50 ring-gray-600/20 border border-gray-200',
+    "Offer": 'text-green-700 bg-green-50 border border-green-200 dark:text-green-300 dark:bg-green-900/20 dark:border-green-800',
+    "HR": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
+    "Phone interview": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
+    "Final interview": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
+    "OA": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
+    "Submitted": 'text-amber-700 bg-amber-50 border border-amber-200 dark:text-amber-300 dark:bg-amber-900/20 dark:border-amber-800',
+    "Rejected": 'text-rose-700 bg-rose-50 border border-rose-200 dark:text-rose-300 dark:bg-rose-900/20 dark:border-rose-800',
 }
 
 const classNames = (...classes) => {
@@ -188,11 +188,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-80 transition-opacity" />
+                    <div className="fixed inset-0 bg-black/60 transition-opacity" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div className="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -202,25 +202,26 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-3 sm:px-4 pb-4 pt-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-5">
+                            <Dialog.Panel className="te-card relative transform overflow-hidden text-left transition-all sm:my-8 sm:w-full sm:max-w-2xl">
                                 {application && (
                                     <>
                                         {/* Header */}
-                                        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
-                                            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                                                <div className="relative h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
+                                        <div className="flex items-center justify-between gap-4 border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-4">
+                                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                                                <div className="relative h-10 w-10 flex-shrink-0">
                                                     <img
                                                         src={getCompanyLogoUrl(application.company)}
                                                         alt={application.company}
-                                                        className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700"
+                                                        className="h-10 w-10 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)] object-cover"
                                                         onError={handleCompanyLogoError}
                                                     />
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                                                    <span className="te-eyebrow text-[10px]">{'// application detail'}</span>
+                                                    <h3 className="mt-1 truncate font-display text-lg font-semibold text-[var(--te-text)]">
                                                         {application.company}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                    <p className="truncate text-sm text-[var(--te-text-dim)]">
                                                         {application.title}, {application.role}
                                                     </p>
                                                 </div>
@@ -228,7 +229,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                             {canEdit && (
                                                 <button
                                                     type="button"
-                                                    className="rounded-full bg-white dark:bg-gray-700 p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
+                                                    className="te-icon-btn flex-shrink-0"
                                                     onClick={isEditing ? handleCancel : handleEdit}
                                                 >
                                                     <PencilIcon className="h-4 w-4" aria-hidden="true" />
@@ -237,59 +238,59 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                         </div>
 
                                         {/* Content */}
-                                        <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+                                        <div className="max-h-[calc(100vh-16rem)] space-y-4 overflow-y-auto px-5 py-5 te-scroll">
                                             {!isEditing ? (
                                                 // View Mode
                                                 <>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Location</label>
-                                                            <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                                                    <div className="grid grid-cols-1 gap-px overflow-hidden border border-[var(--te-border)] bg-[var(--te-border)] sm:grid-cols-2">
+                                                        <div className="bg-[var(--te-surface)] p-4">
+                                                            <label className="te-eyebrow text-[10px]">Location</label>
+                                                            <p className="mt-1 text-sm text-[var(--te-text)]">
                                                                 {application.location?.city}, {application.location?.country}
                                                             </p>
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Status</label>
+                                                        <div className="bg-[var(--te-surface)] p-4">
+                                                            <label className="te-eyebrow text-[10px]">Status</label>
                                                             <span className={classNames(
                                                                 jobStatuses[application.status],
-                                                                'mt-1 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset'
+                                                                'mt-2 inline-flex px-2.5 py-1 text-xs font-semibold font-mono uppercase tracking-wide'
                                                             )}>
                                                                 {application.status}
                                                             </span>
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Referred</label>
-                                                            <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                                                        <div className="bg-[var(--te-surface)] p-4">
+                                                            <label className="te-eyebrow text-[10px]">Referred</label>
+                                                            <p className="mt-1 text-sm text-[var(--te-text)]">
                                                                 {application.referred === true ? "Yes" : "No"}
                                                             </p>
                                                         </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Added on</label>
-                                                            <p className="mt-1 text-sm text-gray-900 dark:text-white">{application.date}</p>
+                                                        <div className="bg-[var(--te-surface)] p-4">
+                                                            <label className="te-eyebrow text-[10px]">Added on</label>
+                                                            <p className="mt-1 text-sm text-[var(--te-text)]">{application.date}</p>
                                                         </div>
                                                     </div>
 
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                                                        <h4 className="text-xs font-medium text-gray-900 dark:text-white">Recruiter Information</h4>
-                                                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow">{'// recruiter information'}</h4>
+                                                        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                             <div>
-                                                                <label className="block text-xs text-gray-500 dark:text-gray-400">Name</label>
-                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white break-words">
+                                                                <label className="block font-mono text-[10px] uppercase tracking-wide text-[var(--te-text-dim)]">Name</label>
+                                                                <p className="mt-0.5 text-sm text-[var(--te-text)] break-words">
                                                                     {application.recruiter_name || 'Not provided'}
                                                                 </p>
                                                             </div>
                                                             <div>
-                                                                <label className="block text-xs text-gray-500 dark:text-gray-400">Email</label>
-                                                                <p className="mt-0.5 text-sm text-gray-900 dark:text-white break-all">
+                                                                <label className="block font-mono text-[10px] uppercase tracking-wide text-[var(--te-text-dim)]">Email</label>
+                                                                <p className="mt-0.5 text-sm text-[var(--te-text)] break-all">
                                                                     {application.recruiter_email || 'Not provided'}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                                                        <h4 className="text-xs font-medium text-gray-900 dark:text-white">Notes</h4>
-                                                        <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow">{'// notes'}</h4>
+                                                        <p className="mt-1.5 text-sm text-[var(--te-text-dim)]">
                                                             {application.notes || 'No notes added'}
                                                         </p>
                                                     </div>
@@ -298,8 +299,8 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                 // Edit Mode
                                                 <>
                                                     {/* Location Section */}
-                                                    <div>
-                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Location</h4>
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow mb-3">{'// location'}</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Country"
@@ -319,8 +320,8 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Status Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
-                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Status</h4>
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow mb-3">{'// status'}</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Application Status"
@@ -340,8 +341,8 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Recruiter Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
-                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Recruiter Information</h4>
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow mb-3">{'// recruiter information'}</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <FormInput
                                                                 field="recruiter_name"
@@ -360,11 +361,11 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     {/* Notes Section */}
-                                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
-                                                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Notes</h4>
+                                                    <div className="te-panel p-4">
+                                                        <h4 className="te-eyebrow mb-3">{'// notes'}</h4>
                                                         <textarea
                                                             rows={4}
-                                                            className="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                                            className="te-textarea w-full"
                                                             value={updateData.notes || ''}
                                                             onChange={(e) => handleInputChange({ field: 'notes', value: e.target.value })}
                                                         />
@@ -374,21 +375,21 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                         </div>
 
                                         {/* Footer */}
-                                        <div className="mt-3 sm:mt-4 flex flex-col-reverse sm:flex-row justify-between gap-2 border-t border-gray-200 dark:border-gray-700 pt-3">
+                                        <div className="flex flex-col-reverse justify-between gap-2 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-4 sm:flex-row">
                                             {isEditing ? (
                                                 <>
                                                     <div></div>
                                                     <div className="flex flex-col-reverse sm:flex-row gap-2">
                                                         <button
                                                             type="button"
-                                                            className="rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                                            className="te-btn-secondary"
                                                             onClick={handleCancel}
                                                         >
                                                             Cancel
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            className="rounded-md bg-blue-600 dark:bg-blue-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 dark:hover:bg-blue-600"
+                                                            className="te-btn-primary"
                                                             onClick={handleSave}
                                                         >
                                                             Save Changes
@@ -401,25 +402,25 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                         <div className="flex flex-col sm:flex-row gap-2">
                                                             <button
                                                                 type="button"
-                                                                className="flex items-center justify-center gap-1.5 rounded-md bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1.5 text-xs font-semibold text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all"
+                                                                className="te-btn-secondary te-btn-sm flex items-center justify-center gap-1.5"
                                                                 onClick={handleArchive}
                                                             >
-                                                                <ArchiveBoxIcon className="h-3.5 w-3.5" />
+                                                                <ArchiveBoxIcon className="h-4 w-4" />
                                                                 Archive
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                className="flex items-center justify-center gap-1.5 rounded-md bg-rose-50 dark:bg-rose-900/30 px-2.5 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all"
+                                                                className="te-btn-danger te-btn-sm flex items-center justify-center gap-1.5"
                                                                 onClick={handleDelete}
                                                             >
-                                                                <TrashIcon className="h-3.5 w-3.5" />
+                                                                <TrashIcon className="h-4 w-4" />
                                                                 Delete
                                                             </button>
                                                         </div>
                                                     )}
                                                     <button
                                                         type="button"
-                                                        className="rounded-md bg-white dark:bg-gray-700 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                                                        className="te-btn-secondary"
                                                         onClick={closeModal}
                                                     >
                                                         Close
@@ -436,30 +437,30 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
                 {/* Confirmation Dialog */}
                 {confirmDialog.isOpen && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <div className={`px-6 py-4 ${confirmDialog.confirmStyle === 'danger' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-blue-50 dark:bg-blue-900/20'}`}>
-                                <h3 className={`text-lg font-bold ${confirmDialog.confirmStyle === 'danger' ? 'text-red-900 dark:text-red-100' : 'text-blue-900 dark:text-blue-100'}`}>
+                    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+                        <div className="te-card max-w-md w-full overflow-hidden">
+                            <div className={`border-b border-[var(--te-border)] px-6 py-4 ${confirmDialog.confirmStyle === 'danger' ? 'bg-rose-50 dark:bg-rose-900/20' : 'bg-[var(--te-surface-alt)]'}`}>
+                                <h3 className={`font-display text-lg font-semibold ${confirmDialog.confirmStyle === 'danger' ? 'text-rose-900 dark:text-rose-100' : 'text-[var(--te-text)]'}`}>
                                     {confirmDialog.title}
                                 </h3>
                             </div>
                             <div className="px-6 py-5">
-                                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                <p className="text-[var(--te-text)] leading-relaxed">
                                     {confirmDialog.message}
                                 </p>
                             </div>
-                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+                            <div className="px-6 py-4 bg-[var(--te-surface-alt)] flex items-center justify-end gap-3 border-t border-[var(--te-border)]">
                                 <button
                                     onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-                                    className="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+                                    className="te-btn-secondary"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmDialog.onConfirm}
-                                    className={`px-5 py-2.5 text-sm font-semibold text-white rounded-lg transition-colors shadow-sm ${confirmDialog.confirmStyle === 'danger'
-                                            ? 'bg-red-600 hover:bg-red-700'
-                                            : 'bg-blue-600 hover:bg-blue-700'
+                                    className={`${confirmDialog.confirmStyle === 'danger'
+                                            ? 'te-btn-danger'
+                                            : 'te-btn-primary'
                                         }`}
                                 >
                                     {confirmDialog.confirmText}
@@ -474,4 +475,3 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 }
 
 export default ApplicationInfo;
-

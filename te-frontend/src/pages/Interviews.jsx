@@ -14,8 +14,8 @@ import {
     XMarkIcon,
     AcademicCapIcon,
     ChatBubbleBottomCenterTextIcon
-} from '@heroicons/react/24/outline';
-import { CalendarDaysIcon, PlusIcon } from '@heroicons/react/20/solid';
+} from 'icons';
+import { CalendarDaysIcon, PlusIcon } from 'icons';
 
 const TABS = {
     MY_INTERVIEWS: 'my_interviews',
@@ -126,82 +126,101 @@ const Interviews = () => {
         }
     };
 
+    const activeTitle = activeTab === TABS.MY_ONE_ON_ONE
+        ? '1-on-1 Sessions'
+        : activeTab === TABS.MY_INTERVIEWS
+            ? 'Mock Interviews'
+            : activeTab === TABS.ASSIGNED
+                ? 'Assigned Meetings'
+                : activeTab === TABS.MANAGE_SLOTS
+                    ? 'Availability'
+                    : 'Requests';
+
+    const activeDescription = activeTab === TABS.MY_ONE_ON_ONE
+        ? 'Book focused mentorship time for career questions, resume reviews, and next steps.'
+        : activeTab === TABS.MY_INTERVIEWS
+            ? 'Practice technical and behavioral rounds with real interviewers.'
+            : activeTab === TABS.MANAGE_SLOTS
+                ? 'Publish clean availability windows for members to book.'
+                : 'Review, assign, confirm, and complete meeting requests.';
+
     if (!isMember) {
         return (
-            <div className="flex flex-col items-center justify-center py-16">
-                <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                    <CalendarDaysIcon className="h-8 w-8 text-gray-400" />
+            <div className="min-h-screen bg-[var(--te-bg)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+                    <div className="te-card mx-auto max-w-lg p-8">
+                        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                            <CalendarDaysIcon className="h-6 w-6 text-[var(--te-text-dim)]" />
+                        </div>
+                        <span className="te-eyebrow">{'// meetings'}</span>
+                        <h3 className="mt-2 font-mono text-xl font-bold text-[var(--te-text)]">Members only</h3>
+                        <p className="mt-3 text-sm leading-relaxed text-[var(--te-text-dim)]">
+                            Meetings are available to verified members only. Please sign in or complete verification to access this feature.
+                        </p>
+                    </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Members Only</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-sm">
-                    Meetings are available to verified members only. Please sign in or complete verification to access this feature.
-                </p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            {/* Compact Header */}
-            <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
-                <div>
-                    <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {activeTab === TABS.MY_ONE_ON_ONE ? '1-on-1 Sessions' : activeTab === TABS.MY_INTERVIEWS ? 'Mock Interviews' : 'Meetings'}
-                    </h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {activeTab === TABS.MY_ONE_ON_ONE
-                            ? 'Get mentorship and ask questions about your career journey'
-                            : activeTab === TABS.MY_INTERVIEWS
-                                ? 'Practice with real interviewers and get personalized feedback'
-                                : 'Manage meeting requests and availability'
-                        }
-                    </p>
-                </div>
-                {isMemberOnly && (activeTab === TABS.MY_INTERVIEWS || activeTab === TABS.MY_ONE_ON_ONE) && (
-                    <button
-                        onClick={() => {
-                            setSessionType(activeTab === TABS.MY_ONE_ON_ONE ? 'one_on_one' : 'interview');
-                            setShowCreateModal(true);
-                        }}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <PlusIcon className="h-4 w-4" />
-                        {activeTab === TABS.MY_ONE_ON_ONE ? 'Request 1-on-1' : 'Request Mock Interview'}
-                    </button>
-                )}
-            </div>
-
-            {/* Tabs - Only show if more than one tab */}
-            {tabs.length > 1 && (
-                <div className="flex flex-wrap gap-2">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-
-                        return (
+        <div className="min-h-screen bg-[var(--te-bg)]">
+            <div className="sticky top-16 z-30 border-b border-[var(--te-border)] bg-[var(--te-bg)]">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="max-w-2xl">
+                            <span className="te-eyebrow">{'// meetings'}</span>
+                            <h1 className="mt-1 font-mono text-2xl font-bold tracking-tight text-[var(--te-text)]">
+                                {activeTitle}
+                            </h1>
+                            <p className="mt-2 text-sm leading-relaxed text-[var(--te-text-dim)]">
+                                {activeDescription}
+                            </p>
+                        </div>
+                        {isMemberOnly && (activeTab === TABS.MY_INTERVIEWS || activeTab === TABS.MY_ONE_ON_ONE) && (
                             <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`
-                                    relative inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all
-                                    ${isActive
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
-                                    }
-                                `}
+                                onClick={() => {
+                                    setSessionType(activeTab === TABS.MY_ONE_ON_ONE ? 'one_on_one' : 'interview');
+                                    setShowCreateModal(true);
+                                }}
+                                className="te-btn-primary te-btn-sm"
                             >
-                                {Icon && <Icon className="h-4 w-4" />}
-                                {tab.label}
+                                <PlusIcon className="h-4 w-4" />
+                                {activeTab === TABS.MY_ONE_ON_ONE ? 'Request 1-on-1' : 'Request mock'}
                             </button>
-                        );
-                    })}
-                </div>
-            )}
+                        )}
+                    </div>
 
-            {/* Content */}
-            <div>
-                {renderContent()}
+                    {tabs.length > 1 && (
+                        <div className="mt-4 overflow-x-auto te-scroll">
+                            <div className="inline-flex rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-1 font-mono text-sm">
+                                {tabs.map((tab) => {
+                                    const Icon = tab.icon;
+                                    const isActive = activeTab === tab.id;
+
+                                    return (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 whitespace-nowrap transition-colors ${isActive
+                                                ? 'bg-[var(--te-surface)] text-[var(--te-text)]'
+                                                : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
+                                                }`}
+                                        >
+                                            {Icon && <Icon className="h-4 w-4" />}
+                                            {tab.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                {renderContent()}
+            </main>
 
             {/* Create Interview Modal */}
             {showCreateModal && (
@@ -214,15 +233,15 @@ const Interviews = () => {
                         />
 
                         {/* Modal */}
-                        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="relative te-card max-w-2xl w-full max-h-[90vh] overflow-y-auto te-scroll">
                             {/* Modal Header */}
-                            <div className="sticky top-0 bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div className="sticky top-0 bg-[var(--te-surface)] px-6 py-4 border-b border-[var(--te-border)] flex items-center justify-between">
+                                <h2 className="font-mono text-lg font-semibold text-[var(--te-text)]">
                                     {sessionType === 'one_on_one' ? 'Request 1-on-1 Session' : 'Request Mock Interview'}
                                 </h2>
                                 <button
                                     onClick={() => setShowCreateModal(false)}
-                                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    className="te-icon-btn"
                                 >
                                     <XMarkIcon className="h-5 w-5" />
                                 </button>

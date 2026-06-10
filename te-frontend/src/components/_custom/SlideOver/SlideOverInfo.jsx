@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, TrashIcon, ArchiveBoxIcon } from 'icons'
 
 
 const SlideOverInfo = ({ entityId, title, setHandler, archiveRequest, deleteRequest, children }) => {
@@ -34,17 +34,17 @@ const SlideOverInfo = ({ entityId, title, setHandler, archiveRequest, deleteRequ
                                 leaveTo="translate-x-full"
                             >
                                 <Dialog.Panel className="pointer-events-auto w-screen max-w-lg">
-                                    <div className="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
+                                    <div className="flex h-full flex-col divide-y divide-[var(--te-border)] bg-[var(--te-surface)] shadow-sm border-l border-[var(--te-border)]">
                                         <div className="h-0 flex-1 overflow-y-auto">
-                                            <div className="bg-sky-800 px-4 py-6 sm:px-6">
+                                            <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-4 py-6 sm:px-6">
                                                 <div className="flex items-center justify-between">
-                                                    <Dialog.Title className="text-base font-semibold leading-6 text-white">
+                                                    <Dialog.Title className="text-base font-semibold leading-6 text-[var(--te-text)]">
                                                         {title}
                                                     </Dialog.Title>
                                                     <div className="ml-3 flex h-7 items-center">
                                                         <button
                                                             type="button"
-                                                            className="relative rounded-md bg-sky-800 text-sky-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+                                                            className="te-icon-btn relative"
                                                             onClick={() => { setOpen(false); }}
                                                         >
                                                             <span className="absolute -inset-2.5" />
@@ -56,24 +56,24 @@ const SlideOverInfo = ({ entityId, title, setHandler, archiveRequest, deleteRequ
                                             </div>
                                             {children}
 
-                                            <div className="flex bottom-0 text-center justify-between px-6">
+                                            <div className="flex bottom-0 text-center justify-between gap-3 px-6 py-4 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                                 <button
                                                     type="button"
-                                                    className="ml-3 w-1/3  justify-between px-3 flex rounded-full py-1 font-medium ring-1 ring-inset text-gray-500 bg-gray-400/10 ring-gray-400/20 hover:bg-gray-700 hover:text-white"
+                                                    className="te-btn-secondary te-btn-sm ml-3 w-1/3 justify-between flex"
                                                     onClick={() => archiveRequest([entityId])}
                                                 >
                                                     Archive <ArchiveBoxIcon className="h-5 w-5" aria-hidden="true" />
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="ml-3 justify-between px-auto flex w-1/3 rounded-full py-1 px-2 font-medium ring-1 ring-inset text-green-500 bg-green-400/10 ring-green-400/20 hover:bg-green-700 hover:text-white"
+                                                    className="te-btn-secondary te-btn-sm ml-3 justify-between flex w-1/3"
                                                     onClick={setOpen}
                                                 >
                                                     Close <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="ml-3   justify-between px-3 flex w-1/3 rounded-full py-1 font-medium ring-1 ring-inset text-red-500 bg-red-400/10 ring-gray-400/20 hover:bg-red-700 hover:text-white"
+                                                    className="te-btn-danger te-btn-sm ml-3 justify-between flex w-1/3"
                                                     onClick={() => deleteRequest([entityId])}
                                                 >
                                                     Delete <TrashIcon className="h-5 w-5" aria-hidden="true" />

@@ -1,6 +1,9 @@
 """API endpoints for Meeting feature."""
 
+import logging
 from typing import Any, Dict, List, Optional, Union
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pymongo.database import Database
@@ -216,7 +219,7 @@ def create_interview_request(
         )
     except Exception as e:
         # Log error but don't fail the request
-        print(f"Failed to send meeting request email: {e}")
+        logger.error(f"Failed to send meeting request email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
@@ -449,7 +452,7 @@ def assign_interviewer(
                 duration_minutes=request.duration_minutes,
             )
         except Exception as e:
-            print(f"Failed to send assignment email: {e}")
+            logger.error(f"Failed to send assignment email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
@@ -496,7 +499,7 @@ def confirm_interview(
             confirmation_message=data.confirmation_message or "",
         )
     except Exception as e:
-        print(f"Failed to send confirmation email: {e}")
+        logger.error(f"Failed to send confirmation email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
@@ -551,7 +554,7 @@ def complete_interview(
             feedback=data.interviewer_feedback,
         )
     except Exception as e:
-        print(f"Failed to send completion email: {e}")
+        logger.error(f"Failed to send completion email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
@@ -609,7 +612,7 @@ def update_interview_notes(
             meeting_notes=data.meeting_notes,
         )
     except Exception as e:
-        print(f"Failed to send notes update email: {e}")
+        logger.error(f"Failed to send notes update email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 
@@ -728,7 +731,7 @@ def cancel_interview(
             cancellation_reason=data.cancellation_reason or "",
         )
     except Exception as e:
-        print(f"Failed to send cancellation email: {e}")
+        logger.error(f"Failed to send cancellation email: {e}")
 
     return {"interview": meeting_deps.parse_meeting_request(request)}
 

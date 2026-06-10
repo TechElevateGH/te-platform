@@ -1,6 +1,7 @@
 import random
+import re
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 
 from bson import ObjectId
@@ -21,7 +22,7 @@ PASSWORD_RESET_MAX_ATTEMPTS = 5
 def read_user_by_email(db: Database, *, email: str) -> Optional[user_models.MemberUser]:
     """Read user by email from MongoDB (case-insensitive)"""
     user_data = db.member_users.find_one(
-        {"email": {"$regex": f"^{email}$", "$options": "i"}}
+        {"email": {"$regex": f"^{re.escape(email)}$", "$options": "i"}}
     )
     if user_data:
         return user_models.MemberUser(**user_data)
@@ -83,7 +84,6 @@ def read_all_privileged_users(db: Database) -> list[dict]:
                 "username": user.get("username"),
                 "role": user.get("role"),
                 "is_active": user.get("is_active", True),
-                "lead_token": user.get("lead_token", ""),  # Include token for edit
             }
         )
     return result
@@ -137,7 +137,7 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
 
     # Check if username already exists in privileged_users (case-insensitive)
     existing_user = db.privileged_users.find_one(
-        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+        {"username": {"$regex": f"^{re.escape(data.username)}$", "$options": "i"}}
     )
     if existing_user:
         raise HTTPException(
@@ -146,13 +146,12 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
 
     # Create minimal privileged user data for Lead/Admin
     user_dict = {
-        "username": data.username,
-        "password": security.get_password_hash(data.token),  # Hash token as password
-        "lead_token": data.token,  # Store plain token for Lead login
-        "email": data.email,  # Optional email for notifications
+        "username": data.username.strip().lower(),
+        "password": security.get_password_hash(data.token),
+        "email": data.email,
         "role": data.role,
         "is_active": True,
-        "company_id": None,  # Not needed for Lead/Admin
+        "company_id": None,
     }
 
     # Insert into privileged_users collection
@@ -162,12 +161,11 @@ def create_lead_user(db: Database, *, data: user_schema.LeadCreate) -> dict:
     user_data = db.privileged_users.find_one({"_id": result.inserted_id})
     user = user_models.PrivilegedUser(**user_data)
 
-    # Return user info with credentials
+    # Return user info (token is NOT returned — share it out-of-band)
     return {
         "user_id": str(user.id),
         "username": user.username,
         "role": user.role,
-        "token": data.token,  # Return provided token for reference
     }
 
 
@@ -175,7 +173,7 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
     """Create a new Referrer account (Admin only) - uses provided token and company"""
     # Check if username already exists in privileged_users (case-insensitive)
     existing_user = db.privileged_users.find_one(
-        {"username": {"$regex": f"^{data.username}$", "$options": "i"}}
+        {"username": {"$regex": f"^{re.escape(data.username)}$", "$options": "i"}}
     )
     if existing_user:
         raise HTTPException(
@@ -196,13 +194,12 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
 
     # Create privileged user data for Referrer
     user_dict = {
-        "username": data.username,
-        "password": security.get_password_hash(data.token),  # Hash token as password
-        "lead_token": data.token,  # Store plain token for Referrer login
-        "email": data.email,  # Optional email for notifications
-        "company_id": ObjectId(data.company_id),  # Store company they manage
-        "company_name": data.company_name,  # Store company name from request
-        "role": user_schema.UserRoles.referrer,  # Always Referrer role
+        "username": data.username.strip().lower(),
+        "password": security.get_password_hash(data.token),
+        "email": data.email,
+        "company_id": ObjectId(data.company_id),
+        "company_name": data.company_name,
+        "role": user_schema.UserRoles.referrer,
         "is_active": True,
     }
 
@@ -213,14 +210,13 @@ def create_referrer_user(db: Database, *, data: user_schema.ReferrerCreate) -> d
     user_data = db.privileged_users.find_one({"_id": result.inserted_id})
     user = user_models.PrivilegedUser(**user_data)
 
-    # Return user info with credentials
+    # Return user info (token is NOT returned — share it out-of-band)
     return {
         "user_id": str(user.id),
         "username": user.username,
         "role": user.role,
         "company_id": data.company_id,
-        "company_name": user.company_name,  # Use company_name from user object
-        "token": data.token,  # Return provided token for reference
+        "company_name": user.company_name,
     }
 
 
@@ -292,6 +288,10 @@ def update_user_profile(
     # Get only the fields that were actually provided (exclude None values)
     update_data = data.dict(exclude_unset=True, exclude_none=True)
 
+    # Whitelist: only allow these fields to be updated via profile update
+    allowed_fields = {"full_name", "phone_number", "address", "university", "image", "slack_joined"}
+    update_data = {k: v for k, v in update_data.items() if k in allowed_fields}
+
     if not update_data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
@@ -333,7 +333,7 @@ def update_privileged_user(
     if data.username is not None:
         username_exists = db.privileged_users.find_one(
             {
-                "username": {"$regex": f"^{data.username}$", "$options": "i"},
+                "username": {"$regex": f"^{re.escape(data.username)}$", "$options": "i"},
                 "_id": {"$ne": ObjectId(user_id)},
             }
         )
@@ -342,12 +342,11 @@ def update_privileged_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already exists",
             )
-        update_data["username"] = data.username
+        update_data["username"] = data.username.strip().lower()
 
     # Hash and update token if provided
     if data.token is not None:
         update_data["password"] = security.get_password_hash(data.token)
-        update_data["lead_token"] = data.token
 
     # Update email if provided
     if data.email is not None:
@@ -395,7 +394,7 @@ def _ensure_request_cooldown(db: Database, email: str) -> None:
         {
             "email": email,
             "created_at": {
-                "$gt": datetime.utcnow()
+                "$gt": datetime.now(timezone.utc)
                 - timedelta(seconds=PASSWORD_RESET_REQUEST_COOLDOWN_SECONDS)
             },
             "status": {"$in": ["requested", "verified"]},
@@ -417,7 +416,7 @@ def create_password_reset_request(
     # Remove previous pending resets for this email
     db.password_resets.delete_many({"email": email, "status": {"$ne": "completed"}})
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     reset_data = {
         "email": email,
         "user_id": ObjectId(str(user.id)),
@@ -467,7 +466,7 @@ def verify_password_reset_code(
         raise HTTPException(status_code=404, detail="Password reset request not found.")
 
     reset = user_models.PasswordReset(**reset_doc)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     if reset.status != "requested":
         raise HTTPException(
@@ -541,7 +540,7 @@ def complete_password_reset(
         raise HTTPException(status_code=404, detail="Password reset request not found.")
 
     reset = user_models.PasswordReset(**reset_doc)
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     if reset.status != "verified":
         raise HTTPException(status_code=400, detail="Reset request is no longer valid.")

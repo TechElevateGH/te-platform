@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import {
-    UserCircleIcon,
     EnvelopeIcon,
     PhoneIcon,
     AcademicCapIcon,
@@ -14,7 +13,7 @@ import {
     XCircleIcon,
     ArrowPathIcon,
     LockClosedIcon
-} from '@heroicons/react/24/outline'
+} from 'icons'
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../axiosConfig';
@@ -57,7 +56,7 @@ const Profile = () => {
     const isPrivilegedUser = userRoleInt >= 2; // Referrer, Volunteer, Lead, or Admin
     const passwordResetSteps = [
         { id: 'request', label: 'Request Code' },
-        { id: 'verify', label: 'Verify Code' },
+        { id: 'verify', label: 'Verify code' },
         { id: 'complete', label: 'Set Password' },
     ];
     const normalizedResetStep = resetStep === 'done' ? 'complete' : resetStep;
@@ -565,98 +564,77 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 transition-colors">
+        <div className="min-h-screen bg-[var(--te-bg)] text-[var(--te-text)] transition-colors">
             {/* Header */}
-            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
+            <div className="border-b border-[var(--te-border)] bg-[var(--te-bg)]">
+                <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-3xl">
+                            <span className="te-eyebrow">{'// settings'}</span>
+                            <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Profile
                             </h1>
-                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                                {isPrivilegedUser ? 'Administrative account management' : 'Manage your personal information and preferences'}
+                            <p className="mt-3 text-sm leading-6 text-[var(--te-text-dim)] sm:text-base">
+                                {isPrivilegedUser ? 'Review privileged access and account security.' : 'Manage your account, contact details, and security settings.'}
                             </p>
                         </div>
-                        <div className="flex flex-wrap gap-2 sm:gap-3">
-                            {/* Reset Password - Available for ALL users */}
-                            <button
-                                onClick={openPasswordResetModal}
-                                className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-white dark:hover:bg-gray-900 transition-all shadow-sm hover:shadow text-xs sm:text-sm"
-                            >
+                        <div className="flex flex-wrap gap-3">
+                            <button onClick={openPasswordResetModal} className="te-btn-secondary">
                                 <LockClosedIcon className="h-4 w-4" />
-                                <span>Reset Password</span>
+                                <span>Reset password</span>
                             </button>
 
-                            {/* Admin: Edit My Account button (when viewing own privileged account) */}
                             {isAdmin && isPrivilegedUser && (
-                                <button
-                                    onClick={() => setShowEditPrivileged(true)}
-                                    className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm"
-                                >
+                                <button onClick={() => setShowEditPrivileged(true)} className="te-btn-secondary">
                                     <PencilIcon className="h-4 w-4" />
-                                    <span className="hidden sm:inline">Edit My Account</span>
-                                    <span className="sm:hidden">Edit</span>
+                                    <span>Edit account</span>
                                 </button>
                             )}
 
-                            {/* Only show edit for Member users */}
                             {!isPrivilegedUser && !isEditing && (
-                                <button
-                                    onClick={handleEdit}
-                                    className="flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm"
-                                >
+                                <button onClick={handleEdit} className="te-btn-primary">
                                     <PencilIcon className="h-4 w-4" />
-                                    <span>Edit Profile</span>
+                                    <span>Edit profile</span>
                                 </button>
                             )}
 
                             {!isPrivilegedUser && isEditing && (
-                                <div className="flex gap-2 sm:gap-3">
-                                    <button
-                                        onClick={handleCancel}
-                                        disabled={isSaving}
-                                        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
+                                <>
+                                    <button onClick={handleCancel} disabled={isSaving} className="te-btn-secondary disabled:cursor-not-allowed disabled:opacity-50">
                                         <XMarkIcon className="h-4 w-4" />
-                                        <span className="hidden sm:inline">Cancel</span>
+                                        <span>Cancel</span>
                                     </button>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={isSaving}
-                                        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
+                                    <button onClick={handleSave} disabled={isSaving} className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50">
                                         {isSaving ? (
                                             <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                                                <span>Saving...</span>
+                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--te-on-primary)] border-t-transparent" />
+                                                <span>Saving…</span>
                                             </>
                                         ) : (
                                             <>
                                                 <CheckIcon className="h-4 w-4" />
-                                                <span>Save Changes</span>
+                                                <span>Save changes</span>
                                             </>
                                         )}
                                     </button>
-                                </div>
+                                </>
                             )}
                         </div>
                     </div>
 
                     {/* Notification Banner */}
                     {notification && (
-                        <div className={`mt-4 p-4 rounded-lg border ${notification.type === 'success'
-                            ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800'
-                            : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800'
+                        <div className={`mt-6 rounded-2xl border px-4 py-3 ${notification.type === 'success'
+                            ? 'border-[var(--te-border)] bg-[var(--te-surface)]'
+                            : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'
                             } animate-fade-in`}>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-start gap-3">
                                 {notification.type === 'success' ? (
-                                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-500 flex-shrink-0" />
+                                    <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--te-text)]" />
                                 ) : (
-                                    <ExclamationCircleIcon className="h-5 w-5 text-red-600 dark:text-red-500 flex-shrink-0" />
+                                    <ExclamationCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                                 )}
-                                <p className={`text-sm font-semibold ${notification.type === 'success' ? 'text-emerald-900 dark:text-emerald-200' : 'text-red-900 dark:text-red-200'
-                                    }`}>
+                                <p className={`text-sm font-medium ${notification.type === 'success' ? 'text-[var(--te-text)]' : 'text-red-900 dark:text-red-200'}`}>
                                     {notification.message}
                                 </p>
                             </div>
@@ -666,285 +644,192 @@ const Profile = () => {
             </div>
 
             {/* Content */}
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                {/* Privileged User Profile */}
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                 {isPrivilegedUser ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-                        <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 h-24 sm:h-32"></div>
-                        <div className="px-4 sm:px-8 py-6 sm:py-8">
-                            <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 -mt-12 sm:-mt-16">
-                                <div className="w-20 h-20 sm:w-32 sm:h-32 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl flex items-center justify-center">
-                                    <ShieldCheckIcon className="h-12 w-12 sm:h-20 sm:w-20 text-purple-600 dark:text-purple-500" />
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+                        <section className="te-panel p-6 sm:p-8">
+                            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                                <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                    <ShieldCheckIcon className="h-12 w-12 text-[var(--te-text-dim)]" />
                                 </div>
-                                <div className="flex-1 sm:mt-16">
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                                        <h2 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                                <div className="min-w-0 flex-1">
+                                    <span className="te-eyebrow">{'// account'}</span>
+                                    <div className="mt-3 flex flex-wrap items-center gap-3">
+                                        <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--te-text)] sm:text-3xl">
                                             {userRoleInt === 5 && 'System Administrator'}
                                             {userRoleInt === 4 && 'Lead Account'}
                                             {userRoleInt === 3 && 'Volunteer Account'}
                                             {userRoleInt === 2 && 'Referrer Account'}
                                         </h2>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold w-fit ${userRoleInt === 5 ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300' :
-                                            userRoleInt === 4 ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300' :
-                                                userRoleInt === 3 ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' :
-                                                    'bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300'
-                                            }`}>
+                                        <span className="te-badge font-mono">
                                             {userRoleInt === 5 && 'ADMIN'}
                                             {userRoleInt === 4 && 'LEAD'}
                                             {userRoleInt === 3 && 'VOLUNTEER'}
                                             {userRoleInt === 2 && 'REFERRER'}
                                         </span>
                                     </div>
-                                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 break-all">
-                                        User ID: <code className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs sm:text-sm">{userId}</code>
+                                    <p className="mt-4 break-all font-mono text-xs text-[var(--te-text-dim)]">
+                                        user_id: <code className="rounded-md border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2 py-1 text-[var(--te-text)]">{userId}</code>
                                     </p>
-                                    <div className="flex flex-wrap gap-2 sm:gap-3 mt-4">
-                                        {userRoleInt === 5 && (
-                                            <>
-                                                <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg px-3 sm:px-4 py-2">
-                                                    <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1">Permissions</p>
-                                                    <p className="text-sm text-purple-900 dark:text-purple-300 font-medium">Full System Access</p>
-                                                </div>
-                                                <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-lg px-4 py-2">
-                                                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mb-1">Capabilities</p>
-                                                    <p className="text-sm text-indigo-900 dark:text-indigo-300 font-medium">Create/Manage All Accounts</p>
-                                                </div>
-                                            </>
-                                        )}
-                                        {userRoleInt === 4 && (
-                                            <>
-                                                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-2">
-                                                    <p className="text-xs text-blue-600 font-semibold mb-1">Permissions</p>
-                                                    <p className="text-sm text-blue-900 font-medium">Full Data Access</p>
-                                                </div>
-                                                <div className="bg-cyan-50 border border-cyan-200 rounded-lg px-4 py-2">
-                                                    <p className="text-xs text-cyan-600 font-semibold mb-1">Capabilities</p>
-                                                    <p className="text-sm text-cyan-900 font-medium">A call to duty!</p>
-                                                </div>
-                                            </>
-                                        )}
-                                        {userRoleInt === 3 && (
-                                            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
-                                                <p className="text-xs text-green-600 font-semibold mb-1">From all of us at TE:</p>
-                                                <p className="text-sm text-green-900 font-medium">Thank You!</p>
-                                            </div>
-                                        )}
-                                        {userRoleInt === 2 && (
-                                            <div className="bg-cyan-50 border border-cyan-200 rounded-lg px-4 py-2">
-                                                <p className="text-xs text-cyan-600 font-semibold mb-1">Assigned Company</p>
-                                                <p className="text-sm text-cyan-900 font-medium">Company-Specific Access</p>
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
                             </div>
-                            {/* Admin Info Section */}
-                            <div className="mt-8 grid md:grid-cols-2 gap-6">
-                                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Account Information</h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Role Type</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                {userRoleInt === 5 && 'Administrator - Full System Control'}
-                                                {userRoleInt === 4 && 'Lead - Team Management'}
-                                                {userRoleInt === 3 && 'Volunteer - Company Management'}
-                                                {userRoleInt === 2 && 'Referrer - Company Specific'}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Access Level</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">Level {userRoleInt} of 5</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        </section>
 
-                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Security</h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase mb-1">Authentication</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">Token-based login</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase mb-1">Session</p>
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">Tab-specific (sessionStorage)</p>
-                                        </div>
-                                    </div>
+                        <section className="te-panel p-6 sm:p-8">
+                            <span className="te-eyebrow">{'// access'}</span>
+                            <div className="mt-5 space-y-5">
+                                <div>
+                                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Role type</p>
+                                    <p className="mt-2 text-sm font-medium text-[var(--te-text)]">
+                                        {userRoleInt === 5 && 'Administrator - Full System Control'}
+                                        {userRoleInt === 4 && 'Lead - Team Management'}
+                                        {userRoleInt === 3 && 'Volunteer - Company Management'}
+                                        {userRoleInt === 2 && 'Referrer - Company Specific'}
+                                    </p>
+                                </div>
+                                <div className="te-divider" />
+                                <div>
+                                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Access level</p>
+                                    <p className="mt-2 text-sm font-medium text-[var(--te-text)]">Level {userRoleInt} of 5</p>
+                                </div>
+                                <div className="te-divider" />
+                                <div>
+                                    <p className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Session</p>
+                                    <p className="mt-2 text-sm font-medium text-[var(--te-text)]">Token-based login · sessionStorage</p>
                                 </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
                 ) : (
-                    /* Member Profile */
-                    <>
-                        {/* Profile Header Card */}
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6 sm:mb-8">
-                            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 h-24 sm:h-32"></div>
-                            <div className="px-4 sm:px-6 md:px-8 pb-6 sm:pb-8">
-                                <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 -mt-12 sm:-mt-16">
-                                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-4 border-white dark:border-gray-800 shadow-xl flex items-center justify-center flex-shrink-0">
-                                        <UserCircleIcon className="h-20 w-20 sm:h-28 sm:w-28 text-gray-400 dark:text-gray-500" />
-                                    </div>
-                                    <div className="flex-1 mt-12 sm:mt-16 w-full">
-                                        <div>
-                                            <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Full Name {isEditing && <span className="text-red-500">*</span>}</label>
-                                            {isEditing ? (
-                                                <div>
-                                                    <input
-                                                        type="text"
-                                                        value={editedInfo.full_name}
-                                                        onChange={(e) => handleChange('full_name', e.target.value)}
-                                                        className={`text-xl sm:text-2xl font-bold text-gray-900 dark:text-white border-b-2 ${errors.full_name ? 'border-red-500' : 'border-blue-500'} focus:outline-none bg-transparent w-full`}
-                                                        placeholder="Enter your full name"
-                                                    />
-                                                    {errors.full_name && (
-                                                        <p className="text-red-600 dark:text-red-400 text-xs mt-1">{errors.full_name}</p>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                                                    {editedInfo.full_name || 'Not provided'}
-                                                </h2>
-                                            )}
-                                        </div>
-                                        <div className="mt-2 flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                            <EnvelopeIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                                            <span className="text-xs sm:text-sm truncate">{editedInfo.email || 'No email provided'}</span>
-                                        </div>
-                                    </div>
+                    <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+                        <aside className="te-panel h-fit p-6">
+                            <div className="flex flex-col items-start">
+                                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                    <span className="font-mono text-3xl font-semibold uppercase text-[var(--te-text)]">
+                                        {(editedInfo.full_name || editedInfo.email || 'TE').trim().slice(0, 2)}
+                                    </span>
                                 </div>
+                                <span className="te-eyebrow mt-6">{'// account'}</span>
+                                {isEditing ? (
+                                    <div className="mt-3 w-full">
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
+                                            Full name <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editedInfo.full_name}
+                                            onChange={(e) => handleChange('full_name', e.target.value)}
+                                            className={`te-input ${errors.full_name ? 'border-red-500' : ''}`}
+                                            placeholder="Enter your full name"
+                                        />
+                                        {errors.full_name && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{errors.full_name}</p>}
+                                    </div>
+                                ) : (
+                                    <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">
+                                        {editedInfo.full_name || 'Not provided'}
+                                    </h2>
+                                )}
+                                <p className="mt-3 flex max-w-full items-center gap-2 truncate text-sm text-[var(--te-text-dim)]">
+                                    <EnvelopeIcon className="h-4 w-4 flex-shrink-0" />
+                                    <span className="truncate">{editedInfo.email || 'No email provided'}</span>
+                                </p>
                             </div>
-                        </div>
+                        </aside>
 
-                        {/* Main Content Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                            {/* Contact Information */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 sm:p-6">
-                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 flex items-center gap-2">
-                                    <EnvelopeIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-500" />
-                                    Contact Information
-                                </h3>
-                                <div className="space-y-3 sm:space-y-4">
-                                    <div>
-                                        <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">
+                        <div className="space-y-6">
+                            <section className="te-panel p-6 sm:p-8">
+                                <span className="te-eyebrow">{'// contact'}</span>
+                                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                                    <div className="sm:col-span-2">
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             Email {isEditing && <span className="text-red-500">*</span>}
                                         </label>
                                         {isEditing ? (
                                             <div>
-                                                <input
-                                                    type="email"
-                                                    value={editedInfo.email}
-                                                    onChange={(e) => handleChange('email', e.target.value)}
-                                                    className={`w-full px-3 sm:px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-sm sm:text-base dark:placeholder-gray-500`}
-                                                    placeholder="your.email@example.com"
-                                                />
-                                                {errors.email && (
-                                                    <p className="text-red-600 dark:text-red-400 text-xs mt-1">{errors.email}</p>
-                                                )}
+                                                <div className="relative">
+                                                    <EnvelopeIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                                                    <input
+                                                        type="email"
+                                                        value={editedInfo.email}
+                                                        onChange={(e) => handleChange('email', e.target.value)}
+                                                        className={`te-input pl-12 ${errors.email ? 'border-red-500' : ''}`}
+                                                        placeholder="your.email@example.com"
+                                                    />
+                                                </div>
+                                                {errors.email && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{errors.email}</p>}
                                                 {editedInfo.email !== userInfo?.email && (
-                                                    <div className="mt-2 flex items-start gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                                                        <ShieldCheckIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                                                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                    <div className="mt-3 flex items-start gap-2 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                                                        <ShieldCheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--te-text)]" />
+                                                        <p className="text-xs text-[var(--te-text-dim)]">
                                                             Email changes require verification. You'll receive a code at your new email address.
                                                         </p>
                                                     </div>
                                                 )}
                                             </div>
                                         ) : (
-                                            <p className="text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2">
-                                                <EnvelopeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                            <p className="flex items-center gap-2 text-sm text-[var(--te-text)]">
+                                                <EnvelopeIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                                 <span className="truncate">{editedInfo.email || 'Not provided'}</span>
                                             </p>
                                         )}
                                     </div>
-                                    <div>
-                                        <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Phone</label>
-                                        {isEditing ? (
-                                            <input
-                                                type="tel"
-                                                value={editedInfo.phone_number}
-                                                onChange={(e) => handleChange('phone_number', e.target.value)}
-                                                className="w-full px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-sm sm:text-base dark:placeholder-gray-500"
-                                                placeholder="+233 XX XXX XXXX"
-                                            />
-                                        ) : (
-                                            <p className="text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2">
-                                                <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                                                {editedInfo.phone_number || 'Not provided'}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Address</label>
-                                        {isEditing ? (
-                                            <input
-                                                type="text"
-                                                value={editedInfo.address}
-                                                onChange={(e) => handleChange('address', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none dark:placeholder-gray-500"
-                                                placeholder="City, Country"
-                                            />
-                                        ) : (
-                                            <p className="text-gray-900 dark:text-white flex items-center gap-2">
-                                                <MapPinIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                                                {editedInfo.address || 'Not provided'}
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
 
-                            {/* Education & Personal */}
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                    <AcademicCapIcon className="h-6 w-6 text-purple-600 dark:text-purple-500" />
-                                    Education & Personal
-                                </h3>
-                                <div className="space-y-4">
                                     <div>
-                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">University</label>
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Phone</label>
                                         {isEditing ? (
-                                            <input
-                                                type="text"
-                                                value={editedInfo.university}
-                                                onChange={(e) => handleChange('university', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none dark:placeholder-gray-500"
-                                                placeholder="Your University"
-                                            />
+                                            <input type="tel" value={editedInfo.phone_number} onChange={(e) => handleChange('phone_number', e.target.value)} className="te-input" placeholder="+233 XX XXX XXXX" />
                                         ) : (
-                                            <p className="text-gray-900 dark:text-white">{editedInfo.university || 'Not provided'}</p>
+                                            <p className="flex items-center gap-2 text-sm text-[var(--te-text)]"><PhoneIcon className="h-4 w-4 text-[var(--te-text-dim)]" />{editedInfo.phone_number || 'Not provided'}</p>
                                         )}
                                     </div>
+
                                     <div>
-                                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 block">Date of Birth</label>
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Address</label>
                                         {isEditing ? (
-                                            <input
-                                                type="date"
-                                                value={editedInfo.date_of_birth}
-                                                onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none dark:placeholder-gray-500"
-                                            />
+                                            <input type="text" value={editedInfo.address} onChange={(e) => handleChange('address', e.target.value)} className="te-input" placeholder="City, Country" />
                                         ) : (
-                                            <p className="text-gray-900 dark:text-white">{editedInfo.date_of_birth || 'Not provided'}</p>
+                                            <p className="flex items-center gap-2 text-sm text-[var(--te-text)]"><MapPinIcon className="h-4 w-4 text-[var(--te-text-dim)]" />{editedInfo.address || 'Not provided'}</p>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </section>
+
+                            <section className="te-panel p-6 sm:p-8">
+                                <span className="te-eyebrow">{'// education'}</span>
+                                <div className="mt-6 grid gap-5 sm:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">University</label>
+                                        {isEditing ? (
+                                            <input type="text" value={editedInfo.university} onChange={(e) => handleChange('university', e.target.value)} className="te-input" placeholder="Your University" />
+                                        ) : (
+                                            <p className="flex items-center gap-2 text-sm text-[var(--te-text)]"><AcademicCapIcon className="h-4 w-4 text-[var(--te-text-dim)]" />{editedInfo.university || 'Not provided'}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Date of birth</label>
+                                        {isEditing ? (
+                                            <input type="date" value={editedInfo.date_of_birth} onChange={(e) => handleChange('date_of_birth', e.target.value)} className="te-input" />
+                                        ) : (
+                                            <p className="text-sm text-[var(--te-text)]">{editedInfo.date_of_birth || 'Not provided'}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                    </>
+                    </div>
                 )}
             </div>
 
             {/* Password Confirmation Modal for Email Change */}
             {showPasswordModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8">
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+                    <div className="te-card w-full max-w-md rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-6 shadow-sm sm:p-8">
+                        <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">
                             Confirm Email Change
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                            You are changing your email to <span className="font-semibold text-blue-600 dark:text-blue-400">{pendingEmailChange}</span>.
+                        <p className="text-sm text-[var(--te-text-dim)] mb-6">
+                            You are changing your email to <span className="font-semibold text-[var(--te-text)]">{pendingEmailChange}</span>.
                             Please enter your password to confirm.
                         </p>
 
@@ -958,7 +843,7 @@ const Profile = () => {
                         )}
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Current Password
                             </label>
                             <input
@@ -973,7 +858,7 @@ const Profile = () => {
                                         handlePasswordConfirm();
                                     }
                                 }}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none"
+                                className="te-input"
                                 placeholder="Enter your password"
                                 autoFocus
                             />
@@ -983,16 +868,16 @@ const Profile = () => {
                             <button
                                 onClick={handlePasswordModalClose}
                                 disabled={isSaving}
-                                className="flex-1 px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                                className="te-btn-secondary flex-1 disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handlePasswordConfirm}
                                 disabled={isSaving}
-                                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-4 py-3 te-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSaving ? 'Confirming...' : 'Confirm'}
+                                {isSaving ? 'Confirming…' : 'Confirm'}
                             </button>
                         </div>
                     </div>
@@ -1001,21 +886,21 @@ const Profile = () => {
 
             {/* Email Verification Modal */}
             {showVerificationModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+                    <div className="te-card w-full max-w-md rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-6 shadow-sm sm:p-8">
                         <div className="text-center mb-6">
                             <div className="flex justify-center mb-4">
-                                <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl">
-                                    <EnvelopeIcon className="h-8 w-8 text-white" />
+                                <div className="h-16 w-16 rounded-lg bg-[var(--te-surface-alt)] border border-[var(--te-border)] flex items-center justify-center shadow-sm">
+                                    <EnvelopeIcon className="h-8 w-8 text-[var(--te-text)]" />
                                 </div>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                            <h3 className="mb-2 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">
                                 Verify Your New Email
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-[var(--te-text-dim)]">
                                 We sent a 6-digit code to
                             </p>
-                            <p className="text-blue-600 dark:text-blue-400 font-semibold mt-1">
+                            <p className="text-[var(--te-text)] font-semibold mt-1">
                                 {pendingEmailChange}
                             </p>
                         </div>
@@ -1031,7 +916,7 @@ const Profile = () => {
 
                         {/* 6-Digit Code Input */}
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                            <label className="mb-3 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                 Enter Verification Code
                             </label>
                             <div className="flex gap-2 justify-center">
@@ -1044,12 +929,12 @@ const Profile = () => {
                                         value={digit}
                                         onChange={(e) => handleVerificationCodeChange(index, e.target.value)}
                                         onKeyDown={(e) => handleVerificationKeyDown(index, e)}
-                                        className="w-12 h-12 text-center text-xl font-bold border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none transition-colors"
+                                        className="h-12 w-12 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface)] text-center font-mono text-xl font-bold text-[var(--te-text)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--te-ring)]"
                                         autoFocus={index === 0}
                                     />
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                            <p className="text-xs text-[var(--te-text-dim)] mt-3">
                                 Code expires in 15 minutes
                             </p>
                         </div>
@@ -1058,27 +943,27 @@ const Profile = () => {
                         <button
                             onClick={handleVerifyEmail}
                             disabled={isVerifying}
-                            className="w-full mb-4 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full mb-4 px-4 py-3 te-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isVerifying ? (
                                 <div className="flex items-center justify-center gap-2">
                                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                                    <span>Verifying...</span>
+                                    <span>Verifying…</span>
                                 </div>
                             ) : (
-                                'Verify Email'
+                                'Verify email'
                             )}
                         </button>
 
                         {/* Resend Code */}
                         <div className="text-center mb-4">
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            <p className="text-sm text-[var(--te-text-dim)] mb-2">
                                 Didn't receive the code?
                             </p>
                             <button
                                 onClick={handleResendVerificationCode}
                                 disabled={isVerifying || resendCooldown > 0}
-                                className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="te-link inline-flex items-center gap-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <ArrowPathIcon className={`h-4 w-4 ${isVerifying ? 'animate-spin' : ''}`} />
                                 {resendCooldown > 0 ? (
@@ -1093,7 +978,7 @@ const Profile = () => {
                         <button
                             onClick={handleVerificationModalClose}
                             disabled={isVerifying}
-                            className="w-full px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                            className="te-btn-secondary w-full disabled:opacity-50"
                         >
                             Cancel
                         </button>
@@ -1103,19 +988,19 @@ const Profile = () => {
 
             {/* Password Reset Modal */}
             {showPasswordResetModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+                    <div className="te-card w-full max-w-lg rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-6 shadow-sm sm:p-8">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <p className="text-xs font-semibold tracking-wide text-blue-500 uppercase mb-1">Secure Reset</p>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset your password</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-xs font-semibold tracking-wide text-[var(--te-text-dim)] uppercase mb-1">Secure Reset</p>
+                                <h3 className="mb-2 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">Reset your password</h3>
+                                <p className="text-sm text-[var(--te-text-dim)]">
                                     We'll send a one-time code to <span className="font-semibold">{resetEmail || 'your email'}</span> and walk you through setting a new password.
                                 </p>
                             </div>
                             <button
                                 onClick={closePasswordResetModal}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                                className="te-icon-btn"
                                 aria-label="Close password reset"
                             >
                                 <XMarkIcon className="h-6 w-6" />
@@ -1129,14 +1014,14 @@ const Profile = () => {
                                 return (
                                     <div key={step.id} className="flex flex-col items-center text-center">
                                         <div
-                                            className={`w-10 h-10 rounded-full flex items-center justify-center border-2 text-sm font-bold ${isComplete || isActive
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-200'
-                                                : 'border-gray-200 dark:border-gray-700 text-gray-400'
+                                            className={`flex h-10 w-10 items-center justify-center rounded-full border font-mono text-sm font-bold ${isComplete || isActive
+                                                ? 'border-[var(--te-border-strong)] bg-[var(--te-surface-alt)] text-[var(--te-text)] '
+                                                : 'border-[var(--te-border)] text-[var(--te-text-dim)]'
                                                 }`}
                                         >
                                             {isComplete ? <CheckIcon className="h-5 w-5" /> : index + 1}
                                         </div>
-                                        <span className={`mt-2 text-xs font-semibold ${isComplete || isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                                        <span className={`mt-2 text-xs font-semibold ${isComplete || isActive ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`}>
                                             {step.label}
                                         </span>
                                     </div>
@@ -1146,9 +1031,9 @@ const Profile = () => {
 
                         {resetStatus.message && (
                             <div
-                                className={`mt-6 rounded-2xl border px-4 py-3 text-sm font-medium ${resetStatus.type === 'error'
+                                className={`mt-6 rounded-lg border px-4 py-3 text-sm font-medium ${resetStatus.type === 'error'
                                     ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                                    : 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                                    : 'bg-[var(--te-surface-alt)] border-[var(--te-border)] text-[var(--te-text)]'
                                     }`}
                             >
                                 {resetStatus.message}
@@ -1160,29 +1045,29 @@ const Profile = () => {
                             {resetStep === 'request' && (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             Account Email
                                         </label>
                                         <input
                                             type="email"
                                             value={resetEmail}
                                             onChange={(e) => setResetEmail(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            className="te-input"
                                         />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        <p className="text-xs text-[var(--te-text-dim)] mt-2">
                                             We recommend using your current profile email so we can match your account instantly.
                                         </p>
                                     </div>
 
-                                    <div className="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-900/20 px-4 py-3 text-xs text-blue-700 dark:text-blue-200 flex items-start gap-3">
-                                        <ShieldCheckIcon className="h-5 w-5 text-blue-500 dark:text-blue-300 flex-shrink-0" />
+                                    <div className="rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-4 py-3 text-xs text-[var(--te-text)]  flex items-start gap-3">
+                                        <ShieldCheckIcon className="h-5 w-5 text-[var(--te-text-dim)] flex-shrink-0" />
                                         <p>Reset links expire in 15 minutes and codes are single-use. You can always request another if it expires.</p>
                                     </div>
 
                                     <button
                                         onClick={handlePasswordResetRequest}
                                         disabled={resetLoading}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                        className="te-btn-primary w-full disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
                                         {resetLoading ? (
                                             <>
@@ -1201,7 +1086,7 @@ const Profile = () => {
 
                             {resetStep === 'verify' && (
                                 <>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                                    <p className="text-sm text-[var(--te-text-dim)]">
                                         Enter the six-digit code we emailed to <span className="font-semibold">{resetEmail}</span>.
                                     </p>
                                     <div className="flex items-center justify-between gap-2">
@@ -1215,7 +1100,7 @@ const Profile = () => {
                                                 value={digit}
                                                 onChange={(e) => handlePasswordResetCodeChange(index, e.target.value)}
                                                 onKeyDown={(e) => handlePasswordResetCodeKeyDown(index, e)}
-                                                className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl font-bold rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                className="h-14 w-12 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface)] text-center font-mono text-xl font-bold text-[var(--te-text)] focus:border-[var(--te-border-strong)] focus:ring-2 focus:ring-[var(--te-ring)] sm:h-16 sm:w-14"
                                             />
                                         ))}
                                     </div>
@@ -1223,7 +1108,7 @@ const Profile = () => {
                                         <button
                                             onClick={handlePasswordResetResend}
                                             disabled={resetLoading || resetResendCooldown > 0}
-                                            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold disabled:opacity-60"
+                                            className="inline-flex items-center gap-2 text-[var(--te-text)] font-semibold disabled:opacity-60"
                                         >
                                             <ArrowPathIcon className="h-4 w-4" />
                                             {resetResendCooldown > 0 ? `Resend in ${resetResendCooldown}s` : 'Resend code'}
@@ -1231,9 +1116,9 @@ const Profile = () => {
                                         <button
                                             onClick={handlePasswordResetVerify}
                                             disabled={resetLoading}
-                                            className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60"
+                                            className="te-btn-primary disabled:opacity-60"
                                         >
-                                            {resetLoading ? 'Verifying...' : 'Verify Code'}
+                                            {resetLoading ? 'Verifying…' : 'Verify code'}
                                         </button>
                                     </div>
                                 </>
@@ -1242,33 +1127,33 @@ const Profile = () => {
                             {resetStep === 'complete' && (
                                 <>
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             New Password
                                         </label>
                                         <input
                                             type="password"
                                             value={resetNewPassword}
                                             onChange={(e) => setResetNewPassword(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            className="te-input"
                                             placeholder="At least 8 characters"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                        <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                                             Confirm Password
                                         </label>
                                         <input
                                             type="password"
                                             value={resetConfirmPassword}
                                             onChange={(e) => setResetConfirmPassword(e.target.value)}
-                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            className="te-input"
                                             placeholder="Re-enter new password"
                                         />
                                     </div>
                                     <button
                                         onClick={handlePasswordResetComplete}
                                         disabled={resetLoading}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-60"
+                                        className="te-btn-primary w-full disabled:opacity-60"
                                     >
                                         {resetLoading ? 'Updating…' : 'Update Password'}
                                     </button>
@@ -1277,11 +1162,11 @@ const Profile = () => {
 
                             {resetStep === 'done' && (
                                 <div className="text-center py-8">
-                                    <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mx-auto mb-4">
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
                                         <CheckCircleIcon className="h-10 w-10" />
                                     </div>
-                                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password updated!</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                    <h4 className="text-xl font-bold text-[var(--te-text)] mb-2">Password updated!</h4>
+                                    <p className="text-sm text-[var(--te-text-dim)] mb-6">
                                         You can now sign in with your new password. For security, consider logging out of other sessions.
                                     </p>
                                     <div className="flex flex-col sm:flex-row gap-3">
@@ -1295,13 +1180,13 @@ const Profile = () => {
                                                 setResetSessionToken('');
                                                 setResetResendCooldown(0);
                                             }}
-                                            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-200"
+                                            className="te-btn-secondary flex-1"
                                         >
                                             Start another reset
                                         </button>
                                         <button
                                             onClick={closePasswordResetModal}
-                                            className="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-md"
+                                            className="te-btn-primary flex-1"
                                         >
                                             Close
                                         </button>

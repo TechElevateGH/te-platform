@@ -11,7 +11,7 @@ import SuccessFeedback from '../_custom/Alert/SuccessFeedback'
 import { FormInput, FormTextArea } from '../_custom/FormInputs'
 import CompanyCombobox from '../_custom/CompanyCombobox'
 import SelectCombobox from '../_custom/SelectCombobox'
-import { BriefcaseIcon, AcademicCapIcon, GlobeAltIcon } from '@heroicons/react/20/solid'
+import { BriefcaseIcon, AcademicCapIcon, GlobeAltIcon } from 'icons'
 
 
 export const customInputMap = {
@@ -92,9 +92,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
             requestHandler={createUserApplicationRequest}
             isSubmitting={isSubmitting}
             children={
-                <div className="px-6 py-6 space-y-6">
+                <div className="space-y-5 px-6 py-6 text-left">
                     {showSuccessFeedback && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div>
                             <SuccessFeedback
                                 message={"Application successfully added."}
                                 setShowSuccessFeedback={setShowSuccessFeedback}
@@ -103,16 +103,14 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     )}
 
                     {submitError && (
-                        <div className="rounded-xl border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm font-semibold text-red-900 dark:text-red-200">
+                        <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300">
                             {submitError}
                         </div>
                     )}
 
                     {/* Company Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Company Information
-                        </h3>
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// company information'}</h3>
                         <CompanyCombobox
                             companies={companyOptions}
                             value={appData.company}
@@ -122,11 +120,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     </div>
 
                     {/* Position Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Position Details
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// position details'}</h3>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Title"
                                 options={jobTitles}
@@ -149,11 +145,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     </div>
 
                     {/* Status Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Application Status
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// application status'}</h3>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Status"
                                 options={Object.keys(jobStatuses)}
@@ -174,11 +168,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     </div>
 
                     {/* Location Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Location
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// location'}</h3>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Country"
                                 options={countries}
@@ -198,11 +190,9 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     </div>
 
                     {/* Recruiter Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Recruiter Information
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// recruiter information'}</h3>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <FormInput
                                 label="Recruiter Name"
                                 field="recruiter_name"
@@ -220,10 +210,8 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     </div>
 
                     {/* Notes Section */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Additional Notes
-                        </h3>
+                    <div className="te-panel space-y-4 p-4">
+                        <h3 className="te-eyebrow">{'// additional notes'}</h3>
                         <FormTextArea
                             label="Notes"
                             field="notes"
@@ -239,4 +227,3 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
 
 export default ApplicationCreate;
-
