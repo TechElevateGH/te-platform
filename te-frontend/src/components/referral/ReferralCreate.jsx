@@ -123,14 +123,14 @@ const ReferralCreate = ({
     }, field, value));
   };
   return <SlideOverForm title={"Request Referral"} setHandler={setReferralCompanyId} requestHandler={createReferralRequest} isSubmitting={isSubmitting} isSubmitDisabled={!hasAllRequiredMaterials} submitButtonText={hasAllRequiredMaterials ? "Request Referral" : "Complete Requirements"} children={!hasResume ? <div className="px-6 py-8">
-                        <div className="border border-rose-200 bg-rose-50 p-6 text-center dark:border-rose-700 dark:bg-rose-900/30">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-rose-200 bg-rose-100 dark:border-rose-700 dark:bg-rose-900/40">
-                                <ExclamationTriangleIcon className="h-8 w-8 text-rose-600 dark:text-rose-400" />
+                        <div className="border border-[var(--te-red)] bg-[var(--te-red-soft)] p-6 text-center">
+                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-[var(--te-red)] bg-[var(--te-red-soft)]">
+                                <ExclamationTriangleIcon className="h-8 w-8 text-te-red" />
                             </div>
-                            <h3 className="font-display text-lg font-bold text-rose-900 dark:text-rose-200 mb-2">
+                            <h3 className="font-display text-lg font-bold text-te-red mb-2">
                                 Resume Required
                             </h3>
-                            <p className="text-sm text-rose-700 dark:text-rose-300 font-medium">
+                            <p className="text-sm text-te-red font-medium">
                                 Please upload your resume before requesting a referral.
                             </p>
                         </div>
@@ -144,8 +144,8 @@ const ReferralCreate = ({
                                 <div>
                                     <p className="font-display text-lg font-bold text-[var(--te-text)]">{company.name}</p>
                                     <div className="flex items-center gap-1 mt-1">
-                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" />
-                                        <span className="text-xs font-semibold text-[var(--te-text)]">Eligible for referral</span>
+                                        <CheckCircleIcon className="h-4 w-4 text-te-green" />
+                                        <span className="text-xs font-semibold text-te-green">Eligible for referral</span>
                                     </div>
                                 </div>
                             </div>
@@ -160,32 +160,32 @@ const ReferralCreate = ({
                                 <div className="te-card p-4">
                                     <div className="grid grid-cols-1 gap-3">
                                         {requirements.resume && <div className="flex items-center gap-3">
-                                                {hasResume ? <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />}
+                                                {hasResume ? <CheckCircleIcon className="h-5 w-5 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-te-red flex-shrink-0" />}
 
-                                                <span className={`text-sm font-semibold ${hasResume ? "text-[var(--te-text)]" : 'text-rose-900 dark:text-rose-200'}`}>
+                                                <span className={`text-sm font-semibold ${hasResume ? "text-te-green" : 'text-te-red'}`}>
                                                     Resume
                                                 </span>
                                             </div>}
 
                                         {requirements.essay && <div className="flex items-center gap-3">
-                                                {hasReferralEssay ? <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />}
+                                                {hasReferralEssay ? <CheckCircleIcon className="h-5 w-5 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-te-red flex-shrink-0" />}
 
-                                                <span className={`text-sm font-semibold ${hasReferralEssay ? "text-[var(--te-text)]" : 'text-rose-900 dark:text-rose-200'}`}>
+                                                <span className={`text-sm font-semibold ${hasReferralEssay ? "text-te-green" : 'text-te-red'}`}>
                                                     Referral Essay
                                                 </span>
                                             </div>}
 
                                         {requirements.phone_number && <div className="flex items-center gap-3">
-                                                {hasPhoneNumber ? <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400 flex-shrink-0" />}
+                                                {hasPhoneNumber ? <CheckCircleIcon className="h-5 w-5 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-5 w-5 text-te-red flex-shrink-0" />}
 
-                                                <span className={`text-sm font-semibold ${hasPhoneNumber ? "text-[var(--te-text)]" : 'text-rose-900 dark:text-rose-200'}`}>
+                                                <span className={`text-sm font-semibold ${hasPhoneNumber ? "text-te-green" : 'text-te-red'}`}>
                                                     Phone Number
                                                 </span>
                                             </div>}
 
                                     </div>
                                 </div>
-                                {!hasAllRequiredMaterials && requirementWarningMessage && <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-700/60 dark:bg-amber-900/30 dark:text-amber-100">
+                                {!hasAllRequiredMaterials && requirementWarningMessage && <div className="flex items-start gap-2 rounded-md border border-[var(--te-gold)] bg-[var(--te-gold-soft)] px-3 py-2 text-te-gold">
                                         <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0" />
                                         <p className="text-xs font-semibold leading-snug">
                                             {requirementWarningMessage}
@@ -328,8 +328,8 @@ const ReferralCreate = ({
                         </div>
 
                         {/* Error Message */}
-                        {submitError && <div className="border border-rose-200 bg-rose-50 p-4 dark:border-rose-700 dark:bg-rose-900/30">
-                                <p className="text-sm font-semibold text-rose-900 dark:text-rose-200">{submitError}</p>
+                        {submitError && <div className="border border-[var(--te-red)] bg-[var(--te-red-soft)] p-4">
+                                <p className="text-sm font-semibold text-te-red">{submitError}</p>
                             </div>}
 
                     </div>} />;

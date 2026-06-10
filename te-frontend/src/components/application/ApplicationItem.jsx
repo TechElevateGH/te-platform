@@ -81,7 +81,7 @@ const ApplicationItem = ({ allowSelection, addSelectedItem, application, setAppl
                         {application.referred && (
                             <>
                                 <span className="text-[var(--te-border-strong)]">/</span>
-                                <span className="te-badge">Referred</span>
+                                <span className="te-badge-green">Referred</span>
                             </>
                         )}
                     </div>

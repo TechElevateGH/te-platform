@@ -128,7 +128,8 @@ const Register = () => {
                         <div className="flex justify-center mb-4">
                             <img src="/te-mark.svg" alt="TechElevate Logo" className="h-20 w-20 select-none" />
                         </div>
-                        <h2 className="font-display text-3xl font-bold tracking-tight text-[var(--te-text)] mb-2">
+                        <span className="te-eyebrow justify-center">{'// registration'}</span>
+                        <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] mb-2">
                             Join TechElevate
                         </h2>
                         <p className="text-[var(--te-text-dim)]">
@@ -243,7 +244,11 @@ const Register = () => {
                 <div className="te-card rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-8 shadow-sm">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--te-text)] mb-2">
+                        <div className="mb-4 flex justify-center">
+                            <img src="/te-mark.svg" alt="TechElevate Logo" className="h-16 w-16 select-none" />
+                        </div>
+                        <span className="te-eyebrow justify-center">{'// registration'}</span>
+                        <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--te-text)] mb-2">
                             Create your account
                         </h2>
                         <p className="text-[var(--te-text-dim)]">

@@ -11,13 +11,13 @@ import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } fro
 import { countries } from '../../data/jobData'
 
 export const jobStatuses = {
-    "Offer": 'text-green-700 bg-green-50 border border-green-200 dark:text-green-300 dark:bg-green-900/20 dark:border-green-800',
-    "HR": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
-    "Phone interview": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
-    "Final interview": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
-    "OA": 'text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border border-[var(--te-border)]',
-    "Submitted": 'text-amber-700 bg-amber-50 border border-amber-200 dark:text-amber-300 dark:bg-amber-900/20 dark:border-amber-800',
-    "Rejected": 'text-rose-700 bg-rose-50 border border-rose-200 dark:text-rose-300 dark:bg-rose-900/20 dark:border-rose-800',
+    "Offer": 'te-chip-green',
+    "HR": 'te-chip-gold',
+    "Phone interview": 'te-chip-gold',
+    "Final interview": 'te-chip-gold',
+    "OA": 'te-chip-gold',
+    "Submitted": 'te-chip-gold',
+    "Rejected": 'te-chip-red',
 }
 
 const classNames = (...classes) => {
@@ -261,7 +261,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                         <div className="bg-[var(--te-surface)] p-4">
                                                             <label className="te-eyebrow text-[10px]">Referred</label>
                                                             <p className="mt-1 text-sm text-[var(--te-text)]">
-                                                                {application.referred === true ? "Yes" : "No"}
+                                                                {application.referred === true ? <span className="te-badge-green">Yes</span> : <span className="text-[var(--te-text-dim)]">No</span>}
                                                             </p>
                                                         </div>
                                                         <div className="bg-[var(--te-surface)] p-4">
@@ -405,7 +405,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                                 className="te-btn-secondary te-btn-sm flex items-center justify-center gap-1.5"
                                                                 onClick={handleArchive}
                                                             >
-                                                                <ArchiveBoxIcon className="h-4 w-4" />
+                                                                <ArchiveBoxIcon className="h-4 w-4 text-te-red" />
                                                                 Archive
                                                             </button>
                                                             <button
@@ -439,8 +439,8 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                 {confirmDialog.isOpen && (
                     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
                         <div className="te-card max-w-md w-full overflow-hidden">
-                            <div className={`border-b border-[var(--te-border)] px-6 py-4 ${confirmDialog.confirmStyle === 'danger' ? 'bg-rose-50 dark:bg-rose-900/20' : 'bg-[var(--te-surface-alt)]'}`}>
-                                <h3 className={`font-display text-lg font-semibold ${confirmDialog.confirmStyle === 'danger' ? 'text-rose-900 dark:text-rose-100' : 'text-[var(--te-text)]'}`}>
+                            <div className={`border-b border-[var(--te-border)] px-6 py-4 ${confirmDialog.confirmStyle === 'danger' ? 'bg-[var(--te-red-soft)]' : 'bg-[var(--te-surface-alt)]'}`}>
+                                <h3 className={`font-display text-lg font-semibold ${confirmDialog.confirmStyle === 'danger' ? 'text-te-red' : 'text-[var(--te-text)]'}`}>
                                     {confirmDialog.title}
                                 </h3>
                             </div>

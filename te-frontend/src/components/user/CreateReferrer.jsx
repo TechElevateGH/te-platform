@@ -115,8 +115,11 @@ const CreateReferrer = ({ show, onClose }) => {
                 {/* Header */}
                 <div className="sticky top-0 flex items-center justify-between border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4 text-[var(--te-text)]">
                     <div className="flex items-center gap-2">
-                        <BuildingOfficeIcon className="h-6 w-6" />
-                        <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Create Referrer Account</h2>
+                        <BuildingOfficeIcon className="h-6 w-6 text-te-green" />
+                        <div>
+                            <span className="te-eyebrow">{'// referrals'}</span>
+                            <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Create Referrer Account</h2>
+                        </div>
                     </div>
                     <button
                         onClick={handleClose}
@@ -130,7 +133,7 @@ const CreateReferrer = ({ show, onClose }) => {
                 {createdCredentials && (
                     <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] p-6">
                         <div className="flex items-start gap-3 mb-4">
-                            <CheckCircleIcon className="h-6 w-6 text-[var(--te-text)] flex-shrink-0 mt-0.5" />
+                            <CheckCircleIcon className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                             <div>
                                 <h3 className="font-bold text-[var(--te-text)] mb-1">
                                     Referrer Account Created Successfully!

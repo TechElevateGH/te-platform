@@ -18,17 +18,20 @@ import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    one_on_one: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    system_design: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    coding: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    one_on_one: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    pending: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    scheduled: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    upcoming: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    confirmed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    completed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    cancelled: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
+    missed: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -268,8 +271,8 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                             key={key}
                             onClick={() => setStatusFilter(key)}
                             className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 whitespace-nowrap transition-colors ${statusFilter === key
-                                ? 'bg-[var(--te-surface)] text-[var(--te-text)]'
-                                : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
+                                ? 'bg-[var(--te-green-soft)] text-te-green shadow-sm'
+                                : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                 }`}
                         >
                             {label}
@@ -309,7 +312,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                     <div className="text-sm font-semibold text-[var(--te-text)]">
                                         {formatDateWithDay(interview.timeslot_date)}
                                     </div>
-                                    <div className="mt-1 flex items-center gap-2 text-xs text-[var(--te-text-dim)]">
+                                    <div className="mt-1 flex items-center gap-2 text-xs text-te-green">
                                         <ClockIcon className="h-3.5 w-3.5" />
                                         {formatTime(interview.timeslot_time)}
                                     </div>
@@ -400,7 +403,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                         <button
                                             onClick={() => openCancelModal(interview)}
                                             disabled={cancellingId === interview.id}
-                                            className="te-btn-ghost te-btn-sm disabled:opacity-50"
+                                            className="te-btn-danger te-btn-sm disabled:opacity-50"
                                         >
                                             {cancellingId === interview.id ? 'Cancelling...' : 'Cancel'}
                                         </button>
@@ -463,8 +466,8 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                 <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden transition-all">
                                     <div className="p-6">
                                         <div className="flex items-start gap-4">
-                                            <div className="flex-shrink-0 w-10 h-10 rounded-md bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                                <ExclamationTriangleIcon className="h-6 w-6 text-[var(--te-text)]" />
+                                            <div className="flex-shrink-0 w-10 h-10 rounded-md border border-[var(--te-red)] bg-[var(--te-red-soft)] flex items-center justify-center">
+                                                <ExclamationTriangleIcon className="h-6 w-6 text-te-red" />
                                             </div>
                                             <div className="flex-1">
                                                 <Dialog.Title className="font-mono text-lg font-semibold text-[var(--te-text)] mb-2">
@@ -474,7 +477,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                                     Are you sure you want to cancel this {interviewToCancel && formatInterviewType(interviewToCancel.interview_type).toLowerCase()} interview scheduled for {interviewToCancel && formatDateWithDay(interviewToCancel.timeslot_date)} at {formatTime(interviewToCancel?.timeslot_time)}?
                                                 </p>
                                                 {interviewToCancel?.status === 'confirmed' && interviewToCancel?.assigned_to_name && (
-                                                    <p className="text-sm text-[var(--te-text)] bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg p-3 mb-4">
+                                                    <p className="text-sm text-te-gold bg-[var(--te-gold-soft)] border border-[var(--te-gold)] rounded-lg p-3 mb-4">
                                                         This interview is confirmed with {interviewToCancel.assigned_to_name}. They will be notified of the cancellation.
                                                     </p>
                                                 )}
@@ -504,7 +507,7 @@ const MyInterviews = ({ onFeedbackCount, onRequestNew, interviewType = 'all' }) 
                                         <button
                                             onClick={handleCancel}
                                             disabled={cancellingId === interviewToCancel?.id}
-                                            className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="te-btn-danger disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {cancellingId === interviewToCancel?.id ? 'Cancelling...' : 'Yes, Cancel Interview'}
                                         </button>

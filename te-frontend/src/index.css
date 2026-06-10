@@ -20,43 +20,52 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Theme variables — clean neutral base + refined blue accent (Apple/Google-style engineering) */
+/* Theme variables — TechElevateGH: Ghana flag palette (red, gold, green, black).
+   Green = primary/links/active, Gold = highlights/eyebrows, Red = energy/danger, Black = ink. */
 :root {
   --te-bg: #ffffff;          /* page */
   --te-surface: #ffffff;     /* cards / panels */
-  --te-surface-alt: #f7f7f8; /* sidebar / subtle fills */
-  --te-border: #e7e7ea;      /* hairline border */
-  --te-border-strong: #d6d7db;
-  --te-text: #1d1d1f;        /* ink (near-black, Apple) */
-  --te-text-dim: #6b6f76;    /* secondary */
-  --te-hover: rgba(15, 23, 42, 0.045);
-  --te-accent: #1a73e8;      /* refined blue — links / active states */
-  --te-accent-hover: #1664c7;
-  --te-accent-soft: #e8f0fe; /* light blue tint — selected / badge bg */
-  --te-primary: #1a73e8;     /* primary button fill (blue) */
-  --te-primary-hover: #1664c7;
+  --te-surface-alt: #faf9f4; /* warm cream — sidebar / subtle fills */
+  --te-border: #e8e4d9;      /* warm hairline border */
+  --te-border-strong: #d8d3c4;
+  --te-text: #1a1712;        /* ink (warm near-black) */
+  --te-text-dim: #6f695c;    /* secondary (warm gray) */
+  --te-hover: rgba(20, 18, 12, 0.05);
+  --te-accent: #0e7a3d;      /* Ghana green — links / active states */
+  --te-accent-hover: #0a6332;
+  --te-accent-soft: #e6f3ec; /* light green tint — selected / badge bg */
+  --te-primary: #0e7a3d;     /* primary button fill (green) */
+  --te-primary-hover: #0a6332;
   --te-on-primary: #ffffff;  /* text on primary */
-  --te-ring: rgba(26, 115, 232, 0.32);
-  --te-gradient: linear-gradient(135deg, #1a73e8 0%, #4c9aff 100%);
+  --te-ring: rgba(14, 122, 61, 0.30);
+  /* palette tokens */
+  --te-green: #0e7a3d;       --te-green-soft: #e6f3ec;
+  --te-gold: #c4880a;        --te-gold-strong: #e0a100; --te-gold-soft: #fbf1d6;
+  --te-red: #ce1126;         --te-red-soft: #fde8ea;
+  --te-gradient: linear-gradient(100deg, #0e7a3d 0%, #c4880a 50%, #ce1126 100%);
 }
 
 .dark {
-  --te-bg: #18191b;          /* dark page */
-  --te-surface: #202124;     /* cards (lighter than page) */
-  --te-surface-alt: #1c1d20; /* sidebar / subtle fills */
-  --te-border: #303134;      /* hairline */
-  --te-border-strong: #3c3d41;
-  --te-text: #e8eaed;        /* ink */
-  --te-text-dim: #9aa0a6;    /* secondary */
+  --te-bg: #14130f;          /* warm black page */
+  --te-surface: #1c1a15;     /* cards (lighter than page) */
+  --te-surface-alt: #181610; /* sidebar / subtle fills */
+  --te-border: #2e2b23;      /* hairline */
+  --te-border-strong: #3a362c;
+  --te-text: #ece8df;        /* ink */
+  --te-text-dim: #a39d8f;    /* secondary */
   --te-hover: rgba(255, 255, 255, 0.06);
-  --te-accent: #5aa0ff;      /* lighter blue — links / active states on dark */
-  --te-accent-hover: #7db4ff;
-  --te-accent-soft: rgba(90, 160, 255, 0.16);
-  --te-primary: #2b7cf0;     /* primary button fill (blue) */
-  --te-primary-hover: #4a90f5;
+  --te-accent: #3fbf6f;      /* brighter green for dark */
+  --te-accent-hover: #5fd089;
+  --te-accent-soft: rgba(63, 191, 111, 0.16);
+  --te-primary: #128a46;     /* primary button fill (green) */
+  --te-primary-hover: #16a052;
   --te-on-primary: #ffffff;  /* text on primary */
-  --te-ring: rgba(90, 160, 255, 0.42);
-  --te-gradient: linear-gradient(135deg, #2b7cf0 0%, #5aa0ff 100%);
+  --te-ring: rgba(63, 191, 111, 0.42);
+  /* palette tokens */
+  --te-green: #3fbf6f;       --te-green-soft: rgba(63, 191, 111, 0.16);
+  --te-gold: #e6b53d;        --te-gold-strong: #f0c14b; --te-gold-soft: rgba(230, 181, 61, 0.16);
+  --te-red: #f0556a;         --te-red-soft: rgba(240, 85, 106, 0.16);
+  --te-gradient: linear-gradient(100deg, #3fbf6f 0%, #e6b53d 50%, #f0556a 100%);
 }
 
 /* Utility classes that map to variables */
@@ -325,7 +334,7 @@ code, .font-mono {
   .te-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.14em];
     font-family: 'JetBrains Mono', ui-monospace, monospace;
-    color: var(--te-text-dim);
+    color: var(--te-gold);
   }
 
   /* Cards / surfaces — flat with hairline border */
@@ -413,6 +422,17 @@ code, .font-mono {
     color: var(--te-accent);
     background: var(--te-accent-soft);
   }
+
+  /* On-palette status variants (Ghana red / gold / green) — for uniform chips & badges */
+  .te-chip-green { @apply te-chip; color: var(--te-green); background: var(--te-green-soft); border-color: transparent; }
+  .te-chip-gold  { @apply te-chip; color: var(--te-gold);  background: var(--te-gold-soft);  border-color: transparent; }
+  .te-chip-red   { @apply te-chip; color: var(--te-red);   background: var(--te-red-soft);   border-color: transparent; }
+  .te-badge-green { @apply te-badge; color: var(--te-green); background: var(--te-green-soft); }
+  .te-badge-gold  { @apply te-badge; color: var(--te-gold);  background: var(--te-gold-soft); }
+  .te-badge-red   { @apply te-badge; color: var(--te-red);   background: var(--te-red-soft); }
+  .text-te-green { color: var(--te-green); }
+  .text-te-gold { color: var(--te-gold); }
+  .text-te-red { color: var(--te-red); }
 
   .te-divider { height: 1px; width: 100%; background: var(--te-border); }
 

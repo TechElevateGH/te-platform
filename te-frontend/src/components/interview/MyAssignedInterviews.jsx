@@ -14,17 +14,20 @@ import { useToast } from '../../context/ToastContext';
 import { Loading } from '../_custom/Loading';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    one_on_one: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    system_design: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    coding: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    one_on_one: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    pending: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    scheduled: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    upcoming: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    confirmed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    completed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    cancelled: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
+    missed: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -244,7 +247,7 @@ const MyAssignedInterviews = () => {
             >
                 <div className="font-mono">
                     <div className="text-sm font-semibold text-[var(--te-text)]">{formatDateWithDay(interview.timeslot_date)}</div>
-                    <div className="mt-1 flex items-center gap-2 text-xs text-[var(--te-text-dim)]">
+                    <div className="mt-1 flex items-center gap-2 text-xs text-te-green">
                         <ClockIcon className="h-3.5 w-3.5" />
                         {formatTime(interview.timeslot_time)}
                     </div>

@@ -440,6 +440,22 @@ const ResumesAndEssaysManagement = () => {
 
     const hasActiveFilters = searchQuery || memberFilter || fileTypeFilter;
 
+    const getReviewStatusClass = (status) => {
+        const colors = {
+            'Pending': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
+            'In Review': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
+            'Requested': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
+            'Completed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
+            'Approved': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
+            'Reviewed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
+            'Declined': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
+            'Cancelled': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
+            'Rejected': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
+            'Needs Changes': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]'
+        };
+        return colors[status] || 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border border-[var(--te-border)]';
+    };
+
     // Filter resume reviews - default to Pending and In Review only
     const filteredResumeReviews = resumeReviews.filter(review => {
         // Status filter
@@ -788,7 +804,7 @@ const ResumesAndEssaysManagement = () => {
                             <button
                                 onClick={() => setActiveTab('resumes')}
                                 className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'resumes'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                     }`}
                             >
@@ -804,7 +820,7 @@ const ResumesAndEssaysManagement = () => {
                             <button
                                 onClick={() => setActiveTab('reviews')}
                                 className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'reviews'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                     }`}
                             >
@@ -813,7 +829,7 @@ const ResumesAndEssaysManagement = () => {
                                     <span className="hidden sm:inline">Resume Reviews</span>
                                     <span className="sm:hidden">Reviews</span>
                                     {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
-                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded-md">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-gold-soft)] text-[var(--te-gold)] rounded-md">
                                             {resumeReviews.filter(r => r.status === 'Pending').length}
                                         </span>
                                     )}
@@ -826,7 +842,7 @@ const ResumesAndEssaysManagement = () => {
                             <button
                                 onClick={() => setActiveTab('myAssignments')}
                                 className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'myAssignments'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                     }`}
                             >
@@ -835,7 +851,7 @@ const ResumesAndEssaysManagement = () => {
                                     <span className="hidden sm:inline">My Assignments</span>
                                     <span className="sm:hidden">My Work</span>
                                     {myAssignedReviews.length > 0 && (
-                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded-md">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-gold-soft)] text-[var(--te-gold)] rounded-md">
                                             {myAssignedReviews.length}
                                         </span>
                                     )}
@@ -848,7 +864,7 @@ const ResumesAndEssaysManagement = () => {
                             <button
                                 onClick={() => setActiveTab('allAssignments')}
                                 className={`px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'allAssignments'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
                                     }`}
                             >
@@ -857,7 +873,7 @@ const ResumesAndEssaysManagement = () => {
                                     <span className="hidden sm:inline">All Assignments</span>
                                     <span className="sm:hidden">All Work</span>
                                     {allAssignments.length > 0 && (
-                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded-md">
+                                        <span className="px-1.5 sm:px-2 py-0.5 text-xs font-bold bg-[var(--te-gold-soft)] text-[var(--te-gold)] rounded-md">
                                             {allAssignments.length}
                                         </span>
                                     )}
@@ -882,8 +898,8 @@ const ResumesAndEssaysManagement = () => {
                                         <span className="font-bold text-[var(--te-text)]">{users.filter(u => u.resumes && u.resumes.length > 0).length}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <DocumentIcon className="h-3.5 w-3.5 text-[var(--te-text-dim)] flex-shrink-0" />
-                                        <span className="font-bold text-[var(--te-text)] text-[var(--te-text-dim)]">{stats.totalResumes}</span>
+                                        <DocumentIcon className="h-3.5 w-3.5 text-[var(--te-green)] flex-shrink-0" />
+                                        <span className="font-bold text-[var(--te-text-dim)]">{stats.totalResumes}</span>
                                     </div>
                                 </div>
 
@@ -939,7 +955,7 @@ const ResumesAndEssaysManagement = () => {
                             <div className="te-card rounded-lg p-3 mb-3 transition-colors">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-[var(--te-text)] text-[var(--te-text-dim)]" />
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                         <h3 className="text-sm font-bold text-[var(--te-text)]">Advanced Filters</h3>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -1077,7 +1093,7 @@ const ResumesAndEssaysManagement = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-3 py-2 text-left">
-                                                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]">
+                                                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-md bg-[var(--te-green-soft)] text-[var(--te-green)]">
                                                             {user.resumes?.length || 0}
                                                         </span>
                                                     </td>
@@ -1120,7 +1136,7 @@ const ResumesAndEssaysManagement = () => {
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]">
+                                                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-md bg-[var(--te-green-soft)] text-[var(--te-green)]">
                                                         {user.resumes?.length || 0} resumes
                                                     </span>
                                                 </div>
@@ -1147,19 +1163,19 @@ const ResumesAndEssaysManagement = () => {
                                         <span className="font-bold text-[var(--te-text)]">{resumeReviews.length}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <ClockIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                         <span className="text-[var(--te-text-dim)] hidden sm:inline">Pending:</span>
                                         <span className="font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <DocumentTextIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <DocumentTextIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                         <span className="text-[var(--te-text)] hidden sm:inline">In Review:</span>
-                                        <span className="font-bold text-[var(--te-text)] text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
+                                        <span className="font-bold text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
-                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-green)]" />
                                         <span className="text-[var(--te-text)] hidden sm:inline">Completed:</span>
-                                        <span className="font-bold text-[var(--te-text)] text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
+                                        <span className="font-bold text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
                                     </div>
                                 </div>
 
@@ -1278,14 +1294,7 @@ const ResumesAndEssaysManagement = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-left">
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md ${review.status === 'Pending'
-                                                            ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
-                                                            : review.status === 'In Review'
-                                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                                : review.status === 'Completed'
-                                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
-                                                            }`}>
+                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
                                                             {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
                                                             {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
                                                             {review.status}
@@ -1497,11 +1506,7 @@ const ResumesAndEssaysManagement = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-left">
-                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md ${review.status === 'Pending' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]' :
-                                                            review.status === 'In Review' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]' :
-                                                                review.status === 'Completed' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]' :
-                                                                    'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
-                                                            }`}>
+                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
                                                             {review.status}
                                                         </span>
                                                     </td>
@@ -1525,7 +1530,7 @@ const ResumesAndEssaysManagement = () => {
                                                                     className="te-btn-danger te-btn-sm gap-1"
                                                                     title="Cancel this review"
                                                                 >
-                                                                    <XCircleIcon className="h-3.5 w-3.5" />
+                                                                    <XCircleIcon className="h-3.5 w-3.5 text-[var(--te-red)]" />
                                                                     Cancel
                                                                 </button>
                                                             )}
@@ -1555,19 +1560,19 @@ const ResumesAndEssaysManagement = () => {
                                         <span className="font-bold text-[var(--te-text)]">{assignmentsAnalytics.total}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <ClockIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                         <span className="font-medium text-[var(--te-text-dim)]">Pending:</span>
                                         <span className="font-bold text-[var(--te-text)]">{assignmentsAnalytics.byStatus['Pending'] || 0}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <EyeIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                         <span className="font-medium text-[var(--te-text)]">In Review:</span>
-                                        <span className="font-bold text-[var(--te-text)] text-[var(--te-text-dim)]">{assignmentsAnalytics.byStatus['In Review'] || 0}</span>
+                                        <span className="font-bold text-[var(--te-text-dim)]">{assignmentsAnalytics.byStatus['In Review'] || 0}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-green)]" />
                                         <span className="font-medium text-[var(--te-text)]">Completed:</span>
-                                        <span className="font-bold text-[var(--te-text)] text-[var(--te-text-dim)]">{assignmentsAnalytics.byStatus['Completed'] || 0}</span>
+                                        <span className="font-bold text-[var(--te-text-dim)]">{assignmentsAnalytics.byStatus['Completed'] || 0}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -1645,7 +1650,7 @@ const ResumesAndEssaysManagement = () => {
                             <div className="te-card rounded-lg p-2.5 mb-3 transition-colors">
                                 <div className="flex items-center justify-between mb-2.5">
                                     <div className="flex items-center gap-2">
-                                        <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 text-[var(--te-text)] text-[var(--te-text-dim)]" />
+                                        <AdjustmentsHorizontalIcon className="h-3.5 w-3.5 text-[var(--te-text-dim)]" />
                                         <h3 className="text-xs font-semibold text-[var(--te-text)]">Advanced Filters</h3>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -1858,11 +1863,7 @@ const ResumesAndEssaysManagement = () => {
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3 text-left">
-                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md ${review.status === 'Pending' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]' :
-                                                            review.status === 'In Review' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]' :
-                                                                review.status === 'Completed' ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]' :
-                                                                    'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
-                                                            }`}>
+                                                        <span className={`inline-flex items-center px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
                                                             {review.status}
                                                         </span>
                                                     </td>
@@ -1952,14 +1953,7 @@ const ResumesAndEssaysManagement = () => {
                                             </div>
                                             <div>
                                                 <p className="text-xs font-semibold text-[var(--te-text-dim)] uppercase tracking-wide mb-1">Status</p>
-                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-md ${selectedReview.status === 'Pending'
-                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
-                                                    : selectedReview.status === 'In Review'
-                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                        : selectedReview.status === 'Completed'
-                                                            ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                            : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
-                                                    }`}>
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(selectedReview.status)}`}>
                                                     {selectedReview.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
                                                     {selectedReview.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
                                                     {selectedReview.status}
@@ -2142,8 +2136,8 @@ const ResumesAndEssaysManagement = () => {
                         {/* Resume Details */}
                         <div className="px-6 py-4 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
                             <div className="flex items-start gap-3">
-                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-surface-alt)] rounded-lg flex items-center justify-center">
-                                    <DocumentIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-gold-soft)] border border-[var(--te-gold)] rounded-lg flex items-center justify-center">
+                                    <DocumentIcon className="h-5 w-5 text-[var(--te-gold)]" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-[var(--te-text)]">
@@ -2189,19 +2183,19 @@ const ResumesAndEssaysManagement = () => {
                                                             className="te-card-interactive w-full text-left px-4 py-3 group disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-surface-alt)] group-hover:bg-[var(--te-surface-alt)] dark:group-hover:bg-[var(--te-hover)] rounded-md flex items-center justify-center transition-colors">
+                                                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-green-soft)] border border-[var(--te-green)] group-hover:bg-[var(--te-green-soft)] rounded-md flex items-center justify-center transition-colors">
                                                                     {assigningInProgress ? (
-                                                                        <div className="animate-spin rounded-md h-5 w-5 border-2 border-[var(--te-border-strong)] dark:border-[var(--te-border-strong)] border-t-transparent" />
+                                                                        <div className="animate-spin rounded-md h-5 w-5 border-2 border-[var(--te-border-strong)] border-t-transparent" />
                                                                     ) : (
                                                                         <UserCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
                                                                     )}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-semibold text-[var(--te-text)] group-hover:text-[var(--te-text)] dark:group-hover:text-[var(--te-text)] transition-colors">
+                                                                    <p className="text-sm font-semibold text-[var(--te-text)] group-hover:text-[var(--te-green)] transition-colors">
                                                                         {user.full_name || user.username || 'No name'}
                                                                     </p>
                                                                 </div>
-                                                                <ChevronRightIcon className="h-5 w-5 text-[var(--te-text-dim)] group-hover:text-[var(--te-text)] dark:group-hover:text-[var(--te-text-dim)] transition-colors" />
+                                                                <ChevronRightIcon className="h-5 w-5 text-[var(--te-text-dim)] group-hover:text-[var(--te-green)] transition-colors" />
                                                             </div>
                                                         </button>
                                                     ))}
@@ -2226,22 +2220,22 @@ const ResumesAndEssaysManagement = () => {
                                                             className="te-card-interactive w-full text-left px-4 py-3 group disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-surface-alt)] group-hover:bg-[var(--te-surface-alt)] dark:group-hover:bg-[var(--te-hover)] rounded-md flex items-center justify-center transition-colors">
+                                                                <div className="flex-shrink-0 w-10 h-10 bg-[var(--te-green-soft)] border border-[var(--te-green)] group-hover:bg-[var(--te-green-soft)] rounded-md flex items-center justify-center transition-colors">
                                                                     {assigningInProgress ? (
-                                                                        <div className="animate-spin rounded-md h-5 w-5 border-2 border-[var(--te-border-strong)] dark:border-[var(--te-border-strong)] border-t-transparent" />
+                                                                        <div className="animate-spin rounded-md h-5 w-5 border-2 border-[var(--te-border-strong)] border-t-transparent" />
                                                                     ) : (
                                                                         <UserCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
                                                                     )}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
-                                                                    <p className="text-sm font-semibold text-[var(--te-text)] group-hover:text-[var(--te-text)] dark:group-hover:text-[var(--te-text)] transition-colors">
+                                                                    <p className="text-sm font-semibold text-[var(--te-text)] group-hover:text-[var(--te-green)] transition-colors">
                                                                         {user.full_name || user.username || 'No name'}
                                                                     </p>
                                                                     <p className="text-xs text-[var(--te-text-dim)] truncate">
                                                                         {user.email || 'No email'}
                                                                     </p>
                                                                 </div>
-                                                                <ChevronRightIcon className="h-5 w-5 text-[var(--te-text-dim)] group-hover:text-[var(--te-text)] dark:group-hover:text-[var(--te-text-dim)] transition-colors" />
+                                                                <ChevronRightIcon className="h-5 w-5 text-[var(--te-text-dim)] group-hover:text-[var(--te-green)] transition-colors" />
                                                             </div>
                                                         </button>
                                                     ))}
@@ -2276,7 +2270,7 @@ const ResumesAndEssaysManagement = () => {
 
             {/* User Details Modal */}
             {showUserDetailsModal && selectedUser && (
-                <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-[var(--te-surface)] rounded-lg shadow-sm max-w-4xl w-full max-h-[90vh] overflow-hidden">
                         {/* Modal Header */}
                         <div className="sticky top-0 px-6 py-4 border-b border-[var(--te-border)] bg-[var(--te-surface)] z-10">
@@ -2304,8 +2298,8 @@ const ResumesAndEssaysManagement = () => {
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-[var(--te-surface-alt)] bg-[var(--te-surface-alt)] rounded-lg">
-                                            <DocumentIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                        <div className="p-2 bg-[var(--te-green-soft)] border border-[var(--te-green)] rounded-lg">
+                                            <DocumentIcon className="h-5 w-5 text-[var(--te-green)]" />
                                         </div>
                                         <div>
                                             <p className="text-xs text-[var(--te-text)] font-medium">Resumes</p>
@@ -2317,8 +2311,8 @@ const ResumesAndEssaysManagement = () => {
                                 </div>
                                 <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-[var(--te-surface-alt)] bg-[var(--te-surface-alt)] rounded-lg">
-                                            <DocumentTextIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                        <div className="p-2 bg-[var(--te-gold-soft)] border border-[var(--te-gold)] rounded-lg">
+                                            <DocumentTextIcon className="h-5 w-5 text-[var(--te-gold)]" />
                                         </div>
                                         <div>
                                             <p className="text-xs text-[var(--te-text)] font-medium">Essays</p>
@@ -2344,8 +2338,8 @@ const ResumesAndEssaysManagement = () => {
                                                 className="flex items-start justify-between p-3 bg-[var(--te-surface-alt)] rounded-lg border border-[var(--te-border)] hover:bg-[var(--te-hover)] transition-colors"
                                             >
                                                 <div className="flex items-start gap-3 flex-1 min-w-0">
-                                                    <div className="flex-shrink-0 w-8 h-8 bg-[var(--te-surface-alt)] rounded flex items-center justify-center mt-0.5">
-                                                        <DocumentIcon className="h-4 w-4 text-[var(--te-text)]" />
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-[var(--te-gold-soft)] border border-[var(--te-gold)] rounded flex items-center justify-center mt-0.5">
+                                                        <DocumentIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                                     </div>
                                                     <div className="flex-1 min-w-0 text-left">
                                                         <p className="text-sm font-semibold text-[var(--te-text)] truncate">
@@ -2472,7 +2466,7 @@ const ResumesAndEssaysManagement = () => {
                                     <div className="p-6">
                                         <div className="flex items-start gap-4">
                                             <div className="flex-shrink-0 w-10 h-10 rounded-md bg-[var(--te-surface-alt)] border border-[var(--te-border)] flex items-center justify-center">
-                                                <XCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
+                                                <XCircleIcon className="h-6 w-6 text-[var(--te-red)]" />
                                             </div>
                                             <div className="flex-1">
                                                 <Dialog.Title className="text-lg font-semibold text-[var(--te-text)] mb-2">

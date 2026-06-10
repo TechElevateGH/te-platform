@@ -411,9 +411,9 @@ const TimeslotManagement = () => {
                 <div className="contents">
                     <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{totalSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">total slots</div></div>
                     
-                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{availableSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">available</div></div>
+                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-te-green">{availableSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">available</div></div>
                     
-                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-[var(--te-text)]">{bookedSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">booked</div></div>
+                    <div className="bg-[var(--te-surface)] p-4"><div className="font-mono text-2xl font-bold text-te-gold">{bookedSlots}</div><div className="mt-1 text-xs text-[var(--te-text-dim)]">booked</div></div>
                 </div>
                 <button
                     onClick={() => setShowCreateForm(true)}
@@ -491,13 +491,13 @@ const TimeslotManagement = () => {
                                                             type="button"
                                                             onClick={() => toggleInterviewType(key)}
                                                             className={`p-4 rounded-lg border transition-all ${isSelected
-                                                                ? 'border-[var(--te-border-strong)] bg-[var(--te-hover)] '
-                                                                : 'border-[var(--te-border)] hover:border-[var(--te-border)] hover:bg-[var(--te-surface-alt)]'
+                                                                ? 'border-[var(--te-green)] bg-[var(--te-green-soft)]'
+                                                                : 'border-[var(--te-border)] bg-[var(--te-surface)] hover:bg-[var(--te-hover)]'
                                                                 }`}
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <div className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center ${isSelected
-                                                                    ? 'bg-[var(--te-primary)] border-[var(--te-border-strong)]'
+                                                                    ? 'bg-[var(--te-primary)] border-[var(--te-primary)]'
                                                                     : 'border-[var(--te-border)]'
                                                                     }`}>
                                                                     {isSelected && (
@@ -506,9 +506,9 @@ const TimeslotManagement = () => {
                                                                         </svg>
                                                                     )}
                                                                 </div>
-                                                                <Icon className={`h-5 w-5 ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
+                                                                <Icon className={`h-5 w-5 ${isSelected ? 'text-te-green' : 'text-[var(--te-text-dim)]'}`} />
                                                                 <div className="flex-1 text-left">
-                                                                    <div className={`text-sm font-semibold ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'}`}>
+                                                                    <div className={`text-sm font-semibold ${isSelected ? 'text-te-green' : 'text-[var(--te-text)]'}`}>
                                                                         {type.label}
                                                                     </div>
                                                                     <p className="text-xs text-[var(--te-text-dim)]">{type.duration} min</p>
@@ -564,8 +564,8 @@ const TimeslotManagement = () => {
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, mode: 'single' }))}
                                                     className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${formData.mode === 'single'
-                                                        ? 'bg-[var(--te-surface)] text-[var(--te-text)] '
-                                                        : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
+                                                        ? 'bg-[var(--te-green-soft)] text-te-green shadow-sm'
+                                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                                         }`}
                                                 >
                                                     Single Slot
@@ -574,8 +574,8 @@ const TimeslotManagement = () => {
                                                     type="button"
                                                     onClick={() => setFormData(prev => ({ ...prev, mode: 'bulk' }))}
                                                     className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${formData.mode === 'bulk'
-                                                        ? 'bg-[var(--te-surface)] text-[var(--te-text)] '
-                                                        : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
+                                                        ? 'bg-[var(--te-green-soft)] text-te-green shadow-sm'
+                                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                                         }`}
                                                 >
                                                     Recurring
@@ -692,9 +692,9 @@ const TimeslotManagement = () => {
                                                                 key={day}
                                                                 type="button"
                                                                 onClick={() => toggleDay(day)}
-                                                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${bulkData.days.includes(day)
-                                                                    ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] '
-                                                                    : 'bg-[var(--te-hover)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
+                                                                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-all ${bulkData.days.includes(day)
+                                                                    ? 'border-[var(--te-primary)] bg-[var(--te-primary)] text-[var(--te-on-primary)]'
+                                                                    : 'border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                                     }`}
                                                             >
                                                                 {day.slice(0, 3)}
@@ -714,9 +714,9 @@ const TimeslotManagement = () => {
                                                                 key={time}
                                                                 type="button"
                                                                 onClick={() => toggleTime(time)}
-                                                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${bulkData.times.includes(time)
-                                                                    ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)] '
-                                                                    : 'bg-[var(--te-hover)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
+                                                                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-all ${bulkData.times.includes(time)
+                                                                    ? 'border-[var(--te-primary)] bg-[var(--te-primary)] text-[var(--te-on-primary)]'
+                                                                    : 'border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
                                                                     }`}
                                                             >
                                                                 {time}
@@ -778,8 +778,8 @@ const TimeslotManagement = () => {
                                     key={date}
                                     className="te-card overflow-hidden"
                                 >
-                                    <div className={`px-4 py-2.5 border-b border-[var(--te-border)] flex items-center gap-2 ${isToday ? 'bg-[var(--te-hover)]' : 'bg-[var(--te-surface-alt)]'}`}>
-                                        <CalendarIcon className={`h-4 w-4 ${isToday ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
+                                    <div className={`px-4 py-2.5 border-b border-[var(--te-border)] flex items-center gap-2 ${isToday ? 'bg-[var(--te-gold-soft)]' : 'bg-[var(--te-surface-alt)]'}`}>
+                                        <CalendarIcon className={`h-4 w-4 ${isToday ? 'text-te-gold' : 'text-[var(--te-text-dim)]'}`} />
                                         <span className={`text-sm font-semibold ${isToday ? 'text-[var(--te-text)]' : 'text-[var(--te-text)]'}`}>
                                             {dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                                             {isToday && <span className="ml-2 text-xs bg-[var(--te-primary)] text-[var(--te-on-primary)] px-2 py-0.5 rounded-md">Today</span>}
@@ -795,17 +795,17 @@ const TimeslotManagement = () => {
                                                 <div
                                                     key={slot.id}
                                                     className={`inline-flex flex-col gap-1.5 px-3 py-2 rounded-lg text-sm transition-all ${slot.is_available
-                                                        ? 'bg-[var(--te-hover)] border border-[var(--te-border)]'
-                                                        : 'bg-[var(--te-surface-alt)] border border-[var(--te-border)]'
+                                                        ? 'bg-[var(--te-surface)] border border-[var(--te-green)] hover:bg-[var(--te-hover)]'
+                                                        : 'bg-[var(--te-red-soft)] border border-[var(--te-red)]'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <ClockIcon className={`h-3.5 w-3.5 ${slot.is_available ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
-                                                        <span className={`font-semibold ${slot.is_available ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`}>
+                                                        <ClockIcon className={`h-3.5 w-3.5 ${slot.is_available ? 'text-te-green' : 'text-te-red'}`} />
+                                                        <span className={`font-mono font-semibold ${slot.is_available ? 'text-[var(--te-text)]' : 'text-te-red'}`}>
                                                             {formatTimeForDisplay(slot.start_time, slot.date)}
                                                         </span>
                                                         {!slot.is_available && (
-                                                            <span className="text-xs px-1.5 py-0.5 bg-[var(--te-hover)] rounded text-[var(--te-text-dim)]">Booked</span>
+                                                            <span className="rounded bg-[var(--te-red-soft)] px-1.5 py-0.5 text-xs font-semibold text-te-red">Booked</span>
                                                         )}
                                                         {slot.is_available && (
                                                             <div className="flex gap-1">
@@ -819,7 +819,7 @@ const TimeslotManagement = () => {
                                                                 <button
                                                                     onClick={() => handleDelete(slot.id)}
                                                                     disabled={deletingId === slot.id}
-                                                                    className="p-1 text-[var(--te-text-dim)] hover:text-[var(--te-text-dim)] disabled:opacity-50 transition-colors rounded hover:bg-[var(--te-hover)]"
+                                                                    className="p-1 text-[var(--te-text-dim)] hover:text-te-red disabled:opacity-50 transition-colors rounded hover:bg-[var(--te-red-soft)]"
                                                                     title="Delete timeslot"
                                                                 >
                                                                     <TrashIcon className="h-3.5 w-3.5" />
@@ -836,8 +836,8 @@ const TimeslotManagement = () => {
                                                                     <span
                                                                         key={type}
                                                                         className={`text-xs px-1.5 py-0.5 rounded ${slot.is_available
-                                                                            ? 'bg-[var(--te-hover)] text-[var(--te-text)]'
-                                                                            : 'bg-[var(--te-hover)] text-[var(--te-text-dim)]'
+                                                                            ? 'bg-[var(--te-green-soft)] text-te-green'
+                                                                            : 'bg-[var(--te-red-soft)] text-te-red'
                                                                             }`}
                                                                     >
                                                                         {typeInfo.label}
@@ -929,16 +929,16 @@ const TimeslotManagement = () => {
                                                             onClick={() => toggleEditInterviewType(key)}
                                                             className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
                                                                 editFormData.interview_types.includes(key)
-                                                                    ? 'border-[var(--te-border-strong)] bg-[var(--te-hover)]'
-                                                                    : 'border-[var(--te-border)] hover:border-[var(--te-border)]'
+                                                                    ? 'border-[var(--te-green)] bg-[var(--te-green-soft)]'
+                                                                    : 'border-[var(--te-border)] bg-[var(--te-surface)] hover:bg-[var(--te-hover)]'
                                                             }`}
                                                         >
                                                             {editFormData.interview_types.includes(key) && (
-                                                                <CheckIcon className="h-4 w-4 text-[var(--te-text)]" />
+                                                                <CheckIcon className="h-4 w-4 text-te-green" />
                                                             )}
                                                             <span className={`text-sm font-medium ${
                                                                 editFormData.interview_types.includes(key)
-                                                                    ? 'text-[var(--te-text)]'
+                                                                    ? 'text-te-green'
                                                                     : 'text-[var(--te-text)]'
                                                             }`}>
                                                                 {type.label}

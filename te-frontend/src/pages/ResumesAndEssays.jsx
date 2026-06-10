@@ -283,8 +283,8 @@ const ResumesAndEssays = () => {
                                 <button
                                     onClick={() => setActiveTab('resumes')}
                                     className={`px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'resumes'
-                                        ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
-                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
+                                        ? 'bg-[var(--te-green-soft)] text-[var(--te-green)]'
+                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-green)]'
                                         }`}
                                 >
                                     Files
@@ -292,8 +292,8 @@ const ResumesAndEssays = () => {
                                 <button
                                     onClick={() => setActiveTab('reviews')}
                                     className={`px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wide transition-colors ${activeTab === 'reviews'
-                                        ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
-                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
+                                        ? 'bg-[var(--te-green-soft)] text-[var(--te-green)]'
+                                        : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-green)]'
                                         }`}
                                 >
                                     Reviews
@@ -350,13 +350,13 @@ const ResumesAndEssays = () => {
                                                 type="button"
                                                 onClick={() => setResumeView('active')}
                                                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'active'
-                                                    ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
-                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
+                                                    ? 'bg-[var(--te-green-soft)] text-[var(--te-green)]'
+                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-green)]'
                                                     }`}
                                             >
                                                 Active
                                                 <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${resumeView === 'active'
-                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                    ? 'bg-[var(--te-surface)] text-[var(--te-green)]'
                                                     : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
                                                     }`}>
                                                     {activeResumesCount}
@@ -366,15 +366,15 @@ const ResumesAndEssays = () => {
                                                 type="button"
                                                 onClick={() => setResumeView('archived')}
                                                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${resumeView === 'archived'
-                                                    ? 'bg-[var(--te-text)] text-[var(--te-on-primary)]'
-                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'
+                                                    ? 'bg-[var(--te-green-soft)] text-[var(--te-green)]'
+                                                    : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-green)]'
                                                     }`}
                                                 title={!hasArchivedResumes ? 'No archived resumes yet' : undefined}
                                             >
                                                 Archived
                                                 <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${resumeView === 'archived'
-                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                    ? 'bg-[var(--te-surface)] text-[var(--te-green)]'
+                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
                                                     }`}>
                                                     {archivedResumesCount}
                                                 </span>
@@ -426,8 +426,8 @@ const ResumesAndEssays = () => {
                                                         className={`group bg-[var(--te-surface)] p-5 transition-colors hover:bg-[var(--te-hover)] ${!isEditing ? 'cursor-pointer' : ''}`}
                                                     >
                                                         <div className="flex items-start gap-4">
-                                                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                                                <PaperClipIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                                                <PaperClipIcon className="h-5 w-5 text-[var(--te-gold)]" />
                                                             </div>
                                                             <div className="min-w-0 flex-1 space-y-3">
                                                                 {isEditing ? (
@@ -528,7 +528,7 @@ const ResumesAndEssays = () => {
                                                                     className="te-icon-btn disabled:opacity-60 disabled:cursor-not-allowed"
                                                                     title="Delete"
                                                                 >
-                                                                    <TrashIcon className="h-4 w-4" />
+                                                                    <TrashIcon className="h-4 w-4 text-[var(--te-red)]" />
                                                                 </button>
                                                             </div>
                                                         )}
@@ -555,8 +555,8 @@ const ResumesAndEssays = () => {
                                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--te-hover)] transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <DocumentTextIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-green)] bg-[var(--te-green-soft)]">
+                                        <DocumentTextIcon className="h-5 w-5 text-[var(--te-green)]" />
                                     </div>
                                     <div className="text-left">
                                         <h3 className="font-display text-sm font-bold text-[var(--te-text)]">Cover Letter</h3>
@@ -655,8 +655,8 @@ const ResumesAndEssays = () => {
                                 className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-[var(--te-hover)] transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <UserIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                    <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                        <UserIcon className="h-5 w-5 text-[var(--te-gold)]" />
                                     </div>
                                     <div className="text-left">
                                         <h3 className="font-display text-sm font-bold text-[var(--te-text)]">Referral Essay</h3>
@@ -798,16 +798,16 @@ const ResumesAndEssays = () => {
 
                         <form onSubmit={handleReviewSubmit} className="p-6 space-y-4">
                             {/* Important Info Banner */}
-                            <div className="bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg p-4">
+                            <div className="bg-[var(--te-gold-soft)] border border-[var(--te-gold)] rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                    <svg className="h-5 w-5 text-[var(--te-text)] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg className="h-5 w-5 text-[var(--te-gold)] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-semibold text-[var(--te-text)] text-[var(--te-text-dim)] mb-1">
+                                        <h3 className="text-sm font-semibold text-[var(--te-text)] mb-1">
                                             Important: Grant Edit Access
                                         </h3>
-                                        <p className="text-xs text-[var(--te-text)] text-[var(--te-text-dim)]">
+                                        <p className="text-xs text-[var(--te-text)]">
                                             Please ensure <span className="font-semibold">info@techelevate.org</span> has <span className="font-semibold">Edit access</span> to your Google Doc so our reviewers can add comments and suggestions directly to your resume.
                                         </p>
                                     </div>
@@ -901,7 +901,7 @@ const ResumesAndEssays = () => {
                         <div className="sticky top-0 border-b border-[var(--te-border)] bg-[var(--te-surface)] px-6 py-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
+                                    <div className="flex h-12 w-12 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)] text-[var(--te-gold)]">
                                         <PaperClipIcon className="h-7 w-7" />
                                     </div>
                                     <div>
@@ -951,7 +951,7 @@ const ResumesAndEssays = () => {
                                                     Archived
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded-md bg-[var(--te-surface-alt)] text-[var(--te-text)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] px-2 py-1 text-xs font-semibold">
+                                                <span className="te-chip te-chip-green text-xs">
                                                     Active
                                                 </span>
                                             )}
@@ -1011,7 +1011,7 @@ const ResumesAndEssays = () => {
                                             }}
                                             className="te-btn-danger gap-2"
                                         >
-                                            <TrashIcon className="h-4 w-4" />
+                                            <TrashIcon className="h-4 w-4 text-[var(--te-red)]" />
                                             Delete
                                         </button>
                                     </div>

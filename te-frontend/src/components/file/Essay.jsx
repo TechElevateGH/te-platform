@@ -80,8 +80,8 @@ const ReferralEssay = () => {
                 <div className="bg-[var(--te-surface-alt)] px-6 py-4 border-b border-[var(--te-border)]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface)]">
-                                <DocumentTextIcon className="h-5 w-5 text-[var(--te-text)]" />
+                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-green)] bg-[var(--te-green-soft)]">
+                                <DocumentTextIcon className="h-5 w-5 text-[var(--te-green)]" />
                             </div>
                             <div>
                                 <h3 className="font-display text-lg font-bold text-[var(--te-text)]">Cover Letter</h3>
@@ -98,7 +98,7 @@ const ReferralEssay = () => {
                                     title="Copy to clipboard"
                                 >
                                     {copiedCover ? (
-                                        <CheckIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                        <CheckIcon className="h-5 w-5 text-[var(--te-green)]" />
                                     ) : (
                                         <ClipboardIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                     )}
@@ -138,8 +138,8 @@ const ReferralEssay = () => {
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <DocumentTextIcon className="h-8 w-8 text-[var(--te-text-dim)]" />
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-green)] bg-[var(--te-green-soft)]">
+                                        <DocumentTextIcon className="h-8 w-8 text-[var(--te-green)]" />
                                     </div>
                                     <h4 className="font-display text-sm font-semibold text-[var(--te-text)] mb-1">
                                         No cover letter added
@@ -159,7 +159,7 @@ const ReferralEssay = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                            <div className="border border-[var(--te-gold)] bg-[var(--te-gold-soft)] p-3">
                                 <p className="text-xs text-[var(--te-text)] font-medium">
                                     💡 Write in <strong>first person</strong>: "I am a software engineer with 5 years of experience..."
                                 </p>
@@ -197,8 +197,8 @@ const ReferralEssay = () => {
                 <div className="bg-[var(--te-surface-alt)] px-6 py-4 border-b border-[var(--te-border)]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface)]">
-                                <UserIcon className="h-5 w-5 text-[var(--te-text)]" />
+                            <div className="flex h-10 w-10 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                <UserIcon className="h-5 w-5 text-[var(--te-gold)]" />
                             </div>
                             <div>
                                 <h3 className="font-display text-lg font-bold text-[var(--te-text)]">Referral Essay</h3>
@@ -215,7 +215,7 @@ const ReferralEssay = () => {
                                     title="Copy to clipboard"
                                 >
                                     {copiedReferral ? (
-                                        <CheckIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                        <CheckIcon className="h-5 w-5 text-[var(--te-green)]" />
                                     ) : (
                                         <ClipboardIcon className="h-5 w-5 text-[var(--te-text-dim)]" />
                                     )}
@@ -255,8 +255,8 @@ const ReferralEssay = () => {
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <UserIcon className="h-8 w-8 text-[var(--te-text-dim)]" />
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                        <UserIcon className="h-8 w-8 text-[var(--te-gold)]" />
                                     </div>
                                     <h4 className="font-display text-sm font-semibold text-[var(--te-text)] mb-1">
                                         No referral essay added
@@ -276,7 +276,7 @@ const ReferralEssay = () => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
+                            <div className="border border-[var(--te-gold)] bg-[var(--te-gold-soft)] p-3">
                                 <p className="text-xs text-[var(--te-text)] font-medium">
                                     💡 Write in <strong>third person</strong>: "[Name] is a software engineer with 5 years of experience..." This will be used when requesting referrals.
                                 </p>

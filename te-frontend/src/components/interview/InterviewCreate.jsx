@@ -217,8 +217,8 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
         return (
             <div className="py-8">
                 <div className="te-panel p-6">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                        <CheckCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-green)] bg-[var(--te-green-soft)]">
+                        <CheckCircleIcon className="h-6 w-6 text-te-green" />
                     </div>
                     <p className="te-eyebrow">{'// submitted'}</p>
                     <h3 className="mt-2 font-mono text-lg font-semibold text-[var(--te-text)]">Meeting scheduled</h3>
@@ -306,7 +306,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                                     <p className="font-mono text-sm font-medium">
                                         {type.name}
                                     </p>
-                                    <p className={`mt-1 text-xs ${isSelected ? 'opacity-80' : 'text-[var(--te-text-dim)]'}`}>
+                                    <p className={`mt-1 font-mono text-xs ${isSelected ? 'opacity-80' : 'text-[var(--te-text-dim)]'}`}>
                                         {type.duration} min
                                     </p>
                                 </button>
@@ -366,7 +366,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                                                     : 'border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text)] hover:bg-[var(--te-hover)]'
                                                     }`}
                                             >
-                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-[var(--te-text)]' : 'text-[var(--te-text-dim)]'}`} />
+                                                <ClockIcon className={`h-3.5 w-3.5 ${isSelected ? 'text-[var(--te-on-primary)]' : 'text-te-green'}`} />
                                                 <span className="font-medium">{formatTime(slot.start_time, slot.date)} - {calculateEndTime(slot.start_time, slot.date, formData.interview_type)}</span>
                                             </button>
                                         );
@@ -471,9 +471,9 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
 
             {/* Error Message */}
             {submitError && (
-                <div className="flex items-start gap-2 p-3 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-lg">
-                    <ExclamationTriangleIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-[var(--te-text)] text-left">{submitError}</p>
+                <div className="flex items-start gap-2 rounded-lg border border-[var(--te-red)] bg-[var(--te-red-soft)] p-3">
+                    <ExclamationTriangleIcon className="h-4 w-4 text-te-red flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-te-red text-left">{submitError}</p>
                 </div>
             )}
 

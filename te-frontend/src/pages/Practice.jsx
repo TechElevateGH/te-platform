@@ -95,6 +95,14 @@ const practiceStats = [
     { label: 'target level', value: 'offer', icon: CodeBracketIcon }
 ]
 
+const difficultyChipClass = (difficulty) => {
+    const normalized = difficulty.toLowerCase()
+    if (normalized.includes('hard')) return 'te-chip-red'
+    if (normalized.includes('medium')) return 'te-chip-gold'
+    if (normalized.includes('easy')) return 'te-chip-green'
+    return 'te-chip'
+}
+
 const Practice = () => {
     return (
         <div className="min-h-screen bg-[var(--te-bg)]">
@@ -133,7 +141,7 @@ const Practice = () => {
                         </div>
                         <div className="grid grid-cols-3 gap-2 font-mono text-xs sm:flex">
                             {['Easy', 'Medium', 'Hard'].map((difficulty) => (
-                                <span key={difficulty} className="te-chip justify-center text-[var(--te-text-dim)]">{difficulty}</span>
+                                <span key={difficulty} className={`${difficultyChipClass(difficulty)} justify-center`}>{difficulty}</span>
                             ))}
                         </div>
                     </div>
@@ -142,13 +150,17 @@ const Practice = () => {
 
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-[var(--te-text)]">
                 <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] lg:grid-cols-4">
-                    {practiceStats.map((stat) => {
+                    {practiceStats.map((stat, index) => {
                         const Icon = stat.icon
+                        const accentClass = index % 2 === 0 ? 'text-te-green' : 'text-te-gold'
                         return (
                             <div key={stat.label} className="bg-[var(--te-surface)] p-4">
-                                <Icon className="h-4 w-4 text-[var(--te-text-dim)]" />
-                                <div className="mt-2 font-mono text-2xl font-bold text-[var(--te-text)]">{stat.value}</div>
+                                <Icon className={`h-4 w-4 ${accentClass}`} />
+                                <div className={`mt-2 font-mono text-2xl font-bold ${accentClass}`}>{stat.value}</div>
                                 <div className="mt-1 text-xs text-[var(--te-text-dim)]">{stat.label}</div>
+                                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--te-surface-alt)]">
+                                    <div className="h-full rounded-full bg-[var(--te-green)]" style={{ width: `${Math.max(55, 88 - index * 10)}%` }} />
+                                </div>
                             </div>
                         )
                     })}
@@ -177,7 +189,11 @@ const Practice = () => {
                                                     </div>
                                                     <span className="te-eyebrow">{category.badge}</span>
                                                 </div>
-                                                <span className="te-chip font-mono text-[var(--te-text-dim)]">{category.difficulty}</span>
+                                                <div className="flex flex-wrap justify-end gap-1.5">
+                                                    {category.difficulty.split(' → ').map((difficulty) => (
+                                                        <span key={difficulty} className={`${difficultyChipClass(difficulty)} font-mono`}>{difficulty}</span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="p-5">

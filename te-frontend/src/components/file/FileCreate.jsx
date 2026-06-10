@@ -116,7 +116,7 @@ const FileCreate = ({ setFileUpload }) => {
                         }
 
                         {/* Continuous Upload Toggle */}
-                        <div className="te-card flex items-start justify-between gap-4 p-4">
+                        <div className="te-card flex items-start justify-between gap-4 p-4 border-[var(--te-green)] bg-[var(--te-green-soft)]">
                             <div>
                                 <p className="text-sm font-semibold text-[var(--te-text)]">Keep uploader open</p>
                                 <p className="text-xs text-[var(--te-text-dim)] mt-1">Stay on this form after a successful upload so you can immediately add another file.</p>
@@ -130,7 +130,7 @@ const FileCreate = ({ setFileUpload }) => {
                                     onChange={(event) => setContinueUploading(event.target.checked)}
                                     disabled={isSubmitting}
                                 />
-                                <span className={`relative inline-flex h-6 w-11 items-center rounded-md transition-colors duration-200 ${continueUploading ? 'bg-[var(--te-text)]' : 'bg-[var(--te-surface-alt)]'} ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                                <span className={`relative inline-flex h-6 w-11 items-center rounded-md transition-colors duration-200 ${continueUploading ? 'bg-[var(--te-green)]' : 'bg-[var(--te-surface-alt)]'} ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}>
                                     <span className={`inline-block h-5 w-5 transform rounded-md bg-[var(--te-surface)] shadow-sm transition-transform duration-200 ${continueUploading ? 'translate-x-5' : 'translate-x-1'}`} />
                                 </span>
                             </label>
@@ -141,7 +141,7 @@ const FileCreate = ({ setFileUpload }) => {
                                 <>
                                     {/* File Upload */}
                                     <div className="space-y-4">
-                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
+                                        <h3 className="te-eyebrow">
                                             {fileData.document_type} File
                                         </h3>
                                         <FileUpload
@@ -158,7 +158,7 @@ const FileCreate = ({ setFileUpload }) => {
 
                                     {/* Role Field */}
                                     <div className="space-y-4">
-                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
+                                        <h3 className="te-eyebrow">
                                             Role Information
                                         </h3>
                                         <SelectCombobox
@@ -177,7 +177,7 @@ const FileCreate = ({ setFileUpload }) => {
 
                                     {/* Notes Field */}
                                     <div className="space-y-4">
-                                        <h3 className="font-mono text-xs font-bold text-[var(--te-text-dim)] uppercase tracking-wider">
+                                        <h3 className="te-eyebrow">
                                             Additional Notes
                                         </h3>
                                         <div className="relative">

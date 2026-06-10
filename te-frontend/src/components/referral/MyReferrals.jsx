@@ -109,31 +109,46 @@ const MyReferrals = ({
   const getStatusBadge = status => {
     const statusConfig = {
       Completed: {
-        bg: "bg-[var(--te-surface-alt)]",
-        text: "text-[var(--te-text)]",
-        border: "border-[var(--te-border)]",
+        bg: "bg-[var(--te-green-soft)]",
+        text: "text-te-green",
+        border: "border-[var(--te-green)]",
         icon: CheckCircleIcon,
         label: "Completed"
       },
+      Approved: {
+        bg: "bg-[var(--te-green-soft)]",
+        text: "text-te-green",
+        border: "border-[var(--te-green)]",
+        icon: CheckCircleIcon,
+        label: "Approved"
+      },
       Pending: {
-        bg: "bg-amber-50 dark:bg-amber-900/30",
-        text: "text-amber-700 dark:text-amber-300",
-        border: "border-amber-200 dark:border-amber-700",
+        bg: "bg-[var(--te-gold-soft)]",
+        text: "text-te-gold",
+        border: "border-[var(--te-gold)]",
         icon: ClockIcon,
         label: "Pending",
         pulse: true
       },
       Declined: {
-        bg: "bg-red-50 dark:bg-red-900/30",
-        text: "text-red-700 dark:text-red-300",
-        border: "border-red-200 dark:border-red-700",
+        bg: "bg-[var(--te-red-soft)]",
+        text: "text-te-red",
+        border: "border-[var(--te-red)]",
         icon: XCircleIcon,
         label: "Declined"
       },
+      "In Review": {
+        bg: "bg-[var(--te-gold-soft)]",
+        text: "text-te-gold",
+        border: "border-[var(--te-gold)]",
+        icon: ClockIcon,
+        label: "In Review",
+        pulse: true
+      },
       Cancelled: {
-        bg: "bg-[var(--te-surface-alt)]",
-        text: "text-[var(--te-text-dim)]",
-        border: "border-[var(--te-border)]",
+        bg: "bg-[var(--te-red-soft)]",
+        text: "text-te-red",
+        border: "border-[var(--te-red)]",
         icon: MinusCircleIcon,
         label: "Cancelled"
       }
@@ -225,7 +240,7 @@ const MyReferrals = ({
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className="font-semibold text-[var(--te-text)]">{referral.company?.name || 'Company'}</span>
-                                                {referral.review_note && !seenFeedback.has(referral.id) && <span className="inline-flex rounded-md h-2 w-2 bg-rose-500"></span>}
+                                                {referral.review_note && !seenFeedback.has(referral.id) && <span className="inline-flex rounded-md h-2 w-2 bg-[var(--te-red)]"></span>}
 
                                             </div>
                                         </div>

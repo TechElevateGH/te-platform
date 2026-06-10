@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'react'
 import axios from '../axiosConfig'
 import {
     PlayCircleIcon,
@@ -69,7 +69,7 @@ const Learning = ({ setContent }) => {
     const [showAddLesson, setShowAddLesson] = useState(false);
     const [showSidebar, setShowSidebar] = useState(true);
     const [activeTab, setActiveTab] = useState('dsa'); // 'dsa', 'python', 'system-design'
-    const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+    const [viewMode, setViewMode] = useState('table'); // 'cards' | 'table'
     const [expandedTopics, setExpandedTopics] = useState(new Set());
     const [collapsedCategories, setCollapsedCategories] = useState(() => {
         // Collapse all categories by default
@@ -800,58 +800,73 @@ const Learning = ({ setContent }) => {
         const expanded = isTopicExpanded(category.category, topic.name);
         const lessons = getLessonsForTopic(category.category, topic.name);
         const note = getTopicNote(category.category, topic.name);
-        const resCount = (topic.resources?.length || 0) + (topic.youtubeId ? 1 : 0);
         return (
-            <div key={topic.name} className={completed ? 'bg-[var(--te-surface-alt)]' : ''}>
-                <div className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--te-hover)]">
-                    <CheckToggle done={completed} onClick={() => toggleTopicCompletion(category.category, topic.name)} />
-                    <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="min-w-0 flex-1 truncate text-left">
-                        <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
-                    </button>
-                    {resCount > 0 && <span className="hidden font-mono text-[11px] text-[var(--te-text-dim)] sm:inline">{resCount} res</span>}
-                    <button onClick={() => toggleBookmark(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">
-                        {bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}
-                    </button>
-                    <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Expand">
-                        <ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-                    </button>
-                </div>
-                {expanded && (
-                    <div className="space-y-3 px-4 pb-4 pl-[52px]">
-                        {(topic.resources?.length > 0 || topic.youtubeId) && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {topic.youtubeId && (
-                                    <a href={`https://www.youtube.com/watch?v=${topic.youtubeId}`} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">
-                                        <VideoCameraIcon className="h-3.5 w-3.5" /> Watch
-                                    </a>
-                                )}
-                                {(topic.resources || []).map((r, i) => (
-                                    <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">{r.name} <ArrowTopRightOnSquareIcon className="h-3 w-3" /></a>
-                                ))}
-                            </div>
-                        )}
-                        <textarea value={note} onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)} placeholder="Add notes…" rows={2} className="te-textarea text-sm" />
-                        {lessons.length > 0 && (
-                            <div className="space-y-2">
-                                {lessons.map((lesson) => (
-                                    <div key={lesson.id} className="rounded-md border border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <span className="text-sm font-semibold text-[var(--te-text)]">{lesson.title}</span>
-                                            {lesson.difficulty && <span className="te-chip">{lesson.difficulty}</span>}
-                                        </div>
-                                        {lesson.description && <p className="mt-1 text-xs text-[var(--te-text-dim)]">{lesson.description}</p>}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        {isAdmin && (
-                            <button onClick={() => openCreateLessonModal(category.category, topic.name)} className="te-btn-secondary te-btn-sm">
-                                <PlusIcon className="h-4 w-4" /> Add lesson
+            <Fragment key={topic.name}>
+                <tr className={`transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-surface-alt)]' : ''}`}>
+                    <td className="w-10 py-2.5 pl-4 align-top">
+                        <CheckToggle done={completed} onClick={() => toggleTopicCompletion(category.category, topic.name)} />
+                    </td>
+                    <td className="py-2.5 pr-3 align-top">
+                        <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="text-left">
+                            <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
+                        </button>
+                    </td>
+                    <td className="hidden py-2.5 pr-3 align-top lg:table-cell">
+                        <div className="flex flex-wrap gap-1.5">
+                            {topic.youtubeId && (
+                                <a href={`https://www.youtube.com/watch?v=${topic.youtubeId}`} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]"><VideoCameraIcon className="h-3.5 w-3.5" /> Watch</a>
+                            )}
+                            {(topic.resources || []).slice(0, 3).map((r, i) => (
+                                <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">{r.name} <ArrowTopRightOnSquareIcon className="h-3 w-3" /></a>
+                            ))}
+                            {topic.resources?.length > 3 && <span className="te-chip">+{topic.resources.length - 3}</span>}
+                            {!(topic.resources?.length) && !topic.youtubeId && <span className="font-mono text-[11px] text-[var(--te-text-dim)]">—</span>}
+                        </div>
+                    </td>
+                    <td className="w-20 py-2.5 pr-3 align-top">
+                        <div className="flex items-center justify-end gap-0.5">
+                            <button onClick={() => toggleBookmark(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">
+                                {bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}
                             </button>
-                        )}
-                    </div>
+                            <button onClick={() => toggleTopicExpanded(category.category, topic.name)} className="te-icon-btn h-7 w-7" aria-label="Expand">
+                                <ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {expanded && (
+                    <tr className={completed ? 'bg-[var(--te-surface-alt)]' : ''}>
+                        <td className="hidden sm:table-cell"></td>
+                        <td colSpan={3} className="px-4 pb-4 pt-0 sm:pl-0 sm:pr-4">
+                            <div className="space-y-3">
+                                {(topic.resources?.length > 0 || topic.youtubeId) && (
+                                    <div className="flex flex-wrap gap-1.5 lg:hidden">
+                                        {topic.youtubeId && <a href={`https://www.youtube.com/watch?v=${topic.youtubeId}`} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]"><VideoCameraIcon className="h-3.5 w-3.5" /> Watch</a>}
+                                        {(topic.resources || []).map((r, i) => (<a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">{r.name} <ArrowTopRightOnSquareIcon className="h-3 w-3" /></a>))}
+                                    </div>
+                                )}
+                                <textarea value={note} onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)} placeholder="Add notes…" rows={2} className="te-textarea text-sm" />
+                                {lessons.length > 0 && (
+                                    <div className="space-y-2">
+                                        {lessons.map((lesson) => (
+                                            <div key={lesson.id} className="rounded-md border border-[var(--te-border)] bg-[var(--te-surface)] p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-sm font-semibold text-[var(--te-text)]">{lesson.title}</span>
+                                                    {lesson.difficulty && <span className="te-chip">{lesson.difficulty}</span>}
+                                                </div>
+                                                {lesson.description && <p className="mt-1 text-xs text-[var(--te-text-dim)]">{lesson.description}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {isAdmin && (
+                                    <button onClick={() => openCreateLessonModal(category.category, topic.name)} className="te-btn-secondary te-btn-sm"><PlusIcon className="h-4 w-4" /> Add lesson</button>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
                 )}
-            </div>
+            </Fragment>
         );
     };
 
@@ -861,43 +876,48 @@ const Learning = ({ setContent }) => {
         const bookmarked = pythonBookmarkedTopics.has(key);
         const expanded = pythonExpandedTopics.has(key);
         return (
-            <div key={topic.name} className={completed ? 'bg-[var(--te-surface-alt)]' : ''}>
-                <div className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--te-hover)]">
-                    <CheckToggle done={completed} onClick={() => togglePyComplete(key)} />
-                    <button onClick={() => togglePyExpand(key)} className="min-w-0 flex-1 truncate text-left">
-                        <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
-                    </button>
-                    {topic.resources?.length > 0 && <span className="hidden font-mono text-[11px] text-[var(--te-text-dim)] sm:inline">{topic.resources.length} res</span>}
-                    <button onClick={() => togglePyBookmark(key)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">
-                        {bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}
-                    </button>
-                    <button onClick={() => togglePyExpand(key)} className="te-icon-btn h-7 w-7" aria-label="Expand">
-                        <ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-                    </button>
-                </div>
+            <Fragment key={topic.name}>
+                <tr className={`transition-colors hover:bg-[var(--te-hover)] ${completed ? 'bg-[var(--te-surface-alt)]' : ''}`}>
+                    <td className="w-10 py-2.5 pl-4 align-top">
+                        <CheckToggle done={completed} onClick={() => togglePyComplete(key)} />
+                    </td>
+                    <td className="py-2.5 pr-3 align-top">
+                        <button onClick={() => togglePyExpand(key)} className="text-left">
+                            <span className={`text-sm font-medium ${completed ? 'text-[var(--te-text-dim)] line-through' : 'text-[var(--te-text)]'}`}>{topic.name}</span>
+                        </button>
+                    </td>
+                    <td className="hidden py-2.5 pr-3 align-top lg:table-cell">
+                        <span className="font-mono text-[11px] text-[var(--te-text-dim)]">{topic.resources?.length || 0} resource{(topic.resources?.length || 0) !== 1 ? 's' : ''}</span>
+                    </td>
+                    <td className="w-20 py-2.5 pr-3 align-top">
+                        <div className="flex items-center justify-end gap-0.5">
+                            <button onClick={() => togglePyBookmark(key)} className="te-icon-btn h-7 w-7" aria-label="Bookmark">{bookmarked ? <BookmarkSolidIcon className="h-4 w-4 text-[var(--te-text)]" /> : <BookmarkIcon className="h-4 w-4" strokeWidth={1.7} />}</button>
+                            <button onClick={() => togglePyExpand(key)} className="te-icon-btn h-7 w-7" aria-label="Expand"><ChevronDownIcon className={`h-4 w-4 transition-transform ${expanded ? 'rotate-180' : ''}`} /></button>
+                        </div>
+                    </td>
+                </tr>
                 {expanded && (
-                    <div className="space-y-3 px-4 pb-4 pl-[52px]">
-                        {topic.description && <p className="text-xs leading-relaxed text-[var(--te-text-dim)]">{topic.description}</p>}
-                        {topic.keyPoints?.length > 0 && (
-                            <ul className="space-y-1">
-                                {topic.keyPoints.map((p, i) => (
-                                    <li key={i} className="flex gap-2 text-sm text-[var(--te-text-dim)]"><span className="select-none">–</span>{p}</li>
-                                ))}
-                            </ul>
-                        )}
-                        {topic.resources?.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {topic.resources.map((r, i) => (
-                                    <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">
-                                        {r.type === 'video' ? <VideoCameraIcon className="h-3.5 w-3.5" /> : <BookOpenIcon className="h-3.5 w-3.5" />}{r.title}
-                                    </a>
-                                ))}
+                    <tr className={completed ? 'bg-[var(--te-surface-alt)]' : ''}>
+                        <td className="hidden sm:table-cell"></td>
+                        <td colSpan={3} className="px-4 pb-4 pt-0 sm:pl-0 sm:pr-4">
+                            <div className="space-y-3">
+                                {topic.description && <p className="text-xs leading-relaxed text-[var(--te-text-dim)]">{topic.description}</p>}
+                                {topic.keyPoints?.length > 0 && (
+                                    <ul className="space-y-1">
+                                        {topic.keyPoints.map((p, i) => (<li key={i} className="flex gap-2 text-sm text-[var(--te-text-dim)]"><span className="select-none">–</span>{p}</li>))}
+                                    </ul>
+                                )}
+                                {topic.resources?.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {topic.resources.map((r, i) => (<a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">{r.type === 'video' ? <VideoCameraIcon className="h-3.5 w-3.5" /> : <BookOpenIcon className="h-3.5 w-3.5" />}{r.title}</a>))}
+                                    </div>
+                                )}
+                                <textarea value={pythonTopicNotes[key] || ''} onChange={(e) => setPythonTopicNotes((prev) => ({ ...prev, [key]: e.target.value }))} placeholder="Add notes…" rows={2} className="te-textarea text-sm" />
                             </div>
-                        )}
-                        <textarea value={pythonTopicNotes[key] || ''} onChange={(e) => setPythonTopicNotes((prev) => ({ ...prev, [key]: e.target.value }))} placeholder="Add notes…" rows={2} className="te-textarea text-sm" />
-                    </div>
+                        </td>
+                    </tr>
                 )}
-            </div>
+            </Fragment>
         );
     };
 
@@ -1070,13 +1090,25 @@ const Learning = ({ setContent }) => {
                                                     <div className="mb-4 flex items-center justify-between border-b border-[var(--te-border)] pb-2">
                                                         <div className="flex items-center gap-2.5">
                                                             <h2 className="text-lg font-bold text-[var(--te-text)]">{category.category}</h2>
-                                                            <span className="te-chip">{diff.icon} {diff.level}</span>
+                                                            <span className={`te-chip-${diff.level === 'Hard' ? 'red' : diff.level === 'Medium' ? 'gold' : 'green'}`}>{diff.icon} {diff.level}</span>
                                                         </div>
                                                         <span className="font-mono text-xs text-[var(--te-text-dim)]">{category.completed}/{category.total}</span>
                                                     </div>
                                                     {viewMode === 'table' ? (
-                                                        <div className="te-card divide-y divide-[var(--te-border)] overflow-hidden">
-                                                            {category.topics.map((topic) => renderDsaTopicRow(category, topic))}
+                                                        <div className="te-card overflow-hidden">
+                                                            <table className="w-full">
+                                                                <thead>
+                                                                    <tr className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] text-left">
+                                                                        <th className="w-10 py-2 pl-4"></th>
+                                                                        <th className="py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
+                                                                        <th className="hidden py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
+                                                                        <th className="w-20 py-2 pr-3"></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody className="divide-y divide-[var(--te-border)]">
+                                                                    {category.topics.map((topic) => renderDsaTopicRow(category, topic))}
+                                                                </tbody>
+                                                            </table>
                                                         </div>
                                                     ) : (
                                                         <div className="grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -1132,13 +1164,25 @@ const Learning = ({ setContent }) => {
                                                 <div className="mb-4 flex items-center justify-between border-b border-[var(--te-border)] pb-2">
                                                     <div className="flex items-center gap-2.5">
                                                         <h2 className="text-lg font-bold text-[var(--te-text)]">{categoryName}</h2>
-                                                        {data.difficulty?.level && <span className="te-chip">{data.difficulty.level}</span>}
+                                                        {data.difficulty?.level && <span className={`te-chip-${/adv|hard/i.test(data.difficulty.level) ? 'red' : /inter|medium/i.test(data.difficulty.level) ? 'gold' : 'green'}`}>{data.difficulty.level}</span>}
                                                     </div>
                                                     <span className="font-mono text-xs text-[var(--te-text-dim)]">{topics.length}</span>
                                                 </div>
                                                 {viewMode === 'table' ? (
-                                                    <div className="te-card divide-y divide-[var(--te-border)] overflow-hidden">
-                                                        {topics.map((topic) => renderPyTopicRow(categoryName, topic))}
+                                                    <div className="te-card overflow-hidden">
+                                                        <table className="w-full">
+                                                            <thead>
+                                                                <tr className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] text-left">
+                                                                    <th className="w-10 py-2 pl-4"></th>
+                                                                    <th className="py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)]">Topic</th>
+                                                                    <th className="hidden py-2 pr-3 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-text-dim)] lg:table-cell">Resources</th>
+                                                                    <th className="w-20 py-2 pr-3"></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="divide-y divide-[var(--te-border)]">
+                                                                {topics.map((topic) => renderPyTopicRow(categoryName, topic))}
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 ) : (
                                                     <div className="grid items-start gap-3 sm:grid-cols-2 xl:grid-cols-3">

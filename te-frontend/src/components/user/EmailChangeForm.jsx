@@ -55,14 +55,15 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
 
     return (
         <div className="te-panel p-6">
-            <h3 className="mb-4 font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Change Email Address</h3>
+            <span className="te-eyebrow">{'// email'}</span>
+            <h3 className="mb-4 mt-3 font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Change Email Address</h3>
 
             {/* Warning */}
-            <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4">
+            <div className="mb-6 rounded-xl border border-[var(--te-gold)] bg-[var(--te-gold-soft)] p-4">
                 <div className="flex">
-                    <ExclamationTriangleIcon className="h-5 w-5 text-[var(--te-text-dim)] flex-shrink-0" />
+                    <ExclamationTriangleIcon className="h-5 w-5 text-te-gold flex-shrink-0" />
                     <div className="ml-3">
-                        <p className="text-sm text-[var(--te-text-dim)]">
+                        <p className="text-sm text-[var(--te-text)]">
                             You will need to verify your new email address before the change takes effect.
                             A verification code will be sent to your new email.
                         </p>

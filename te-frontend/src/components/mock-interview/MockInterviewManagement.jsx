@@ -23,16 +23,19 @@ import { Loading } from '../_custom/Loading';
 import DeleteConfirmationModal from '../_custom/DeleteConfirmationModal';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    system_design: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    coding: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    pending: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    scheduled: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    upcoming: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    confirmed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    completed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    cancelled: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
+    missed: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -469,14 +472,14 @@ const MockInterviewManagement = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="space-y-1">
-                                                    <div className="flex items-center gap-2 text-sm">
+                                                    <div className="flex items-center gap-2 text-sm font-mono">
                                                         <CalendarIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
                                                         <span className="font-medium text-[var(--te-text)]">
                                                             {interview.timeslot_date}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-[var(--te-text-dim)]">
-                                                        <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
+                                                    <div className="flex items-center gap-2 text-sm font-mono text-te-green">
+                                                        <ClockIcon className="h-4 w-4 flex-shrink-0" />
                                                         <span>{interview.timeslot_time}</span>
                                                         <span className="text-xs text-[var(--te-text-dim)]">({interview.duration_minutes} min)</span>
                                                     </div>

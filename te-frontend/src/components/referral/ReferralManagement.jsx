@@ -75,14 +75,15 @@ const ReferralManagement = ({
   };
   const getStatusColor = status => {
     switch (status) {
+      case 'Approved':
       case 'Completed':
-        return "text-[var(--te-text)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
+        return "text-te-green bg-[var(--te-green-soft)] border-[var(--te-green)]";
       case 'Pending':
-        return 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-700';
+      case 'In Review':
+        return "text-te-gold bg-[var(--te-gold-soft)] border-[var(--te-gold)]";
       case 'Declined':
-        return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700';
       case 'Cancelled':
-        return "text-[var(--te-text-dim)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
+        return "text-te-red bg-[var(--te-red-soft)] border-[var(--te-red)]";
       default:
         return "text-[var(--te-text)] bg-[var(--te-surface-alt)] border-[var(--te-border)]";
     }

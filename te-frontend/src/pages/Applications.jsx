@@ -248,17 +248,16 @@ const Applications = () => {
 
     // Status badge styling
     const getStatusBadge = (status) => {
-        const neutral = 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]';
         const styles = {
-            'Submitted': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
-            'HR': neutral,
-            'Phone interview': neutral,
-            'OA': neutral,
-            'Final interview': neutral,
-            'Offer': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
-            'Rejected': 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800'
+            'Submitted': 'te-chip-gold',
+            'HR': 'te-chip-gold',
+            'Phone interview': 'te-chip-gold',
+            'OA': 'te-chip-gold',
+            'Final interview': 'te-chip-gold',
+            'Offer': 'te-chip-green',
+            'Rejected': 'te-chip-red'
         };
-        return styles[status] || neutral;
+        return styles[status] || 'te-chip';
     };
 
     return (
@@ -303,7 +302,7 @@ const Applications = () => {
                                 <button
                                     key={status}
                                     onClick={() => setStatusFilter(status)}
-                                    className={`te-btn-sm font-mono ${statusFilter === status ? 'te-btn-primary' : 'te-btn-secondary'}`}
+                                    className={`te-btn-sm border font-mono ${statusFilter === status ? 'border-[var(--te-accent)] bg-[var(--te-accent-soft)] text-[var(--te-accent)]' : 'te-btn-secondary'}`}
                                 >
                                     {status === 'Phone interview' ? 'Phone' : status === 'Final interview' ? 'Final' : status}
                                 </button>
@@ -371,18 +370,18 @@ const Applications = () => {
                         <div className="mb-6 overflow-hidden border border-[var(--te-border)] bg-[var(--te-border)]">
                             <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-5">
                                 {[
-                                    { label: 'Total', value: stats.total, icon: BriefcaseIcon },
-                                    { label: 'Offers', value: stats.offers, icon: CheckCircleIcon },
-                                    { label: 'Interviewing', value: stats.interviewing, icon: ClockIcon },
-                                    { label: 'Pending', value: stats.pending, icon: ClockIcon },
-                                    { label: 'Rejected', value: stats.rejected, icon: XCircleIconSolid },
+                                    { label: 'Total', value: stats.total, icon: BriefcaseIcon, tone: 'text-[var(--te-text)]' },
+                                    { label: 'Offers', value: stats.offers, icon: CheckCircleIcon, tone: 'text-te-green' },
+                                    { label: 'Interviewing', value: stats.interviewing, icon: ClockIcon, tone: 'text-te-gold' },
+                                    { label: 'Pending', value: stats.pending, icon: ClockIcon, tone: 'text-te-gold' },
+                                    { label: 'Rejected', value: stats.rejected, icon: XCircleIconSolid, tone: 'text-te-red' },
                                 ].map((item) => (
                                     <div key={item.label} className="bg-[var(--te-surface)] p-4">
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="te-eyebrow text-[10px]">{item.label}</span>
-                                            <item.icon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                            <item.icon className={`h-4 w-4 ${item.tone}`} />
                                         </div>
-                                        <p className="mt-4 font-mono text-3xl font-semibold tracking-tight text-[var(--te-text)]">
+                                        <p className={`mt-4 font-mono text-3xl font-semibold tracking-tight ${item.tone}`}>
                                             {item.value}
                                         </p>
                                     </div>
@@ -402,7 +401,7 @@ const Applications = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button onClick={handleArchiveAll} className="te-btn-secondary te-btn-sm flex-1 sm:flex-none">
-                                        <ArchiveBoxIcon className="h-4 w-4" />
+                                        <ArchiveBoxIcon className="h-4 w-4 text-te-red" />
                                         Archive all
                                     </button>
                                     <button onClick={handleDeleteAll} className="te-btn-danger te-btn-sm flex-1 sm:flex-none">
@@ -416,8 +415,8 @@ const Applications = () => {
 
                     {sortedApplications.length === 0 ? (
                         <div className="te-card p-10 sm:p-16 text-center">
-                            <div className="mx-auto flex h-16 w-16 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                <BriefcaseIcon className="h-8 w-8 text-[var(--te-text-dim)]" />
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                <BriefcaseIcon className="h-8 w-8 text-te-gold" />
                             </div>
                             <h3 className="mt-6 font-display text-xl font-semibold text-[var(--te-text)]">
                                 {searchQuery || statusFilter !== 'All' || levelFilter !== 'All' || locationFilter !== 'All' ? 'No matching applications' : 'No applications yet'}
@@ -463,7 +462,7 @@ const Applications = () => {
                                                     <span className="font-mono uppercase tracking-wide">{app.role || 'Level —'}</span>
                                                     <span className="truncate text-right">{app.location?.city ? `${app.location.city}, ${app.location.country}` : app.location?.country || 'Unknown'}</span>
                                                     <span>{new Date(app.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                    {app.referred && <span className="text-right"><span className="te-badge">Referred</span></span>}
+                                                    {app.referred && <span className="text-right"><span className="te-badge-green">Referred</span></span>}
                                                 </div>
                                             </div>
                                         </div>
@@ -537,7 +536,7 @@ const Applications = () => {
                                                 <button
                                                     key={pageNum}
                                                     onClick={() => setCurrentPage(pageNum)}
-                                                    className={`px-3 py-1.5 font-mono text-xs transition-colors ${currentPage === pageNum ? 'bg-[var(--te-primary)] text-[var(--te-on-primary)]' : 'border border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'}`}
+                                                    className={`px-3 py-1.5 font-mono text-xs transition-colors ${currentPage === pageNum ? 'border border-[var(--te-accent)] bg-[var(--te-accent-soft)] text-[var(--te-accent)]' : 'border border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-text-dim)] hover:bg-[var(--te-hover)]'}`}
                                                 >
                                                     {pageNum}
                                                 </button>

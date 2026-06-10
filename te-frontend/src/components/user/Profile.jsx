@@ -625,16 +625,16 @@ const Profile = () => {
                     {/* Notification Banner */}
                     {notification && (
                         <div className={`mt-6 rounded-2xl border px-4 py-3 ${notification.type === 'success'
-                            ? 'border-[var(--te-border)] bg-[var(--te-surface)]'
+                            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
                             : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/30'
                             } animate-fade-in`}>
                             <div className="flex items-start gap-3">
                                 {notification.type === 'success' ? (
-                                    <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--te-text)]" />
+                                    <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
                                 ) : (
                                     <ExclamationCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
                                 )}
-                                <p className={`text-sm font-medium ${notification.type === 'success' ? 'text-[var(--te-text)]' : 'text-red-900 dark:text-red-200'}`}>
+                                <p className={`text-sm font-medium ${notification.type === 'success' ? 'text-green-800 dark:text-green-200' : 'text-red-900 dark:text-red-200'}`}>
                                     {notification.message}
                                 </p>
                             </div>
@@ -661,7 +661,7 @@ const Profile = () => {
                                             {userRoleInt === 3 && 'Volunteer Account'}
                                             {userRoleInt === 2 && 'Referrer Account'}
                                         </h2>
-                                        <span className="te-badge font-mono">
+                                        <span className="te-chip-gold font-mono">
                                             {userRoleInt === 5 && 'ADMIN'}
                                             {userRoleInt === 4 && 'LEAD'}
                                             {userRoleInt === 3 && 'VOLUNTEER'}
@@ -710,6 +710,7 @@ const Profile = () => {
                                     </span>
                                 </div>
                                 <span className="te-eyebrow mt-6">{'// account'}</span>
+                                <span className="te-chip-green mt-3 font-mono">MEMBER</span>
                                 {isEditing ? (
                                     <div className="mt-3 w-full">
                                         <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
@@ -759,7 +760,7 @@ const Profile = () => {
                                                 {errors.email && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{errors.email}</p>}
                                                 {editedInfo.email !== userInfo?.email && (
                                                     <div className="mt-3 flex items-start gap-2 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                                        <ShieldCheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--te-text)]" />
+                                                        <ShieldCheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-te-gold" />
                                                         <p className="text-xs text-[var(--te-text-dim)]">
                                                             Email changes require verification. You'll receive a code at your new email address.
                                                         </p>
@@ -890,8 +891,8 @@ const Profile = () => {
                     <div className="te-card w-full max-w-md rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-6 shadow-sm sm:p-8">
                         <div className="text-center mb-6">
                             <div className="flex justify-center mb-4">
-                                <div className="h-16 w-16 rounded-lg bg-[var(--te-surface-alt)] border border-[var(--te-border)] flex items-center justify-center shadow-sm">
-                                    <EnvelopeIcon className="h-8 w-8 text-[var(--te-text)]" />
+                                <div className="h-16 w-16 rounded-full bg-[var(--te-surface-alt)] border border-[var(--te-border)] flex items-center justify-center shadow-sm">
+                                    <EnvelopeIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
                                 </div>
                             </div>
                             <h3 className="mb-2 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">
@@ -992,7 +993,7 @@ const Profile = () => {
                     <div className="te-card w-full max-w-lg rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-6 shadow-sm sm:p-8">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <p className="text-xs font-semibold tracking-wide text-[var(--te-text-dim)] uppercase mb-1">Secure Reset</p>
+                                <p className="te-eyebrow mb-1">Secure Reset</p>
                                 <h3 className="mb-2 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">Reset your password</h3>
                                 <p className="text-sm text-[var(--te-text-dim)]">
                                     We'll send a one-time code to <span className="font-semibold">{resetEmail || 'your email'}</span> and walk you through setting a new password.
@@ -1015,7 +1016,7 @@ const Profile = () => {
                                     <div key={step.id} className="flex flex-col items-center text-center">
                                         <div
                                             className={`flex h-10 w-10 items-center justify-center rounded-full border font-mono text-sm font-bold ${isComplete || isActive
-                                                ? 'border-[var(--te-border-strong)] bg-[var(--te-surface-alt)] text-[var(--te-text)] '
+                                                ? 'border-green-600 bg-green-50 text-green-700 dark:border-green-500 dark:bg-green-900/20 dark:text-green-300 '
                                                 : 'border-[var(--te-border)] text-[var(--te-text-dim)]'
                                                 }`}
                                         >
@@ -1033,7 +1034,7 @@ const Profile = () => {
                             <div
                                 className={`mt-6 rounded-lg border px-4 py-3 text-sm font-medium ${resetStatus.type === 'error'
                                     ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
-                                    : 'bg-[var(--te-surface-alt)] border-[var(--te-border)] text-[var(--te-text)]'
+                                    : 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200'
                                     }`}
                             >
                                 {resetStatus.message}
@@ -1059,7 +1060,7 @@ const Profile = () => {
                                         </p>
                                     </div>
 
-                                    <div className="rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-4 py-3 text-xs text-[var(--te-text)]  flex items-start gap-3">
+                                    <div className="rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-4 py-3 text-xs text-[var(--te-text)] flex items-start gap-3">
                                         <ShieldCheckIcon className="h-5 w-5 text-[var(--te-text-dim)] flex-shrink-0" />
                                         <p>Reset links expire in 15 minutes and codes are single-use. You can always request another if it expires.</p>
                                     </div>
@@ -1108,7 +1109,7 @@ const Profile = () => {
                                         <button
                                             onClick={handlePasswordResetResend}
                                             disabled={resetLoading || resetResendCooldown > 0}
-                                            className="inline-flex items-center gap-2 text-[var(--te-text)] font-semibold disabled:opacity-60"
+                                            className="te-link inline-flex items-center gap-2 text-sm font-semibold disabled:opacity-60"
                                         >
                                             <ArrowPathIcon className="h-4 w-4" />
                                             {resetResendCooldown > 0 ? `Resend in ${resetResendCooldown}s` : 'Resend code'}
@@ -1162,7 +1163,7 @@ const Profile = () => {
 
                             {resetStep === 'done' && (
                                 <div className="text-center py-8">
-                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text)]">
+                                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
                                         <CheckCircleIcon className="h-10 w-10" />
                                     </div>
                                     <h4 className="text-xl font-bold text-[var(--te-text)] mb-2">Password updated!</h4>
@@ -1225,4 +1226,3 @@ const Profile = () => {
 }
 
 export default Profile;
-

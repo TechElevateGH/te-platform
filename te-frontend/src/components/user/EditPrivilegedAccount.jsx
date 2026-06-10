@@ -117,9 +117,10 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                     <div className="flex items-start justify-between mb-6">
                                         <div className="flex items-center gap-3">
                                             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--te-surface-alt)] border border-[var(--te-border)]">
-                                                <ShieldCheckIcon className="h-6 w-6 text-[var(--te-text)]" />
+                                                <ShieldCheckIcon className="h-6 w-6 text-te-green" />
                                             </div>
                                             <div>
+                                                <span className="te-eyebrow">{'// access'}</span>
                                                 <Dialog.Title className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">
                                                     Edit Privileged Account
                                                 </Dialog.Title>
@@ -141,14 +142,13 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                         <div className="mb-6 p-4 bg-[var(--te-surface-alt)] border border-[var(--te-border)] rounded-xl">
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-sm font-semibold text-[var(--te-text)]">Current Account</span>
-                                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${'te-badge'
-                                                    }`}>
+                                                <span className="te-chip-gold font-mono">
                                                     {getRoleName(account.role)}
                                                 </span>
                                             </div>
                                             <p className="text-lg font-bold text-[var(--te-text)]">{account.username}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">
-                                                Status: <span className={`font-semibold ${account.is_active ? 'text-[var(--te-text)]' : 'text-red-600'}`}>
+                                                Status: <span className={`font-semibold ${account.is_active ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                                                     {account.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </p>

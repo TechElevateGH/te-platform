@@ -203,8 +203,8 @@ const Interviews = () => {
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
                                             className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 whitespace-nowrap transition-colors ${isActive
-                                                ? 'bg-[var(--te-surface)] text-[var(--te-text)]'
-                                                : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
+                                                ? 'bg-[var(--te-green-soft)] text-te-green shadow-sm'
+                                                : 'text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                                                 }`}
                                         >
                                             {Icon && <Icon className="h-4 w-4" />}

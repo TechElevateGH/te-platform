@@ -329,17 +329,16 @@ const ApplicationManagement = () => {
     };
 
     const getStatusColor = (status) => {
-        const neutral = 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]';
         const colors = {
-            'Submitted': 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
-            'HR': neutral,
-            'Phone interview': neutral,
-            'OA': neutral,
-            'Final interview': neutral,
-            'Offer': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
-            'Rejected': 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800',
+            'Submitted': 'te-chip-gold',
+            'HR': 'te-chip-gold',
+            'Phone interview': 'te-chip-gold',
+            'OA': 'te-chip-gold',
+            'Final interview': 'te-chip-gold',
+            'Offer': 'te-chip-green',
+            'Rejected': 'te-chip-red',
         };
-        return colors[status] || neutral;
+        return colors[status] || 'te-chip';
     };
 
     if (loading) {
@@ -427,7 +426,7 @@ const ApplicationManagement = () => {
                                 <button
                                     key={status || 'All'}
                                     onClick={() => setStatusFilter(status)}
-                                    className={`te-btn-sm font-mono ${statusFilter === status ? 'te-btn-primary' : 'te-btn-secondary'}`}
+                                    className={`te-btn-sm border font-mono ${statusFilter === status ? 'border-[var(--te-accent)] bg-[var(--te-accent-soft)] text-[var(--te-accent)]' : 'te-btn-secondary'}`}
                                 >
                                     {status || 'All'}
                                 </button>
@@ -499,18 +498,18 @@ const ApplicationManagement = () => {
                 <div className="mb-6 overflow-hidden border border-[var(--te-border)] bg-[var(--te-border)]">
                     <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-5">
                         {[
-                            { label: 'Total', value: stats.total, icon: UserGroupIcon },
-                            { label: 'Offers', value: stats.offered, icon: CheckCircleIcon },
-                            { label: 'Interviewing', value: stats.interviewing, icon: ClockIcon },
-                            { label: 'Submitted', value: stats.submitted, icon: ClockIcon },
-                            { label: 'Rejected', value: stats.rejected, icon: XCircleIcon },
+                            { label: 'Total', value: stats.total, icon: UserGroupIcon, tone: 'text-[var(--te-text)]' },
+                            { label: 'Offers', value: stats.offered, icon: CheckCircleIcon, tone: 'text-te-green' },
+                            { label: 'Interviewing', value: stats.interviewing, icon: ClockIcon, tone: 'text-te-gold' },
+                            { label: 'Submitted', value: stats.submitted, icon: ClockIcon, tone: 'text-te-gold' },
+                            { label: 'Rejected', value: stats.rejected, icon: XCircleIcon, tone: 'text-te-red' },
                         ].map((item) => (
                             <div key={item.label} className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center justify-between gap-3">
                                     <span className="te-eyebrow text-[10px]">{item.label}</span>
-                                    <item.icon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                    <item.icon className={`h-4 w-4 ${item.tone}`} />
                                 </div>
-                                <p className="mt-4 font-mono text-3xl font-semibold tracking-tight text-[var(--te-text)]">{item.value}</p>
+                                <p className={`mt-4 font-mono text-3xl font-semibold tracking-tight ${item.tone}`}>{item.value}</p>
                             </div>
                         ))}
                     </div>
@@ -577,8 +576,8 @@ const ApplicationManagement = () => {
                                 {sortedApplications.length === 0 ? (
                                     <tr>
                                         <td colSpan={visibleColumnCount + (isAdmin ? 1 : 0)} className="px-4 py-16 text-center">
-                                            <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                                <BuildingOfficeIcon className="h-7 w-7 text-[var(--te-text-dim)]" />
+                                            <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                                <BuildingOfficeIcon className="h-7 w-7 text-te-gold" />
                                             </div>
                                             <p className="mt-4 font-display text-lg font-semibold text-[var(--te-text)]">No applications found</p>
                                             <p className="mt-1 text-sm text-[var(--te-text-dim)]">{applications.length === 0 ? 'No member applications yet.' : 'Try adjusting your filters.'}</p>
@@ -628,7 +627,7 @@ const ApplicationManagement = () => {
                                             {visibleColumns.position && <td className="px-4 py-4 text-sm text-[var(--te-text)]">{app.title}</td>}
                                             {visibleColumns.level && <td className="px-4 py-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">{app.role}</td>}
                                             {visibleColumns.location && <td className="px-4 py-4 text-sm text-[var(--te-text-dim)]">{app.location?.city && app.location?.country ? `${app.location.city}, ${app.location.country}` : app.location?.country || app.location?.city || '—'}</td>}
-                                            {visibleColumns.referred && <td className="px-4 py-4">{app.referred ? <span className="te-badge">Yes</span> : <span className="text-xs text-[var(--te-text-dim)]">—</span>}</td>}
+                                            {visibleColumns.referred && <td className="px-4 py-4">{app.referred ? <span className="te-badge-green">Yes</span> : <span className="text-xs text-[var(--te-text-dim)]">—</span>}</td>}
                                             {visibleColumns.recruiter && (
                                                 <td className="px-4 py-4">
                                                     {app.recruiter_name ? (
@@ -651,8 +650,8 @@ const ApplicationManagement = () => {
                     <div className="grid gap-3 p-3 md:hidden">
                         {sortedApplications.length === 0 ? (
                             <div className="p-10 text-center">
-                                <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                    <BuildingOfficeIcon className="h-7 w-7 text-[var(--te-text-dim)]" />
+                                <div className="mx-auto flex h-14 w-14 items-center justify-center border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                                    <BuildingOfficeIcon className="h-7 w-7 text-te-gold" />
                                 </div>
                                 <p className="mt-4 font-display text-lg font-semibold text-[var(--te-text)]">No applications found</p>
                                 <p className="mt-1 text-sm text-[var(--te-text-dim)]">{applications.length === 0 ? 'No member applications yet.' : 'Try adjusting your filters.'}</p>
@@ -683,7 +682,7 @@ const ApplicationManagement = () => {
                                             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-wide text-[var(--te-text-dim)]">
                                                 {visibleColumns.level && <span>{app.role}</span>}
                                                 {visibleColumns.applied && <span>{app.date}</span>}
-                                                {visibleColumns.referred && app.referred && <span className="te-badge">Referred</span>}
+                                                {visibleColumns.referred && app.referred && <span className="te-badge-green">Referred</span>}
                                             </div>
                                         </div>
                                     </div>

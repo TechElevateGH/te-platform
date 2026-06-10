@@ -1,7 +1,7 @@
 const STATUS_STYLES = {
-  "Completed": "text-[var(--te-text)] bg-[var(--te-surface-alt)]",
-  "In review": "text-amber-500 bg-amber-500/10",
-  "Cancelled": "text-rose-500 bg-rose-500/10"
+  "Completed": "text-te-green bg-[var(--te-green-soft)]",
+  "In review": "text-te-gold bg-[var(--te-gold-soft)]",
+  "Cancelled": "text-te-red bg-[var(--te-red-soft)]"
 };
 const ReferralActivityItem = ({
   status,

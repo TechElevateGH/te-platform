@@ -62,7 +62,7 @@ export default function AdminAnalytics() {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24">
                         <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                            <ChartBarIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
+                            <ChartBarIcon className="h-6 w-6 animate-pulse text-te-green" />
                         </div>
                         <p className="mt-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Loading analytics...</p>
                     </div>
@@ -73,53 +73,53 @@ export default function AdminAnalytics() {
                             <div className="bg-[var(--te-surface)] p-6">
                                 <div className="mb-5 flex items-center justify-between">
                                     <div className="w-10 h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                        <svg className="w-5 h-5 text-[var(--te-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="w-5 h-5 text-te-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
                                     </div>
                                 </div>
-                                <p className="font-mono text-4xl font-bold tracking-tight text-[var(--te-text)]">{adminStatistics.total_members}</p>
+                                <p className="font-mono text-4xl font-bold tracking-tight text-te-green">{adminStatistics.total_members}</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Total Members</p>
                             </div>
 
                             <div className="bg-[var(--te-surface)] p-6">
                                 <div className="mb-5 flex items-center justify-between">
                                     <div className="w-10 h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                        <FireSolidIcon className="w-5 h-5 text-[var(--te-text)]" />
+                                        <FireSolidIcon className="w-5 h-5 text-te-green" />
                                     </div>
                                 </div>
-                                <p className="font-mono text-4xl font-bold tracking-tight text-[var(--te-text)]">{adminStatistics.members_with_progress}</p>
+                                <p className="font-mono text-4xl font-bold tracking-tight text-te-green">{adminStatistics.members_with_progress}</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Active Learners</p>
                             </div>
 
                             <div className="bg-[var(--te-surface)] p-6">
                                 <div className="mb-5 flex items-center justify-between">
                                     <div className="w-10 h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                        <ChartBarIcon className="w-5 h-5 text-[var(--te-text)]" />
+                                        <ChartBarIcon className="w-5 h-5 text-te-gold" />
                                     </div>
                                 </div>
-                                <p className="font-mono text-4xl font-bold tracking-tight text-[var(--te-text)]">{adminStatistics.engagement_rate}%</p>
+                                <p className="font-mono text-4xl font-bold tracking-tight text-te-gold">{adminStatistics.engagement_rate}%</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Engagement</p>
                             </div>
 
                             <div className="bg-[var(--te-surface)] p-6">
                                 <div className="mb-5 flex items-center justify-between">
                                     <div className="w-10 h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                        <CheckCircleSolidIcon className="w-5 h-5 text-[var(--te-text)]" />
+                                        <CheckCircleSolidIcon className="w-5 h-5 text-te-green" />
                                     </div>
                                 </div>
-                                <p className="font-mono text-4xl font-bold tracking-tight text-[var(--te-text)]">{adminStatistics.total_completions}</p>
+                                <p className="font-mono text-4xl font-bold tracking-tight text-te-green">{adminStatistics.total_completions}</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Total Completions</p>
                             </div>
                         </div>
                         {/* Additional Stats */}
                         <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] sm:grid-cols-3">
                             <div className="bg-[var(--te-surface)] p-5">
-                                <p className="font-mono text-2xl font-bold text-[var(--te-text)]">{adminStatistics.avg_completions_per_member}</p>
+                                <p className="font-mono text-2xl font-bold text-te-green">{adminStatistics.avg_completions_per_member}</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Avg Completions/Member</p>
                             </div>
                             <div className="bg-[var(--te-surface)] p-5">
-                                <p className="font-mono text-2xl font-bold text-[var(--te-text)]">{adminStatistics.total_bookmarks}</p>
+                                <p className="font-mono text-2xl font-bold text-te-gold">{adminStatistics.total_bookmarks}</p>
                                 <p className="mt-2 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Total Bookmarks</p>
                             </div>
                             <div className="bg-[var(--te-surface)] p-5">
@@ -132,7 +132,7 @@ export default function AdminAnalytics() {
                             <div className="te-card p-6">
                                 <h3 className="mb-4 flex items-center gap-2 font-mono text-sm font-semibold uppercase tracking-wide text-[var(--te-text)]">
                                     <div className="w-8 h-8 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                        <TrophyIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                        <TrophyIcon className="w-4 h-4 text-te-gold" />
                                     </div>
                                     <span>Most Popular Topics</span>
                                 </h3>
@@ -140,16 +140,16 @@ export default function AdminAnalytics() {
                                     {adminStatistics.most_completed_topics.slice(0, 5).map((item, idx) => (
                                         <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-[var(--te-surface-alt)] hover:bg-[var(--te-hover)] transition-colors">
                                             <div className="flex items-center gap-3 flex-1">
-                                                <div className={`w-7 h-7 rounded-md flex items-center justify-center font-semibold text-xs ${idx === 0 ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]' :
-                                                    idx === 1 ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]' :
-                                                        idx === 2 ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]' :
-                                                            'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
+                                                <div className={`w-7 h-7 rounded-md flex items-center justify-center font-semibold text-xs ${idx === 0 ? 'te-chip-green' :
+                                                    idx === 1 ? 'te-chip-gold' :
+                                                        idx === 2 ? 'te-chip-red' :
+                                                            'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border border-[var(--te-border)]'
                                                     }`}>
                                                     #{idx + 1}
                                                 </div>
                                                 <span className="text-sm font-medium text-[var(--te-text)] truncate">{item.topic}</span>
                                             </div>
-                                            <span className="te-chip text-xs">{item.count} completions</span>
+                                            <span className="te-chip-green text-xs">{item.count} completions</span>
                                         </div>
                                     ))}
                                 </div>
@@ -210,13 +210,13 @@ export default function AdminAnalytics() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded-md text-xs font-medium">
+                                                        <span className="te-chip-green text-xs">
                                                             <CheckCircleSolidIcon className="w-3 h-3" />
                                                             {member.completed_count}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded-md text-xs font-medium">
+                                                        <span className="te-chip-gold text-xs">
                                                             <BookmarkSolidIcon className="w-3 h-3" />
                                                             {member.bookmarked_count}
                                                         </span>

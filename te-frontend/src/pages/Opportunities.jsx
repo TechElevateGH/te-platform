@@ -78,6 +78,8 @@ const sampleJobs = [
     }
 ]
 
+const signalAccentClass = (label) => label.includes('launch') ? 'text-te-gold' : 'text-te-green'
+
 const Opportunities = () => {
     return (
         <div className="min-h-screen bg-[var(--te-bg)]">
@@ -94,10 +96,10 @@ const Opportunities = () => {
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="te-badge font-mono">
+                            <span className="te-badge-gold font-mono">
                                 <ClockIcon className="h-4 w-4" /> coming soon
                             </span>
-                            <button disabled className="te-btn-primary te-btn-sm cursor-not-allowed opacity-60">
+                            <button disabled className="te-btn-secondary te-btn-sm cursor-not-allowed border-[var(--te-gold)] bg-[var(--te-gold-soft)] text-te-gold opacity-80">
                                 Join waitlist
                             </button>
                         </div>
@@ -132,10 +134,11 @@ const Opportunities = () => {
                 <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] lg:grid-cols-4">
                     {platformSignals.map((signal) => {
                         const Icon = signal.icon
+                        const accentClass = signalAccentClass(signal.label)
                         return (
                             <div key={signal.label} className="bg-[var(--te-surface)] p-4">
-                                <Icon className="h-4 w-4 text-[var(--te-text-dim)]" />
-                                <div className="mt-2 font-mono text-2xl font-bold text-[var(--te-text)]">{signal.value}</div>
+                                <Icon className={`h-4 w-4 ${accentClass}`} />
+                                <div className={`mt-2 font-mono text-2xl font-bold ${accentClass}`}>{signal.value}</div>
                                 <div className="mt-1 text-xs text-[var(--te-text-dim)]">{signal.label}</div>
                             </div>
                         )
@@ -164,19 +167,22 @@ const Opportunities = () => {
                     </div>
 
                     <div className="mt-4 grid gap-3">
-                        {sampleJobs.map((job) => (
-                            <article key={`${job.company}-${job.title}`} className="te-card-interactive p-4 opacity-75">
+                        {sampleJobs.map((job, index) => (
+                            <article key={`${job.company}-${job.title}`} className={`te-card-interactive relative overflow-hidden p-4 opacity-90 ${index === 0 ? 'border-l-4 border-l-[var(--te-gold)]' : ''}`}>
+                                {index === 0 && <div className="absolute inset-x-0 top-0 h-1 bg-[var(--te-gold)]" />}
                                 <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
                                     <div className="flex items-start gap-4">
-                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] font-mono text-sm font-bold text-[var(--te-text)] grayscale">
+                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] font-mono text-sm font-bold text-[var(--te-text)]">
                                             {job.company.slice(0, 2).toUpperCase()}
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <h3 className="text-base font-semibold text-[var(--te-text)]">{job.title}</h3>
-                                                <span className="te-chip font-mono">
+                                                <span className="te-badge-green font-mono">
                                                     <CheckBadgeIcon className="h-3.5 w-3.5" /> verified
                                                 </span>
+                                                {index === 0 && <span className="te-badge-gold font-mono">featured</span>}
+                                                {index === 1 && <span className="te-badge-gold font-mono">new</span>}
                                             </div>
                                             <div className="mt-2 flex flex-wrap gap-2 font-mono text-xs text-[var(--te-text-dim)]">
                                                 <span className="te-chip"><BuildingOfficeIcon className="h-3.5 w-3.5" />{job.company}</span>
@@ -186,7 +192,7 @@ const Opportunities = () => {
                                             </div>
                                             <div className="mt-3 flex flex-wrap gap-1.5">
                                                 {job.tags.map((tag) => (
-                                                    <span key={tag} className="te-badge font-mono">{tag}</span>
+                                                    <span key={tag} className="te-chip font-mono">{tag}</span>
                                                 ))}
                                             </div>
                                         </div>
@@ -220,10 +226,10 @@ const Opportunities = () => {
 
                 <section className="mt-8 te-panel p-8">
                     <div className="mx-auto flex max-w-xl flex-col items-center text-center">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                            <BriefcaseIcon className="h-5 w-5 text-[var(--te-text)]" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-gold)] bg-[var(--te-gold-soft)]">
+                            <BriefcaseIcon className="h-5 w-5 text-te-gold" />
                         </div>
-                        <h3 className="mt-4 font-mono text-lg font-bold text-[var(--te-text)]">opportunities feed initializing</h3>
+                        <h3 className="mt-4 font-mono text-lg font-bold text-te-gold">opportunities feed initializing</h3>
                         <p className="mt-2 text-sm leading-6 text-[var(--te-text-dim)]">
                             While the marketplace comes online, use Applications and Referrals to keep your search system organized.
                         </p>

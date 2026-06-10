@@ -625,15 +625,15 @@ const ReferralsManagement = () => {
                                     </>}
 
                                 <div className="border-r border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                    <ClockIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-amber-600 dark:text-amber-300" />
+                                    <ClockIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-te-gold" />
                                     <span className="text-[var(--te-text-dim)]">Pending:</span>
-                                    <span className="font-bold text-amber-700 dark:text-amber-300">{stats.pending}</span>
+                                    <span className="font-bold text-te-gold">{stats.pending}</span>
                                 </div>
                                 <div className="hidden"></div>
                                 <div className="border-r border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                    <CheckCircleIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-[var(--te-text)]" />
+                                    <CheckCircleIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-te-green" />
                                     <span className="text-[var(--te-text-dim)]">Completed:</span>
-                                    <span className="font-bold text-[var(--te-text)]">{stats.completed}</span>
+                                    <span className="font-bold text-te-green">{stats.completed}</span>
                                 </div>
                             </div>
 
@@ -745,7 +745,7 @@ const ReferralsManagement = () => {
                                         </span>}
 
                                 </div>
-                                <button onClick={clearAllFilters} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-rose-600 dark:text-rose-300 hover:bg-[var(--te-hover)] rounded transition-colors">
+                                <button onClick={clearAllFilters} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-te-red hover:bg-[var(--te-hover)] rounded transition-colors">
 
                                     <XMarkIcon className="h-3 w-3" />
                                     Clear All
@@ -772,7 +772,7 @@ const ReferralsManagement = () => {
                                         <thead>
                                             <tr className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                                 {isAdmin && <th className="px-4 py-3 w-12">
-                                                        <input type="checkbox" checked={selectedItems.length === filteredReferrals.length && filteredReferrals.length > 0} onChange={toggleSelectAll} className="rounded border-[var(--te-border)] text-red-600 focus:ring-red-500 bg-[var(--te-surface-alt)]" />
+                                                        <input type="checkbox" checked={selectedItems.length === filteredReferrals.length && filteredReferrals.length > 0} onChange={toggleSelectAll} className="rounded border-[var(--te-border)] text-te-green focus:ring-[var(--te-green)] bg-[var(--te-surface-alt)]" />
 
                                                     </th>}
 
@@ -825,7 +825,7 @@ const ReferralsManagement = () => {
                   }} className="group hover:bg-[var(--te-hover)] transition-colors cursor-pointer">
 
                                                         {isAdmin && <td className="px-4 py-3 w-12" onClick={e => e.stopPropagation()}>
-                                                                <input type="checkbox" checked={selectedItems.includes(ref.id)} onChange={() => toggleSelectItem(ref.id)} className="rounded border-[var(--te-border)] text-red-600 focus:ring-red-500 bg-[var(--te-surface-alt)]" />
+                                                                <input type="checkbox" checked={selectedItems.includes(ref.id)} onChange={() => toggleSelectItem(ref.id)} className="rounded border-[var(--te-border)] text-te-green focus:ring-[var(--te-green)] bg-[var(--te-surface-alt)]" />
 
                                                             </td>}
 
@@ -906,7 +906,7 @@ const ReferralsManagement = () => {
 
                                                         {visibleColumns.status && <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                                                                 <div className="flex justify-start">
-                                                                    <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} className={`te-select text-xs font-bold py-1.5 ${ref.status === 'Completed' ? "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]" : ref.status === 'Pending' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500' : ref.status === 'Declined' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700 focus:ring-red-500' : ref.status === 'Cancelled' ? "bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)] focus:ring-[var(--te-ring)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
+                                                                    <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} className={`te-select text-xs font-bold py-1.5 ${(ref.status === 'Approved' || ref.status === 'Completed') ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)] focus:ring-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)] focus:ring-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
 
 
                                                                         <option value="Pending">Pending</option>
@@ -987,7 +987,7 @@ const ReferralsManagement = () => {
 
                                                 </div>
                                                 {/* Compact Status Badge */}
-                                                {visibleColumns.status && <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} onClick={e => e.stopPropagation()} className={`te-select text-[9px] font-bold py-1 ${ref.status === 'Completed' ? "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]" : ref.status === 'Pending' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700' : ref.status === 'Declined' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-700' : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]"}`}>
+                                                {visibleColumns.status && <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} onClick={e => e.stopPropagation()} className={`te-select text-[9px] font-bold py-1 ${(ref.status === 'Approved' || ref.status === 'Completed') ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]"}`}>
 
 
                                                         <option value="Pending">Pending</option>

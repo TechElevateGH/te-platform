@@ -374,11 +374,16 @@ const ResumeReviews = () => {
 
     const getStatusColor = (status) => {
         const colors = {
-            'Pending': 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            'In Review': 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            'Completed': 'bg-[var(--te-text)] text-[var(--te-on-primary)] border-[var(--te-text)]',
-            'Declined': 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]',
-            'Cancelled': 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]'
+            'Pending': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border-[var(--te-gold)]',
+            'In Review': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border-[var(--te-gold)]',
+            'Requested': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border-[var(--te-gold)]',
+            'Completed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border-[var(--te-green)]',
+            'Approved': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border-[var(--te-green)]',
+            'Reviewed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border-[var(--te-green)]',
+            'Declined': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border-[var(--te-red)]',
+            'Cancelled': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border-[var(--te-red)]',
+            'Rejected': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border-[var(--te-red)]',
+            'Needs Changes': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border-[var(--te-red)]'
         };
         return colors[status] || 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)]';
     };
@@ -540,17 +545,17 @@ const ResumeReviews = () => {
                                 <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.total}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
-                                <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <ClockIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                 <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Pending</span>
                                 <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.pending}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
-                                <SparklesIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <SparklesIcon className="h-4 w-4 text-[var(--te-gold)]" />
                                 <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">In Review</span>
                                 <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.inReview}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
-                                <CheckCircleIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                <CheckCircleIcon className="h-4 w-4 text-[var(--te-green)]" />
                                 <span className="mt-3 block font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Completed</span>
                                 <span className="mt-1 block font-display text-2xl font-bold text-[var(--te-text)]">{stats.completed}</span>
                             </div>
@@ -567,7 +572,7 @@ const ResumeReviews = () => {
                             <button
                                 onClick={() => setActiveTab('all')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'all'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                     }`}
                             >
@@ -576,7 +581,7 @@ const ResumeReviews = () => {
                             <button
                                 onClick={() => setActiveTab('myAssignments')}
                                 className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'myAssignments'
-                                    ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                    ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                     : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                     }`}
                             >
@@ -591,7 +596,7 @@ const ResumeReviews = () => {
                                 <button
                                     onClick={() => setActiveTab('assignments')}
                                     className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'assignments'
-                                        ? 'border-[var(--te-border-strong)] text-[var(--te-text)]'
+                                        ? 'border-[var(--te-green)] text-[var(--te-green)]'
                                         : 'border-transparent text-[var(--te-text-dim)] hover:text-[var(--te-text)] hover:border-[var(--te-border)]'
                                         }`}
                                 >
@@ -689,7 +694,7 @@ const ResumeReviews = () => {
                                                 className="te-icon-btn ml-3"
                                                 title="Cancel request"
                                             >
-                                                <XCircleIcon className="h-5 w-5" />
+                                                <XCircleIcon className="h-5 w-5 text-[var(--te-red)]" />
                                             </button>
                                         )}
                                     </div>
@@ -826,7 +831,7 @@ const ResumeReviews = () => {
                         {/* Bulk Actions Bar */}
                         {isLeadOrAbove && selectedReviewIds.size > 0 && (
                             <div className="px-4 py-3 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] flex items-center justify-between">
-                                <span className="text-sm font-medium text-[var(--te-text)] text-[var(--te-text-dim)]">
+                                <span className="text-sm font-medium text-[var(--te-text-dim)]">
                                     {selectedReviewIds.size} review{selectedReviewIds.size !== 1 ? 's' : ''} selected
                                 </span>
                                 <button
@@ -1385,7 +1390,7 @@ const ResumeReviews = () => {
 
             {/* Resume Review Details Modal */}
             {selectedReview && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={() => setSelectedReview(null)}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedReview(null)}>
                     <div className="te-panel max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-6 py-5">
                             <div className="flex items-start justify-between mb-4">
@@ -1453,7 +1458,7 @@ const ResumeReviews = () => {
                                     <p className="text-xs font-semibold text-[var(--te-text)] uppercase tracking-wider mb-3">
                                         Feedback from {selectedReview.reviewer_name || 'Reviewer'}
                                     </p>
-                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4 border-2 border-[var(--te-border)] shadow-sm">
+                                    <div className="bg-[var(--te-green-soft)] rounded-lg p-4 border-2 border-[var(--te-green)] shadow-sm">
                                         <p className="text-sm text-[var(--te-text)] leading-relaxed whitespace-pre-wrap">{selectedReview.feedback}</p>
                                     </div>
                                 </div>

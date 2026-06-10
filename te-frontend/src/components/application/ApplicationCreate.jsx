@@ -103,7 +103,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
                     )}
 
                     {submitError && (
-                        <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300">
+                        <div className="border border-[var(--te-red)] bg-[var(--te-red-soft)] px-4 py-3 text-sm font-medium text-te-red">
                             {submitError}
                         </div>
                     )}

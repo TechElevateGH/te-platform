@@ -54,13 +54,13 @@ const UserAccountManagement = () => {
 
     const getRoleBadgeColor = (role) => {
         const colors = {
-            5: 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            4: 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            3: 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            2: 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
-            1: 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]',
+            5: 'te-chip-red',
+            4: 'te-chip-green',
+            3: 'te-chip-gold',
+            2: 'te-chip-gold',
+            1: 'te-chip-green',
         };
-        return colors[role] || 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]';
+        return colors[role] || 'te-chip';
     };
 
     // Fetch privileged users
@@ -299,7 +299,7 @@ const UserAccountManagement = () => {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-16">
                             <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                <UserGroupIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
+                                <UserGroupIcon className="h-6 w-6 animate-pulse text-te-green" />
                             </div>
                             <p className="mt-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Loading accounts...</p>
                         </div>
@@ -380,7 +380,7 @@ const UserAccountManagement = () => {
                                                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                             <div className="flex items-center gap-2 sm:gap-3">
                                                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center flex-shrink-0">
-                                                                    <ShieldCheckIcon className="h-4 w-4 sm:h-6 sm:w-6 text-[var(--te-text)]" />
+                                                                    <ShieldCheckIcon className="h-4 w-4 sm:h-6 sm:w-6 text-te-green" />
                                                                 </div>
                                                                 <span className="font-medium text-[var(--te-text)] text-xs sm:text-sm">
                                                                     {user.username}
@@ -400,12 +400,12 @@ const UserAccountManagement = () => {
                                                         </td>
                                                         <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                             {user.is_active ? (
-                                                                <span className="flex items-center gap-1 sm:gap-2 text-[var(--te-text)]">
+                                                                <span className="flex items-center gap-1 sm:gap-2 text-te-green">
                                                                     <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                                                                     <span className="text-xs sm:text-sm font-medium">Active</span>
                                                                 </span>
                                                             ) : (
-                                                                <span className="flex items-center gap-1 sm:gap-2 text-[var(--te-text-dim)]">
+                                                                <span className="flex items-center gap-1 sm:gap-2 text-te-red">
                                                                     <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                                                                     <span className="text-xs sm:text-sm font-medium">Inactive</span>
                                                                 </span>
@@ -417,7 +417,7 @@ const UserAccountManagement = () => {
                                                                     onClick={() => handleEditPrivileged(user)}
                                                                     disabled={!canEdit}
                                                                     className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${canEdit
-                                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                                        ? 'te-btn-secondary'
                                                                         : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] cursor-not-allowed opacity-50'
                                                                         }`}
                                                                 >
@@ -437,7 +437,7 @@ const UserAccountManagement = () => {
                                                                         ? 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] cursor-not-allowed opacity-50'
                                                                         : user.is_active
                                                                             ? 'te-btn-danger'
-                                                                            : 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                                            : 'te-btn-primary'
                                                                         }`}
                                                                 >
                                                                     {user.is_active ? 'Deactivate' : 'Activate'}
@@ -469,7 +469,7 @@ const UserAccountManagement = () => {
                                                 {/* Card Header */}
                                                 <div className="flex items-center gap-2.5 px-3 py-2.5 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
                                                     <div className="w-9 h-9 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center flex-shrink-0">
-                                                        <ShieldCheckIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                                        <ShieldCheckIcon className="h-5 w-5 text-te-green" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="text-sm font-bold text-[var(--te-text)] truncate">
@@ -486,12 +486,12 @@ const UserAccountManagement = () => {
                                                     {/* Status */}
                                                     <div className="mb-2.5 py-2 border-b border-[var(--te-border)]">
                                                         {user.is_active ? (
-                                                            <span className="flex items-center gap-1.5 text-[var(--te-text)]">
+                                                            <span className="flex items-center gap-1.5 text-te-green">
                                                                 <CheckCircleIcon className="h-4 w-4" />
                                                                 <span className="text-xs font-medium">Active</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="flex items-center gap-1.5 text-[var(--te-text-dim)]">
+                                                            <span className="flex items-center gap-1.5 text-te-red">
                                                                 <XCircleIcon className="h-4 w-4" />
                                                                 <span className="text-xs font-medium">Inactive</span>
                                                             </span>
@@ -504,7 +504,7 @@ const UserAccountManagement = () => {
                                                             onClick={() => handleEditPrivileged(user)}
                                                             disabled={!canEdit}
                                                             className={`flex-1 px-4 py-1.5 rounded-md font-medium transition-all text-xs flex items-center justify-center gap-1.5 ${canEdit
-                                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                                ? 'te-btn-secondary'
                                                                 : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] cursor-not-allowed opacity-50'
                                                                 }`}
                                                         >
@@ -518,7 +518,7 @@ const UserAccountManagement = () => {
                                                                 ? 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] cursor-not-allowed opacity-50'
                                                                 : user.is_active
                                                                     ? 'te-btn-danger'
-                                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                                    : 'te-btn-primary'
                                                                 }`}
                                                         >
                                                             {user.is_active ? 'Deactivate' : 'Activate'}
@@ -533,7 +533,7 @@ const UserAccountManagement = () => {
                         </div>
                     ) : (
                         /* Member Users Table */
-                        <div className="bg-[var(--te-surface)] rounded-lg  border border-[var(--te-border)] overflow-hidden">
+                        <div className="te-card overflow-hidden">
                             {/* Desktop Table - Hidden on mobile */}
                             <div className="hidden md:block overflow-x-auto">
                                 <table className="w-full min-w-[640px]">
@@ -609,7 +609,7 @@ const UserAccountManagement = () => {
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         <div className="flex items-center gap-2 sm:gap-3">
                                                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center">
-                                                                <UserCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-[var(--te-text)]" />
+                                                                <UserCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-te-green" />
                                                             </div>
                                                             <div>
                                                                 <div className="font-medium text-[var(--te-text)] text-xs sm:text-sm">
@@ -624,12 +624,12 @@ const UserAccountManagement = () => {
                                                     </td>
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         {user.is_active ? (
-                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-[var(--te-text)]">
+                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-te-green">
                                                                 <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                                                                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Active</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-[var(--te-text-dim)]">
+                                                            <span className="flex items-center gap-1.5 sm:gap-2 text-te-red">
                                                                 <XCircleIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                                                                 <span className="text-xs sm:text-sm font-medium whitespace-nowrap">Inactive</span>
                                                             </span>
@@ -647,7 +647,7 @@ const UserAccountManagement = () => {
                                                                 }
                                                                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm whitespace-nowrap ${user.is_active
                                                                     ? 'te-btn-danger'
-                                                                    : 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                                    : 'te-btn-primary'
                                                                     }`}
                                                             >
                                                                 {user.is_active ? 'Deactivate' : 'Activate'}
@@ -676,7 +676,7 @@ const UserAccountManagement = () => {
                                             {/* Card Header */}
                                             <div className="flex items-center gap-2.5 px-3 py-2.5 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
                                                 <div className="w-9 h-9 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center flex-shrink-0">
-                                                    <UserCircleIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                                    <UserCircleIcon className="h-5 w-5 text-te-green" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="text-sm font-bold text-[var(--te-text)] truncate">
@@ -701,12 +701,12 @@ const UserAccountManagement = () => {
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-[10px] font-medium text-[var(--te-text-dim)] uppercase">Status</span>
                                                         {user.is_active ? (
-                                                            <span className="flex items-center gap-1 text-[var(--te-text)]">
+                                                            <span className="flex items-center gap-1 text-te-green">
                                                                 <CheckCircleIcon className="h-4 w-4" />
                                                                 <span className="text-xs font-medium">Active</span>
                                                             </span>
                                                         ) : (
-                                                            <span className="flex items-center gap-1 text-[var(--te-text-dim)]">
+                                                            <span className="flex items-center gap-1 text-te-red">
                                                                 <XCircleIcon className="h-4 w-4" />
                                                                 <span className="text-xs font-medium">Inactive</span>
                                                             </span>
@@ -726,7 +726,7 @@ const UserAccountManagement = () => {
                                                         onClick={() => toggleUserStatus(user._id || user.id, user.is_active, false)}
                                                         className={`px-4 py-1.5 rounded-md font-medium transition-all text-xs ${user.is_active
                                                             ? 'te-btn-danger'
-                                                            : 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] hover:bg-[var(--te-hover)]'
+                                                            : 'te-btn-primary'
                                                             }`}
                                                     >
                                                         {user.is_active ? 'Deactivate' : 'Activate'}
@@ -761,9 +761,9 @@ const UserAccountManagement = () => {
                 {/* Member Details Modal */}
                 {selectedMember && showMemberModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setShowMemberModal(false)}>
-                        <div className="bg-[var(--te-surface)] rounded-lg  max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                        <div className="te-card max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                             {/* Header */}
-                            <div className="sticky top-0 bg-[var(--te-surface-alt)] text-[var(--te-text)] px-6 py-4 rounded-t-lg">
+                            <div className="sticky top-0 border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-6 py-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg bg-[var(--te-surface)] flex items-center justify-center">
@@ -771,7 +771,7 @@ const UserAccountManagement = () => {
                                         </div>
                                         <div>
                                             <h2 className="text-xl font-bold">{selectedMember.full_name}</h2>
-                                            <p className="text-sm text-[var(--te-text)]">Member Details</p>
+                                            <p className="text-sm text-[var(--te-text-dim)]">Member Details</p>
                                         </div>
                                     </div>
                                     <button
@@ -840,12 +840,12 @@ const UserAccountManagement = () => {
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium text-[var(--te-text)]">Status</span>
                                             {selectedMember.is_active ? (
-                                                <span className="flex items-center gap-2 text-[var(--te-text)] font-semibold">
+                                                <span className="flex items-center gap-2 text-te-green font-semibold">
                                                     <CheckCircleIcon className="h-5 w-5" />
                                                     Active
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-2 text-[var(--te-text-dim)] font-semibold">
+                                                <span className="flex items-center gap-2 text-te-red font-semibold">
                                                     <XCircleIcon className="h-5 w-5" />
                                                     Inactive
                                                 </span>

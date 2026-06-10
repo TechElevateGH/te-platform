@@ -218,7 +218,7 @@ export default function LearningAnalytics() {
                     <div className="flex items-end justify-between gap-4">
                         <div className="flex items-start gap-4">
                             <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                <ChartBarIcon className="w-6 h-6 text-[var(--te-text)]" />
+                                <ChartBarIcon className="w-6 h-6 text-te-green" />
                             </div>
                             <div>
                                 <p className="te-eyebrow mb-2">{'// analytics'}</p>
@@ -234,45 +234,45 @@ export default function LearningAnalytics() {
                     <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-[var(--te-border)] px-4 sm:grid-cols-3 sm:px-6 lg:grid-cols-6 lg:px-8">
                         <div className="bg-[var(--te-surface-alt)] py-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <UserGroupIcon className="w-4 h-4" />
+                                <UserGroupIcon className="w-4 h-4 text-te-green" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Total</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalMembers}</span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-green">{stats.totalMembers}</span>
                         </div>
                         <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <FireIcon className="w-4 h-4" />
+                                <FireIcon className="w-4 h-4 text-te-green" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Active</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.activeMembers} <span className="text-xs text-[var(--te-text-dim)]">({stats.engagementRate}%)</span></span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-green">{stats.activeMembers} <span className="text-xs text-[var(--te-text-dim)]">({stats.engagementRate}%)</span></span>
                         </div>
                         <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <CheckCircleSolidIcon className="w-4 h-4" />
+                                <CheckCircleSolidIcon className="w-4 h-4 text-te-green" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Completions</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalCompletions}</span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-green">{stats.totalCompletions}</span>
                         </div>
                         <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <ClockIcon className="w-4 h-4" />
+                                <ClockIcon className="w-4 h-4 text-te-gold" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Time</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.totalTimeFormatted}</span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-gold">{stats.totalTimeFormatted}</span>
                         </div>
                         <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <TrophyIcon className="w-4 h-4" />
+                                <TrophyIcon className="w-4 h-4 text-te-gold" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Best Streak</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.maxStreak} days</span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-gold">{stats.maxStreak} days</span>
                         </div>
                         <div className="bg-[var(--te-surface-alt)] py-3 pl-3">
                             <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                <ArrowTrendingUpIcon className="w-4 h-4" />
+                                <ArrowTrendingUpIcon className="w-4 h-4 text-te-green" />
                                 <span className="font-mono text-[10px] uppercase tracking-wide">Streaks</span>
                             </div>
-                            <span className="mt-1 block font-mono text-lg font-semibold text-[var(--te-text)]">{stats.activeStreaks}</span>
+                            <span className="mt-1 block font-mono text-lg font-semibold text-te-green">{stats.activeStreaks}</span>
                         </div>
                     </div>
                 </div>
@@ -284,7 +284,7 @@ export default function LearningAnalytics() {
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-24">
                             <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                <ChartBarIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
+                                <ChartBarIcon className="h-6 w-6 animate-pulse text-te-green" />
                             </div>
                             <p className="mt-4 font-mono text-xs uppercase tracking-wide text-[var(--te-text-dim)]">Loading analytics...</p>
                         </div>
@@ -375,7 +375,7 @@ export default function LearningAnalytics() {
                                 {/* Category Breakdown */}
                                 <div className="te-card p-4">
                                     <h3 className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold uppercase tracking-wide text-[var(--te-text)]">
-                                        <AcademicCapIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                        <AcademicCapIcon className="w-4 h-4 text-te-gold" />
                                         Category Breakdown
                                     </h3>
                                     <div className="space-y-3">
@@ -391,7 +391,7 @@ export default function LearningAnalytics() {
                                                         </div>
                                                         <div className="h-2 overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                                             <div
-                                                                className="h-full rounded-lg bg-[var(--te-text)]"
+                                                                className={`h-full rounded-lg ${idx % 2 === 0 ? 'bg-[var(--te-green)]' : 'bg-[var(--te-gold)]'}`}
                                                                 style={{ width: `${percentage}%` }}
                                                             />
                                                         </div>
@@ -407,7 +407,7 @@ export default function LearningAnalytics() {
                                 {/* Weekly Activity */}
                                 <div className="te-card p-4">
                                     <h3 className="mb-3 flex items-center gap-2 font-mono text-sm font-semibold uppercase tracking-wide text-[var(--te-text)]">
-                                        <ArrowTrendingUpIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                        <ArrowTrendingUpIcon className="w-4 h-4 text-te-green" />
                                         Weekly Activity
                                     </h3>
                                     <div className="flex items-end justify-between h-24 gap-1">
@@ -421,13 +421,13 @@ export default function LearningAnalytics() {
                                                         <div className="relative w-full flex justify-center mb-1">
                                                             <div
                                                                 className={`w-6 rounded-t transition-all ${height > 0
-                                                                    ? 'bg-[var(--te-text)]' : 'bg-[var(--te-surface-alt)]'
+                                                                    ? (idx % 2 === 0 ? 'bg-[var(--te-green)]' : 'bg-[var(--te-gold)]') : 'bg-[var(--te-surface-alt)]'
                                                                     }`}
                                                                 style={{ height: `${Math.max(height, 4)}%`, minHeight: '4px' }}
                                                                 title={`${day.active_members} active members`}
                                                             />
                                                             {height > 0 && (
-                                                                <span className="absolute -top-4 text-[10px] font-medium text-[var(--te-text)]">
+                                                                <span className="absolute -top-4 font-mono text-[10px] font-semibold text-te-green">
                                                                     {day.active_members}
                                                                 </span>
                                                             )}
@@ -459,12 +459,12 @@ export default function LearningAnalytics() {
                                         <table className="min-w-full divide-y divide-[var(--te-border)]">
                                             <thead className="bg-[var(--te-surface-alt)]">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Member</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Completed</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Time Spent</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Streak</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Sessions</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Last Active</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Member</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Completed</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Time Spent</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Streak</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Sessions</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Last Active</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[var(--te-border)]">
@@ -485,13 +485,13 @@ export default function LearningAnalytics() {
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="te-chip text-xs">
+                                                                <span className="te-chip-green text-xs">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {member.completed_count}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="te-chip text-xs">
+                                                                <span className="te-chip-gold text-xs">
                                                                     <ClockIcon className="w-3 h-3" />
                                                                     {member.total_time_formatted || '0h 0m'}
                                                                 </span>
@@ -499,8 +499,8 @@ export default function LearningAnalytics() {
                                                             <td className="px-4 py-2.5">
                                                                 <div className="flex items-center gap-1">
                                                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${member.current_streak > 0
-                                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
-                                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'
+                                                                        ? 'te-chip-green'
+                                                                        : 'te-chip text-[var(--te-text-dim)]'
                                                                         }`}>
                                                                         <FireIcon className="w-3 h-3" />
                                                                         {member.current_streak || 0}
@@ -536,10 +536,10 @@ export default function LearningAnalytics() {
                                         <table className="min-w-full divide-y divide-[var(--te-border)]">
                                             <thead className="bg-[var(--te-surface-alt)]">
                                                 <tr>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Topic</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Category</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Completed By</th>
-                                                    <th className="px-4 py-2 text-left text-xs font-medium text-[var(--te-text)] ">Bookmarked By</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Topic</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Category</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Completed By</th>
+                                                    <th className="px-4 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] ">Bookmarked By</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[var(--te-border)]">
@@ -557,18 +557,18 @@ export default function LearningAnalytics() {
                                                                 <p className="text-xs font-medium text-[var(--te-text)] ">{topic.name}</p>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="te-chip text-xs">
+                                                                <span className="te-chip-gold text-xs">
                                                                     {topic.category}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="te-chip text-xs">
+                                                                <span className="te-chip-green text-xs">
                                                                     <CheckCircleSolidIcon className="w-3 h-3" />
                                                                     {topic.completed.length}
                                                                 </span>
                                                             </td>
                                                             <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)] rounded text-xs font-medium">
+                                                                <span className="te-chip-gold text-xs">
                                                                     <BookmarkSolidIcon className="w-3 h-3" />
                                                                     {topic.bookmarked.length}
                                                                 </span>
@@ -638,19 +638,19 @@ export default function LearningAnalytics() {
                                     {/* Stats Summary */}
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.completed_count}</p>
+                                            <p className="font-mono text-2xl font-bold text-te-green">{selectedMember.completed_count}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Completed</p>
                                         </div>
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.total_time_formatted || '0h'}</p>
+                                            <p className="font-mono text-2xl font-bold text-te-gold">{selectedMember.total_time_formatted || '0h'}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Time Spent</p>
                                         </div>
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.current_streak || 0}</p>
+                                            <p className="font-mono text-2xl font-bold text-te-green">{selectedMember.current_streak || 0}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Current Streak</p>
                                         </div>
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedMember.session_count || 0}</p>
+                                            <p className="font-mono text-2xl font-bold text-[var(--te-text)]">{selectedMember.session_count || 0}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Sessions</p>
                                         </div>
                                     </div>
@@ -659,7 +659,7 @@ export default function LearningAnalytics() {
                                     {(selectedMember.current_streak > 0 || selectedMember.longest_streak > 0) && (
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
                                             <h4 className="text-sm font-semibold text-[var(--te-text)] mb-2 flex items-center gap-2">
-                                                <TrophyIcon className="w-4 h-4" />
+                                                <TrophyIcon className="w-4 h-4 text-te-gold" />
                                                 Streak Stats
                                             </h4>
                                             <div className="flex items-center gap-4 text-sm">
@@ -685,7 +685,7 @@ export default function LearningAnalytics() {
                                     {selectedMember.category_breakdown && Object.keys(selectedMember.category_breakdown).length > 0 && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
-                                                <AcademicCapIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                                <AcademicCapIcon className="w-4 h-4 text-te-gold" />
                                                 Progress by Category
                                             </h4>
                                             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -720,7 +720,7 @@ export default function LearningAnalytics() {
                                     {selectedMember.completed_topics && selectedMember.completed_topics.length > 0 && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
-                                                <CheckCircleSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                                <CheckCircleSolidIcon className="w-4 h-4 text-te-green" />
                                                 Completed Topics ({selectedMember.completed_topics.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
@@ -736,7 +736,7 @@ export default function LearningAnalytics() {
                                                                     ×{topic.count}
                                                                 </span>
                                                             )}
-                                                            <span className="te-chip ml-2 flex-shrink-0 text-xs">
+                                                            <span className="te-chip-gold ml-2 flex-shrink-0 text-xs">
                                                                 {topic.category || 'Uncategorized'}
                                                             </span>
                                                         </div>
@@ -750,7 +750,7 @@ export default function LearningAnalytics() {
                                     {selectedMember.bookmarked_topics && selectedMember.bookmarked_topics.length > 0 && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
-                                                <BookmarkSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                                <BookmarkSolidIcon className="w-4 h-4 text-te-gold" />
                                                 Bookmarked Topics ({selectedMember.bookmarked_topics.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
@@ -760,7 +760,7 @@ export default function LearningAnalytics() {
                                                         className="flex items-center justify-between border border-[var(--te-border)] bg-[var(--te-surface-alt)] px-2.5 py-1.5 transition-colors hover:bg-[var(--te-hover)]"
                                                     >
                                                         <span className="text-sm font-medium text-[var(--te-text)]  truncate flex-1">{topic.topic_name}</span>
-                                                        <span className="te-chip ml-2 flex-shrink-0 text-xs">
+                                                        <span className="te-chip-gold ml-2 flex-shrink-0 text-xs">
                                                             {topic.category || 'Uncategorized'}
                                                         </span>
                                                     </div>
@@ -775,11 +775,11 @@ export default function LearningAnalytics() {
                                     {/* Stats Summary */}
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedTopic.completed.length}</p>
+                                            <p className="font-mono text-2xl font-bold text-te-green">{selectedTopic.completed.length}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Completed By</p>
                                         </div>
                                         <div className="border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-3">
-                                            <p className="text-2xl font-bold text-[var(--te-text)]">{selectedTopic.bookmarked.length}</p>
+                                            <p className="font-mono text-2xl font-bold text-te-gold">{selectedTopic.bookmarked.length}</p>
                                             <p className="text-xs text-[var(--te-text-dim)] mt-1">Bookmarked By</p>
                                         </div>
                                     </div>
@@ -788,7 +788,7 @@ export default function LearningAnalytics() {
                                     {selectedTopic.completed.length > 0 && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
-                                                <CheckCircleSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                                <CheckCircleSolidIcon className="w-4 h-4 text-te-green" />
                                                 Completed By ({selectedTopic.completed.length} {selectedTopic.completed.length === 1 ? 'member' : 'members'})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">
@@ -825,7 +825,7 @@ export default function LearningAnalytics() {
                                     {selectedTopic.bookmarked.length > 0 && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-[var(--te-text)]  mb-2 flex items-center gap-2">
-                                                <BookmarkSolidIcon className="w-4 h-4 text-[var(--te-text)]" />
+                                                <BookmarkSolidIcon className="w-4 h-4 text-te-gold" />
                                                 Bookmarked By ({selectedTopic.bookmarked.length})
                                             </h4>
                                             <div className="space-y-1 max-h-64 overflow-y-auto">

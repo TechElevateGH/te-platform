@@ -296,7 +296,7 @@ const AdminFiles = () => {
             <div className="flex min-h-screen items-center justify-center bg-[var(--te-bg)]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                        <FolderIcon className="h-6 w-6 animate-pulse text-[var(--te-text)]" />
+                        <FolderIcon className="h-6 w-6 animate-pulse text-te-green" />
                     </div>
                     <Loading />
                 </div>
@@ -314,7 +314,7 @@ const AdminFiles = () => {
                             <p className="te-eyebrow mb-2">{'// files'}</p>
                             <h1 className="flex items-center gap-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">
                                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                    <FolderIcon className="h-5 w-5 text-[var(--te-text)]" />
+                                    <FolderIcon className="h-5 w-5 text-te-green" />
                                 </span>
                                 Member Files & Resume Reviews
                             </h1>
@@ -431,10 +431,10 @@ const AdminFiles = () => {
                                 }`}
                         >
                             <div className="flex items-center gap-2">
-                                <DocumentTextIcon className="h-4 w-4" />
+                                <DocumentTextIcon className="h-4 w-4 text-te-gold" />
                                 Resume Reviews
                                 {resumeReviews.filter(r => r.status === 'Pending').length > 0 && (
-                                    <span className="te-chip text-xs">
+                                    <span className="te-chip-gold text-xs">
                                         {resumeReviews.filter(r => r.status === 'Pending').length}
                                     </span>
                                 )}
@@ -452,31 +452,31 @@ const AdminFiles = () => {
                         <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] md:grid-cols-4">
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <UserGroupIcon className="h-4 w-4" />
+                                    <UserGroupIcon className="h-4 w-4 text-te-green" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Members</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalUsers}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-green">{stats.totalUsers}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <DocumentIcon className="h-4 w-4" />
+                                    <DocumentIcon className="h-4 w-4 text-te-gold" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Resumes</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalResumes}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-gold">{stats.totalResumes}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <DocumentIcon className="h-4 w-4" />
+                                    <DocumentIcon className="h-4 w-4 text-te-gold" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Essays</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalEssays}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-gold">{stats.totalEssays}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <ChartBarIcon className="h-4 w-4" />
+                                    <ChartBarIcon className="h-4 w-4 text-te-green" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Total Files</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{stats.totalFiles}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-green">{stats.totalFiles}</span>
                             </div>
                         </div>
 
@@ -636,7 +636,7 @@ const AdminFiles = () => {
                         </div>
 
                         {/* Files Table */}
-                        <div className="hidden md:block bg-[var(--te-surface)] rounded border border-[var(--te-border)] overflow-hidden transition-colors">
+                        <div className="te-card hidden overflow-hidden transition-colors md:block">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
@@ -718,21 +718,21 @@ const AdminFiles = () => {
                                                     )}
                                                     {visibleColumns.resumes && (
                                                         <td className="px-3 py-2">
-                                                            <span className="te-chip text-xs">
+                                                            <span className="te-chip-gold text-xs">
                                                                 {user.resumes?.length || 0}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.essays && (
                                                         <td className="px-3 py-2">
-                                                            <span className="te-chip text-xs">
+                                                            <span className="te-chip-gold text-xs">
                                                                 {user.essays?.length || 0}
                                                             </span>
                                                         </td>
                                                     )}
                                                     {visibleColumns.totalFiles && (
                                                         <td className="px-3 py-2">
-                                                            <span className="te-chip text-xs">
+                                                            <span className="te-chip-green text-xs">
                                                                 {(user.resumes?.length || 0) + (user.essays?.length || 0)}
                                                             </span>
                                                         </td>
@@ -777,31 +777,31 @@ const AdminFiles = () => {
                         <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)] md:grid-cols-4">
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <ChartBarIcon className="h-4 w-4" />
+                                    <ChartBarIcon className="h-4 w-4 text-te-green" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Requests</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-green">{resumeReviews.length}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <ClockIcon className="h-4 w-4" />
+                                    <ClockIcon className="h-4 w-4 text-te-gold" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Pending</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-gold">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <DocumentTextIcon className="h-4 w-4" />
+                                    <DocumentTextIcon className="h-4 w-4 text-te-gold" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">In Review</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-gold">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
                             </div>
                             <div className="bg-[var(--te-surface)] p-4">
                                 <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
-                                    <CheckCircleIcon className="h-4 w-4" />
+                                    <CheckCircleIcon className="h-4 w-4 text-te-green" />
                                     <span className="font-mono text-[10px] uppercase tracking-wide">Completed</span>
                                 </div>
-                                <span className="mt-2 block font-mono text-2xl font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
+                                <span className="mt-2 block font-mono text-2xl font-bold text-te-green">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
                             </div>
                         </div>
 
@@ -842,23 +842,23 @@ const AdminFiles = () => {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex justify-start">
-                                                            <span className="te-chip text-xs">
+                                                            <span className="te-chip-gold text-xs">
                                                                 {review.level}
                                                             </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex justify-start">
-                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg ${review.status === 'Pending'
-                                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
+                                                            <span className={`${review.status === 'Pending'
+                                                                ? 'te-chip-gold text-xs'
                                                                 : review.status === 'In Review'
-                                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                                    ? 'te-chip-gold text-xs'
                                                                     : review.status === 'Completed'
-                                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                                        ? 'te-chip-green text-xs'
+                                                                        : 'te-chip-red text-xs'
                                                                 }`}>
-                                                                {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
-                                                                {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
+                                                                {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5 text-te-gold" />}
+                                                                {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5 text-te-green" />}
                                                                 {review.status}
                                                             </span>
                                                         </div>
@@ -1113,13 +1113,13 @@ const AdminFiles = () => {
                                     <div>
                                         <label className="text-xs font-medium text-[var(--te-text-dim)]">Current Status</label>
                                         <div className="mt-1">
-                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg ${selectedReview.status === 'Pending'
-                                                ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)] border border-[var(--te-border)]'
+                                            <span className={`${selectedReview.status === 'Pending'
+                                                ? 'te-chip-gold text-xs'
                                                 : selectedReview.status === 'In Review'
-                                                    ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                    ? 'te-chip-gold text-xs'
                                                     : selectedReview.status === 'Completed'
-                                                        ? 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
-                                                        : 'bg-[var(--te-surface-alt)] text-[var(--te-text)]'
+                                                        ? 'te-chip-green text-xs'
+                                                        : 'te-chip-red text-xs'
                                                 }`}>
                                                 {selectedReview.status}
                                             </span>
@@ -1145,7 +1145,7 @@ const AdminFiles = () => {
                                         rel="noopener noreferrer"
                                         className="te-btn-primary"
                                     >
-                                        <DocumentIcon className="h-4 w-4" />
+                                        <DocumentIcon className="h-4 w-4 text-te-gold" />
                                         Open Resume
                                     </a>
                                 </div>
@@ -1211,7 +1211,7 @@ const AdminFiles = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircleIcon className="h-4 w-4" />
+                                        <CheckCircleIcon className="h-4 w-4 text-te-green" />
                                         Save Review
                                     </>
                                 )}

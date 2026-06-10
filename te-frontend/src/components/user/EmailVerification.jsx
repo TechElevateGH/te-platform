@@ -164,19 +164,19 @@ const EmailVerification = () => {
                     )}
 
                     {success && (
-                        <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4 animate-fade-in">
+                        <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20 animate-fade-in">
                             <div className="flex">
-                                <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" />
-                                <p className="ml-3 text-sm text-[var(--te-text)]">{success}</p>
+                                <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <p className="ml-3 text-sm text-green-800 dark:text-green-200">{success}</p>
                             </div>
                         </div>
                     )}
 
                     {resendSuccess && (
-                        <div className="mb-6 rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4 animate-fade-in">
+                        <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20 animate-fade-in">
                             <div className="flex">
-                                <CheckCircleIcon className="h-5 w-5 text-[var(--te-text)] flex-shrink-0" />
-                                <p className="ml-3 text-sm text-[var(--te-text)]">{resendSuccess}</p>
+                                <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                                <p className="ml-3 text-sm text-green-800 dark:text-green-200">{resendSuccess}</p>
                             </div>
                         </div>
                     )}

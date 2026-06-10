@@ -357,7 +357,7 @@ const Referrals = () => {
 
 
                                     <span className="relative z-10">My Requests</span>
-                                    {myReferralsFeedbackCount > 0 && <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-rose-500 text-white rounded-md border border-[var(--te-border)] ">
+                                    {myReferralsFeedbackCount > 0 && <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-[var(--te-red)] text-white rounded-md border border-[var(--te-border)] ">
                                             {myReferralsFeedbackCount}
                                         </span>}
 
@@ -366,7 +366,7 @@ const Referrals = () => {
 
 
                                         <span className="relative z-10">All Requests</span>
-                                        {pendingReferralsCount > 0 && <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-rose-500 text-white rounded-md border border-[var(--te-border)] ">
+                                        {pendingReferralsCount > 0 && <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-[10px] font-bold bg-[var(--te-gold)] text-black rounded-md border border-[var(--te-border)] ">
                                                 {pendingReferralsCount}
                                             </span>}
 
@@ -390,11 +390,11 @@ const Referrals = () => {
                             <div className="border-b border-r border-[var(--te-border)] bg-[var(--te-surface)] p-4 transition-colors md:border-b-0">
                                 <div className="flex items-center gap-2">
                                     <div className="flex h-8 w-8 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <CheckBadgeIcon className="h-3.5 w-3.5 text-[var(--te-text)]" />
+                                        <CheckBadgeIcon className="h-3.5 w-3.5 text-te-green" />
                                     </div>
                                     <div className="leading-none">
                                         <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--te-text-dim)]">Ready</p>
-                                        <p className="font-mono text-2xl font-semibold text-[var(--te-text)]">
+                                        <p className="font-mono text-2xl font-semibold text-te-green">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Ready').length}
                                         </p>
                                     </div>
@@ -404,11 +404,11 @@ const Referrals = () => {
                             <div className="border-b border-r border-[var(--te-border)] bg-[var(--te-surface)] p-4 transition-colors md:border-b-0">
                                 <div className="flex items-center gap-2">
                                     <div className="flex h-8 w-8 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <ClockIcon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                                        <ClockIcon className="h-3.5 w-3.5 text-te-red" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-700 dark:text-amber-300">Incomplete</p>
-                                        <p className="font-mono text-2xl font-semibold text-[var(--te-text)]">
+                                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-te-red">Incomplete</p>
+                                        <p className="font-mono text-2xl font-semibold text-te-red">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Incomplete').length}
                                         </p>
                                     </div>
@@ -418,11 +418,11 @@ const Referrals = () => {
                             <div className="border-b border-r border-[var(--te-border)] bg-[var(--te-surface)] p-4 transition-colors md:border-b-0">
                                 <div className="flex items-center gap-2">
                                     <div className="flex h-8 w-8 items-center justify-center border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                        <ArrowPathIcon className="h-3.5 w-3.5 text-[var(--te-text-dim)]" />
+                                        <ArrowPathIcon className="h-3.5 w-3.5 text-te-gold" />
                                     </div>
                                     <div className="leading-none">
-                                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--te-text-dim)]">Pending</p>
-                                        <p className="font-mono text-2xl font-semibold text-[var(--te-text)]">
+                                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-te-gold">Pending</p>
+                                        <p className="font-mono text-2xl font-semibold text-te-gold">
                                             {referralCompanies.filter(c => checkRequirementsMet(c) === 'Pending').length}
                                         </p>
                                     </div>
@@ -525,25 +525,25 @@ const Referrals = () => {
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex flex-col gap-2">
                                                                         {materials.resume && <div className="flex items-center gap-2">
-                                                                                {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />}
+                                                                                {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
 
                                                                                 <span className="text-sm font-medium text-[var(--te-text)]">Resume</span>
                                                                             </div>}
 
                                                                         {materials.essay && <div className="flex items-center gap-2">
-                                                                                {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />}
+                                                                                {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
 
                                                                                 <span className="text-sm font-medium text-[var(--te-text)]">Referral Essay</span>
                                                                             </div>}
 
                                                                         {materials.cover_letter && <div className="flex items-center gap-2">
-                                                                                {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />}
+                                                                                {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
 
                                                                                 <span className="text-sm font-medium text-[var(--te-text)]">Cover Letter</span>
                                                                             </div>}
 
                                                                         {materials.phone_number && <div className="flex items-center gap-2">
-                                                                                {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)] flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-rose-600 flex-shrink-0" />}
+                                                                                {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
 
                                                                                 <span className="text-sm font-medium text-[var(--te-text)]">Contact</span>
                                                                             </div>}
@@ -588,25 +588,25 @@ const Referrals = () => {
                                                             <p className="text-[10px] font-medium text-[var(--te-text-dim)] uppercase mb-1.5">Requirements</p>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {materials.resume && <div className="flex items-center gap-1.5">
-                                                                        {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <XCircleIcon className="h-4 w-4 text-rose-600" />}
+                                                                        {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
 
                                                                         <span className="text-xs font-medium text-[var(--te-text)]">Resume</span>
                                                                     </div>}
 
                                                                 {materials.essay && <div className="flex items-center gap-1.5">
-                                                                        {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <XCircleIcon className="h-4 w-4 text-rose-600" />}
+                                                                        {userInfo?.referral_essay && userInfo.referral_essay.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
 
                                                                         <span className="text-xs font-medium text-[var(--te-text)]">Essay</span>
                                                                     </div>}
 
                                                                 {materials.cover_letter && <div className="flex items-center gap-1.5">
-                                                                        {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <XCircleIcon className="h-4 w-4 text-rose-600" />}
+                                                                        {userInfo?.cover_letter && userInfo.cover_letter.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
 
                                                                         <span className="text-xs font-medium text-[var(--te-text)]">Cover Letter</span>
                                                                     </div>}
 
                                                                 {materials.phone_number && <div className="flex items-center gap-1.5">
-                                                                        {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-[var(--te-text)]" /> : <XCircleIcon className="h-4 w-4 text-rose-600" />}
+                                                                        {userInfo?.phone_number && userInfo.phone_number.trim() !== '' ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
 
                                                                         <span className="text-xs font-medium text-[var(--te-text)]">Contact</span>
                                                                     </div>}
@@ -694,7 +694,7 @@ const Referrals = () => {
                             {/* Export Controls */}
                             {filteredAllReferrals.length > 0 && <>
                                     {/* Tip Banner */}
-                                    <div className="mb-4 bg-[var(--te-surface-alt)] border border-amber-400 dark:border-red-500/70 rounded-md p-4 transition-colors">
+                                    <div className="mb-4 bg-[var(--te-surface-alt)] border border-[var(--te-gold)] rounded-md p-4 transition-colors">
                                         <div className="flex items-start gap-3">
                                             <div className="flex-shrink-0">
                                                 <svg className="h-5 w-5 text-[var(--te-text)]" fill="currentColor" viewBox="0 0 20 20">
@@ -712,8 +712,8 @@ const Referrals = () => {
 
                                     <div className="mb-4 flex items-center justify-between te-card p-4 transition-colors">
                                         <div className="flex items-center gap-2">
-                                            <BellAlertIcon className="h-5 w-5 text-[var(--te-text)]" />
-                                            <span className="text-sm font-semibold text-[var(--te-text)]">
+                                            <BellAlertIcon className="h-5 w-5 text-te-gold" />
+                                            <span className="text-sm font-semibold text-te-gold">
                                                 {pendingReferralsCount} pending request{pendingReferralsCount !== 1 ? 's' : ''}
                                             </span>
                                         </div>
@@ -841,7 +841,7 @@ const Referrals = () => {
 
                                                         </td>
                                                         <td className="px-6 py-4">
-                                                            <select value={referral.status} onChange={e => handleInlineStatusUpdate(referral.id, e.target.value)} className={`text-xs font-bold rounded-md border px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors ${referral.status === 'Completed' ? "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]" : referral.status === 'Pending' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700 focus:ring-amber-500' : referral.status === 'Declined' ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-700 focus:ring-rose-500' : referral.status === 'Cancelled' ? "bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border-[var(--te-border)] focus:ring-[var(--te-ring)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
+                                                            <select value={referral.status} onChange={e => handleInlineStatusUpdate(referral.id, e.target.value)} className={`text-xs font-bold rounded-md border px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 transition-colors ${(referral.status === 'Approved' || referral.status === 'Completed') ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)] focus:ring-[var(--te-green)]" : referral.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)] focus:ring-[var(--te-gold)]' : referral.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]' : referral.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
 
 
                                                                 <option value="Pending">Pending</option>

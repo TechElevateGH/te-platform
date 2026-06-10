@@ -23,17 +23,20 @@ import { Loading } from '../_custom/Loading';
 import DeleteConfirmationModal from '../_custom/DeleteConfirmationModal';
 
 const INTERVIEW_TYPE_COLORS = {
-    system_design: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    behavioral: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    coding: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    one_on_one: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    system_design: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
+    behavioral: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    coding: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    one_on_one: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
 };
 
 const STATUS_COLORS = {
-    pending: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
-    confirmed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    completed: { bg: 'bg-[var(--te-hover)]', text: 'text-[var(--te-text)]', border: 'border-[var(--te-border)]' },
-    cancelled: { bg: 'bg-[var(--te-surface-alt)]', text: 'text-[var(--te-text-dim)]', border: 'border-[var(--te-border)]' },
+    pending: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    scheduled: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    upcoming: { bg: 'bg-[var(--te-gold-soft)]', text: 'text-te-gold', border: 'border-[var(--te-gold)]' },
+    confirmed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    completed: { bg: 'bg-[var(--te-green-soft)]', text: 'text-te-green', border: 'border-[var(--te-green)]' },
+    cancelled: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
+    missed: { bg: 'bg-[var(--te-red-soft)]', text: 'text-te-red', border: 'border-[var(--te-red)]' },
 };
 
 const formatInterviewType = (type) => {
@@ -536,14 +539,14 @@ const InterviewManagement = () => {
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="space-y-1">
-                                                    <div className="flex items-center gap-2 text-sm">
+                                                    <div className="flex items-center gap-2 text-sm font-mono">
                                                         <CalendarIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
                                                         <span className="font-medium text-[var(--te-text)]">
                                                             {formatDate(interview.timeslot_date)}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-sm text-[var(--te-text-dim)]">
-                                                        <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)] flex-shrink-0" />
+                                                    <div className="flex items-center gap-2 text-sm font-mono text-te-green">
+                                                        <ClockIcon className="h-4 w-4 flex-shrink-0" />
                                                         <span>{formatTime(interview.timeslot_time)}</span>
                                                         <span className="text-xs text-[var(--te-text-dim)]">({interview.duration_minutes} min)</span>
                                                     </div>
@@ -633,7 +636,7 @@ const InterviewManagement = () => {
                                                     {interview.status === 'pending' && isAdmin && (
                                                         <button
                                                             onClick={() => openCancelModal(interview)}
-                                                            className="te-btn-ghost te-btn-sm"
+                                                            className="te-btn-danger te-btn-sm"
                                                         >
                                                             Cancel
                                                         </button>
@@ -899,10 +902,10 @@ const InterviewManagement = () => {
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-3 mb-2">
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-semibold ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.bg} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.text}`}>
+                                                            <span className={`inline-flex items-center rounded-md border px-3 py-1 text-sm font-semibold ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.border} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.bg} ${INTERVIEW_TYPE_COLORS[viewModal.interview.interview_type]?.text}`}>
                                                                 {formatInterviewType(viewModal.interview.interview_type)}
                                                             </span>
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-semibold ${STATUS_COLORS[viewModal.interview.status]?.bg} ${STATUS_COLORS[viewModal.interview.status]?.text}`}>
+                                                            <span className={`inline-flex items-center rounded-md border px-3 py-1 text-sm font-semibold ${STATUS_COLORS[viewModal.interview.status]?.border} ${STATUS_COLORS[viewModal.interview.status]?.bg} ${STATUS_COLORS[viewModal.interview.status]?.text}`}>
                                                                 {formatStatus(viewModal.interview.status)}
                                                             </span>
                                                         </div>
@@ -928,14 +931,14 @@ const InterviewManagement = () => {
                                                             <CalendarIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                                             <span className="text-xs font-bold text-[var(--te-text)] uppercase">Date</span>
                                                         </div>
-                                                        <div className="text-sm font-semibold text-[var(--te-text)]">{formatDate(viewModal.interview.timeslot_date)}</div>
+                                                        <div className="font-mono text-sm font-semibold text-[var(--te-text)]">{formatDate(viewModal.interview.timeslot_date)}</div>
                                                     </div>
                                                     <div className="te-panel p-4">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <ClockIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                                             <span className="text-xs font-bold text-[var(--te-text)] uppercase">Time</span>
                                                         </div>
-                                                        <div className="text-sm font-semibold text-[var(--te-text)]">
+                                                        <div className="font-mono text-sm font-semibold text-te-green">
                                                             {formatTime(viewModal.interview.timeslot_time)} <span className="text-xs text-[var(--te-text-dim)]">({viewModal.interview.duration_minutes} min)</span>
                                                         </div>
                                                     </div>
@@ -1073,8 +1076,8 @@ const InterviewManagement = () => {
                                 <Dialog.Panel className="te-card w-full max-w-md transform overflow-hidden transition-all">
                                     <div className="p-6">
                                         <div className="flex items-start gap-4">
-                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                                                <XCircleIcon className="h-6 w-6 text-[var(--te-text)]" />
+                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--te-red)] bg-[var(--te-red-soft)]">
+                                                <XCircleIcon className="h-6 w-6 text-te-red" />
                                             </div>
                                             <div className="flex-1">
                                                 <Dialog.Title className="font-mono text-lg font-semibold text-[var(--te-text)] mb-2">
@@ -1085,12 +1088,12 @@ const InterviewManagement = () => {
                                                         <p className="text-sm text-[var(--te-text-dim)]">
                                                             Cancel {formatInterviewType(cancelModal.interview.interview_type).toLowerCase()} interview for <strong>{cancelModal.interview.user_name}</strong>?
                                                         </p>
-                                                        <div className="bg-[var(--te-surface-alt)] rounded-lg p-3 text-sm">
-                                                            <div className="flex items-center gap-2 text-[var(--te-text)]">
+                                                        <div className="rounded-lg border border-[var(--te-red)] bg-[var(--te-red-soft)] p-3 text-sm">
+                                                            <div className="flex items-center gap-2 font-mono text-te-red">
                                                                 <CalendarDaysIcon className="h-4 w-4" />
                                                                 <span>{formatDate(cancelModal.interview.timeslot_date)}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-[var(--te-text)] mt-1">
+                                                            <div className="flex items-center gap-2 font-mono text-te-red mt-1">
                                                                 <ClockIcon className="h-4 w-4" />
                                                                 <span>{formatTime(cancelModal.interview.timeslot_time)}</span>
                                                             </div>
@@ -1123,7 +1126,7 @@ const InterviewManagement = () => {
                                         <button
                                             onClick={handleCancel}
                                             disabled={submitting}
-                                            className="te-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="te-btn-danger disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {submitting ? 'Cancelling...' : 'Yes, Cancel Interview'}
                                         </button>

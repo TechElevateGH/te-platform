@@ -14,15 +14,18 @@ const DARK_THEME_VARS = {
     '--text-secondary': 'rgba(237, 237, 236, 0.72)',
     '--text-muted': 'rgba(237, 237, 236, 0.56)',
     '--heading': '#ffffff',
-    '--accent': '#ededec',
-    '--accent-hover': '#ffffff',
-    '--accent-blue': '#c9c9c7',
-    '--accent-soft': 'rgba(255, 255, 255, 0.18)',
-    '--link': '#ededec',
+    '--accent': '#3fbf6f',
+    '--accent-hover': '#64d58b',
+    '--accent-blue': '#3fbf6f',
+    '--accent-soft': 'rgba(63, 191, 111, 0.18)',
+    '--link': '#3fbf6f',
     '--code-bg': 'rgba(0, 0, 0, 0.4)',
-    '--success': '#ededec',
-    '--warning': '#f59e0b',
-    '--error': '#ef4444',
+    '--success': '#3fbf6f',
+    '--success-soft': 'rgba(63, 191, 111, 0.16)',
+    '--warning': '#c4880a',
+    '--warning-soft': 'rgba(196, 136, 10, 0.18)',
+    '--error': '#ce1126',
+    '--error-soft': 'rgba(206, 17, 38, 0.16)',
     '--sidebar-width': '280px',
 };
 
@@ -37,12 +40,18 @@ const LIGHT_THEME_VARS = {
     '--text-secondary': '#4a4a4a',
     '--text-muted': '#6b6b6b',
     '--heading': '#111111',
-    '--accent': '#1f1f1f',
-    '--accent-hover': '#000000',
-    '--accent-blue': '#3a3a3a',
-    '--accent-soft': 'rgba(15, 15, 15, 0.08)',
-    '--link': '#1f1f1f',
+    '--accent': '#0e7a3d',
+    '--accent-hover': '#0a5a2d',
+    '--accent-blue': '#0e7a3d',
+    '--accent-soft': 'rgba(14, 122, 61, 0.12)',
+    '--link': '#0e7a3d',
     '--code-bg': 'rgba(0, 0, 0, 0.05)',
+    '--success': '#0e7a3d',
+    '--success-soft': 'rgba(14, 122, 61, 0.10)',
+    '--warning': '#c4880a',
+    '--warning-soft': 'rgba(196, 136, 10, 0.14)',
+    '--error': '#ce1126',
+    '--error-soft': 'rgba(206, 17, 38, 0.10)',
 };
 
 const DOCS_CACHE_KEY = '__teDocsCache_v1';
@@ -569,7 +578,7 @@ const Documentation = () => {
     };
     const wrapperClass = 'te-docs-shell min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text)]';
     const headerClass = 'sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)] backdrop-blur';
-    const subtitleClass = 'te-eyebrow text-[var(--text-muted)]';
+    const subtitleClass = 'te-eyebrow text-[var(--warning)]';
     const navButtonClass = 'inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]';
     const loaderTextClass = 'font-mono text-sm uppercase tracking-[0.18em] text-[var(--text-muted)]';
     const skeletonBaseClass = 'bg-[var(--bg-tertiary)]';
@@ -627,6 +636,69 @@ const Documentation = () => {
                     color: var(--accent-hover);
                     background: var(--accent-soft);
                 }
+                .te-docs-shell .te-docs-content [class*="text-blue"],
+                .te-docs-shell .te-docs-content [class*="text-sky"],
+                .te-docs-shell .te-docs-content [class*="text-cyan"],
+                .te-docs-shell .te-docs-content [class*="text-indigo"],
+                .te-docs-shell .te-docs-content [class*="text-violet"],
+                .te-docs-shell .te-docs-content [class*="text-purple"],
+                .te-docs-shell .te-docs-content [class*="text-teal"],
+                .te-docs-shell .te-docs-content [class*="text-emerald"],
+                .te-docs-shell .te-docs-content [class*="text-lime"] {
+                    color: var(--accent) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="bg-blue"],
+                .te-docs-shell .te-docs-content [class*="bg-sky"],
+                .te-docs-shell .te-docs-content [class*="bg-cyan"],
+                .te-docs-shell .te-docs-content [class*="bg-indigo"],
+                .te-docs-shell .te-docs-content [class*="bg-violet"],
+                .te-docs-shell .te-docs-content [class*="bg-purple"],
+                .te-docs-shell .te-docs-content [class*="bg-teal"],
+                .te-docs-shell .te-docs-content [class*="bg-emerald"],
+                .te-docs-shell .te-docs-content [class*="bg-lime"] {
+                    background: var(--success-soft) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="border-blue"],
+                .te-docs-shell .te-docs-content [class*="border-sky"],
+                .te-docs-shell .te-docs-content [class*="border-cyan"],
+                .te-docs-shell .te-docs-content [class*="border-indigo"],
+                .te-docs-shell .te-docs-content [class*="border-violet"],
+                .te-docs-shell .te-docs-content [class*="border-purple"],
+                .te-docs-shell .te-docs-content [class*="border-teal"],
+                .te-docs-shell .te-docs-content [class*="border-emerald"],
+                .te-docs-shell .te-docs-content [class*="border-lime"] {
+                    border-color: var(--success) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="text-amber"],
+                .te-docs-shell .te-docs-content [class*="text-yellow"],
+                .te-docs-shell .te-docs-content [class*="text-orange"] {
+                    color: var(--warning) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="bg-amber"],
+                .te-docs-shell .te-docs-content [class*="bg-yellow"],
+                .te-docs-shell .te-docs-content [class*="bg-orange"] {
+                    background: var(--warning-soft) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="border-amber"],
+                .te-docs-shell .te-docs-content [class*="border-yellow"],
+                .te-docs-shell .te-docs-content [class*="border-orange"] {
+                    border-color: var(--warning) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="text-red"],
+                .te-docs-shell .te-docs-content [class*="text-rose"],
+                .te-docs-shell .te-docs-content [class*="text-pink"] {
+                    color: var(--error) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="bg-red"],
+                .te-docs-shell .te-docs-content [class*="bg-rose"],
+                .te-docs-shell .te-docs-content [class*="bg-pink"] {
+                    background: var(--error-soft) !important;
+                }
+                .te-docs-shell .te-docs-content [class*="border-red"],
+                .te-docs-shell .te-docs-content [class*="border-rose"],
+                .te-docs-shell .te-docs-content [class*="border-pink"] {
+                    border-color: var(--error) !important;
+                }
                 .te-docs-shell .te-docs-content code,
                 .te-docs-shell .te-docs-content pre,
                 .te-docs-shell .te-docs-content kbd,
@@ -657,6 +729,40 @@ const Documentation = () => {
                     color: var(--text);
                     border-color: var(--border);
                     box-shadow: none;
+                }
+                .te-docs-shell .te-docs-content .callout,
+                .te-docs-shell .te-docs-content .admonition,
+                .te-docs-shell .te-docs-content .alert {
+                    background: var(--surface);
+                    color: var(--text);
+                    border: 1px solid var(--border);
+                    box-shadow: none;
+                }
+                .te-docs-shell .te-docs-content .callout-info,
+                .te-docs-shell .te-docs-content .callout-note,
+                .te-docs-shell .te-docs-content .admonition-info,
+                .te-docs-shell .te-docs-content .admonition-note,
+                .te-docs-shell .te-docs-content .alert-info,
+                .te-docs-shell .te-docs-content .alert-success,
+                .te-docs-shell .te-docs-content .callout-success,
+                .te-docs-shell .te-docs-content .admonition-success {
+                    background: var(--success-soft);
+                    border-color: var(--success);
+                }
+                .te-docs-shell .te-docs-content .callout-warning,
+                .te-docs-shell .te-docs-content .admonition-warning,
+                .te-docs-shell .te-docs-content .alert-warning {
+                    background: var(--warning-soft);
+                    border-color: var(--warning);
+                }
+                .te-docs-shell .te-docs-content .callout-danger,
+                .te-docs-shell .te-docs-content .callout-error,
+                .te-docs-shell .te-docs-content .admonition-danger,
+                .te-docs-shell .te-docs-content .admonition-error,
+                .te-docs-shell .te-docs-content .alert-danger,
+                .te-docs-shell .te-docs-content .alert-error {
+                    background: var(--error-soft);
+                    border-color: var(--error);
                 }
                 .te-docs-shell .te-docs-content #sidebar,
                 .te-docs-shell .te-docs-content aside,
