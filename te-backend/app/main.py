@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from app.core.settings import settings
+from app.core.limiter import limiter
 from app.ents.api import api_router
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,8 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
 import time
 from fastapi.middleware.gzip import GZipMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 # Configure logging
@@ -19,9 +19,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-# Rate limiter instance (shared across the app)
-limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager

@@ -41,7 +41,7 @@ import app.ents.user.crud as user_crud
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
 from app.core.settings import settings
-from app.main import limiter
+from app.core.limiter import limiter
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from pymongo.database import Database
