@@ -4,7 +4,7 @@ services:
     runtime: python
     region: oregon
     plan: free
-    branch: deployment
+    branch: main
     rootDir: te-backend
     buildCommand: bash build.sh
     startCommand: bash start.sh
@@ -84,7 +84,7 @@ services:
   - type: web
     name: te-frontend
     runtime: static
-    branch: deployment
+    branch: main
     rootDir: te-frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: ./build
