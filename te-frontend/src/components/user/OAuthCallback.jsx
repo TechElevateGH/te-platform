@@ -18,7 +18,7 @@ const OAuthCallback = () => {
     useEffect(() => {
         if (hasProcessed) return; // Prevent double processing
 
-        const handleOAuthCallback = () => {
+        const handleOAuthCallback = async () => {
             setHasProcessed(true);
 
             console.log('=== OAuth Callback Handler Started ===');
@@ -26,18 +26,11 @@ const OAuthCallback = () => {
             console.log('Current pathname:', window.location.pathname);
 
             // Get parameters from URL
-            const token = searchParams.get('token');
-            const userId = searchParams.get('user_id');
-            const role = searchParams.get('role');
+            let token = searchParams.get('token');
+            let userId = searchParams.get('user_id');
+            let role = searchParams.get('role');
+            const code = searchParams.get('code');
             const error = searchParams.get('error');
-            const stateParam = searchParams.get('state');
-
-            console.log('OAuth Callback - URL params:', {
-                token: token ? 'present' : 'missing',
-                userId: userId ? 'present' : 'missing',
-                role: role ? 'present' : 'missing',
-                error: error
-            });
 
             // Mark that OAuth is in progress
             sessionStorage.setItem('oauthInProgress', 'true');
@@ -46,14 +39,28 @@ const OAuthCallback = () => {
                 console.error('OAuth error from backend:', error);
                 setStatus('error');
                 setTimeout(() => {
-                    navigate('/login');
-                }, 3000);
+                    navigate('/login?error=oauth_failed');
+                }, 2500);
                 return;
             }
 
-            // Optional: warn if state not returned (should be, but we only hard-fail on mismatch at backend)
-            if (!stateParam) {
-                console.warn('No state parameter present in callback URL. Backend performed verification, proceeding.');
+            // Secure flow: the backend redirects with a single-use ?code=… that we
+            // exchange (server-side) for the access token. (Older flow passed
+            // token/user_id/role directly in the URL — still supported above.)
+            if (!token && code) {
+                try {
+                    const res = await axiosInstance.post('auth/exchange-code', { code });
+                    token = res.data.access_token;
+                    userId = String(res.data.user_id);
+                    role = String(res.data.role);
+                } catch (err) {
+                    console.error('OAuth code exchange failed:', err?.response?.data || err.message);
+                    setStatus('error');
+                    setTimeout(() => {
+                        navigate('/login?error=oauth_failed');
+                    }, 2500);
+                    return;
+                }
             }
 
             if (token && userId && role) {
