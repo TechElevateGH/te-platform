@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowPathIcon, CheckCircleIcon, XCircleIcon } from 'icons';
 import axiosInstance from '../../axiosConfig';
@@ -8,7 +8,7 @@ const OAuthCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [status, setStatus] = useState('processing'); // processing, success, error
-    const [hasProcessed, setHasProcessed] = useState(false);
+    const hasProcessedRef = useRef(false);
     const [showSlackModal, setShowSlackModal] = useState(false);
     const [userId, setUserId] = useState(null);
 
@@ -16,11 +16,10 @@ const OAuthCallback = () => {
     console.log('Current URL:', window.location.href);
 
     useEffect(() => {
-        if (hasProcessed) return; // Prevent double processing
+        if (hasProcessedRef.current) return; // Prevent double processing (auth code is single-use)
+        hasProcessedRef.current = true;
 
         const handleOAuthCallback = async () => {
-            setHasProcessed(true);
-
             console.log('=== OAuth Callback Handler Started ===');
             console.log('Current URL:', window.location.href);
             console.log('Current pathname:', window.location.pathname);

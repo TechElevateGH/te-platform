@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     // Check if we're on the OAuth callback page without params (stale redirect from browser restore)
     if (window.location.pathname === '/auth/callback') {
       const urlParams = new URLSearchParams(window.location.search);
-      const hasParams = urlParams.has('token') || urlParams.has('error') || urlParams.has('user_id');
+      const hasParams = urlParams.has('token') || urlParams.has('error') || urlParams.has('user_id') || urlParams.has('code');
 
       if (!hasParams) {
         // This is a stale OAuth callback URL (browser restore after close)
