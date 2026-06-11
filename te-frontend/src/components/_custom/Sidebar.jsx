@@ -16,6 +16,15 @@ const GROUP_LABELS = {
     accounts: 'Admin',
 }
 
+// Color-code each section with the Ghana palette (green / gold / red).
+const TONE = {
+    career: { tile: 'te-tile-green', solid: 'var(--te-green)', soft: 'var(--te-green-soft)', text: 'var(--te-green)' },
+    interview: { tile: 'te-tile-gold', solid: 'var(--te-gold)', soft: 'var(--te-gold-soft)', text: 'var(--te-gold)' },
+    learn: { tile: 'te-tile-red', solid: 'var(--te-red)', soft: 'var(--te-red-soft)', text: 'var(--te-red)' },
+    analytics: { tile: 'te-tile-green', solid: 'var(--te-green)', soft: 'var(--te-green-soft)', text: 'var(--te-green)' },
+    accounts: { tile: 'te-tile-gold', solid: 'var(--te-gold)', soft: 'var(--te-gold-soft)', text: 'var(--te-gold)' },
+}
+
 const ROLE_LABELS = { 5: 'Admin', 4: 'Lead', 3: 'Volunteer', 2: 'Referrer' }
 
 const getRoleLabel = (userRole, isGuest) => {
@@ -40,21 +49,39 @@ const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen 
 
     const navButton = (item, onClick) => {
         const active = item.name === content
+        const tone = TONE[item.type] || TONE.career
         return (
             <button
                 onClick={onClick}
                 className={classNames(
-                    'group flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-sm transition-colors duration-150',
+                    'group relative flex w-full items-center gap-2.5 rounded-lg py-1.5 pl-3 pr-2.5 text-sm transition-colors duration-150',
                     active
-                        ? 'bg-[var(--te-accent-soft)] font-medium text-[var(--te-accent)]'
+                        ? 'font-medium'
                         : 'font-normal text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
                 )}
+                style={active ? { background: tone.soft, color: tone.text } : undefined}
             >
-                <item.icon
-                    className="h-[18px] w-[18px] flex-shrink-0"
-                    strokeWidth={active ? 2.1 : 1.8}
-                    aria-hidden="true"
-                />
+                {active && (
+                    <span
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full"
+                        style={{ background: tone.solid }}
+                        aria-hidden="true"
+                    />
+                )}
+                <span
+                    className={classNames(
+                        'grid h-[26px] w-[26px] flex-shrink-0 place-items-center rounded-[7px] transition-colors duration-150',
+                        !active && tone.tile,
+                        !active && 'group-hover:brightness-95'
+                    )}
+                    style={active ? { background: tone.solid, color: '#ffffff' } : undefined}
+                >
+                    <item.icon
+                        className="h-[15px] w-[15px]"
+                        strokeWidth={active ? 2.2 : 1.9}
+                        aria-hidden="true"
+                    />
+                </span>
                 <span className="flex-1 truncate text-left">{item.name}</span>
             </button>
         )
@@ -62,36 +89,46 @@ const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen 
 
     const renderBody = (onItemClick) => (
         <>
-            <nav className="te-scroll flex-1 overflow-y-auto px-3 py-4">
-                <div className="flex flex-col gap-y-5">
-                    {groups.map((group) => (
-                        <div key={group.key}>
-                            <p className="mb-1.5 px-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[var(--te-gold)]">
-                                {group.label}
-                            </p>
-                            <ul className="space-y-0.5">
-                                {group.items.map((item) => (
-                                    <li key={item.name}>{navButton(item, () => onItemClick(item.name))}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+            <nav className="te-scroll flex flex-1 flex-col overflow-y-auto px-3 py-4">
+                <div className="my-auto flex flex-col gap-y-5">
+                    {groups.map((group) => {
+                        const tone = TONE[group.key] || TONE.career
+                        return (
+                            <div key={group.key}>
+                                <p
+                                    className="mb-1.5 flex items-center gap-1.5 px-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+                                    style={{ color: tone.text }}
+                                >
+                                    <span className="h-[5px] w-[5px] rounded-full" style={{ background: tone.solid }} aria-hidden="true" />
+                                    {group.label}
+                                </p>
+                                <ul className="space-y-0.5">
+                                    {group.items.map((item) => (
+                                        <li key={item.name}>{navButton(item, () => onItemClick(item.name))}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    })}
                 </div>
             </nav>
 
             <div className="mt-auto border-t border-[var(--te-border)] p-3">
                 {roleLabel && (
-                    <div className="mb-1 flex items-center justify-between rounded-md px-2.5 py-1.5">
-                        <span className="text-xs font-medium text-[var(--te-text-dim)]">
+                    <div className="mb-1 flex items-center gap-1.5 px-3 py-1">
+                        <span className="h-[5px] w-[5px] rounded-full" style={{ background: 'var(--te-gold)' }} aria-hidden="true" />
+                        <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
                             {roleLabel}{isGuest ? ' mode' : ' access'}
                         </span>
                     </div>
                 )}
                 <button
                     onClick={() => { logout(); navigate(isGuest ? '/login' : '/'); setSidebarOpen(false) }}
-                    className="group flex w-full items-center gap-2.5 rounded-md px-2.5 py-[7px] text-sm font-normal text-[var(--te-text-dim)] transition-colors hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]"
+                    className="group flex w-full items-center gap-2.5 rounded-lg py-1.5 pl-3 pr-2.5 text-sm font-normal text-[var(--te-text-dim)] transition-colors hover:bg-[var(--te-red-soft)] hover:text-[var(--te-red)]"
                 >
-                    <ArrowLeftOnRectangleIcon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                    <span className="grid h-[26px] w-[26px] flex-shrink-0 place-items-center rounded-[7px] bg-[var(--te-hover)] text-[var(--te-text-dim)] transition-colors group-hover:bg-transparent group-hover:text-[var(--te-red)]">
+                        <ArrowLeftOnRectangleIcon className="h-[15px] w-[15px]" strokeWidth={1.9} />
+                    </span>
                     <span>{isGuest ? 'Exit guest mode' : 'Log out'}</span>
                 </button>
             </div>
