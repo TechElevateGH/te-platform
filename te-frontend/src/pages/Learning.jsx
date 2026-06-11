@@ -585,7 +585,7 @@ const Learning = ({ setContent }) => {
             aria-label={done ? 'Mark incomplete' : 'Mark complete'}
         >
             {done
-                ? <CheckCircleSolidIcon className="h-5 w-5 text-[var(--te-text)]" />
+                ? <CheckCircleSolidIcon className="h-5 w-5 text-[var(--te-green)]" />
                 : <CheckCircleIcon className="h-5 w-5" strokeWidth={1.6} />}
         </button>
     );
