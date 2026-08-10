@@ -49,12 +49,6 @@ services:
         sync: false
       - key: ADMIN_BOOTSTRAP_TOKEN
         value: Admin
-      - key: GDRIVE_RESUMES
-        sync: false
-      - key: GDRIVE_OTHER_FILES
-        sync: false
-      - key: GDRIVE_LESSONS
-        sync: false
       - key: GOOGLE_PROJECT_ID
         sync: false
       - key: GOOGLE_PRIVATE_KEY_ID

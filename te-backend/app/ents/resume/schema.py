@@ -19,6 +19,9 @@ class ResumeRead(ResumeBase):
     id: str
     file_id: str
     link: str
+    storage: str = "gdrive"
+    content_type: str = "application/pdf"
+    size: int = 0
 
 
 class ResumesRead(BaseModel):

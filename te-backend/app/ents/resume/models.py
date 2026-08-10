@@ -10,13 +10,16 @@ class Resume(BaseModel):
     """Embedded Resume document stored on the member user record."""
 
     id: str  # UUID for identifying this resume
-    file_id: str  # Google Drive file ID
+    file_id: str  # GridFS file ID (legacy records hold a Google Drive file ID)
     date: str
-    link: str  # Google Drive link
+    link: str  # API path serving the file (legacy records hold a Drive link)
     name: str
     role: str = ""  # Target role for this resume
     notes: str = ""  # Additional notes about this resume
     archived: bool = False
+    storage: str = "gdrive"  # "mongodb" for GridFS-backed files
+    content_type: str = "application/pdf"
+    size: int = 0
 
     class Config:
         arbitrary_types_allowed = True

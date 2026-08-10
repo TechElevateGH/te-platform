@@ -12,7 +12,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", case_sensitive=True, env_file_encoding="utf-8"
+        env_file=".env",
+        case_sensitive=True,
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     API_STR: str
@@ -78,12 +81,10 @@ class Settings(BaseSettings):
     MONGODB_URI: str
     MONGODB_DB_NAME: str
 
-    # Google Drive
-    GDRIVE_RESUMES: str
-    GDRIVE_OTHER_FILES: str
-    GDRIVE_LESSONS: str
+    # File storage: uploads are stored in MongoDB (GridFS); no external
+    # storage provider is required.
 
-    # Google Drive Service Account Credentials
+    # Google Service Account Credentials (used for Sheets exports)
     GOOGLE_TYPE: str = "service_account"
     GOOGLE_PROJECT_ID: Optional[str] = None
     GOOGLE_PRIVATE_KEY_ID: Optional[str] = None

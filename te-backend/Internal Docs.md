@@ -227,11 +227,8 @@ LEAD_TOKEN=<secure-random-token>
 ADMIN_EMAIL=info@techelevate.org
 ADMIN_PASSWORD=<hashed-password>
 
-# Google Drive (File Storage)
-GDRIVE_RESUMES=<folder-id>
-GDRIVE_OTHER_FILES=<folder-id>
-GDRIVE_LESSONS=<folder-id>
-GOOGLE_SERVICE_ACCOUNT_KEY=<path-to-credentials.json>
+# File Storage
+# Uploaded files are stored in MongoDB (GridFS) - no external provider needed.
 
 # Email Service
 SMTP_HOST=smtp.gmail.com
@@ -694,7 +691,7 @@ Post-Deployment:
 - [ ] Test role-based access control
 - [ ] Check audit logging functionality
 - [ ] Verify email notifications (all 3 types)
-- [ ] Test file upload to Google Drive
+- [ ] Test file upload (MongoDB GridFS)
 - [ ] Monitor error rates
 - [ ] Review security headers
 - [ ] Check email delivery rates

@@ -20,7 +20,7 @@ The documentation covers:
 1. **Platform Overview** - Mission, vision, user personas
 2. **Architecture** - Technology stack, frontend/backend structure
 3. **Database Design** - MongoDB collections and relationships
-4. **File Storage** - Google Drive integration details
+4. **File Storage** - MongoDB GridFS storage details
 5. **Features** - Authentication, resumes, applications, referrals, companies, learning
 6. **API Reference** - Complete endpoint documentation with examples
 7. **Development** - Setup instructions, coding guidelines, testing

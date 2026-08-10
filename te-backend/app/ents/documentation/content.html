@@ -884,14 +884,14 @@
                 <li><strong>Motor</strong> - Async MongoDB driver</li>
                 <li><strong>Python-Jose</strong> - JWT handling</li>
                 <li><strong>Uvicorn</strong> - ASGI server</li>
-                <li><strong>Google API Client</strong> - Drive integration</li>
+                <li><strong>GridFS</strong> - MongoDB file storage</li>
               </ul>
             </div>
             <div class="card">
               <h4>Infrastructure</h4>
               <ul>
                 <li><strong>MongoDB Atlas</strong> - Database</li>
-                <li><strong>Google Drive</strong> - File storage</li>
+                <li><strong>MongoDB GridFS</strong> - File storage</li>
                 <li><strong>JWT</strong> - Authentication</li>
                 <li><strong>CORS</strong> - Cross-origin requests</li>
               </ul>
@@ -1167,25 +1167,26 @@
         <section id="storage">
           <h2>File Storage</h2>
           <p>
-            Files (resumes, cover letters, essays) are stored in Google Drive
-            using a service account with domain-wide delegation.
+            Files (resumes, lesson material, other member uploads) are stored
+            directly in MongoDB using GridFS. No external storage provider is
+            required.
           </p>
 
           <h3>Storage Architecture</h3>
           <div class="cards">
             <div class="card">
-              <h4>Google Drive Integration</h4>
+              <h4>MongoDB GridFS</h4>
               <ul>
-                <li>Service account authentication</li>
-                <li>Folder-based organization by user</li>
-                <li>Metadata stored in MongoDB</li>
-                <li>Direct download links</li>
+                <li>File bytes stored in the <code>files</code> bucket</li>
+                <li>Grouped by folder label (resumes, lessons, other-files)</li>
+                <li>Metadata embedded on the user document</li>
+                <li>Served via <code>GET /files/{file_id}</code></li>
               </ul>
             </div>
             <div class="card">
               <h4>File Operations</h4>
               <ul>
-                <li><strong>Upload</strong>: Multipart upload to Drive</li>
+                <li><strong>Upload</strong>: Multipart upload stored in GridFS</li>
                 <li><strong>Rename</strong>: Update file metadata</li>
                 <li><strong>Archive</strong>: Move to archive folder</li>
                 <li><strong>Delete</strong>: Permanent removal</li>
@@ -1515,8 +1516,8 @@
             <div class="card">
               <h4>Upload</h4>
               <p>
-                Drag-and-drop or click to upload PDF/DOCX files. Files are
-                automatically uploaded to user's Google Drive folder.
+                Drag-and-drop or click to upload PDF files. Files are stored in
+                MongoDB (GridFS) and served back through the API.
               </p>
             </div>
             <div class="card">
@@ -1538,12 +1539,14 @@
           </div>
 
           <h3>File Organization</h3>
-          <p>Each user has a dedicated Google Drive folder structure:</p>
-          <pre><code>TechElevate Members/
-└── [user_email]/
-    ├── Resumes/
-    ├── Cover Letters/
-    └── Archive/</code></pre>
+          <p>
+            Files live in the GridFS <code>files</code> bucket, tagged with a
+            folder label and the owning user:
+          </p>
+          <pre><code>files.files / files.chunks
+├── folder: "resumes"      → member resumes
+├── folder: "lessons"      → lesson material
+└── folder: "other-files"  → other member uploads</code></pre>
         </section>
 
         <section id="resume-reviews">

@@ -2,6 +2,7 @@ from app.ents.application.endpoints import (
     applications_router,
     user_applications_router,
 )
+from app.ents.file import files_router
 from app.ents.referral.endpoints import referral_router
 from app.ents.home.endpoints import home_router
 from app.ents.documentation.endpoints import documentation_router
@@ -47,6 +48,9 @@ api_router.include_router(resume_reviews_router)
 
 # Resume management
 api_router.include_router(resumes_router)
+
+# File storage (GridFS backed uploads)
+api_router.include_router(files_router)
 
 # Referral management
 api_router.include_router(referral_router, tags=["Referrals"])

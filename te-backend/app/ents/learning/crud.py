@@ -1,8 +1,6 @@
 import app.ents.learning.models as learning_models
 import app.ents.learning.schema as learning_schema
 from pymongo.database import Database
-from app.core import service
-from app.core.settings import settings
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from bson import ObjectId
@@ -403,15 +401,6 @@ def read_lessons(
     db: Database, *, skip: int = 0, limit: int = 100
 ) -> List[learning_models.Lesson]:
     return get_all_lessons(db, skip=skip, limit=limit)
-
-
-def read_lessons_v1():
-    drive_service = service.get_drive_service()
-    response = drive_service.files(q=settings.GDRIVE_LESSONS)
-    files = response.get("files", [])
-
-    # Log files for debugging if needed
-    logger.debug(f"Found {len(files)} files in Google Drive")
 
 
 # User Progress CRUD Operations

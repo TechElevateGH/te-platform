@@ -5,7 +5,7 @@ FastAPI backend for the TechElevate platform.
 ## Database & Storage
 
 - **Database**: MongoDB Atlas (cloud-hosted)
-- **File Storage**: Google Drive for resume files
+- **File Storage**: MongoDB GridFS (resumes and other uploads live in the database)
 - **Connection**: Managed via environment variables
 
 ## Quick Start
@@ -14,7 +14,6 @@ FastAPI backend for the TechElevate platform.
 
 - Python 3.10+
 - MongoDB Atlas account (connection string in `.env`)
-- Google Drive API credentials (for file storage)
 
 ### Running the Server
 
@@ -52,11 +51,6 @@ Edit `te-backend/.env`:
 # MongoDB
 MONGODB_URI = mongodb+srv://te_platform_admin:!ElevatingTech!@te-platform.v91qs4k.mongodb.net/?appName=TE-Platform
 MONGODB_DB_NAME = te_platform
-
-# Google Drive (for resume storage)
-GDRIVE_RESUMES = your-folder-id
-GDRIVE_OTHER_FILES = your-folder-id
-GDRIVE_LESSONS = your-folder-id
 ```
 
 ### Database Collections
@@ -67,14 +61,16 @@ MongoDB automatically creates collections on first insert:
 - `companies` - Company information
 - `applications` - Job applications
 - `referrals` - Referral requests
-- `files` - File metadata (actual files in Google Drive)
+- `files.files` / `files.chunks` - GridFS collections holding uploaded files
 - `lessons` - Learning materials
 
 ## Notes
 
 📦 **MongoDB**: Data persists across server restarts in MongoDB Atlas
 
-📁 **File Storage**: Resume files stored in Google Drive, metadata in MongoDB
+📁 **File Storage**: Uploaded files (resumes, lesson material) are stored in MongoDB
+via GridFS. They are served by the API at `GET {API_STR}/files/{file_id}` (add
+`/download` to force a download).
 
 🧹 **Clean Setup**: No SQLAlchemy, Alembic, or Docker - simple MongoDB integration
 

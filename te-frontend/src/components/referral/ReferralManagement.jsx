@@ -37,15 +37,17 @@ const ReferralManagement = ({
     }
   };
 
-  // Convert Google Drive download link to preview link
+  // Legacy Google Drive links: convert download link to preview link.
+  // Files uploaded to MongoDB are served directly by the API and pass through.
   const getViewableResumeUrl = url => {
     if (!url) return url;
 
-    // If it's a Google Drive webContentLink (download), convert to view link
     // webContentLink format: https://drive.google.com/uc?id=FILE_ID&export=download
     // View format: https://drive.google.com/file/d/FILE_ID/view
 
-    const fileIdMatch = url.match(/[?&]id=([^&]+)/);
+    const fileIdMatch = url.includes('drive.google.com')
+      ? url.match(/[?&]id=([^&]+)/)
+      : null;
     if (fileIdMatch && fileIdMatch[1]) {
       return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
     }

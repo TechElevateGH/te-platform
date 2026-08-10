@@ -1,13 +1,10 @@
-import os
-import tempfile
 from datetime import date
 from uuid import uuid4
 
-import app.core.service as service
+import app.core.storage as storage
 import app.ents.application.models as application_models
 import app.ents.application.schema as application_schema
 from fastapi import HTTPException
-from googleapiclient.http import MediaFileUpload
 from pymongo.database import Database
 
 
@@ -202,30 +199,17 @@ def bulk_delete_applications(db: Database, *, application_ids: list[str]) -> dic
 # ============= Helper Functions =============
 
 
-def upload_member_file(file, parent) -> application_schema.FileUpload:
-    drive_service = service.get_drive_service()
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(file.file.read())
-
-    file_metadata = {
-        "name": file.filename,
-        "parents": [parent],
-    }
-
-    media = MediaFileUpload(temp_file.name, resumable=True)
-    uploaded_file = (
-        drive_service.files()
-        .create(
-            body=file_metadata,
-            media_body=media,
-            fields="id,name,webContentLink",
-        )
-        .execute()
-    )
-
-    os.remove(temp_file.name)
+def upload_member_file(
+    db: Database,
+    file,
+    *,
+    folder: str = storage.OTHER_FILES_FOLDER,
+    metadata: dict | None = None,
+) -> application_schema.FileUpload:
+    """Store a member file in MongoDB (GridFS) and return its metadata."""
+    stored = storage.save_file(db, file, folder=folder, metadata=metadata)
     return application_schema.FileUpload(
-        file_id=uploaded_file.get("id"),
-        name=uploaded_file.get("name"),
-        link=uploaded_file.get("webContentLink"),
+        file_id=stored.file_id,
+        name=stored.name,
+        link=stored.link,
     )

@@ -9,6 +9,7 @@ import app.ents.resume.models as resume_models
 import app.ents.resume.schema as resume_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
+import app.core.storage as storage
 from app.core.permissions import get_user_role, require_volunteer
 from fastapi import (
     APIRouter,
@@ -18,6 +19,7 @@ from fastapi import (
     Form,
     HTTPException,
     Query,
+    Request,
     UploadFile,
     status,
 )
@@ -30,10 +32,14 @@ user_resumes_router = APIRouter(
 resume_reviews_router = APIRouter(prefix="/resumes/reviews", tags=["Resume Reviews"])
 
 
-def resume_to_read(resume: resume_models.Resume) -> resume_schema.ResumeRead:
+def resume_to_read(
+    resume: resume_models.Resume, request: Request | None = None
+) -> resume_schema.ResumeRead:
     """Convert a Resume model instance into the API response schema."""
 
-    return resume_schema.ResumeRead(**resume.model_dump())
+    data = resume.model_dump()
+    data["link"] = storage.absolute_link(request, data.get("link"))
+    return resume_schema.ResumeRead(**data)
 
 
 def _require_target_user(current_user, target_user_id: str) -> int:
@@ -66,6 +72,7 @@ def _reviewer_name(user: user_models.MemberUser) -> str:
 @resumes_router.get("", response_model=Dict[str, resume_schema.ResumesRead])
 def list_resumes(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     current_user=Depends(user_dependencies.get_current_user),
     user_id: str | None = Query(
@@ -78,7 +85,7 @@ def list_resumes(
 
     return {
         "resumes": resume_schema.ResumesRead(
-            resumes=[resume_to_read(resume) for resume in resumes]
+            resumes=[resume_to_read(resume, request) for resume in resumes]
         )
     }
 
@@ -90,6 +97,7 @@ def list_resumes(
 )
 def upload_resume(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     file: UploadFile = File(...),
     role: str = Form(default="", description="Target role for this resume"),
@@ -108,7 +116,7 @@ def upload_resume(
         db, file=file, user_id=target_user_id, role=role, notes=notes
     )
 
-    return {"resume": resume_to_read(uploaded_resume)}
+    return {"resume": resume_to_read(uploaded_resume, request)}
 
 
 @resumes_router.patch(
@@ -116,6 +124,7 @@ def upload_resume(
 )
 def update_resume(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     resume_id: str,
     data: resume_schema.ResumeUpdate,
@@ -144,7 +153,7 @@ def update_resume(
             detail="Resume not found or no changes made",
         )
 
-    return {"resume": resume_to_read(updated_resume)}
+    return {"resume": resume_to_read(updated_resume, request)}
 
 
 @resumes_router.delete("/{resume_id}", status_code=status.HTTP_200_OK)
@@ -181,6 +190,7 @@ def delete_resume(
 def list_user_resumes(
     db: Database = Depends(session.get_db),
     *,
+    request: Request,
     user_id: str,
     current_user=Depends(user_dependencies.get_current_user),
 ) -> Dict[str, resume_schema.ResumesRead]:
@@ -189,7 +199,7 @@ def list_user_resumes(
 
     return {
         "resumes": resume_schema.ResumesRead(
-            resumes=[resume_to_read(resume) for resume in resumes]
+            resumes=[resume_to_read(resume, request) for resume in resumes]
         )
     }
 
@@ -202,6 +212,7 @@ def list_user_resumes(
 def upload_user_resume(
     db: Database = Depends(session.get_db),
     *,
+    request: Request,
     user_id: str,
     file: UploadFile = File(...),
     role: str = Form(default="", description="Target role for this resume"),
@@ -224,7 +235,7 @@ def upload_user_resume(
         db, file=file, user_id=user_id, role=role, notes=notes
     )
 
-    return {"resume": resume_to_read(uploaded_resume)}
+    return {"resume": resume_to_read(uploaded_resume, request)}
 
 
 @user_resumes_router.patch(
@@ -233,6 +244,7 @@ def upload_user_resume(
 def update_user_resume(
     db: Database = Depends(session.get_db),
     *,
+    request: Request,
     user_id: str,
     resume_id: str,
     data: resume_schema.ResumeUpdate,
@@ -256,7 +268,7 @@ def update_user_resume(
             detail="Resume not found or no changes made",
         )
 
-    return {"resume": resume_to_read(updated_resume)}
+    return {"resume": resume_to_read(updated_resume, request)}
 
 
 @user_resumes_router.delete("/{resume_id}", status_code=status.HTTP_200_OK)

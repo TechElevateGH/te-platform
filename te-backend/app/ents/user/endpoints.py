@@ -4,12 +4,13 @@ from bson import ObjectId
 
 logger = logging.getLogger(__name__)
 
+import app.core.storage as storage
 import app.database.session as session
 import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pymongo.database import Database
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -444,6 +445,7 @@ def update_member_profile(
 def get_user_resumes(
     db: Database = Depends(session.get_db),
     *,
+    request: Request,
     user_id: str,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
@@ -477,7 +479,9 @@ def get_user_resumes(
             "id": r.get("id", ""),  # UUID
             "file_id": r.get("file_id", ""),
             "name": r.get("name", ""),
-            "link": r.get("link", ""),  # Frontend expects 'link' not 'url'
+            "link": storage.absolute_link(
+                request, r.get("link", "")
+            ),  # Frontend expects 'link' not 'url'
             "date": r.get("date", ""),
             "role": r.get("role", ""),
             "notes": r.get("notes", ""),
@@ -618,6 +622,7 @@ def update_cover_letter(
 def list_all_user_files(
     db: Database = Depends(session.get_db),
     *,
+    request: Request,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
 ) -> Any:
     """
@@ -661,7 +666,7 @@ def list_all_user_files(
                     "id": r.get("id", ""),  # UUID
                     "file_id": r.get("file_id", ""),
                     "name": r.get("name", ""),
-                    "url": r.get("link", ""),
+                    "url": storage.absolute_link(request, r.get("link", "")),
                     "uploaded_at": r.get("date", ""),
                     "role": r.get("role", ""),
                     "notes": r.get("notes", ""),

@@ -7,8 +7,8 @@ import app.ents.learning.crud as learning_crud
 import app.ents.learning.schema as learning_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
-from app.core.settings import settings
-from fastapi import APIRouter, Depends, UploadFile, HTTPException, Query
+import app.core.storage as storage
+from fastapi import APIRouter, Depends, Request, UploadFile, HTTPException, Query
 from pymongo.database import Database
 
 router = APIRouter(prefix="/learning")
@@ -270,6 +270,7 @@ def delete_lesson(
 )
 def lesson_file_upload(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     file: UploadFile,
     current_user: user_models.MemberUser = Depends(user_dependencies.get_current_user),
@@ -278,8 +279,12 @@ def lesson_file_upload(
     Create other lesson.
     """
     uploaded_file = application_crud.upload_member_file(
-        file=file, parent=settings.GDRIVE_LESSONS
+        db,
+        file,
+        folder=storage.LESSONS_FOLDER,
+        metadata={"uploaded_by": str(current_user.id), "kind": "lesson"},
     )
+    uploaded_file.link = storage.absolute_link(request, uploaded_file.link)
     return {"file": uploaded_file}
 
 

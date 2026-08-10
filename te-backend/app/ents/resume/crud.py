@@ -1,15 +1,11 @@
-import os
-import tempfile
 from datetime import date, datetime
 from uuid import uuid4
 
 from bson import ObjectId
 from fastapi import HTTPException, status
-from googleapiclient.http import MediaFileUpload
 from pymongo.database import Database
 
-import app.core.service as service
-from app.core.settings import settings
+import app.core.storage as storage
 import app.ents.resume.models as resume_models
 import app.ents.resume.schema as resume_schema
 
@@ -24,53 +20,34 @@ def read_resumes(db: Database, *, user_id: str) -> list[resume_models.Resume]:
     return [resume_models.Resume(**resume) for resume in user.get("resumes", [])]
 
 
-def upload_file(file, parent) -> resume_schema.FileUpload:
-    """Upload a file to Google Drive and return its metadata."""
-    drive_service = service.get_drive_service()
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(file.file.read())
-
-    file_metadata = {
-        "name": file.filename,
-        "parents": [parent],
-    }
-
-    media = MediaFileUpload(temp_file.name, resumable=True)
-    uploaded_file = (
-        drive_service.files()
-        .create(
-            body=file_metadata,
-            media_body=media,
-            fields="id,name,webContentLink",
-        )
-        .execute()
-    )
-
-    os.remove(temp_file.name)
-    return resume_schema.FileUpload(
-        file_id=uploaded_file.get("id"),
-        name=uploaded_file.get("name"),
-        link=uploaded_file.get("webContentLink"),
-    )
+def upload_file(db: Database, file, *, folder: str, metadata: dict | None = None):
+    """Store a file in MongoDB (GridFS) and return its metadata."""
+    return storage.save_file(db, file, folder=folder, metadata=metadata)
 
 
 def create_resume(
     db: Database, file, user_id: str, role: str = "", notes: str = ""
 ) -> resume_models.Resume:
     """Upload and create a new resume for a member (embedded in user document)."""
-    uploaded_file = upload_file(file=file, parent=settings.GDRIVE_RESUMES)
+    uploaded_file = upload_file(
+        db,
+        file,
+        folder=storage.RESUMES_FOLDER,
+        metadata={"user_id": user_id, "kind": "resume"},
+    )
 
     new_resume = {
         "id": str(uuid4()),
         "file_id": uploaded_file.file_id,
         "name": uploaded_file.name,
-        "link": uploaded_file.link[: uploaded_file.link.find("&export=download")]
-        if "&export=download" in uploaded_file.link
-        else uploaded_file.link,
+        "link": uploaded_file.link,
         "date": date.today().strftime("%Y-%m-%d"),
         "role": role,
         "notes": notes,
         "archived": False,
+        "storage": "mongodb",
+        "content_type": uploaded_file.content_type,
+        "size": uploaded_file.size,
     }
 
     result = db.member_users.update_one(
@@ -78,6 +55,7 @@ def create_resume(
     )
 
     if result.matched_count == 0:
+        storage.delete_file(db, uploaded_file.file_id)
         raise HTTPException(status_code=404, detail="User not found")
 
     return resume_models.Resume(**new_resume)
@@ -85,9 +63,20 @@ def create_resume(
 
 def delete_resume(db: Database, *, resume_id: str, user_id: str) -> bool:
     """Delete a resume by UUID from the user's embedded resumes array."""
+    user = db.member_users.find_one(
+        {"_id": ObjectId(user_id)},
+        {"resumes": {"$elemMatch": {"id": resume_id}}},
+    )
+    existing = (user or {}).get("resumes") or []
+
     result = db.member_users.update_one(
         {"_id": ObjectId(user_id)}, {"$pull": {"resumes": {"id": resume_id}}}
     )
+
+    if result.modified_count > 0 and existing:
+        removed = existing[0]
+        if removed.get("storage") == "mongodb":
+            storage.delete_file(db, removed.get("file_id"))
 
     return result.modified_count > 0
 
