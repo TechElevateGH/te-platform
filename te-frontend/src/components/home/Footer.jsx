@@ -63,7 +63,7 @@ const Footer = () => {
                                 </a>
                             )}
                         </div>
-                        <p className="mt-5 text-xs leading-5 text-white/35">Accra, Ghana<br />Growing across borders</p>
+                        <p className="mt-5 text-xs leading-5 text-white/35">A focused career platform<br />for ambitious talent</p>
                     </div>
                 </div>
 

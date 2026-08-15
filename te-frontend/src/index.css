@@ -457,7 +457,7 @@ code, .font-mono {
     background: var(--te-accent-soft);
   }
 
-  /* On-palette status variants (Ghana red / gold / green) — for uniform chips & badges */
+  /* Status variants for uniform chips and badges */
   .te-chip-green { @apply te-chip; color: var(--te-green); background: var(--te-green-soft); border-color: transparent; }
   .te-chip-gold  { @apply te-chip; color: var(--te-gold);  background: var(--te-gold-soft);  border-color: transparent; }
   .te-chip-red   { @apply te-chip; color: var(--te-red);   background: var(--te-red-soft);   border-color: transparent; }

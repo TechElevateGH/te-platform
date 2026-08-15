@@ -100,9 +100,6 @@ const Navbar = ({ onMobileMenuOpen, isWorkspace = false }) => {
                         <button onClick={() => navigate('/')} className="group flex min-w-0 items-center gap-2.5 rounded-xl">
                             <img src="/te-mark.svg" alt="" className="h-9 w-9 rounded-xl shadow-sm transition-transform group-hover:rotate-[-3deg] group-hover:scale-105" />
                             <span className="te-wordmark truncate text-[16px] text-[var(--te-text)]">TechElevate</span>
-                            <span className="hidden rounded-full bg-[var(--te-gold-soft)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--te-gold)] sm:inline">
-                                GH
-                            </span>
                         </button>
                     </div>
 

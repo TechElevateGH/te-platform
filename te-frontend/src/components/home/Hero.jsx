@@ -29,7 +29,7 @@ const Hero = () => {
                 <div className="min-w-0 max-w-2xl">
                     <div className="inline-flex items-center gap-2 rounded-full border border-[var(--te-border)] bg-[color:color-mix(in_srgb,var(--te-surface)_82%,transparent)] px-3 py-1.5 text-xs font-bold text-[var(--te-text-dim)] shadow-sm backdrop-blur">
                         <SparklesIcon className="h-3.5 w-3.5 text-[var(--te-gold)]" />
-                        Built in Ghana. Open to ambitious talent everywhere.
+                        Built for ambitious talent everywhere.
                     </div>
 
                     <h1 className="mt-7 max-w-3xl break-words text-[clamp(3.2rem,7vw,6.4rem)] font-extrabold leading-[0.96] tracking-[-0.075em] text-[var(--te-text)]">
