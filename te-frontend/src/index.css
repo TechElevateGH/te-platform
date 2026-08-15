@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,66 +6,83 @@
 
 body {
   margin: 0;
-  font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: -0.003em;
+  line-height: 1.55;
+  letter-spacing: -0.012em;
   scroll-behavior: smooth;
   background: var(--te-bg);
   color: var(--te-text);
   text-rendering: optimizeLegibility;
 }
 
-/* Theme variables — TechElevateGH: Ghana flag palette (red, gold, green, black).
-   Green = primary/links/active, Gold = highlights/eyebrows, Red = energy/danger, Black = ink. */
 :root {
-  --te-bg: #ffffff;          /* page */
-  --te-surface: #ffffff;     /* cards / panels */
-  --te-surface-alt: #faf9f4; /* warm cream — sidebar / subtle fills */
-  --te-border: #e8e4d9;      /* warm hairline border */
-  --te-border-strong: #d8d3c4;
-  --te-text: #1a1712;        /* ink (warm near-black) */
-  --te-text-dim: #6f695c;    /* secondary (warm gray) */
-  --te-hover: rgba(20, 18, 12, 0.05);
-  --te-accent: #0e7a3d;      /* Ghana green — links / active states */
-  --te-accent-hover: #0a6332;
-  --te-accent-soft: #e6f3ec; /* light green tint — selected / badge bg */
-  --te-primary: #0e7a3d;     /* primary button fill (green) */
-  --te-primary-hover: #0a6332;
-  --te-on-primary: #ffffff;  /* text on primary */
-  --te-ring: rgba(14, 122, 61, 0.30);
-  /* palette tokens */
-  --te-green: #0e7a3d;       --te-green-soft: #e6f3ec;
-  --te-gold: #c4880a;        --te-gold-strong: #e0a100; --te-gold-soft: #fbf1d6;
-  --te-red: #ce1126;         --te-red-soft: #fde8ea;
-  --te-gradient: linear-gradient(100deg, #0e7a3d 0%, #c4880a 50%, #ce1126 100%);
+  color-scheme: light;
+  --te-bg: #f5f8f5;
+  --te-surface: #ffffff;
+  --te-surface-alt: #edf3ef;
+  --te-surface-strong: #e4ece7;
+  --te-border: #dce6df;
+  --te-border-strong: #c5d4ca;
+  --te-text: #12251c;
+  --te-text-dim: #627168;
+  --te-hover: rgba(10, 108, 65, 0.07);
+  --te-accent: #0d7c4c;
+  --te-accent-hover: #08623b;
+  --te-accent-soft: #e0f5e9;
+  --te-primary: #0d7c4c;
+  --te-primary-hover: #08623b;
+  --te-on-primary: #ffffff;
+  --te-ring: rgba(13, 124, 76, 0.22);
+  --te-green: #0d7c4c;
+  --te-green-soft: #e0f5e9;
+  --te-gold: #b9780f;
+  --te-gold-strong: #d7941d;
+  --te-gold-soft: #fff2d8;
+  --te-red: #c63f4c;
+  --te-red-soft: #fde9eb;
+  --te-ink: #0b2e21;
+  --te-gradient: linear-gradient(135deg, #0d7c4c 0%, #25a86c 55%, #d49a2f 130%);
+  --te-shadow-sm: 0 1px 2px rgba(18, 37, 28, 0.05);
+  --te-shadow: 0 14px 38px -24px rgba(18, 37, 28, 0.3), 0 2px 8px rgba(18, 37, 28, 0.05);
+  --te-shadow-lg: 0 28px 80px -36px rgba(5, 45, 29, 0.5), 0 8px 24px rgba(18, 37, 28, 0.08);
 }
 
 .dark {
-  --te-bg: #14130f;          /* warm black page */
-  --te-surface: #1c1a15;     /* cards (lighter than page) */
-  --te-surface-alt: #181610; /* sidebar / subtle fills */
-  --te-border: #2e2b23;      /* hairline */
-  --te-border-strong: #3a362c;
-  --te-text: #ece8df;        /* ink */
-  --te-text-dim: #a39d8f;    /* secondary */
+  color-scheme: dark;
+  --te-bg: #07130e;
+  --te-surface: #0e1d16;
+  --te-surface-alt: #13261c;
+  --te-surface-strong: #1a3024;
+  --te-border: #223a2d;
+  --te-border-strong: #31503e;
+  --te-text: #edf7f1;
+  --te-text-dim: #9fb3a7;
   --te-hover: rgba(255, 255, 255, 0.06);
-  --te-accent: #3fbf6f;      /* brighter green for dark */
-  --te-accent-hover: #5fd089;
-  --te-accent-soft: rgba(63, 191, 111, 0.16);
-  --te-primary: #128a46;     /* primary button fill (green) */
-  --te-primary-hover: #16a052;
-  --te-on-primary: #ffffff;  /* text on primary */
-  --te-ring: rgba(63, 191, 111, 0.42);
-  /* palette tokens */
-  --te-green: #3fbf6f;       --te-green-soft: rgba(63, 191, 111, 0.16);
-  --te-gold: #e6b53d;        --te-gold-strong: #f0c14b; --te-gold-soft: rgba(230, 181, 61, 0.16);
-  --te-red: #f0556a;         --te-red-soft: rgba(240, 85, 106, 0.16);
-  --te-gradient: linear-gradient(100deg, #3fbf6f 0%, #e6b53d 50%, #f0556a 100%);
+  --te-accent: #55d08d;
+  --te-accent-hover: #78dda5;
+  --te-accent-soft: rgba(85, 208, 141, 0.14);
+  --te-primary: #36b876;
+  --te-primary-hover: #52ce8b;
+  --te-ring: rgba(85, 208, 141, 0.3);
+  --te-green: #55d08d;
+  --te-green-soft: rgba(85, 208, 141, 0.14);
+  --te-gold: #efbd58;
+  --te-gold-strong: #f5ca73;
+  --te-gold-soft: rgba(239, 189, 88, 0.14);
+  --te-red: #f47782;
+  --te-red-soft: rgba(244, 119, 130, 0.14);
+  --te-ink: #06120d;
+  --te-gradient: linear-gradient(135deg, #45c982 0%, #6bd99d 55%, #efbd58 130%);
+  --te-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.22);
+  --te-shadow: 0 18px 46px -24px rgba(0, 0, 0, 0.68), 0 3px 12px rgba(0, 0, 0, 0.24);
+  --te-shadow-lg: 0 32px 90px -36px rgba(0, 0, 0, 0.84), 0 10px 30px rgba(0, 0, 0, 0.26);
 }
 
 /* Utility classes that map to variables */
@@ -85,23 +102,22 @@ body {
   color: transparent;
 }
 
-/* Typography — JetBrains Mono headings (engineering/IDE feel), Plex Sans body */
 h1, h2, h3, h4, h5, h6, .font-display {
-  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 750;
+  letter-spacing: -0.04em;
   color: var(--te-text);
 }
 
-h1 { font-size: 1.625rem; line-height: 1.25; font-weight: 700; }
-h2 { font-size: 1.3125rem; line-height: 1.3; font-weight: 700; }
-h3 { font-size: 1.0625rem; line-height: 1.35; font-weight: 600; }
-h4 { font-size: 0.9375rem; line-height: 1.4; font-weight: 600; }
-h5 { font-size: 0.8125rem; font-weight: 600; }
-h6 { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+h1 { font-size: 2rem; line-height: 1.14; }
+h2 { font-size: 1.5rem; line-height: 1.22; }
+h3 { font-size: 1.125rem; line-height: 1.35; }
+h4 { font-size: 1rem; line-height: 1.4; }
+h5 { font-size: 0.875rem; }
+h6 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
 
 code, .font-mono {
-  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: 'DM Mono', ui-monospace, 'SF Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
 
@@ -306,15 +322,15 @@ code, .font-mono {
 
   /* Glass morphism utility */
   .glass {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.06);
+    background: color-mix(in srgb, var(--te-surface) 82%, transparent);
+    backdrop-filter: blur(22px) saturate(130%);
+    -webkit-backdrop-filter: blur(22px) saturate(130%);
+    box-shadow: var(--te-shadow);
   }
   
   .dark .glass {
-    background: rgba(15, 23, 42, 0.72);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+    background: color-mix(in srgb, var(--te-surface) 84%, transparent);
+    box-shadow: var(--te-shadow);
   }
 
   /* Gradient text without @apply (tool complaining) — monochrome */
@@ -326,47 +342,63 @@ code, .font-mono {
   }
 }
 
-/* ===================================================================
-   Notion-style component primitives — neutral, flat, sparing accent.
-   Colors are driven by CSS variables so light/dark switch automatically.
-   =================================================================== */
 @layer components {
   .te-eyebrow {
-    @apply text-[11px] font-semibold uppercase tracking-[0.14em];
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    color: var(--te-gold);
+    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em];
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    color: var(--te-accent);
+  }
+  .te-eyebrow::before {
+    content: '';
+    width: 1.35rem;
+    height: 2px;
+    border-radius: 9999px;
+    background: currentColor;
   }
 
-  /* Cards / surfaces — flat with hairline border */
   .te-card {
-    @apply rounded-lg;
+    @apply rounded-2xl;
     background: var(--te-surface);
     border: 1px solid var(--te-border);
+    box-shadow: var(--te-shadow-sm);
   }
   .te-card-interactive {
-    @apply te-card transition-colors duration-150 cursor-pointer;
+    @apply te-card cursor-pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
   }
   .te-card-interactive:hover {
-    background: var(--te-surface-alt);
     border-color: var(--te-border-strong);
+    box-shadow: var(--te-shadow);
+    transform: translateY(-2px);
   }
   .te-panel {
-    @apply rounded-lg;
+    @apply rounded-2xl;
     background: var(--te-surface);
     border: 1px solid var(--te-border);
+    box-shadow: var(--te-shadow-sm);
   }
 
-  /* Buttons — compact, monospace (engineering/IDE), flat */
   .te-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium transition-colors duration-150 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    letter-spacing: -0.01em;
+    @apply inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.012em;
     outline: none;
+    transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease;
   }
   .te-btn:focus-visible { box-shadow: 0 0 0 3px var(--te-ring); }
+  .te-btn:active:not(:disabled) { transform: translateY(1px); }
 
-  .te-btn-primary { @apply te-btn; color: var(--te-on-primary); background: var(--te-primary); }
-  .te-btn-primary:hover { background: var(--te-primary-hover); }
+  .te-btn-primary {
+    @apply te-btn;
+    color: var(--te-on-primary);
+    background: var(--te-primary);
+    box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--te-primary) 82%, transparent);
+  }
+  .te-btn-primary:hover {
+    background: var(--te-primary-hover);
+    box-shadow: 0 12px 24px -10px color-mix(in srgb, var(--te-primary) 88%, transparent);
+    transform: translateY(-1px);
+  }
 
   .te-btn-secondary {
     @apply te-btn;
@@ -374,48 +406,50 @@ code, .font-mono {
     background: var(--te-surface);
     border: 1px solid var(--te-border);
   }
-  .te-btn-secondary:hover { background: var(--te-surface-alt); border-color: var(--te-border-strong); }
+  .te-btn-secondary:hover { background: var(--te-surface-alt); border-color: var(--te-border-strong); transform: translateY(-1px); }
 
   .te-btn-ghost { @apply te-btn; color: var(--te-text-dim); }
   .te-btn-ghost:hover { background: var(--te-hover); color: var(--te-text); }
 
-  .te-btn-danger { @apply te-btn text-white; background: #dc2626; }
-  .te-btn-danger:hover { background: #b91c1c; }
+  .te-btn-danger { @apply te-btn text-white; background: var(--te-red); }
+  .te-btn-danger:hover { background: #a72f3b; transform: translateY(-1px); }
 
-  .te-btn-sm { @apply px-2.5 py-1.5 text-xs rounded-md gap-1.5; }
-  .te-btn-lg { @apply px-4 py-2.5 text-sm rounded-lg; }
+  .te-btn-sm { @apply min-h-[34px] rounded-lg px-3 py-1.5 text-xs gap-1.5; }
+  .te-btn-lg { @apply min-h-[48px] rounded-xl px-5 py-3 text-sm; }
 
-  /* Icon button */
   .te-icon-btn {
-    @apply inline-flex items-center justify-center h-8 w-8 rounded-md transition-colors duration-150;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl;
     color: var(--te-text-dim);
     outline: none;
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
   }
-  .te-icon-btn:hover { background: var(--te-hover); color: var(--te-text); }
+  .te-icon-btn:hover { background: var(--te-hover); color: var(--te-text); transform: translateY(-1px); }
   .te-icon-btn:focus-visible { box-shadow: 0 0 0 3px var(--te-ring); }
 
   /* Inputs */
   .te-input {
-    @apply w-full rounded-md px-3 py-2 text-sm transition-colors duration-150;
+    @apply w-full rounded-xl px-3.5 py-2.5 text-sm;
+    min-height: 44px;
     color: var(--te-text);
-    background: var(--te-surface);
+    background: color-mix(in srgb, var(--te-surface) 96%, var(--te-bg));
     border: 1px solid var(--te-border);
     outline: none;
+    box-shadow: inset 0 1px 1px rgba(18, 37, 28, 0.025);
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
   }
   .te-input::placeholder { color: var(--te-text-dim); opacity: 0.8; }
   .te-input:focus { border-color: var(--te-accent); box-shadow: 0 0 0 3px var(--te-ring); }
   .te-select { @apply te-input cursor-pointer; }
-  .te-textarea { @apply te-input resize-y min-h-[96px] leading-relaxed; }
+  .te-textarea { @apply te-input resize-y min-h-[112px] leading-relaxed; }
 
-  /* Chips / badges — neutral by default */
   .te-chip {
-    @apply inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
     color: var(--te-text-dim);
     background: var(--te-surface-alt);
     border: 1px solid var(--te-border);
   }
   .te-badge {
-    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
   }
   .te-badge-brand {
     @apply te-badge;
@@ -440,12 +474,11 @@ code, .font-mono {
   .te-tile-red   { color: var(--te-red);   background: var(--te-red-soft); }
   .te-tile-dark  { color: var(--te-on-primary); background: var(--te-text); }
 
-  /* Ghana tricolor flag stripe (red | gold | green) — recurring accent motif */
   .te-stripe {
-    background-image: linear-gradient(90deg, var(--te-red) 0 33.33%, var(--te-gold) 33.33% 66.66%, var(--te-green) 66.66% 100%);
+    background-image: var(--te-gradient);
   }
   .te-stripe-v {
-    background-image: linear-gradient(180deg, var(--te-red) 0 33.33%, var(--te-gold) 33.33% 66.66%, var(--te-green) 66.66% 100%);
+    background-image: linear-gradient(180deg, var(--te-green), var(--te-gold));
   }
 
   .te-divider { height: 1px; width: 100%; background: var(--te-border); }
@@ -464,12 +497,14 @@ code, .font-mono {
 .te-scroll::-webkit-scrollbar-thumb:hover { background: var(--te-text-dim); }
 .te-scroll { scrollbar-width: thin; scrollbar-color: var(--te-border-strong) transparent; }
 
-/* Engineering "canvas" textures — subtle dotted/grid backgrounds for workspace surfaces */
 .te-grid-bg {
   background-color: var(--te-bg);
-  background-image: radial-gradient(var(--te-border) 1px, transparent 1px);
-  background-size: 22px 22px;
-  background-position: -1px -1px;
+  background-image:
+    radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--te-green) 11%, transparent), transparent 30rem),
+    radial-gradient(circle at 92% 88%, color-mix(in srgb, var(--te-gold) 10%, transparent), transparent 28rem),
+    linear-gradient(color-mix(in srgb, var(--te-border) 28%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--te-border) 28%, transparent) 1px, transparent 1px);
+  background-size: auto, auto, 34px 34px, 34px 34px;
 }
 .te-lines-bg {
   background-color: var(--te-bg);
@@ -482,7 +517,7 @@ code, .font-mono {
 
 /* Terminal-style brand mark (used in shells) */
 .te-mark {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif;
   font-weight: 700;
   letter-spacing: -0.04em;
   background: var(--te-primary);
@@ -492,7 +527,187 @@ code, .font-mono {
   justify-content: center;
 }
 .te-wordmark {
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+/* Shared application polish for legacy and feature-specific surfaces. */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--te-bg);
+  scrollbar-color: var(--te-border-strong) transparent;
+}
+
+::selection {
+  color: var(--te-on-primary);
+  background: var(--te-primary);
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+summary {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+:focus-visible {
+  outline: 3px solid var(--te-ring);
+  outline-offset: 2px;
+}
+
+.App {
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.workspace-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--te-green) 7%, transparent), transparent 28rem),
+    var(--te-bg);
+}
+
+.workspace-shell main > .min-h-screen {
+  background: transparent !important;
+}
+
+.workspace-shell main > .min-h-screen > .sticky,
+.workspace-shell main > .min-h-screen > header.sticky {
+  border-color: color-mix(in srgb, var(--te-border) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--te-bg) 86%, transparent) !important;
+  box-shadow: 0 1px 0 rgba(18, 37, 28, 0.02);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+}
+
+.workspace-shell main > .min-h-screen > .sticky > .max-w-7xl,
+.workspace-shell main > .min-h-screen > header.sticky > .max-w-7xl {
+  padding-top: 1.35rem;
+  padding-bottom: 1.35rem;
+}
+
+.workspace-shell main > .min-h-screen > main,
+.workspace-shell main > .min-h-screen > .max-w-7xl:last-child {
+  padding-bottom: 4rem;
+}
+
+.workspace-shell main .rounded-lg {
+  border-radius: 0.875rem;
+}
+
+.workspace-shell main .rounded-md {
+  border-radius: 0.625rem;
+}
+
+.workspace-shell main .shadow-sm {
+  box-shadow: var(--te-shadow-sm);
+}
+
+.workspace-shell main label.font-mono,
+[role='dialog'] label.font-mono {
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0.035em !important;
+}
+
+.workspace-shell main table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.workspace-shell main thead {
+  background: var(--te-surface-alt);
+}
+
+.workspace-shell main th {
+  color: var(--te-text-dim);
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workspace-shell main tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.workspace-shell main tbody tr:hover {
+  background: var(--te-hover);
+}
+
+.workspace-shell main tbody td {
+  border-color: var(--te-border);
+}
+
+.workspace-shell main details[open] > summary {
+  color: var(--te-accent);
+  border-color: var(--te-border-strong);
+}
+
+[role='dialog'] > div[class*='fixed'][class*='inset-0'],
+.fixed.inset-0.bg-black\/40,
+.fixed.inset-0.bg-black\/50,
+.fixed.inset-0.bg-black\/60 {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+input:not([type='checkbox']):not([type='radio']):not([type='file']),
+select,
+textarea {
+  accent-color: var(--te-primary);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--te-primary);
+}
+
+input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  border: 1px solid var(--te-border);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.75rem;
+  color: var(--te-text);
+  background: var(--te-surface-alt);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 14px;
+  }
+
+  .workspace-shell main > .min-h-screen > .sticky,
+  .workspace-shell main > .min-h-screen > header.sticky {
+    top: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

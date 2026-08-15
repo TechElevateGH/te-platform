@@ -771,7 +771,7 @@ const ResumesAndEssaysManagement = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                         <div className="min-w-0 flex-1">
-                            <span className="te-eyebrow">{'// reviews'}</span>
+                            <span className="te-eyebrow">Reviews</span>
                             <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Resumes & Essays Management
                             </h1>

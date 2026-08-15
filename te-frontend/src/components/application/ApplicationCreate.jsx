@@ -110,7 +110,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Company Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// company information'}</h3>
+                        <h3 className="te-eyebrow">Company information</h3>
                         <CompanyCombobox
                             companies={companyOptions}
                             value={appData.company}
@@ -121,7 +121,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Position Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// position details'}</h3>
+                        <h3 className="te-eyebrow">Position details</h3>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Title"
@@ -146,7 +146,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Status Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// application status'}</h3>
+                        <h3 className="te-eyebrow">Application status</h3>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Status"
@@ -169,7 +169,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Location Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// location'}</h3>
+                        <h3 className="te-eyebrow">Location</h3>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <SelectCombobox
                                 label="Country"
@@ -191,7 +191,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Recruiter Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// recruiter information'}</h3>
+                        <h3 className="te-eyebrow">Recruiter information</h3>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <FormInput
                                 label="Recruiter Name"
@@ -211,7 +211,7 @@ const ApplicationCreate = ({ setAddApplication }) => {
 
                     {/* Notes Section */}
                     <div className="te-panel space-y-4 p-4">
-                        <h3 className="te-eyebrow">{'// additional notes'}</h3>
+                        <h3 className="te-eyebrow">Additional notes</h3>
                         <FormTextArea
                             label="Notes"
                             field="notes"

@@ -657,7 +657,7 @@ const Learning = ({ setContent }) => {
                         {expanded && (
                             <div className="mt-3 space-y-3 border-t border-[var(--te-border)] pt-3">
                         <div>
-                            <p className="te-eyebrow mb-1.5">{'// notes'}</p>
+                            <p className="te-eyebrow mb-1.5">Notes</p>
                             <textarea
                                 value={note}
                                 onChange={(e) => updateTopicNote(category.category, topic.name, e.target.value)}
@@ -669,7 +669,7 @@ const Learning = ({ setContent }) => {
 
                         {lessons.length > 0 && (
                             <div className="space-y-2">
-                                <p className="te-eyebrow">{'// lessons'}</p>
+                                <p className="te-eyebrow">Lessons</p>
                                 {lessons.map((lesson) => (
                                     <div key={lesson.id} className="rounded-md border border-[var(--te-border)] bg-[var(--te-surface)] p-3">
                                         <div className="flex items-center justify-between gap-2">
@@ -753,7 +753,7 @@ const Learning = ({ setContent }) => {
                             <div className="mt-3 space-y-3 border-t border-[var(--te-border)] pt-3">
                                 {topic.keyPoints?.length > 0 && (
                                     <div>
-                                        <p className="te-eyebrow mb-1.5">{'// key points'}</p>
+                                        <p className="te-eyebrow mb-1.5">Key points</p>
                                         <ul className="space-y-1">
                                             {topic.keyPoints.map((point, i) => (
                                                 <li key={i} className="flex gap-2 text-sm text-[var(--te-text-dim)]">
@@ -765,7 +765,7 @@ const Learning = ({ setContent }) => {
                                 )}
                                 {topic.resources?.length > 0 && (
                                     <div>
-                                        <p className="te-eyebrow mb-1.5">{'// resources'}</p>
+                                        <p className="te-eyebrow mb-1.5">Resources</p>
                                         <div className="flex flex-wrap gap-1.5">
                                             {topic.resources.map((r, i) => (
                                                 <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="te-chip hover:bg-[var(--te-hover)]">
@@ -777,7 +777,7 @@ const Learning = ({ setContent }) => {
                                     </div>
                                 )}
                                 <div>
-                                    <p className="te-eyebrow mb-1.5">{'// notes'}</p>
+                                    <p className="te-eyebrow mb-1.5">Notes</p>
                                     <textarea
                                         value={pythonTopicNotes[key] || ''}
                                         onChange={(e) => setPythonTopicNotes((prev) => ({ ...prev, [key]: e.target.value }))}
@@ -930,7 +930,7 @@ const Learning = ({ setContent }) => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <span className="te-eyebrow">{'// learning'}</span>
+                            <span className="te-eyebrow">Learning</span>
                             <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--te-text)]">Curriculum</h1>
                         </div>
                         <div className="flex items-center gap-2">

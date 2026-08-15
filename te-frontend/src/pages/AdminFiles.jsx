@@ -311,7 +311,7 @@ const AdminFiles = () => {
                 <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p className="te-eyebrow mb-2">{'// files'}</p>
+                            <p className="te-eyebrow mb-2">Files</p>
                             <h1 className="flex items-center gap-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">
                                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                                     <FolderIcon className="h-5 w-5 text-te-green" />

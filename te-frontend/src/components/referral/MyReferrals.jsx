@@ -185,7 +185,7 @@ const MyReferrals = ({
   return <div className="space-y-5">
             {/* Status Filter */}
             <div className="flex flex-col gap-3 border border-[var(--te-border)] bg-[var(--te-surface)] p-4 sm:flex-row sm:items-center sm:justify-between">
-                <label className="te-eyebrow">{'// status'}</label>
+                <label className="te-eyebrow">Status</label>
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="te-select">
 
                     <option value="active">Active (Pending + In Review)</option>

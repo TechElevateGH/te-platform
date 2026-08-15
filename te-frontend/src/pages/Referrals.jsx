@@ -337,7 +337,7 @@ const Referrals = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <span className="te-eyebrow">{'// referrals'}</span>
+                            <span className="te-eyebrow">Referrals</span>
                             <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-[var(--te-text)]">
                                 Referral workspace
                             </h1>

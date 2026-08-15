@@ -217,7 +217,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     />
                                                 </div>
                                                 <div className="min-w-0 flex-1">
-                                                    <span className="te-eyebrow text-[10px]">{'// application detail'}</span>
+                                                    <span className="te-eyebrow text-[10px]">Application detail</span>
                                                     <h3 className="mt-1 truncate font-display text-lg font-semibold text-[var(--te-text)]">
                                                         {application.company}
                                                     </h3>
@@ -271,7 +271,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow">{'// recruiter information'}</h4>
+                                                        <h4 className="te-eyebrow">Recruiter information</h4>
                                                         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                             <div>
                                                                 <label className="block font-mono text-[10px] uppercase tracking-wide text-[var(--te-text-dim)]">Name</label>
@@ -289,7 +289,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                     </div>
 
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow">{'// notes'}</h4>
+                                                        <h4 className="te-eyebrow">Notes</h4>
                                                         <p className="mt-1.5 text-sm text-[var(--te-text-dim)]">
                                                             {application.notes || 'No notes added'}
                                                         </p>
@@ -300,7 +300,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
                                                 <>
                                                     {/* Location Section */}
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow mb-3">{'// location'}</h4>
+                                                        <h4 className="te-eyebrow mb-3">Location</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Country"
@@ -321,7 +321,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
                                                     {/* Status Section */}
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow mb-3">{'// status'}</h4>
+                                                        <h4 className="te-eyebrow mb-3">Status</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <SelectCombobox
                                                                 label="Application Status"
@@ -342,7 +342,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
                                                     {/* Recruiter Section */}
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow mb-3">{'// recruiter information'}</h4>
+                                                        <h4 className="te-eyebrow mb-3">Recruiter information</h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                                             <FormInput
                                                                 field="recruiter_name"
@@ -362,7 +362,7 @@ const ApplicationInfo = ({ applicationId, setApplicationId, application, setAppl
 
                                                     {/* Notes Section */}
                                                     <div className="te-panel p-4">
-                                                        <h4 className="te-eyebrow mb-3">{'// notes'}</h4>
+                                                        <h4 className="te-eyebrow mb-3">Notes</h4>
                                                         <textarea
                                                             rows={4}
                                                             className="te-textarea w-full"

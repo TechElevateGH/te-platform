@@ -120,7 +120,7 @@ const EditPrivilegedAccount = ({ show, onClose, account, onSuccess }) => {
                                                 <ShieldCheckIcon className="h-6 w-6 text-te-green" />
                                             </div>
                                             <div>
-                                                <span className="te-eyebrow">{'// access'}</span>
+                                                <span className="te-eyebrow">Access</span>
                                                 <Dialog.Title className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">
                                                     Edit Privileged Account
                                                 </Dialog.Title>

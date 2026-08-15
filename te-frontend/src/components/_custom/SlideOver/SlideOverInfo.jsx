@@ -19,28 +19,28 @@ const SlideOverInfo = ({ entityId, title, setHandler, archiveRequest, deleteRequ
 
     return (
         <Transition.Root show={open} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={setOpen}>
-                <div className="fixed inset-0  transition-opacity" />
+            <Dialog as="div" className="relative z-50" onClose={setOpen}>
+                <div className="fixed inset-0 bg-[#06130d]/60 backdrop-blur-sm transition-opacity" />
                 <div className="fixed inset-0 overflow-hidden">
                     <div className="absolute inset-0 overflow-hidden">
-                        <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+                        <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-4 sm:pl-10">
                             <Transition.Child
                                 as={Fragment}
-                                enter="transform transition ease-in-out duration-500 sm:duration-700"
+                                enter="transform transition ease-out duration-300"
                                 enterFrom="translate-x-full"
                                 enterTo="translate-x-0"
-                                leave="transform transition ease-in-out duration-500 sm:duration-700"
+                                leave="transform transition ease-in duration-200"
                                 leaveFrom="translate-x-0"
                                 leaveTo="translate-x-full"
                             >
-                                <Dialog.Panel className="pointer-events-auto w-screen max-w-lg">
-                                    <div className="flex h-full flex-col divide-y divide-[var(--te-border)] bg-[var(--te-surface)] shadow-sm border-l border-[var(--te-border)]">
-                                        <div className="h-0 flex-1 overflow-y-auto">
-                                            <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-4 py-6 sm:px-6">
+                                <Dialog.Panel className="pointer-events-auto h-full w-screen max-w-xl">
+                                    <div className="flex h-full flex-col border-l border-[var(--te-border)] bg-[var(--te-surface)] shadow-[var(--te-shadow-lg)]">
+                                            <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-5 sm:px-7">
                                                 <div className="flex items-center justify-between">
-                                                    <Dialog.Title className="text-base font-semibold leading-6 text-[var(--te-text)]">
-                                                        {title}
-                                                    </Dialog.Title>
+                                                    <div>
+                                                        <span className="te-eyebrow">Details</span>
+                                                        <Dialog.Title className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[var(--te-text)]">{title}</Dialog.Title>
+                                                    </div>
                                                     <div className="ml-3 flex h-7 items-center">
                                                         <button
                                                             type="button"
@@ -54,32 +54,31 @@ const SlideOverInfo = ({ entityId, title, setHandler, archiveRequest, deleteRequ
                                                     </div>
                                                 </div>
                                             </div>
-                                            {children}
+                                            <div className="te-scroll min-h-0 flex-1 overflow-y-auto">{children}</div>
 
-                                            <div className="flex bottom-0 text-center justify-between gap-3 px-6 py-4 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                                            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-4 sm:px-7">
                                                 <button
                                                     type="button"
-                                                    className="te-btn-secondary te-btn-sm ml-3 w-1/3 justify-between flex"
+                                                    className="te-btn-secondary"
                                                     onClick={() => archiveRequest([entityId])}
                                                 >
                                                     Archive <ArchiveBoxIcon className="h-5 w-5" aria-hidden="true" />
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="te-btn-secondary te-btn-sm ml-3 justify-between flex w-1/3"
-                                                    onClick={setOpen}
+                                                    className="te-btn-secondary"
+                                                    onClick={() => setOpen(false)}
                                                 >
                                                     Close <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className="te-btn-danger te-btn-sm ml-3 justify-between flex w-1/3"
+                                                    className="te-btn-danger"
                                                     onClick={() => deleteRequest([entityId])}
                                                 >
                                                     Delete <TrashIcon className="h-5 w-5" aria-hidden="true" />
                                                 </button>
                                             </div>
-                                        </div>
                                     </div >
 
                                 </Dialog.Panel>

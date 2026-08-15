@@ -8,7 +8,7 @@ const ReferralActivity = () => {
   } = useData();
   return <aside className="te-card h-full px-4 text-sm lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:mr-6 lg:w-2/6 lg:overflow-y-auto">
             <header className="mt-6 border-b border-[var(--te-border)] pb-3">
-                <span className="te-eyebrow">{'// activity'}</span>
+                <span className="te-eyebrow">Activity</span>
                 <h2 className="mt-1 font-display text-base font-semibold text-[var(--te-text)]">In review</h2>
             </header>
 

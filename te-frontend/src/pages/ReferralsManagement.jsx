@@ -489,7 +489,7 @@ const ReferralsManagement = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <span className="te-eyebrow">{'// referrals'}</span>
+                            <span className="te-eyebrow">Referrals</span>
                             <div className="mt-1 flex items-center gap-2 flex-wrap">
                                 <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--te-text)] flex items-center gap-2">
                                     <PaperAirplaneIcon className="h-5 w-5 text-[var(--te-text)]" />

@@ -193,7 +193,7 @@ const CreateLeadAdmin = ({ show, onClose, userRole }) => {
                     <div className="flex items-center gap-2">
                         <ShieldCheckIcon className="h-6 w-6 text-te-green" />
                         <div>
-                            <span className="te-eyebrow">{'// access'}</span>
+                            <span className="te-eyebrow">Access</span>
                             <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">
                                 Create Management Account
                             </h2>

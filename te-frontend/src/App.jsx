@@ -17,6 +17,7 @@ import ResumeReviews from './pages/ResumeReviews';
 import PostHogProvider from './providers/PostHogProvider';
 import OAuthCallback from './components/user/OAuthCallback';
 import Documentation from './pages/Documentation';
+import { Loading } from './components/_custom/Loading';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -26,8 +27,8 @@ const ProtectedRoute = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+      <div className="te-grid-bg flex min-h-screen items-center justify-center">
+        <Loading label="Opening your workspace…" />
       </div>
     );
   }
@@ -51,7 +52,7 @@ function App() {
             <ToastProvider>
               <NotificationProvider>
                 <DataProvider>
-                  <div className="App gentium-book">
+                  <div className="App">
                     <Routes>
                       <Route path="/" element={<Home />} />
                       <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />

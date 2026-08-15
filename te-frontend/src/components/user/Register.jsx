@@ -10,6 +10,7 @@ import {
     ArrowRightIcon,
     CheckCircleIcon
 } from 'icons';
+import AuthAside from '../_custom/AuthAside';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -121,24 +122,31 @@ const Register = () => {
 
     if (step === 1) {
         return (
-            <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="relative w-full max-w-md">
+            <div className="min-h-screen bg-[var(--te-bg)] lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+                <AuthAside
+                    eyebrow="Start with support"
+                    title="Talent grows faster with people in your corner."
+                    description="Join a community built to help ambitious technologists learn deliberately, prepare honestly, and find real opportunity."
+                />
+                <main className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10 lg:px-14">
+                <div className="relative w-full max-w-[460px]">
                     {/* Logo and header */}
-                    <div className="mb-8 text-center">
-                        <div className="flex justify-center mb-4">
-                            <img src="/te-mark.svg" alt="TechElevate Logo" className="h-20 w-20 select-none" />
+                    <div className="mb-8">
+                        <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+                            <img src="/te-mark.svg" alt="" className="h-10 w-10 rounded-xl" />
+                            <span className="te-wordmark text-base">TechElevate</span>
                         </div>
-                        <span className="te-eyebrow justify-center">{'// registration'}</span>
-                        <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] mb-2">
-                            Join TechElevate
-                        </h2>
-                        <p className="text-[var(--te-text-dim)]">
-                            Create your engineering workspace
+                        <span className="te-eyebrow">Create your account</span>
+                        <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.055em] text-[var(--te-text)] sm:text-5xl">
+                            Let&apos;s build your next chapter.
+                        </h1>
+                        <p className="mt-3 text-sm leading-6 text-[var(--te-text-dim)]">
+                            Joining is free. Choose how you would like to begin.
                         </p>
                     </div>
 
                     {/* Main card */}
-                    <div className="te-card rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-8 shadow-sm">
+                    <div className="te-card p-6 sm:p-8">
                         {error && (
                             <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30 animate-fade-in">
                                 <div className="flex">
@@ -169,7 +177,7 @@ const Register = () => {
                                 <div className="w-full border-t border-[var(--te-border)]"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="bg-[var(--te-surface)] px-4 font-mono text-xs uppercase tracking-[0.18em] text-[var(--te-text-dim)]">Or register with email</span>
+                                <span className="bg-[var(--te-surface)] px-4 text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--te-text-dim)]">Or use email</span>
                             </div>
                         </div>
 
@@ -179,7 +187,7 @@ const Register = () => {
                             className="te-btn-primary te-btn-lg w-full"
                         >
                             <EnvelopeIcon className="h-5 w-5" />
-                            <span>Sign up with email</span>
+                            <span>Continue with email</span>
                             <ArrowRightIcon className="h-5 w-5" />
                         </button>
 
@@ -208,8 +216,7 @@ const Register = () => {
                         </div>
                     </div>
 
-                    {/* Back to home */}
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center lg:hidden">
                         <button
                             onClick={() => navigate('/')}
                             className="te-link inline-flex items-center gap-2 text-sm"
@@ -221,13 +228,20 @@ const Register = () => {
                         </button>
                     </div>
                 </div>
+                </main>
             </div>
         );
     }
 
     // Step 2: Registration form
     return (
-        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[var(--te-bg)] lg:grid lg:grid-cols-[0.72fr_1.28fr]">
+            <AuthAside
+                eyebrow="Almost there"
+                title="A few details. A lot of possibility."
+                description="Set up your profile so mentors, volunteers, and the TechElevate team can give you more relevant support."
+            />
+            <main className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-10 lg:px-12">
             <div className="relative w-full max-w-2xl">
                 {/* Back button */}
                 <button
@@ -241,23 +255,20 @@ const Register = () => {
                 </button>
 
                 {/* Main card */}
-                <div className="te-card rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-8 shadow-sm">
+                <div className="te-card p-6 sm:p-8">
                     {/* Header */}
-                    <div className="mb-8 text-center">
-                        <div className="mb-4 flex justify-center">
-                            <img src="/te-mark.svg" alt="TechElevate Logo" className="h-16 w-16 select-none" />
-                        </div>
-                        <span className="te-eyebrow justify-center">{'// registration'}</span>
-                        <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-[var(--te-text)] mb-2">
+                    <div className="mb-8">
+                        <span className="te-eyebrow">Your profile</span>
+                        <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.045em] text-[var(--te-text)]">
                             Create your account
                         </h2>
-                        <p className="text-[var(--te-text-dim)]">
-                            Tell us where to route your workspace
+                        <p className="mt-2 text-sm text-[var(--te-text-dim)]">
+                            Tell us enough to personalize your workspace.
                         </p>
                         <button
                             type="button"
                             onClick={handleGuestContinue}
-                            className="te-link mt-3 inline-flex items-center gap-2 text-sm"
+                            className="te-link mt-3 inline-flex items-center gap-2 text-xs font-bold"
                         >
                             <span>Continue as Guest</span>
                             <ArrowRightIcon className="h-4 w-4" />
@@ -474,6 +485,7 @@ const Register = () => {
                     </div>
                 </div>
             </div>
+            </main>
         </div>
     );
 };

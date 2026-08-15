@@ -570,7 +570,7 @@ const Profile = () => {
                 <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-3xl">
-                            <span className="te-eyebrow">{'// settings'}</span>
+                            <span className="te-eyebrow">Settings</span>
                             <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Profile
                             </h1>
@@ -653,7 +653,7 @@ const Profile = () => {
                                     <ShieldCheckIcon className="h-12 w-12 text-[var(--te-text-dim)]" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <span className="te-eyebrow">{'// account'}</span>
+                                    <span className="te-eyebrow">Account</span>
                                     <div className="mt-3 flex flex-wrap items-center gap-3">
                                         <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--te-text)] sm:text-3xl">
                                             {userRoleInt === 5 && 'System Administrator'}
@@ -676,7 +676,7 @@ const Profile = () => {
                         </section>
 
                         <section className="te-panel p-6 sm:p-8">
-                            <span className="te-eyebrow">{'// access'}</span>
+                            <span className="te-eyebrow">Access</span>
                             <div className="mt-5 space-y-5">
                                 <div>
                                     <p className="font-mono text-xs uppercase tracking-[0.14em] text-[var(--te-text-dim)]">Role type</p>
@@ -709,7 +709,7 @@ const Profile = () => {
                                         {(editedInfo.full_name || editedInfo.email || 'TE').trim().slice(0, 2)}
                                     </span>
                                 </div>
-                                <span className="te-eyebrow mt-6">{'// account'}</span>
+                                <span className="te-eyebrow mt-6">Account</span>
                                 <span className="te-chip-green mt-3 font-mono">MEMBER</span>
                                 {isEditing ? (
                                     <div className="mt-3 w-full">
@@ -739,7 +739,7 @@ const Profile = () => {
 
                         <div className="space-y-6">
                             <section className="te-panel p-6 sm:p-8">
-                                <span className="te-eyebrow">{'// contact'}</span>
+                                <span className="te-eyebrow">Contact</span>
                                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
                                     <div className="sm:col-span-2">
                                         <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
@@ -796,7 +796,7 @@ const Profile = () => {
                             </section>
 
                             <section className="te-panel p-6 sm:p-8">
-                                <span className="te-eyebrow">{'// education'}</span>
+                                <span className="te-eyebrow">Education</span>
                                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
                                     <div>
                                         <label className="mb-2 block font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">University</label>

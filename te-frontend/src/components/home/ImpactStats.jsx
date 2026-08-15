@@ -1,141 +1,110 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRightIcon, GlobeAltIcon, HeartIcon, TrophyIcon } from 'icons';
 import { useAuth } from '../../context/AuthContext';
-import {
-    GlobeAltIcon,
-    TrophyIcon,
-    HeartIcon,
-} from 'icons';
 
 const stats = [
-    {
-        id: 0,
-        name: 'Success Stories',
-        value: 60,
-        suffix: '+',
-        icon: TrophyIcon,
-        description: 'Members who landed their dream jobs',
-    },
-    {
-        id: 1,
-        name: 'Nationalities',
-        value: 5,
-        suffix: '+',
-        icon: GlobeAltIcon,
-        description: 'Global presence across continents',
-    },
-    {
-        id: 2,
-        name: 'Community Members',
-        value: 110,
-        suffix: '+',
-        icon: HeartIcon,
-        description: 'Active community participants',
-    },
+    { name: 'Success stories', value: 60, suffix: '+', icon: TrophyIcon, note: 'people stepped into roles they worked hard for' },
+    { name: 'Nationalities', value: 5, suffix: '+', icon: GlobeAltIcon, note: 'perspectives making the community stronger' },
+    { name: 'Community members', value: 110, suffix: '+', icon: HeartIcon, note: 'peers, mentors, referrers, and volunteers' },
 ];
 
-const AnimatedNumber = ({ value, duration = 2000 }) => {
+const AnimatedNumber = ({ value, active }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
-        let startTime;
-        let animationFrame;
+        if (!active) return undefined;
+        if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setCount(value);
+            return undefined;
+        }
 
-        const animate = (timestamp) => {
-            if (!startTime) startTime = timestamp;
-            const progress = timestamp - startTime;
-            const percentage = Math.min(progress / duration, 1);
-            setCount(Math.floor(value * percentage));
-            if (percentage < 1) {
-                animationFrame = requestAnimationFrame(animate);
-            }
+        let frame;
+        let startedAt;
+        const tick = (timestamp) => {
+            if (!startedAt) startedAt = timestamp;
+            const progress = Math.min((timestamp - startedAt) / 1500, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(value * eased));
+            if (progress < 1) frame = requestAnimationFrame(tick);
         };
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+    }, [active, value]);
 
-        animationFrame = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(animationFrame);
-    }, [value, duration]);
-
-    return <span>{count}</span>;
+    return count;
 };
 
 const ImpactStats = () => {
+    const sectionRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        const element = document.getElementById('impact');
-        if (element) {
-            observer.observe(element);
+        const section = sectionRef.current;
+        if (!section) return undefined;
+        if (typeof IntersectionObserver === 'undefined') {
+            setIsVisible(true);
+            return undefined;
         }
-
-        return () => {
-            if (element) {
-                observer.unobserve(element);
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.disconnect();
             }
-        };
+        }, { threshold: 0.2 });
+        observer.observe(section);
+        return () => observer.disconnect();
     }, []);
 
     return (
-        <section id="impact" className="bg-[var(--te-bg)] py-24 sm:py-28 border-b border-[var(--te-border)]">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                {/* Section header */}
-                <div className="max-w-2xl mb-14">
-                    <span className="te-eyebrow">{'// impact'}</span>
-                    <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--te-text)]">
-                        Real people, real outcomes
-                    </h2>
-                    <p className="mt-4 text-base sm:text-lg leading-relaxed text-[var(--te-text-dim)]">
-                        Every number here is a person who found their path into tech through TechElevate.
+        <section ref={sectionRef} id="impact" className="relative overflow-hidden bg-[#0b2e21] py-24 text-white sm:py-32">
+            <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full border-[90px] border-white/[0.025]" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-96 opacity-20 [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:18px_18px]" />
+            <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+                    <div>
+                        <span className="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#6fdda5] before:h-0.5 before:w-5 before:rounded-full before:bg-current">
+                            The human outcome
+                        </span>
+                        <h2 className="mt-5 text-4xl font-extrabold tracking-[-0.055em] text-white sm:text-5xl">
+                            Progress is personal. Impact is collective.
+                        </h2>
+                    </div>
+                    <p className="max-w-2xl text-lg leading-8 text-white/60 lg:justify-self-end">
+                        Behind every number is someone who asked a better question, found a generous mentor, practised one more time, and took the next brave step.
                     </p>
                 </div>
 
-                {/* Stats grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-lg border border-[var(--te-border)] bg-[var(--te-border)]">
-                    {stats.map((stat, i) => {
-                        const tone = ['green', 'gold', 'red'][i % 3];
-                        return (
-                        <div key={stat.id} className="bg-[var(--te-surface)] p-8">
-                            <div className="flex items-center justify-between">
-                                <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg te-tile-${tone}`}>
-                                    <stat.icon className="h-5 w-5" strokeWidth={1.9} />
-                                </span>
+                <div className="mt-16 grid overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.04] backdrop-blur sm:grid-cols-3">
+                    {stats.map((stat, index) => (
+                        <article key={stat.name} className={`p-7 sm:p-8 ${index > 0 ? 'border-t border-white/10 sm:border-l sm:border-t-0' : ''}`}>
+                            <div className="flex items-start justify-between">
+                                <stat.icon className="h-5 w-5 text-[#6fdda5]" strokeWidth={1.8} />
+                                <span className="text-[10px] font-bold text-white/25">0{index + 1}</span>
                             </div>
-                            <div className={`mt-6 font-mono text-5xl font-bold tracking-tight text-te-${tone}`}>
-                                {isVisible ? <AnimatedNumber value={stat.value} /> : 0}
-                                {stat.suffix}
-                            </div>
-                            <div className="mt-3 text-base font-semibold text-[var(--te-text)]">
-                                {stat.name}
-                            </div>
-                            <p className="mt-1 text-sm leading-relaxed text-[var(--te-text-dim)]">
-                                {stat.description}
+                            <p className="mt-10 text-5xl font-extrabold tracking-[-0.06em] text-white sm:text-6xl">
+                                <AnimatedNumber value={stat.value} active={isVisible} />{stat.suffix}
                             </p>
-                        </div>
-                        );
-                    })}
+                            <h3 className="mt-4 text-base font-extrabold text-white">{stat.name}</h3>
+                            <p className="mt-2 text-sm leading-6 text-white/50">{stat.note}</p>
+                        </article>
+                    ))}
                 </div>
 
-                {/* Bottom CTA */}
-                <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="mt-14 flex flex-col items-start justify-between gap-6 rounded-[1.75rem] bg-[#f2bd58] p-7 text-[#0b2e21] sm:flex-row sm:items-center sm:p-9">
+                    <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#0b2e21]/55">There is room for your story</p>
+                        <h3 className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[#0b2e21] sm:text-3xl">Take the next step with people in your corner.</h3>
+                    </div>
                     <button
                         onClick={() => navigate(isAuthenticated ? '/workspace' : '/register')}
-                        className="te-btn-primary te-btn-lg"
+                        className="group inline-flex min-h-[48px] flex-shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0b2e21] px-5 py-3 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#123d2d]"
                     >
-                        Be part of our impact <span aria-hidden="true">→</span>
+                        {isAuthenticated ? 'Keep moving' : 'Join TechElevate'}
+                        <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </button>
-                    <span className="font-mono text-xs text-[var(--te-text-dim)]">
-                        {'// join us in changing lives'}
-                    </span>
                 </div>
             </div>
         </section>

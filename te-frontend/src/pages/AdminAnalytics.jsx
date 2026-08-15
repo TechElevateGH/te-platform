@@ -46,7 +46,7 @@ export default function AdminAnalytics() {
             <div className="mb-8 border-b border-[var(--te-border)] pb-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p className="te-eyebrow mb-3">{'// analytics'}</p>
+                        <p className="te-eyebrow mb-3">Analytics</p>
                         <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                             Member Learning Analytics
                         </h1>

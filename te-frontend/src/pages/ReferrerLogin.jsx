@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BuildingOfficeIcon, KeyIcon, ArrowLeftIcon } from 'icons';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
+import AuthAside from '../components/_custom/AuthAside';
 
 const ReferrerLogin = () => {
     const navigate = useNavigate();
@@ -53,7 +54,13 @@ const ReferrerLogin = () => {
     };
 
     return (
-        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+        <div className="min-h-screen bg-[var(--te-bg)] lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+            <AuthAside
+                eyebrow="Referrer access"
+                title="A warm introduction can change a career."
+                description="Review referral requests and help strong candidates reach the teams where they can thrive."
+            />
+            <main className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10 lg:px-14">
             <div className="relative max-w-md w-full">
                 <button
                     onClick={() => navigate('/login')}
@@ -63,7 +70,7 @@ const ReferrerLogin = () => {
                     Back to member login
                 </button>
 
-                <div className="flex items-center justify-center mb-8">
+                <div className="flex items-center justify-center mb-8 lg:hidden">
                     <img
                         src="/te-mark.svg"
                         alt="TechElevate Logo"
@@ -71,12 +78,12 @@ const ReferrerLogin = () => {
                     />
                 </div>
 
-                <div className="bg-[var(--te-surface)] rounded-2xl shadow-sm border border-[var(--te-border)] p-8">
+                <div className="te-card p-6 sm:p-8">
                     <div className="text-center mb-8">
-                        <p className="te-eyebrow mb-2">Referrer</p>
-                        <h2 className="text-3xl font-bold text-[var(--te-text)]">
-                            Company Referrer Access
-                        </h2>
+                        <p className="te-eyebrow mb-3">Referrer portal</p>
+                        <h1 className="text-3xl font-extrabold tracking-[-0.045em] text-[var(--te-text)]">
+                            Open the right door.
+                        </h1>
                         <p className="mt-2 text-sm text-[var(--te-text-dim)]">
                             Enter your secure access token to continue.
                         </p>
@@ -160,6 +167,7 @@ const ReferrerLogin = () => {
                     Your access token is encrypted and secure.
                 </p>
             </div>
+            </main>
         </div>
     );
 };

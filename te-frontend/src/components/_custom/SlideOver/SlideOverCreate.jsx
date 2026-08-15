@@ -64,44 +64,45 @@ const SlideOverForm = ({
     return (
         <Transition.Root show={open} as={Fragment}>
             <Dialog as="div" className="relative z-50" onClose={() => { setOpen(false) }}>
-                {/* Backdrop with smooth fade and blur */}
                 <Transition.Child
                     as={Fragment}
-                    enter="ease-out duration-300"
+                    enter="ease-out duration-200"
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
-                    leave="ease-in duration-200"
+                    leave="ease-in duration-150"
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black/40 transition-all" />
+                    <div className="fixed inset-0 bg-[#06130d]/60 backdrop-blur-sm" />
                 </Transition.Child>
 
-                <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-center justify-center p-4">
+                <div className="fixed inset-0 z-10 overflow-hidden">
+                    <div className="absolute inset-0 overflow-hidden">
+                        <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-4 sm:pl-10">
                         <Transition.Child
                             as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0 scale-95 translate-y-4"
-                            enterTo="opacity-100 scale-100 translate-y-0"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100 scale-100 translate-y-0"
-                            leaveTo="opacity-0 scale-95 translate-y-4"
+                            enter="transform transition ease-out duration-300"
+                            enterFrom="translate-x-full"
+                            enterTo="translate-x-0"
+                            leave="transform transition ease-in duration-200"
+                            leaveFrom="translate-x-0"
+                            leaveTo="translate-x-full"
                         >
-                            <Dialog.Panel className="te-card relative transform overflow-hidden shadow-sm transition-all w-full max-w-2xl">
+                            <Dialog.Panel className="pointer-events-auto h-full w-screen max-w-2xl border-l border-[var(--te-border)] bg-[var(--te-surface)] shadow-[var(--te-shadow-lg)]">
                                 <form
                                     ref={formRef}
-                                    className="flex flex-col"
+                                    className="flex h-full flex-col"
                                     onKeyDown={handleKeyDown}
                                     onSubmit={submitFormHandler}
                                 >
-                                    {/* Premium Header */}
-                                    <div className="relative bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-6 py-5">
-                                        <div className="absolute inset-0 opacity-30" />
-                                        <div className="relative flex items-center justify-between">
-                                            <Dialog.Title className="text-xl font-bold text-[var(--te-text)]">
+                                    <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-5 sm:px-7">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <span className="te-eyebrow">Create new</span>
+                                                <Dialog.Title className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-[var(--te-text)]">
                                                 {title}
-                                            </Dialog.Title>
+                                                </Dialog.Title>
+                                            </div>
                                             <button
                                                 type="button"
                                                 className="te-icon-btn"
@@ -112,13 +113,11 @@ const SlideOverForm = ({
                                         </div>
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="te-scroll max-h-[calc(100vh-16rem)] overflow-y-auto bg-[var(--te-surface)] transition-colors">
+                                    <div className="te-scroll min-h-0 flex-1 overflow-y-auto bg-[var(--te-surface)]">
                                         {children}
                                     </div>
 
-                                    {/* Premium Footer */}
-                                    <div className="flex items-center justify-end gap-3 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-6 py-4 transition-colors">
+                                    <div className="flex items-center justify-end gap-3 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] px-5 py-4 sm:px-7">
                                         <button
                                             type="button"
                                             className="te-btn-secondary"
@@ -140,6 +139,7 @@ const SlideOverForm = ({
                                 </form>
                             </Dialog.Panel>
                         </Transition.Child>
+                        </div>
                     </div>
                 </div>
             </Dialog>

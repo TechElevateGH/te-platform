@@ -22,7 +22,7 @@ export const FormCombobox = ({ field, label, data, handleInputChange, value, req
             {label && (
                 <label
                     htmlFor={field}
-                    className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors"
+                    className="mb-2 block text-sm font-bold text-[var(--te-text)] transition-colors"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
@@ -93,7 +93,7 @@ export const FormSelect = ({ field, label, data, handleInputChange, value, requi
             {label && (
                 <label
                     htmlFor={field}
-                    className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors"
+                    className="mb-2 block text-sm font-bold text-[var(--te-text)] transition-colors"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
@@ -126,7 +126,7 @@ export const FormInput = ({ type, label, field, placeholder, handleInputChange, 
             {label && (
                 <label
                     htmlFor={field}
-                    className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors"
+                    className="mb-2 block text-sm font-bold text-[var(--te-text)] transition-colors"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
@@ -159,7 +159,7 @@ export const FormTextArea = ({ label, field, handleInputChange, required }) => {
             {label && (
                 <label
                     htmlFor={field}
-                    className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors"
+                    className="mb-2 block text-sm font-bold text-[var(--te-text)] transition-colors"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
@@ -196,12 +196,12 @@ export const FileUpload = ({
             {label && (
                 <label
                     htmlFor={inputId}
-                    className="block mb-2 text-sm font-mono font-semibold text-[var(--te-text)] transition-colors"
+                    className="mb-2 block text-sm font-bold text-[var(--te-text)] transition-colors"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
             )}
-            <div className="mt-6 flex rounded-lg border border-dashed border-[var(--te-border)] px-3 py-3 bg-[var(--te-surface)] transition-colors">
+            <div className="mt-3 flex items-center rounded-2xl border border-dashed border-[var(--te-border-strong)] bg-[var(--te-surface-alt)] p-4 transition-colors hover:border-[var(--te-accent)]">
                 <input
                     type="file"
                     id={inputId}
@@ -229,7 +229,7 @@ export const FormCheckBox = ({ label, field, handleInputChange, checked = false 
     const checkboxId = field.replace(/\./g, '-');
 
     return (
-        <div className="block text-sm leading-6 text-[var(--te-text)] font-mono font-semibold transition-colors">
+        <div className="block text-sm font-semibold leading-6 text-[var(--te-text)] transition-colors">
             <label htmlFor={checkboxId} className='mr-2'>{label}</label>
             <input
                 id={checkboxId}

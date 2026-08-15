@@ -87,7 +87,7 @@ const Opportunities = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-3xl">
-                            <span className="te-eyebrow">{'// opportunities'}</span>
+                            <span className="te-eyebrow">Opportunities</span>
                             <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Job discovery, engineered.
                             </h1>
@@ -148,7 +148,7 @@ const Opportunities = () => {
                 <section className="mt-8">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <span className="te-eyebrow">{'// preview'}</span>
+                            <span className="te-eyebrow">Preview</span>
                             <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--te-text)]">Sample opportunity feed</h2>
                             <p className="mt-1 text-sm text-[var(--te-text-dim)]">Flat, scannable cards built for quick role triage.</p>
                         </div>

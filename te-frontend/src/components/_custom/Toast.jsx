@@ -1,44 +1,55 @@
 import { useEffect } from 'react';
-import { CheckCircleIcon, XMarkIcon } from 'icons';
+import {
+    CheckCircleIcon,
+    ExclamationTriangleIcon,
+    InformationCircleIcon,
+    XCircleIcon,
+    XMarkIcon,
+} from 'icons';
 
-const Toast = ({ message, type = 'success', onClose, duration = 2000 }) => {
+const variants = {
+    success: {
+        icon: CheckCircleIcon,
+        iconClass: 'bg-[var(--te-green-soft)] text-[var(--te-green)]',
+        label: 'Success',
+    },
+    error: {
+        icon: XCircleIcon,
+        iconClass: 'bg-[var(--te-red-soft)] text-[var(--te-red)]',
+        label: 'Something went wrong',
+    },
+    warning: {
+        icon: ExclamationTriangleIcon,
+        iconClass: 'bg-[var(--te-gold-soft)] text-[var(--te-gold)]',
+        label: 'Heads up',
+    },
+    info: {
+        icon: InformationCircleIcon,
+        iconClass: 'bg-[var(--te-accent-soft)] text-[var(--te-accent)]',
+        label: 'Update',
+    },
+};
+
+const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
     useEffect(() => {
-        const timer = setTimeout(() => {
-            onClose();
-        }, duration);
-
+        const timer = setTimeout(onClose, duration);
         return () => clearTimeout(timer);
     }, [duration, onClose]);
 
+    const variant = variants[type] || variants.info;
+    const Icon = variant.icon;
+
     return (
-        <div className="fixed top-4 right-4 z-[10000] animate-slide-in-right">
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-sm border bg-[var(--te-surface)] text-[var(--te-text)] border-[var(--te-border)] ${type === 'error'
-                    ? 'border-l-4 border-l-red-600'
-                    : type === 'warning'
-                        ? 'border-l-4 border-l-amber-500'
-                        : ''
-                }`}>
-                <div className={`flex-shrink-0 ${type === 'error'
-                        ? 'text-red-600 dark:text-red-400'
-                        : type === 'warning'
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-[var(--te-text)]'
-                    }`}>
-                    <CheckCircleIcon className="h-5 w-5 animate-scale-in" />
+        <div className="fixed inset-x-4 top-4 z-[10000] animate-slide-in-right sm:left-auto sm:right-5 sm:w-full sm:max-w-sm" role="alert">
+            <div className="flex items-start gap-3 rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-4 shadow-[var(--te-shadow-lg)]">
+                <span className={`grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl ${variant.iconClass}`}>
+                    <Icon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1 pt-0.5">
+                    <p className="text-xs font-extrabold text-[var(--te-text)]">{variant.label}</p>
+                    <p className="mt-1 text-sm leading-5 text-[var(--te-text-dim)]">{message}</p>
                 </div>
-                <p className={`text-sm font-medium ${type === 'success'
-                        ? 'text-[var(--te-text)]'
-                        : 'text-[var(--te-text)]'
-                    }`}>
-                    {message}
-                </p>
-                <button
-                    onClick={onClose}
-                    className={`flex-shrink-0 ${type === 'success'
-                            ? 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
-                            : 'text-[var(--te-text-dim)] hover:text-[var(--te-text)]'
-                        }`}
-                >
+                <button onClick={onClose} className="te-icon-btn -mr-2 -mt-2 h-8 w-8 flex-shrink-0" aria-label="Dismiss notification">
                     <XMarkIcon className="h-4 w-4" />
                 </button>
             </div>

@@ -117,7 +117,7 @@ const CreateReferrer = ({ show, onClose }) => {
                     <div className="flex items-center gap-2">
                         <BuildingOfficeIcon className="h-6 w-6 text-te-green" />
                         <div>
-                            <span className="te-eyebrow">{'// referrals'}</span>
+                            <span className="te-eyebrow">Referrals</span>
                             <h2 className="font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Create Referrer Account</h2>
                         </div>
                     </div>

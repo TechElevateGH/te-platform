@@ -121,7 +121,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                                         onError={handleCompanyLogoError}
                                                     />
                                                     <div>
-                                                        <span className="te-eyebrow text-[10px]">{'// update application'}</span>
+                                                        <span className="te-eyebrow text-[10px]">Update application</span>
                                                         <Dialog.Title className="mt-1 font-display text-xl font-semibold text-[var(--te-text)]">
                                                             {application.company.name}
                                                         </Dialog.Title>
@@ -144,7 +144,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
                                         <div className="max-h-[calc(100vh-16rem)] space-y-5 overflow-y-auto px-6 py-6 te-scroll">
                                             {/* Location Section */}
                                             <div className="te-panel space-y-4 p-4">
-                                                <h3 className="te-eyebrow">{'// location'}</h3>
+                                                <h3 className="te-eyebrow">Location</h3>
                                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormSelect
                                                         label="Country"
@@ -165,7 +165,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
 
                                             {/* Status Section */}
                                             <div className="te-panel space-y-4 p-4">
-                                                <h3 className="te-eyebrow">{'// application status'}</h3>
+                                                <h3 className="te-eyebrow">Application status</h3>
                                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormSelect
                                                         label="Status"
@@ -186,7 +186,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
 
                                             {/* Recruiter Section */}
                                             <div className="te-panel space-y-4 p-4">
-                                                <h3 className="te-eyebrow">{'// recruiter information'}</h3>
+                                                <h3 className="te-eyebrow">Recruiter information</h3>
                                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                                     <FormInput
                                                         label="Recruiter Name"
@@ -207,7 +207,7 @@ const ApplicationUpdate = ({ application, setApplication, setUpdateApplication }
 
                                             {/* Notes Section */}
                                             <div className="te-panel space-y-4 p-4">
-                                                <h3 className="te-eyebrow">{'// notes'}</h3>
+                                                <h3 className="te-eyebrow">Notes</h3>
                                                 <FormInput
                                                     label="Notes"
                                                     type='text'

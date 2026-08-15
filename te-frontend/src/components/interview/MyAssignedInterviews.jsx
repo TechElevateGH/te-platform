@@ -384,7 +384,7 @@ const MyAssignedInterviews = () => {
             {/* Upcoming Interviews */}
             {upcomingInterviews.length > 0 && (
                 <div className="space-y-6">
-                    <h4 className="te-eyebrow">{'// upcoming'}</h4>
+                    <h4 className="te-eyebrow">Upcoming</h4>
                     {Object.entries(groupedUpcoming).map(([label, groupInterviews]) => (
                         <div key={label}>
                             {groupBy !== 'none' && (
@@ -405,7 +405,7 @@ const MyAssignedInterviews = () => {
             {/* Past Interviews */}
             {pastInterviews.length > 0 && (
                 <div className="space-y-6">
-                    <h4 className="te-eyebrow">{'// past'}</h4>
+                    <h4 className="te-eyebrow">Past</h4>
                     {Object.entries(groupedPast).map(([label, groupInterviews]) => (
                         <div key={label}>
                             {groupBy !== 'none' && (

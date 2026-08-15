@@ -12,7 +12,7 @@ const SignInPrompt = ({ isOpen, onClose }) => {
     };
 
     const handleSignUp = () => {
-        navigate('/signup');
+        navigate('/register');
         onClose();
     };
 
@@ -29,7 +29,7 @@ const SignInPrompt = ({ isOpen, onClose }) => {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black/40 transition-all" />
+                    <div className="fixed inset-0 bg-[#06130d]/60 backdrop-blur-sm transition-all" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -43,7 +43,7 @@ const SignInPrompt = ({ isOpen, onClose }) => {
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="te-card relative transform overflow-hidden shadow-sm transition-all w-full max-w-md">
+                            <Dialog.Panel className="te-card relative w-full max-w-md transform overflow-hidden shadow-[var(--te-shadow-lg)] transition-all">
                                 {/* Header */}
                                 <div className="absolute top-0 inset-x-0 h-32 bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]" />
 
@@ -59,14 +59,14 @@ const SignInPrompt = ({ isOpen, onClose }) => {
                                     </div>
 
                                     {/* Title */}
-                                    <Dialog.Title className="text-2xl font-bold text-[var(--te-text)] text-center mb-3">
-                                        Sign In Required
+                                    <Dialog.Title className="mb-3 text-center text-2xl font-extrabold tracking-[-0.04em] text-[var(--te-text)]">
+                                        Save your momentum
                                     </Dialog.Title>
 
                                     {/* Message */}
                                     <div className="text-center mb-8">
                                         <p className="text-sm text-[var(--te-text-dim)] mb-2">
-                                            Please sign in to access your workspace and manage your resumes, applications, and referrals.
+                                            Sign in to manage your resumes, applications, referrals, and saved learning progress.
                                         </p>
                                         <p className="text-xs text-[var(--te-text-dim)]">
                                             Don't have an account? Create one in seconds!

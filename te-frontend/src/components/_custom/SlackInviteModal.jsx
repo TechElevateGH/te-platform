@@ -31,7 +31,7 @@ const SlackInviteModal = ({ isOpen, onClose, onJoin }) => {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black/40" />
+                    <div className="fixed inset-0 bg-[#06130d]/60 backdrop-blur-sm" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
@@ -45,7 +45,7 @@ const SlackInviteModal = ({ isOpen, onClose, onJoin }) => {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="te-card w-full max-w-lg transform overflow-hidden shadow-sm transition-all">
+                            <Dialog.Panel className="te-card w-full max-w-lg transform overflow-hidden shadow-[var(--te-shadow-lg)] transition-all">
                                 {/* Close button */}
                                 <div className="absolute right-4 top-4">
                                     <button
@@ -58,8 +58,8 @@ const SlackInviteModal = ({ isOpen, onClose, onJoin }) => {
                                 </div>
 
                                 {/* Header */}
-                                <div className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)] px-8 pt-12 pb-8 text-[var(--te-text)]">
-                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-lg bg-[var(--te-surface)] border border-[var(--te-border)] text-[var(--te-text)]">
+                                <div className="border-b border-[var(--te-border)] bg-[var(--te-gold-soft)] px-8 pb-8 pt-12 text-[var(--te-text)]">
+                                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] text-[var(--te-gold)] shadow-sm">
                                         {/* Slack icon */}
                                         <svg className="h-12 w-12" viewBox="0 0 127 127" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M27.2 80c0 7.3-5.9 13.2-13.2 13.2C6.7 93.2.8 87.3.8 80c0-7.3 5.9-13.2 13.2-13.2h13.2V80zm6.6 0c0-7.3 5.9-13.2 13.2-13.2 7.3 0 13.2 5.9 13.2 13.2v33c0 7.3-5.9 13.2-13.2 13.2-7.3 0-13.2-5.9-13.2-13.2V80z" fill="currentColor" />
@@ -70,12 +70,12 @@ const SlackInviteModal = ({ isOpen, onClose, onJoin }) => {
                                     </div>
                                     <Dialog.Title
                                         as="h3"
-                                        className="text-2xl font-bold mb-3 text-[var(--te-text)]"
+                                        className="mb-3 text-2xl font-extrabold tracking-[-0.04em] text-[var(--te-text)]"
                                     >
-                                        Join Our Slack Community! 🎉
+                                        Meet the community in Slack
                                     </Dialog.Title>
                                     <p className="text-[var(--te-text-dim)] text-base">
-                                        Connect with fellow members, get support, and stay updated
+                                        Get support, share progress, and hear about opportunities as they happen.
                                     </p>
                                 </div>
 
@@ -106,7 +106,7 @@ const SlackInviteModal = ({ isOpen, onClose, onJoin }) => {
                                             }
                                         ].map((benefit, index) => (
                                             <div key={index} className="flex gap-4 items-start">
-                                                <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-md bg-[var(--te-surface-alt)] border border-[var(--te-border)] text-2xl">
+                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--te-border)] bg-[var(--te-surface-alt)] text-xl">
                                                     {benefit.icon}
                                                 </div>
                                                 <div className="flex-1 text-left">

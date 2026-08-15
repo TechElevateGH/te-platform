@@ -260,7 +260,7 @@ const ResumesAndEssays = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <span className="te-eyebrow">{'// resumes'}</span>
+                            <span className="te-eyebrow">Resumes</span>
                             <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Resumes & Essays
                             </h1>
@@ -316,7 +316,7 @@ const ResumesAndEssays = () => {
                                 <div className="te-card p-5">
                                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <span className="te-eyebrow">{'// files'}</span>
+                                            <span className="te-eyebrow">Files</span>
                                             <h2 className="mt-2 font-display text-xl font-bold text-[var(--te-text)]">Resume library</h2>
                                         </div>
                                         {isMember && (

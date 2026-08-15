@@ -152,7 +152,7 @@ const Interviews = () => {
                         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)]">
                             <CalendarDaysIcon className="h-6 w-6 text-[var(--te-text-dim)]" />
                         </div>
-                        <span className="te-eyebrow">{'// meetings'}</span>
+                        <span className="te-eyebrow">Meetings</span>
                         <h3 className="mt-2 font-mono text-xl font-bold text-[var(--te-text)]">Members only</h3>
                         <p className="mt-3 text-sm leading-relaxed text-[var(--te-text-dim)]">
                             Meetings are available to verified members only. Please sign in or complete verification to access this feature.
@@ -169,7 +169,7 @@ const Interviews = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="max-w-2xl">
-                            <span className="te-eyebrow">{'// meetings'}</span>
+                            <span className="te-eyebrow">Meetings</span>
                             <h1 className="mt-1 font-mono text-2xl font-bold tracking-tight text-[var(--te-text)]">
                                 {activeTitle}
                             </h1>

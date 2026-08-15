@@ -266,7 +266,7 @@ const Applications = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-2xl">
-                            <span className="te-eyebrow">{'// applications'}</span>
+                            <span className="te-eyebrow">Applications</span>
                             <h1 className="mt-3 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--te-text)]">
                                 Application tracker
                             </h1>

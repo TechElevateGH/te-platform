@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShieldCheckIcon, KeyIcon, UserIcon, ArrowLeftIcon } from 'icons';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
+import AuthAside from '../components/_custom/AuthAside';
 
 const LeadLogin = () => {
     const navigate = useNavigate();
@@ -59,7 +60,13 @@ const LeadLogin = () => {
     };
 
     return (
-        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+        <div className="min-h-screen bg-[var(--te-bg)] lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+            <AuthAside
+                eyebrow="Team access"
+                title="Lead with clarity. Support with context."
+                description="Manage learning, members, and community operations from the same focused platform."
+            />
+            <main className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10 lg:px-14">
             <div className="relative max-w-md w-full">
                 <button
                     onClick={() => navigate('/login')}
@@ -69,7 +76,7 @@ const LeadLogin = () => {
                     Back to member login
                 </button>
 
-                <div className="flex items-center justify-center mb-8">
+                <div className="flex items-center justify-center mb-8 lg:hidden">
                     <img
                         src="/te-mark.svg"
                         alt="TechElevate Logo"
@@ -77,12 +84,12 @@ const LeadLogin = () => {
                     />
                 </div>
 
-                <div className="bg-[var(--te-surface)] rounded-2xl shadow-sm border border-[var(--te-border)] p-8">
+                <div className="te-card p-6 sm:p-8">
                     <div className="text-center mb-8">
-                        <p className="te-eyebrow mb-2">Management</p>
-                        <h2 className="text-3xl font-bold text-[var(--te-text)]">
-                            Management Login
-                        </h2>
+                        <p className="te-eyebrow mb-3">Management access</p>
+                        <h1 className="text-3xl font-extrabold tracking-[-0.045em] text-[var(--te-text)]">
+                            Welcome back, team.
+                        </h1>
                         <p className="mt-2 text-sm text-[var(--te-text-dim)]">
                             Enter your username and access token.
                         </p>
@@ -174,6 +181,7 @@ const LeadLogin = () => {
                     </form>
                 </div>
             </div>
+            </main>
         </div>
     );
 };

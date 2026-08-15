@@ -43,6 +43,19 @@ const red = {
   900: '#620913',
   950: '#3a0309',
 };
+const neutral = {
+  50: '#f5f8f5',
+  100: '#edf3ef',
+  200: '#dce6df',
+  300: '#c5d4ca',
+  400: '#91a298',
+  500: '#627168',
+  600: '#4b5c52',
+  700: '#34483d',
+  800: '#21372c',
+  900: '#12251c',
+  950: '#07130e',
+};
 
 module.exports = {
   mode: 'jit',
@@ -58,9 +71,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['IBM Plex Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
-        display: ['JetBrains Mono', 'ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
+        sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        mono: ['DM Mono', 'ui-monospace', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        display: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         // On-palette named scales
@@ -86,6 +99,11 @@ module.exports = {
         // Red family -> Ghana red
         rose: red,
         pink: red,
+        slate: neutral,
+        gray: neutral,
+        zinc: neutral,
+        neutral,
+        stone: neutral,
         // Backwards-compatible aliases
         'te-blue': green[600],
         'te-cyan': green[500],
@@ -105,14 +123,14 @@ module.exports = {
         'brand-gradient': 'linear-gradient(135deg, #0e7a3d 0%, #138a46 100%)'
       },
       boxShadow: {
-        'te': '0 1px 2px 0 rgba(20,18,12,0.05), 0 1px 3px 0 rgba(20,18,12,0.06)',
-        'te-dark': '0 1px 2px 0 rgba(0,0,0,0.4), 0 1px 3px 0 rgba(0,0,0,0.5)',
-        'te-card': '0 1px 2px 0 rgba(20,18,12,0.04), 0 1px 2px 0 rgba(20,18,12,0.04)',
-        'te-card-hover': '0 1px 2px 0 rgba(20,18,12,0.06), 0 6px 16px -8px rgba(20,18,12,0.12)',
-        'brand-glow': '0 1px 2px 0 rgba(14,122,61,0.10), 0 8px 24px -12px rgba(14,122,61,0.35)'
+        'te': '0 14px 38px -24px rgba(18,37,28,0.3), 0 2px 8px rgba(18,37,28,0.05)',
+        'te-dark': '0 18px 46px -24px rgba(0,0,0,0.68), 0 3px 12px rgba(0,0,0,0.24)',
+        'te-card': '0 1px 2px rgba(18,37,28,0.05)',
+        'te-card-hover': '0 18px 46px -24px rgba(18,37,28,0.36), 0 4px 12px rgba(18,37,28,0.07)',
+        'brand-glow': '0 14px 28px -12px rgba(13,124,76,0.42)'
       },
       borderRadius: {
-        'xl2': '0.875rem'
+        'xl2': '1rem'
       }
     }
   },

@@ -360,7 +360,7 @@ const Workspace = ({ setLogin }) => {
 
     return (
         <>
-            <div className="bg-theme transition-colors">
+            <div className="workspace-shell bg-theme transition-colors">
                 <Sidebar
                     navigation={navigation}
                     content={content}
@@ -373,7 +373,7 @@ const Workspace = ({ setLogin }) => {
                 {/* Workspace Navbar */}
                 <Navbar onMobileMenuOpen={() => setSidebarOpen(true)} isWorkspace={true} />
 
-                <div className="md:pl-60">
+                <div className="md:pl-64">
                     <main className="min-h-screen bg-theme pt-16 transition-colors">
                         {
                             content === "Account Management" ? <UserAccountManagement /> :

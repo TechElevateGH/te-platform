@@ -110,7 +110,7 @@ const Practice = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-3xl">
-                            <span className="te-eyebrow">{'// practice'}</span>
+                            <span className="te-eyebrow">Practice</span>
                             <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[var(--te-text)] sm:text-4xl">
                                 Practice like an engineer.
                             </h1>
@@ -169,7 +169,7 @@ const Practice = () => {
                 {resourceCategories.length > 0 && (
                     <section className="mt-8">
                         <div className="max-w-3xl">
-                            <span className="te-eyebrow">{'// recommended path'}</span>
+                            <span className="te-eyebrow">Recommended path</span>
                             <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--te-text)]">Core resources we actually use</h2>
                             <p className="mt-2 text-sm leading-6 text-[var(--te-text-dim)]">
                                 Sprint through the roadmap, revise aggressively, visualize tricky state, and keep every learning loop lightweight.
@@ -231,7 +231,7 @@ const Practice = () => {
                 {companionTips.length > 0 && (
                     <section className="mt-8">
                         <div className="max-w-3xl">
-                            <span className="te-eyebrow">{'// practice principles'}</span>
+                            <span className="te-eyebrow">Practice principles</span>
                             <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--te-text)]">Keep these mindsets in rotation</h2>
                             <p className="mt-2 text-sm leading-6 text-[var(--te-text-dim)]">
                                 Use these reminders to prevent burnout, stay confident, and learn faster than the average grinder.
@@ -267,7 +267,7 @@ const Practice = () => {
                                     <LightBulbIcon className="h-5 w-5 text-[var(--te-text)]" />
                                 </div>
                                 <div>
-                                    <span className="te-eyebrow">{'// terminal note'}</span>
+                                    <span className="te-eyebrow">A note for practice</span>
                                     <h2 className="mt-1 text-lg font-semibold text-[var(--te-text)]">Revision is everything</h2>
                                 </div>
                             </div>

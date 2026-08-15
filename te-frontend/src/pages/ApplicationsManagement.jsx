@@ -355,7 +355,7 @@ const ApplicationManagement = () => {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-2xl">
-                            <span className="te-eyebrow">{'// applications admin'}</span>
+                            <span className="te-eyebrow">Applications admin</span>
                             <h1 className="mt-3 font-display text-3xl sm:text-4xl font-bold tracking-tight text-[var(--te-text)]">
                                 Member applications
                             </h1>
@@ -379,7 +379,7 @@ const ApplicationManagement = () => {
                                 </summary>
                                 <div className="te-card absolute right-0 z-40 mt-2 w-72 overflow-hidden">
                                     <div className="border-b border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4">
-                                        <span className="te-eyebrow">{'// display'}</span>
+                                        <span className="te-eyebrow">Display</span>
                                         <div className="mt-3 flex gap-2">
                                             <button onClick={showAllColumns} className="te-btn-ghost te-btn-sm flex-1">Show all</button>
                                             <button onClick={resetColumns} className="te-btn-secondary te-btn-sm flex-1">Reset</button>

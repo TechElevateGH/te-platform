@@ -55,7 +55,7 @@ const EmailChangeForm = ({ currentEmail, onCancel }) => {
 
     return (
         <div className="te-panel p-6">
-            <span className="te-eyebrow">{'// email'}</span>
+            <span className="te-eyebrow">Email</span>
             <h3 className="mb-4 mt-3 font-display text-xl font-bold tracking-tight text-[var(--te-text)]">Change Email Address</h3>
 
             {/* Warning */}

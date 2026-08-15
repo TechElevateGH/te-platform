@@ -4,9 +4,9 @@ import axiosInstance from '../../axiosConfig';
 import {
     XCircleIcon,
     CheckCircleIcon,
-    EnvelopeIcon,
     ArrowPathIcon
 } from 'icons';
+import AuthAside from '../_custom/AuthAside';
 
 const EmailVerification = () => {
     const navigate = useNavigate();
@@ -133,17 +133,24 @@ const EmailVerification = () => {
     };
 
     return (
-        <div className="min-h-screen te-grid-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[var(--te-bg)] lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+            <AuthAside
+                eyebrow="One final step"
+                title="Secure your space. Keep your momentum."
+                description="Email verification protects your work, your profile, and the community you are joining."
+            />
+            <main className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10 lg:px-14">
             <div className="relative max-w-md w-full">
                 {/* Logo and header */}
-                <div className="mb-8 text-center">
-                    <div className="mb-4 flex justify-center">
-                        <img src="/te-mark.svg" alt="TechElevate Logo" className="h-20 w-20 select-none" />
+                <div className="mb-8">
+                    <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+                        <img src="/te-mark.svg" alt="" className="h-10 w-10 rounded-xl" />
+                        <span className="te-wordmark text-base">TechElevate</span>
                     </div>
-                    <span className="te-eyebrow justify-center">{'// verification'}</span>
-                    <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">
+                    <span className="te-eyebrow">Check your inbox</span>
+                    <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.055em] text-[var(--te-text)]">
                         Verify your email
-                    </h2>
+                    </h1>
                     <p className="mt-3 text-[var(--te-text-dim)]">
                         Enter the 6-digit code sent to
                     </p>
@@ -153,7 +160,7 @@ const EmailVerification = () => {
                 </div>
 
                 {/* Main card */}
-                <div className="te-card rounded-2xl border border-[var(--te-border)] bg-[var(--te-surface)] p-8 shadow-sm">
+                <div className="te-card p-6 sm:p-8">
                     {error && (
                         <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30 animate-fade-in">
                             <div className="flex">
@@ -265,6 +272,7 @@ const EmailVerification = () => {
                     </div>
                 )}
             </div>
+            </main>
         </div>
     );
 };

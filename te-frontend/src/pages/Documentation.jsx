@@ -579,7 +579,7 @@ const Documentation = () => {
     const wrapperClass = 'te-docs-shell min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text)]';
     const headerClass = 'sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)] backdrop-blur';
     const subtitleClass = 'te-eyebrow text-[var(--warning)]';
-    const navButtonClass = 'inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]';
+    const navButtonClass = 'inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] transition-colors hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)]';
     const loaderTextClass = 'font-mono text-sm uppercase tracking-[0.18em] text-[var(--text-muted)]';
     const skeletonBaseClass = 'bg-[var(--bg-tertiary)]';
     const skeletonMidClass = 'bg-[var(--border)]';
@@ -615,7 +615,7 @@ const Documentation = () => {
                     min-height: 100%;
                     background: var(--bg-primary);
                     color: var(--text);
-                    font-family: var(--font-sans, 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif);
+                    font-family: var(--font-sans, 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif);
                 }
                 .te-docs-shell .te-docs-content h1,
                 .te-docs-shell .te-docs-content h2,
@@ -624,7 +624,7 @@ const Documentation = () => {
                 .te-docs-shell .te-docs-content h5,
                 .te-docs-shell .te-docs-content h6 {
                     color: var(--heading);
-                    font-family: var(--font-display, 'JetBrains Mono', ui-monospace, monospace);
+                    font-family: var(--font-display, 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif);
                     letter-spacing: -0.03em;
                 }
                 .te-docs-shell .te-docs-content a {
@@ -815,7 +815,7 @@ const Documentation = () => {
                         />
                         <div className="flex flex-col text-left">
                             <span className={subtitleClass}>TechElevate</span>
-                            <span className="font-mono text-base font-semibold uppercase tracking-[-0.02em] text-[var(--heading)]">Documentation</span>
+                            <span className="text-base font-extrabold tracking-[-0.03em] text-[var(--heading)]">Documentation</span>
                         </div>
                     </button>
                     <div className="flex items-center gap-2">

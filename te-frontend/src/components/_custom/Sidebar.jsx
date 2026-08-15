@@ -1,197 +1,192 @@
-import { Fragment } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
-import { XMarkIcon, ArrowLeftOnRectangleIcon } from 'icons'
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-}
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { ArrowLeftOnRectangleIcon, XMarkIcon } from 'icons';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const GROUP_LABELS = {
-    career: 'Workspace',
-    interview: 'Support',
-    learn: 'Learning',
+    career: 'Career toolkit',
+    interview: 'People & opportunities',
+    learn: 'Grow your skills',
     analytics: 'Insights',
-    accounts: 'Admin',
-}
+    accounts: 'Administration',
+};
 
-// Color-code each section with the Ghana palette (green / gold / red).
-const TONE = {
-    career: { tile: 'te-tile-green', solid: 'var(--te-green)', soft: 'var(--te-green-soft)', text: 'var(--te-green)' },
-    interview: { tile: 'te-tile-gold', solid: 'var(--te-gold)', soft: 'var(--te-gold-soft)', text: 'var(--te-gold)' },
-    learn: { tile: 'te-tile-red', solid: 'var(--te-red)', soft: 'var(--te-red-soft)', text: 'var(--te-red)' },
-    analytics: { tile: 'te-tile-green', solid: 'var(--te-green)', soft: 'var(--te-green-soft)', text: 'var(--te-green)' },
-    accounts: { tile: 'te-tile-gold', solid: 'var(--te-gold)', soft: 'var(--te-gold-soft)', text: 'var(--te-gold)' },
-}
+const GROUP_TONES = {
+    career: '#68d8a0',
+    interview: '#f0bd61',
+    learn: '#f0868d',
+    analytics: '#85b7ff',
+    accounts: '#c59df5',
+};
 
-const ROLE_LABELS = { 5: 'Admin', 4: 'Lead', 3: 'Volunteer', 2: 'Referrer' }
+const ROLE_LABELS = { 5: 'Administrator', 4: 'Team lead', 3: 'Volunteer', 2: 'Referrer' };
 
 const getRoleLabel = (userRole, isGuest) => {
-    if (isGuest) return 'Guest'
-    const n = parseInt(userRole)
-    if (!n || n < 2) return null
-    if (n >= 5) return ROLE_LABELS[5]
-    if (n >= 4) return ROLE_LABELS[4]
-    if (n >= 3) return ROLE_LABELS[3]
-    return ROLE_LABELS[2]
-}
+    if (isGuest) return 'Guest preview';
+    const role = parseInt(userRole);
+    if (!role || role < 2) return 'Member workspace';
+    if (role >= 5) return ROLE_LABELS[5];
+    if (role >= 4) return ROLE_LABELS[4];
+    if (role >= 3) return ROLE_LABELS[3];
+    return ROLE_LABELS[2];
+};
 
 const Sidebar = ({ navigation, content, setContent, sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate();
     const { logout, userRole, isGuest } = useAuth();
 
     const groups = ['career', 'interview', 'learn', 'analytics', 'accounts']
-        .map((key) => ({ key, label: GROUP_LABELS[key], items: navigation.filter((item) => item.type === key) }))
-        .filter((group) => group.items.length > 0)
+        .map((key) => ({
+            key,
+            label: GROUP_LABELS[key],
+            items: navigation.filter((item) => item.type === key),
+        }))
+        .filter((group) => group.items.length > 0);
 
-    const roleLabel = getRoleLabel(userRole, isGuest)
+    const roleLabel = getRoleLabel(userRole, isGuest);
 
-    const navButton = (item, onClick) => {
-        const active = item.name === content
-        const tone = TONE[item.type] || TONE.career
+    const navItem = (item, onSelect) => {
+        const active = item.name === content;
+        const tone = GROUP_TONES[item.type] || GROUP_TONES.career;
+
         return (
             <button
-                onClick={onClick}
-                className={classNames(
-                    'group relative flex w-full items-center gap-2.5 rounded-lg py-1.5 pl-3 pr-2.5 text-sm transition-colors duration-150',
+                type="button"
+                onClick={onSelect}
+                aria-current={active ? 'page' : undefined}
+                className={`group relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
                     active
-                        ? 'font-medium'
-                        : 'font-normal text-[var(--te-text-dim)] hover:bg-[var(--te-hover)] hover:text-[var(--te-text)]'
-                )}
-                style={active ? { background: tone.soft, color: tone.text } : undefined}
+                        ? 'bg-white text-[#0b2e21] shadow-[0_10px_24px_-14px_rgba(0,0,0,0.7)]'
+                        : 'text-white/70 hover:bg-white/[0.08] hover:text-white'
+                }`}
             >
-                {active && (
-                    <span
-                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full"
-                        style={{ background: tone.solid }}
-                        aria-hidden="true"
-                    />
-                )}
                 <span
-                    className={classNames(
-                        'grid h-[26px] w-[26px] flex-shrink-0 place-items-center rounded-[7px] transition-colors duration-150',
-                        !active && tone.tile,
-                        !active && 'group-hover:brightness-95'
-                    )}
-                    style={active ? { background: tone.solid, color: '#ffffff' } : undefined}
+                    className={`grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg transition-colors ${
+                        active ? 'bg-[#e6f6ed]' : 'bg-white/[0.08] group-hover:bg-white/[0.12]'
+                    }`}
+                    style={{ color: active ? '#0d7c4c' : tone }}
                 >
-                    <item.icon
-                        className="h-[15px] w-[15px]"
-                        strokeWidth={active ? 2.2 : 1.9}
-                        aria-hidden="true"
-                    />
+                    <item.icon className="h-4 w-4" strokeWidth={active ? 2.3 : 1.9} aria-hidden="true" />
                 </span>
-                <span className="flex-1 truncate text-left">{item.name}</span>
+                <span className="min-w-0 flex-1 truncate text-left">{item.name}</span>
+                {active && <span className="h-1.5 w-1.5 rounded-full bg-[#0d7c4c]" />}
             </button>
-        )
-    }
+        );
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate(isGuest ? '/login' : '/');
+        setSidebarOpen(false);
+    };
 
     const renderBody = (onItemClick) => (
         <>
-            <nav className="te-scroll flex flex-1 flex-col overflow-y-auto px-3 py-4">
-                <div className="my-auto flex flex-col gap-y-5">
-                    {groups.map((group) => {
-                        const tone = TONE[group.key] || TONE.career
-                        return (
-                            <div key={group.key}>
-                                <p
-                                    className="mb-1.5 flex items-center gap-1.5 px-3 font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em]"
-                                    style={{ color: tone.text }}
-                                >
-                                    <span className="h-[5px] w-[5px] rounded-full" style={{ background: tone.solid }} aria-hidden="true" />
-                                    {group.label}
-                                </p>
-                                <ul className="space-y-0.5">
-                                    {group.items.map((item) => (
-                                        <li key={item.name}>{navButton(item, () => onItemClick(item.name))}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )
-                    })}
+            <div className="border-b border-white/10 px-5 py-5">
+                <div className="flex items-center justify-between gap-3">
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">Your space</p>
+                        <p className="mt-1 text-sm font-bold text-white">{roleLabel}</p>
+                    </div>
+                    <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#68d8a0] opacity-40" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#68d8a0]" />
+                    </span>
+                </div>
+            </div>
+
+            <nav className="te-scroll flex flex-1 flex-col overflow-y-auto px-3 py-5">
+                <div className="space-y-6">
+                    {groups.map((group) => (
+                        <div key={group.key}>
+                            <p className="mb-2 flex items-center gap-2 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ background: GROUP_TONES[group.key] }} />
+                                {group.label}
+                            </p>
+                            <ul className="space-y-1">
+                                {group.items.map((item) => (
+                                    <li key={item.name}>
+                                        {navItem(item, () => onItemClick(item.name))}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
                 </div>
             </nav>
 
-            <div className="mt-auto border-t border-[var(--te-border)] p-3">
-                {roleLabel && (
-                    <div className="mb-1 flex items-center gap-1.5 px-3 py-1">
-                        <span className="h-[5px] w-[5px] rounded-full" style={{ background: 'var(--te-gold)' }} aria-hidden="true" />
-                        <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--te-text-dim)]">
-                            {roleLabel}{isGuest ? ' mode' : ' access'}
-                        </span>
-                    </div>
-                )}
+            <div className="mt-auto border-t border-white/10 p-3">
                 <button
-                    onClick={() => { logout(); navigate(isGuest ? '/login' : '/'); setSidebarOpen(false) }}
-                    className="group flex w-full items-center gap-2.5 rounded-lg py-1.5 pl-3 pr-2.5 text-sm font-normal text-[var(--te-text-dim)] transition-colors hover:bg-[var(--te-red-soft)] hover:text-[var(--te-red)]"
+                    type="button"
+                    onClick={handleLogout}
+                    className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-white/60 hover:bg-[#f47782]/10 hover:text-[#ff9ca4]"
                 >
-                    <span className="grid h-[26px] w-[26px] flex-shrink-0 place-items-center rounded-[7px] bg-[var(--te-hover)] text-[var(--te-text-dim)] transition-colors group-hover:bg-transparent group-hover:text-[var(--te-red)]">
-                        <ArrowLeftOnRectangleIcon className="h-[15px] w-[15px]" strokeWidth={1.9} />
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/[0.07] group-hover:bg-[#f47782]/10">
+                        <ArrowLeftOnRectangleIcon className="h-4 w-4" strokeWidth={1.9} />
                     </span>
-                    <span>{isGuest ? 'Exit guest mode' : 'Log out'}</span>
+                    {isGuest ? 'Leave guest preview' : 'Log out'}
                 </button>
             </div>
         </>
-    )
+    );
 
     return (
         <>
-            {/* ===================== Mobile sidebar ===================== */}
             <Transition.Root show={sidebarOpen} as={Fragment}>
                 <Dialog as="div" className="relative z-50 md:hidden" onClose={setSidebarOpen}>
                     <Transition.Child
                         as={Fragment}
-                        enter="transition-opacity ease-linear duration-200"
-                        enterFrom="opacity-0" enterTo="opacity-100"
-                        leave="transition-opacity ease-linear duration-200"
-                        leaveFrom="opacity-100" leaveTo="opacity-0"
+                        enter="transition-opacity ease-out duration-200"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="transition-opacity ease-in duration-150"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
                     >
-                        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
+                        <div className="fixed inset-0 bg-[#06130d]/70 backdrop-blur-sm" />
                     </Transition.Child>
 
                     <div className="fixed inset-0 flex">
                         <Transition.Child
                             as={Fragment}
-                            enter="transition ease-in-out duration-200 transform"
-                            enterFrom="-translate-x-full" enterTo="translate-x-0"
-                            leave="transition ease-in-out duration-200 transform"
-                            leaveFrom="translate-x-0" leaveTo="-translate-x-full"
+                            enter="transition ease-out duration-200 transform"
+                            enterFrom="-translate-x-full"
+                            enterTo="translate-x-0"
+                            leave="transition ease-in duration-180 transform"
+                            leaveFrom="translate-x-0"
+                            leaveTo="-translate-x-full"
                         >
-                            <Dialog.Panel className="relative mr-16 flex w-full max-w-[17rem] flex-1">
-                                <Transition.Child
-                                    as={Fragment}
-                                    enter="ease-in-out duration-200" enterFrom="opacity-0" enterTo="opacity-100"
-                                    leave="ease-in-out duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"
-                                >
-                                    <div className="absolute left-full top-0 flex w-16 justify-center pt-4">
-                                        <button type="button" className="te-icon-btn text-white hover:bg-white/10" onClick={() => setSidebarOpen(false)}>
-                                            <span className="sr-only">Close sidebar</span>
-                                            <XMarkIcon className="h-6 w-6" strokeWidth={1.8} aria-hidden="true" />
-                                        </button>
-                                    </div>
-                                </Transition.Child>
-
-                                <div className="flex grow flex-col bg-[var(--te-surface-alt)]">
-                                    <button onClick={() => navigate('/')} className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[var(--te-border)] px-5">
-                                        <img src="/te-mark.svg" alt="TechElevate" className="h-8 w-8 rounded-[9px]" />
-                                        <span className="te-wordmark text-[15px] text-[var(--te-text)]">techelevate</span>
+                            <Dialog.Panel className="relative flex w-full max-w-[18rem] flex-col bg-[#0b2e21] shadow-2xl">
+                                <div className="flex h-16 items-center justify-between border-b border-white/10 px-5">
+                                    <button onClick={() => navigate('/')} className="flex items-center gap-2.5">
+                                        <img src="/te-mark.svg" alt="" className="h-9 w-9 rounded-xl" />
+                                        <span className="te-wordmark text-[15px] text-white">TechElevate</span>
                                     </button>
-                                    {renderBody((name) => { setContent(name); setSidebarOpen(false) })}
+                                    <button
+                                        type="button"
+                                        className="grid h-9 w-9 place-items-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+                                        onClick={() => setSidebarOpen(false)}
+                                        aria-label="Close workspace navigation"
+                                    >
+                                        <XMarkIcon className="h-5 w-5" />
+                                    </button>
                                 </div>
+                                {renderBody((name) => {
+                                    setContent(name);
+                                    setSidebarOpen(false);
+                                })}
                             </Dialog.Panel>
                         </Transition.Child>
                     </div>
                 </Dialog>
             </Transition.Root>
 
-            {/* ===================== Desktop sidebar (persistent) ===================== */}
-            <aside className="hidden md:fixed md:top-16 md:bottom-0 md:left-0 md:z-40 md:flex md:w-60 md:flex-col border-r border-[var(--te-border)] bg-[var(--te-surface-alt)]">
-                <div className="te-stripe h-1 w-full flex-shrink-0" />
-                {renderBody((name) => setContent(name))}
+            <aside className="fixed bottom-0 left-0 top-16 z-40 hidden w-64 flex-col border-r border-white/5 bg-[#0b2e21] shadow-[12px_0_40px_-32px_rgba(0,0,0,0.7)] md:flex">
+                {renderBody(setContent)}
             </aside>
         </>
-    )
-}
+    );
+};
 
 export default Sidebar;

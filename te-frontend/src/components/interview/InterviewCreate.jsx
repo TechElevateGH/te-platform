@@ -220,7 +220,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--te-green)] bg-[var(--te-green-soft)]">
                         <CheckCircleIcon className="h-6 w-6 text-te-green" />
                     </div>
-                    <p className="te-eyebrow">{'// submitted'}</p>
+                    <p className="te-eyebrow">Submitted</p>
                     <h3 className="mt-2 font-mono text-lg font-semibold text-[var(--te-text)]">Meeting scheduled</h3>
                     <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--te-text-dim)]">
                         Your {sessionType === 'one_on_one' ? '1-on-1 session' : 'mock interview'} request has been submitted. You&apos;ll receive a confirmation email once a volunteer is assigned.
@@ -235,7 +235,7 @@ const InterviewCreate = ({ onSuccess, onCancel, sessionType = 'interview' }) => 
         return (
             <div className="space-y-6">
                 <div>
-                    <span className="te-eyebrow">{'// prerequisite'}</span>
+                    <span className="te-eyebrow">Prerequisite</span>
                     <h3 className="mt-2 font-mono text-base font-semibold text-[var(--te-text)]">
                         Before you schedule
                     </h3>

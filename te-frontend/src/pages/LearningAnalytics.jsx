@@ -226,7 +226,7 @@ export default function LearningAnalytics() {
                                 <ChartBarIcon className="w-6 h-6 text-te-green" />
                             </div>
                             <div>
-                                <p className="te-eyebrow mb-2">{'// analytics'}</p>
+                                <p className="te-eyebrow mb-2">Analytics</p>
                                 <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--te-text)]">Learning Analytics</h1>
                                 <p className="mt-2 text-sm leading-relaxed text-[var(--te-text-dim)]">Track member progress, topic adoption, and engagement signals.</p>
                             </div>
