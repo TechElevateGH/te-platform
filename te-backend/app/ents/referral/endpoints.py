@@ -10,7 +10,7 @@ import app.ents.referral.schema as referral_schema
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 from app.core.permissions import require_lead
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from pymongo.database import Database
 
 referral_router = APIRouter(prefix="/referrals")
@@ -110,6 +110,7 @@ def update_referral_company(
     response_model=Dict[str, referral_schema.ReferralRead],
 )
 def request_referral(
+    request: Request,
     db: Database = Depends(session.get_db),
     *,
     data: referral_schema.ReferralRequest,
@@ -140,7 +141,7 @@ def request_referral(
         # Log error but don't fail the request
         logger.error(f"Failed to send referral request email: {e}")
 
-    return {"referral": referral_dependencies.parse_referral(referral)}
+    return {"referral": referral_dependencies.parse_referral(referral, request)}
 
 
 @referral_router.get(
@@ -148,6 +149,7 @@ def request_referral(
     response_model=Dict[str, list[referral_schema.ReferralReadWithUser]],
 )
 def get_referrals(
+    request: Request,
     db: Database = Depends(session.get_db),
     *,
     skip: int = 0,
@@ -186,7 +188,7 @@ def get_referrals(
         referrals = referral_crud.read_user_referrals(db, user_id=user_id)
         return {
             "referrals": [
-                referral_dependencies.parse_referral_with_user(referral)
+                referral_dependencies.parse_referral_with_user(referral, request)
                 for referral in referrals
             ]
         }
@@ -257,7 +259,7 @@ def get_referrals(
 
     return {
         "referrals": [
-            referral_dependencies.parse_referral_with_user(referral)
+            referral_dependencies.parse_referral_with_user(referral, request)
             for referral in referrals
         ]
     }
@@ -268,6 +270,7 @@ def get_referrals(
     response_model=Dict[str, Any],
 )
 def get_company_referrals(
+    request: Request,
     db: Database = Depends(session.get_db),
     *,
     company_id: str,
@@ -289,7 +292,7 @@ def get_company_referrals(
 
     return {
         "referrals": [
-            referral_dependencies.parse_referral_with_user(referral)
+            referral_dependencies.parse_referral_with_user(referral, request)
             for referral in referrals
         ],
         "total": total,
@@ -303,6 +306,7 @@ def get_company_referrals(
     response_model=Dict[str, Any],
 )
 def get_referrals_by_status(
+    request: Request,
     db: Database = Depends(session.get_db),
     *,
     status: str,
@@ -325,7 +329,7 @@ def get_referrals_by_status(
 
     return {
         "referrals": [
-            referral_dependencies.parse_referral_with_user(referral)
+            referral_dependencies.parse_referral_with_user(referral, request)
             for referral in referrals
         ],
         "total": total,
@@ -339,6 +343,7 @@ def get_referrals_by_status(
     response_model=Dict[str, list[referral_schema.ReferralRead]],
 )
 def get_user_company_referrals(
+    request: Request,
     db: Database = Depends(session.get_db),
     *,
     user_id: str,
@@ -362,7 +367,8 @@ def get_user_company_referrals(
     )
     return {
         "referrals": [
-            referral_dependencies.parse_referral(referral) for referral in referrals
+            referral_dependencies.parse_referral(referral, request)
+            for referral in referrals
         ]
     }
 
@@ -373,6 +379,7 @@ def get_user_company_referrals(
 )
 def update_referral(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     referral_id: str,
     data: referral_schema.ReferralUpdateStatus,
@@ -465,7 +472,9 @@ def update_referral(
                 # Log error but don't fail the request
                 logger.error(f"Failed to send referral update email: {e}")
 
-    return {"referral": referral_dependencies.parse_referral_with_user(referral)}
+    return {
+        "referral": referral_dependencies.parse_referral_with_user(referral, request)
+    }
 
 
 @referral_router.patch(
@@ -474,6 +483,7 @@ def update_referral(
 )
 def cancel_referral(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     referral_id: str,
     user: user_models.MemberUser = Depends(user_dependencies.get_current_member_only),
@@ -516,7 +526,7 @@ def cancel_referral(
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
 
-    return {"referral": referral_dependencies.parse_referral(referral)}
+    return {"referral": referral_dependencies.parse_referral(referral, request)}
 
 
 @referral_router.post(
@@ -525,6 +535,7 @@ def cancel_referral(
 )
 def review_referral(
     *,
+    request: Request,
     db: Database = Depends(session.get_db),
     referral_id: str,
     data: referral_schema.ReferralUpdateStatus,
@@ -546,7 +557,9 @@ def review_referral(
     if not referral:
         raise HTTPException(status_code=404, detail="Referral not found")
 
-    return {"referral": referral_dependencies.parse_referral_with_user(referral)}
+    return {
+        "referral": referral_dependencies.parse_referral_with_user(referral, request)
+    }
 
 
 @referral_router.delete(

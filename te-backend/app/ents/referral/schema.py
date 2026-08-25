@@ -83,7 +83,7 @@ class ReferralRequest(BaseModel):
     job_id: Optional[str] = ""
     role: str
     request_note: str
-    resume: str
+    resume_id: str = ""
     phone_number: str = ""
     email: str = ""
     essay: str = ""
@@ -110,6 +110,9 @@ class ReferralReadBase(BaseModel):
     feedback_date: Optional[str] = None
     status: ReferralStatuses
     resume: str = ""
+    resume_file_id: str = ""
+    resume_name: str = ""
+    resume_content_type: str = ""
     phone_number: str = ""
     email: str = ""
     essay: str = ""

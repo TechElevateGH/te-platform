@@ -2,11 +2,97 @@ import logging
 import app.ents.referral.models as referral_models
 import app.ents.referral.schema as referral_schema
 import app.ents.user.crud as user_crud
+import app.core.storage as storage
+from app.ents.resume.validation import PDF_CONTENT_TYPE, is_pdf_stream
 from typing import Optional
+from bson import ObjectId
 from pymongo.database import Database
-from fastapi import HTTPException
+from pymongo.collation import Collation
+from fastapi import HTTPException, status
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_referral_resume(
+    db: Database,
+    *,
+    user_id: str,
+    resume_id: str,
+) -> dict:
+    """Resolve a member-owned GridFS PDF for a referral request."""
+    user = db.member_users.find_one(
+        {"_id": ObjectId(user_id), "resumes.id": resume_id},
+        {"resumes": {"$elemMatch": {"id": resume_id}}},
+    )
+    resumes = (user or {}).get("resumes") or []
+    if not resumes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Select a resume from your uploaded resumes.",
+        )
+
+    resume = resumes[0]
+    if resume.get("archived"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Archived resumes cannot be attached to referral requests.",
+        )
+    if resume.get("storage") != "mongodb" or not resume.get("file_id"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This resume must be uploaded again before it can be used for a referral.",
+        )
+
+    file_id = resume["file_id"]
+    try:
+        grid_out = storage.get_file(db, file_id)
+    except HTTPException as exc:
+        if exc.status_code == status.HTTP_404_NOT_FOUND:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The selected resume file is missing. Please upload it again.",
+            ) from exc
+        raise
+
+    if not storage.is_resume_file(grid_out) or not is_pdf_stream(grid_out):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The selected resume is not a valid stored PDF.",
+        )
+
+    return {
+        "resume": storage.file_path(file_id),
+        "resume_file_id": file_id,
+        "resume_name": resume.get("name") or grid_out.filename or "resume.pdf",
+        "resume_content_type": PDF_CONTENT_TYPE,
+    }
+
+
+def _resume_file_id(referral: dict) -> str | None:
+    return referral.get("resume_file_id") or storage.file_id_from_link(
+        referral.get("resume")
+    )
+
+
+def _cleanup_unreferenced_resume_file(db: Database, file_id: str | None) -> None:
+    if not file_id:
+        return
+
+    referral_reference = db.referrals.find_one(
+        {
+            "$or": [
+                {"resume_file_id": file_id},
+                {"resume": {"$regex": f"/files/{file_id}(?:[/?]|$)"}},
+            ]
+        },
+        {"_id": 1},
+    )
+    member_reference = db.member_users.find_one(
+        {"resumes.file_id": file_id},
+        {"_id": 1},
+    )
+    if not referral_reference and not member_reference:
+        storage.delete_file(db, file_id)
 
 
 def create_referral_company(
@@ -266,27 +352,56 @@ def request_referral(
     data: referral_schema.ReferralRequest,
 ) -> referral_models.Referral:
     """Create a new referral request in MongoDB"""
-    from bson import ObjectId
-
     user = user_crud.read_user_by_id(db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    company = db.referral_companies.find_one(
+        {"name": data.company_id},
+        collation=Collation(locale="en", strength=2),
+    )
+    if not company or not company.get("can_refer", True):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This company is not currently accepting referral requests.",
+        )
+
+    materials = company.get("referral_materials") or {}
+    requires_resume = materials.get("resume", True)
+    if requires_resume and not data.resume_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Select a PDF resume for this referral request.",
+        )
+
+    resume_fields = {
+        "resume": "",
+        "resume_file_id": "",
+        "resume_name": "",
+        "resume_content_type": "",
+    }
+    if data.resume_id:
+        resume_fields = resolve_referral_resume(
+            db,
+            user_id=user_id,
+            resume_id=data.resume_id,
+        )
+
     # Create referral document with company_name (string from frontend)
     referral_dict = {
         "user_id": ObjectId(user_id),
-        "company_name": data.company_id,  # Store company name as string
+        "company_name": company["name"],
         "job_title": data.job_title,
         "job_id": data.job_id or "",
         "role": data.role,
         "request_note": data.request_note,
-        "resume": data.resume,
         "phone_number": data.phone_number or "",
         "email": data.email or "",
         "essay": data.essay or "",
         "country": data.country or "",
         "status": referral_schema.ReferralStatuses.pending.value,
         "referral_date": data.date,
+        **resume_fields,
     }
 
     # Insert into MongoDB
@@ -340,11 +455,14 @@ def delete_referral(db: Database, *, referral_id: str) -> bool:
     """
     Permanently delete a referral from the database (Admin only).
     """
-    from bson import ObjectId
+    referral = db.referrals.find_one({"_id": ObjectId(referral_id)})
+    if not referral:
+        raise HTTPException(status_code=404, detail="Referral not found")
 
     result = db.referrals.delete_one({"_id": ObjectId(referral_id)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Referral not found")
+    _cleanup_unreferenced_resume_file(db, _resume_file_id(referral))
     return True
 
 
@@ -352,10 +470,16 @@ def bulk_delete_referrals(db: Database, *, referral_ids: list[str]) -> dict:
     """
     Permanently delete multiple referrals from the database (Admin only).
     """
-    from bson import ObjectId
-
     object_ids = [ObjectId(rid) for rid in referral_ids]
+    referrals = list(
+        db.referrals.find(
+            {"_id": {"$in": object_ids}},
+            {"resume": 1, "resume_file_id": 1},
+        )
+    )
     result = db.referrals.delete_many({"_id": {"$in": object_ids}})
+    for file_id in {_resume_file_id(referral) for referral in referrals}:
+        _cleanup_unreferenced_resume_file(db, file_id)
 
     return {
         "message": f"Successfully deleted {result.deleted_count} referral(s)",

@@ -19,6 +19,8 @@ const INITIAL_FILE_DATA = {
     document_type: "Resume", // Default document type
     file: null,
 };
+const MAX_RESUME_SIZE_BYTES = 10 * 1024 * 1024;
+const PDF_CONTENT_TYPES = ['application/pdf', 'application/x-pdf', 'application/octet-stream'];
 
 const FileCreate = ({ setFileUpload }) => {
     const { accessToken } = useAuth();
@@ -44,6 +46,14 @@ const FileCreate = ({ setFileUpload }) => {
         const fileName = fileData.file.name.toLowerCase();
         if (!fileName.endsWith('.pdf')) {
             setToast({ message: "Only PDF files are allowed. Please upload a PDF resume.", type: "error" });
+            return false;
+        }
+        if (fileData.file.type && !PDF_CONTENT_TYPES.includes(fileData.file.type)) {
+            setToast({ message: "The selected file is not a PDF.", type: "error" });
+            return false;
+        }
+        if (fileData.file.size > MAX_RESUME_SIZE_BYTES) {
+            setToast({ message: "Resume PDFs must be 10 MB or smaller.", type: "error" });
             return false;
         }
 

@@ -80,10 +80,14 @@ class Referral(BaseModel):
     role: str  # JobRoles enum value
     request_note: str = ""
     review_note: Optional[str] = ""
-    resume: str = ""  # Google Drive link
+    resume: str = ""  # Canonical API path or legacy external link
+    resume_file_id: str = ""  # GridFS file ID for current referral attachments
+    resume_name: str = ""
+    resume_content_type: str = ""
     phone_number: str = ""  # User's phone number
     email: str = ""  # User's email (can be different from account email)
     essay: str = ""  # Referral essay/cover letter URL
+    country: str = ""
     referral_date: str
     feedback_date: Optional[str] = None  # Date when referrer provided feedback
     status: str  # ReferralStatuses enum value

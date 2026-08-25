@@ -4,7 +4,7 @@ import axiosInstance from "../../axiosConfig";
 import SlideOverForm from "../_custom/SlideOver/SlideOverCreate";
 import { useData } from "../../context/DataContext";
 import { FormTextArea } from "../_custom/FormInputs";
-import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError } from "../../utils";
+import { setNestedPropertyValue, getCompanyLogoUrl, handleCompanyLogoError, isReferralReadyResume } from "../../utils";
 import { countries } from '../../data/jobData';
 import { useAuth } from "../../context/AuthContext";
 import SelectCombobox from "../_custom/SelectCombobox";
@@ -22,7 +22,7 @@ const ReferralCreate = ({
   } = useData();
 
   // Resumes come from userInfo.resumes (part of user model)
-  const availableResumes = (userInfo?.resumes || []).filter(resume => !resume.archived);
+  const availableResumes = (userInfo?.resumes || []).filter(isReferralReadyResume);
   const hasResume = availableResumes.length > 0;
 
   // Referral data matching backend schema
@@ -33,7 +33,7 @@ const ReferralCreate = ({
     job_id: "",
     role: "New grad",
     request_note: "",
-    resume: hasResume ? availableResumes[0].link || "" : "",
+    resume_id: hasResume ? availableResumes[0].id : "",
     phone_number: userInfo?.phone_number || "",
     email: userInfo?.email || "",
     essay: userInfo?.referral_essay || "",
@@ -122,7 +122,7 @@ const ReferralCreate = ({
       ...prevData
     }, field, value));
   };
-  return <SlideOverForm title={"Request Referral"} setHandler={setReferralCompanyId} requestHandler={createReferralRequest} isSubmitting={isSubmitting} isSubmitDisabled={!hasAllRequiredMaterials} submitButtonText={hasAllRequiredMaterials ? "Request Referral" : "Complete Requirements"} children={!hasResume ? <div className="px-6 py-8">
+  return <SlideOverForm title={"Request Referral"} setHandler={setReferralCompanyId} requestHandler={createReferralRequest} isSubmitting={isSubmitting} isSubmitDisabled={!hasAllRequiredMaterials} submitButtonText={hasAllRequiredMaterials ? "Request Referral" : "Complete Requirements"} children={requirements.resume && !hasResume ? <div className="px-6 py-8">
                         <div className="border border-[var(--te-red)] bg-[var(--te-red-soft)] p-6 text-center">
                             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center border border-[var(--te-red)] bg-[var(--te-red-soft)]">
                                 <ExclamationTriangleIcon className="h-8 w-8 text-te-red" />
@@ -269,7 +269,7 @@ const ReferralCreate = ({
                         </div>
 
                         {/* Resume Selection */}
-                        <div className="space-y-4">
+                        {hasResume && <div className="space-y-4">
                             <h3 className="text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">Select Resume</h3>
                             <div className="space-y-3">
                                 {availableResumes.map(resume => {
@@ -277,8 +277,8 @@ const ReferralCreate = ({
           return <div key={resume.id} onClick={() => {
             setSelectedResumeId(resume.id);
             handleInputChange({
-              field: 'resume',
-              value: resume.link || ''
+              field: 'resume_id',
+              value: resume.id
             });
           }} className={`cursor-pointer border p-4 transition-colors hover:bg-[var(--te-hover)] ${isSelected ? "bg-[var(--te-surface-alt)] border-[var(--te-border)]" : "bg-[var(--te-surface-alt)] border-[var(--te-border)] hover:border-[var(--te-border-strong)]"}`}>
 
@@ -315,7 +315,7 @@ const ReferralCreate = ({
                             <p className="text-xs text-[var(--te-text-dim)] font-medium">
                                 Select the resume that best matches this role
                             </p>
-                        </div>
+                        </div>}
 
                         {/* Additional Notes */}
                         <div className="space-y-4">

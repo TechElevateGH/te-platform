@@ -6,7 +6,10 @@ platform has no third-party storage dependency.
 """
 
 from datetime import datetime
+import hashlib
+import hmac
 from typing import Any, Optional
+from urllib.parse import urlencode, urlparse
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -42,6 +45,66 @@ def get_fs(db: Database) -> GridFS:
 def file_path(file_id: str) -> str:
     """Relative API path that serves the given stored file."""
     return f"{settings.API_STR}/files/{file_id}"
+
+
+def file_id_from_link(link: Optional[str]) -> Optional[str]:
+    """Extract a GridFS id from one of the platform's file links."""
+    if not link:
+        return None
+
+    path_parts = [part for part in urlparse(link).path.split("/") if part]
+    try:
+        files_index = path_parts.index("files")
+        file_id = path_parts[files_index + 1]
+    except (ValueError, IndexError):
+        return None
+
+    return file_id if ObjectId.is_valid(file_id) else None
+
+
+def private_file_token(file_id: str) -> str:
+    """Create a stable capability token for a private stored file."""
+    message = f"private-file:{file_id}".encode("utf-8")
+    secret = settings.SECRET_KEY.encode("utf-8")
+    return hmac.new(secret, message, hashlib.sha256).hexdigest()
+
+
+def private_file_path(file_id: str) -> str:
+    """Return the signed API path used to serve a private file."""
+    return f"{file_path(file_id)}?{urlencode({'token': private_file_token(file_id)})}"
+
+
+def private_file_link(
+    request: Any, file_id: Optional[str], legacy_link: Optional[str] = None
+) -> str:
+    """Return a signed link for GridFS files while preserving external links."""
+    resolved_file_id = file_id or file_id_from_link(legacy_link)
+    if resolved_file_id:
+        return absolute_link(request, private_file_path(resolved_file_id))
+    return absolute_link(request, legacy_link)
+
+
+def has_valid_private_file_token(file_id: str, token: Optional[str]) -> bool:
+    if not token:
+        return False
+    return hmac.compare_digest(private_file_token(file_id), token)
+
+
+def is_resume_file(grid_out: GridOut) -> bool:
+    """Return whether a stored file contains private resume material."""
+    file_document = getattr(grid_out, "_file", {}) or {}
+    metadata = file_document.get("metadata") or {}
+    return (
+        file_document.get("folder") == RESUMES_FOLDER
+        or metadata.get("kind") == "resume"
+    )
+
+
+def requires_private_file_token(grid_out: GridOut) -> bool:
+    """Return whether access to a stored file requires a capability token."""
+    file_document = getattr(grid_out, "_file", {}) or {}
+    metadata = file_document.get("metadata") or {}
+    return metadata.get("private") is True
 
 
 def absolute_link(request: Any, link: Optional[str]) -> str:
@@ -85,6 +148,7 @@ def save_file(
     *,
     folder: str,
     metadata: Optional[dict] = None,
+    content_type: Optional[str] = None,
 ) -> StoredFile:
     """Persist an UploadFile in GridFS and return its metadata."""
     contents = file.file.read()
@@ -94,12 +158,14 @@ def save_file(
         )
 
     filename = file.filename or "file"
-    content_type = getattr(file, "content_type", None) or DEFAULT_CONTENT_TYPE
+    resolved_content_type = (
+        content_type or getattr(file, "content_type", None) or DEFAULT_CONTENT_TYPE
+    )
 
     file_id = get_fs(db).put(
         contents,
         filename=filename,
-        contentType=content_type,
+        contentType=resolved_content_type,
         folder=folder,
         uploaded_at=datetime.utcnow().isoformat(),
         metadata=metadata or {},
@@ -110,7 +176,7 @@ def save_file(
         file_id=stored_id,
         name=filename,
         link=file_path(stored_id),
-        content_type=content_type,
+        content_type=resolved_content_type,
         size=len(contents),
     )
 

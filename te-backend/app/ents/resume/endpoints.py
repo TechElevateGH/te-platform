@@ -7,6 +7,7 @@ import app.database.session as session
 import app.ents.resume.crud as resume_crud
 import app.ents.resume.models as resume_models
 import app.ents.resume.schema as resume_schema
+from app.ents.resume.validation import validate_pdf_upload
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 import app.core.storage as storage
@@ -38,7 +39,9 @@ def resume_to_read(
     """Convert a Resume model instance into the API response schema."""
 
     data = resume.model_dump()
-    data["link"] = storage.absolute_link(request, data.get("link"))
+    data["link"] = storage.private_file_link(
+        request, data.get("file_id"), data.get("link")
+    )
     return resume_schema.ResumeRead(**data)
 
 
@@ -106,11 +109,7 @@ def upload_resume(
 ) -> Dict[str, resume_schema.ResumeRead]:
     target_user_id = str(current_user.id)
 
-    if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PDF files are accepted. Please upload a PDF file.",
-        )
+    validate_pdf_upload(file)
 
     uploaded_resume = resume_crud.create_resume(
         db, file=file, user_id=target_user_id, role=role, notes=notes
@@ -225,11 +224,7 @@ def upload_user_resume(
             detail="Can only upload resumes for yourself",
         )
 
-    if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only PDF files are accepted. Please upload a PDF file.",
-        )
+    validate_pdf_upload(file)
 
     uploaded_resume = resume_crud.create_resume(
         db, file=file, user_id=user_id, role=role, notes=notes

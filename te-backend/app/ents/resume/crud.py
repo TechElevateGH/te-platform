@@ -8,6 +8,7 @@ from pymongo.database import Database
 import app.core.storage as storage
 import app.ents.resume.models as resume_models
 import app.ents.resume.schema as resume_schema
+from app.ents.resume.validation import PDF_CONTENT_TYPE
 
 
 def read_resumes(db: Database, *, user_id: str) -> list[resume_models.Resume]:
@@ -20,9 +21,22 @@ def read_resumes(db: Database, *, user_id: str) -> list[resume_models.Resume]:
     return [resume_models.Resume(**resume) for resume in user.get("resumes", [])]
 
 
-def upload_file(db: Database, file, *, folder: str, metadata: dict | None = None):
+def upload_file(
+    db: Database,
+    file,
+    *,
+    folder: str,
+    metadata: dict | None = None,
+    content_type: str | None = None,
+):
     """Store a file in MongoDB (GridFS) and return its metadata."""
-    return storage.save_file(db, file, folder=folder, metadata=metadata)
+    return storage.save_file(
+        db,
+        file,
+        folder=folder,
+        metadata=metadata,
+        content_type=content_type,
+    )
 
 
 def create_resume(
@@ -33,7 +47,8 @@ def create_resume(
         db,
         file,
         folder=storage.RESUMES_FOLDER,
-        metadata={"user_id": user_id, "kind": "resume"},
+        metadata={"user_id": user_id, "kind": "resume", "private": True},
+        content_type=PDF_CONTENT_TYPE,
     )
 
     new_resume = {
@@ -75,7 +90,17 @@ def delete_resume(db: Database, *, resume_id: str, user_id: str) -> bool:
 
     if result.modified_count > 0 and existing:
         removed = existing[0]
-        if removed.get("storage") == "mongodb":
+        file_id = removed.get("file_id")
+        is_attached_to_referral = file_id and db.referrals.find_one(
+            {
+                "$or": [
+                    {"resume_file_id": file_id},
+                    {"resume": {"$regex": f"/files/{file_id}(?:[/?]|$)"}},
+                ]
+            },
+            {"_id": 1},
+        )
+        if removed.get("storage") == "mongodb" and not is_attached_to_referral:
             storage.delete_file(db, removed.get("file_id"))
 
     return result.modified_count > 0

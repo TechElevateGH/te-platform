@@ -479,8 +479,10 @@ def get_user_resumes(
             "id": r.get("id", ""),  # UUID
             "file_id": r.get("file_id", ""),
             "name": r.get("name", ""),
-            "link": storage.absolute_link(
-                request, r.get("link", "")
+            "link": storage.private_file_link(
+                request,
+                r.get("file_id"),
+                r.get("link", ""),
             ),  # Frontend expects 'link' not 'url'
             "date": r.get("date", ""),
             "role": r.get("role", ""),
@@ -629,7 +631,7 @@ def list_all_user_files(
     Retrieve all members' files and essays (Lead/Admin dashboard).
 
     Returns aggregated view of:
-    - All resumes (PDFs in Google Drive)
+    - All resumes (PDFs in MongoDB GridFS, plus legacy external records)
     - Referral essays (text)
     - Cover letters (text)
 
@@ -666,7 +668,11 @@ def list_all_user_files(
                     "id": r.get("id", ""),  # UUID
                     "file_id": r.get("file_id", ""),
                     "name": r.get("name", ""),
-                    "url": storage.absolute_link(request, r.get("link", "")),
+                    "url": storage.private_file_link(
+                        request,
+                        r.get("file_id"),
+                        r.get("link", ""),
+                    ),
                     "uploaded_at": r.get("date", ""),
                     "role": r.get("role", ""),
                     "notes": r.get("notes", ""),

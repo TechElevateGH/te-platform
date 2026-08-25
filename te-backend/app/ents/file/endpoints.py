@@ -1,6 +1,6 @@
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pymongo.database import Database
 
 import app.core.storage as storage
@@ -16,8 +16,21 @@ def _content_type(grid_out) -> str:
     return content_type or storage.DEFAULT_CONTENT_TYPE
 
 
-def _file_response(db: Database, file_id: str, *, disposition: str) -> Response:
+def _file_response(
+    db: Database,
+    file_id: str,
+    *,
+    disposition: str,
+    token: str | None = None,
+) -> Response:
     grid_out = storage.get_file(db, file_id)
+    if storage.requires_private_file_token(
+        grid_out
+    ) and not storage.has_valid_private_file_token(file_id, token):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="A valid resume access link is required",
+        )
     filename = grid_out.filename or "file"
 
     return Response(
@@ -35,9 +48,10 @@ def get_file(
     *,
     db: Database = Depends(session.get_db),
     file_id: str,
+    token: str | None = Query(default=None),
 ) -> Response:
-    """Serve a stored file inline (viewable in the browser)."""
-    return _file_response(db, file_id, disposition="inline")
+    """Serve a stored file inline, validating private-file capability links."""
+    return _file_response(db, file_id, disposition="inline", token=token)
 
 
 @files_router.get("/{file_id}/download")
@@ -45,6 +59,7 @@ def download_file(
     *,
     db: Database = Depends(session.get_db),
     file_id: str,
+    token: str | None = Query(default=None),
 ) -> Response:
     """Serve a stored file as a download attachment."""
-    return _file_response(db, file_id, disposition="attachment")
+    return _file_response(db, file_id, disposition="attachment", token=token)

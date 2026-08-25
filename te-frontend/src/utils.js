@@ -30,6 +30,14 @@ export const copyTextToClipboard = async (text) => {
     return true;
 };
 
+export const isReferralReadyResume = (resume) => (
+    Boolean(resume)
+    && !resume.archived
+    && resume.storage === 'mongodb'
+    && resume.content_type === 'application/pdf'
+    && Boolean(resume.id)
+);
+
 /**
  * Get Clearbit logo URL for a company
  * @param {string} companyName - The company name

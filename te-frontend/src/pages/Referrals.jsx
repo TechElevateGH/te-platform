@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
-import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
+import { getCompanyLogoUrl, handleCompanyLogoError, isReferralReadyResume } from '../utils';
 import ReferralCreate from '../components/referral/ReferralCreate';
 import ReferralManagement from '../components/referral/ReferralManagement';
 import MyReferrals from '../components/referral/MyReferrals';
@@ -83,6 +83,7 @@ const Referrals = () => {
   const isLeadOrAdmin = userRole && parseInt(userRole) >= 2;
   const isMember = userRole && parseInt(userRole) === 1; // Only Members can request referrals
   const isReferrer = userRole && parseInt(userRole) === 2; // Referrer role
+  const hasReferralReadyResume = resumes.some(isReferralReadyResume);
 
   // State for view toggle - persist across page refreshes
   const [viewMode, setViewMode] = useState(() => {
@@ -127,7 +128,7 @@ const Referrals = () => {
     const materials = company.referral_materials || {};
 
     // Check resume requirement
-    if (materials.resume && resumes.length === 0) return false;
+    if (materials.resume && !hasReferralReadyResume) return false;
 
     // Check essay requirement
     if (materials.essay && (!userInfo?.referral_essay || userInfo.referral_essay.trim() === '')) return false;
@@ -135,7 +136,7 @@ const Referrals = () => {
     // Check phone number requirement
     if (materials.phone_number && (!userInfo?.phone_number || userInfo.phone_number.trim() === '')) return false;
     return true;
-  }, [resumes, userInfo]); // Filters for All Requests view
+  }, [hasReferralReadyResume, userInfo]); // Filters for All Requests view
   const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending
   const [companyFilter, setCompanyFilter] = useState('');
   const [memberFilter, setMemberFilter] = useState('');
@@ -314,7 +315,7 @@ const Referrals = () => {
     const materials = company.referral_materials || {};
     const requirements = [];
     // Check actual resumes from context, not displayResumes which includes mock data
-    if (materials.resume) requirements.push(resumes.length !== 0);
+    if (materials.resume) requirements.push(hasReferralReadyResume);
     if (materials.essay) requirements.push(userInfo?.referral_essay && userInfo.referral_essay.trim() !== '');
     if (materials.cover_letter) requirements.push(userInfo?.cover_letter && userInfo.cover_letter.trim() !== '');
     if (materials.phone_number) requirements.push(userInfo?.phone_number && userInfo.phone_number.trim() !== '');
@@ -525,7 +526,7 @@ const Referrals = () => {
                                                                 <td className="px-6 py-4">
                                                                     <div className="flex flex-col gap-2">
                                                                         {materials.resume && <div className="flex items-center gap-2">
-                                                                                {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
+                                                                                {hasReferralReadyResume ? <CheckCircleIcon className="h-4 w-4 text-te-green flex-shrink-0" /> : <XCircleIcon className="h-4 w-4 text-te-red flex-shrink-0" />}
 
                                                                                 <span className="text-sm font-medium text-[var(--te-text)]">Resume</span>
                                                                             </div>}
@@ -588,7 +589,7 @@ const Referrals = () => {
                                                             <p className="text-[10px] font-medium text-[var(--te-text-dim)] uppercase mb-1.5">Requirements</p>
                                                             <div className="flex flex-wrap gap-2">
                                                                 {materials.resume && <div className="flex items-center gap-1.5">
-                                                                        {resumes.length !== 0 ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
+                                                                        {hasReferralReadyResume ? <CheckCircleIcon className="h-4 w-4 text-te-green" /> : <XCircleIcon className="h-4 w-4 text-te-red" />}
 
                                                                         <span className="text-xs font-medium text-[var(--te-text)]">Resume</span>
                                                                     </div>}
