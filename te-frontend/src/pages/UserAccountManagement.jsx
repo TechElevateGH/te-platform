@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     UserGroupIcon,
     ShieldCheckIcon,
@@ -9,7 +9,8 @@ import {
     UserCircleIcon,
     ChevronUpDownIcon,
     ChevronUpIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    XMarkIcon
 } from 'icons';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +35,12 @@ const UserAccountManagement = () => {
     const [privilegedSortDirection, setPrivilegedSortDirection] = useState('asc');
     const [memberSortField, setMemberSortField] = useState('full_name');
     const [memberSortDirection, setMemberSortDirection] = useState('asc');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [roleFilter, setRoleFilter] = useState('all');
+    const [companyFilter, setCompanyFilter] = useState('all');
+    const [universityFilter, setUniversityFilter] = useState('all');
+    const [verificationFilter, setVerificationFilter] = useState('all');
+    const [communityFilter, setCommunityFilter] = useState('all');
 
     // Check permissions - convert userRole to number for comparison
     const roleNumber = parseInt(userRole);
@@ -64,10 +71,13 @@ const UserAccountManagement = () => {
     };
 
     // Fetch privileged users
-    const fetchPrivilegedUsers = async () => {
+    const fetchPrivilegedUsers = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await axiosInstance.get('/users/privileged');
+            const endpoint = isAdmin
+                ? '/users/privileged?include_inactive=true'
+                : '/users/privileged';
+            const response = await axiosInstance.get(endpoint);
             setPrivilegedUsers(response.data || []);
         } catch (error) {
             console.error('Error fetching privileged users:', error);
@@ -75,10 +85,10 @@ const UserAccountManagement = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAdmin]);
 
     // Fetch member users
-    const fetchMemberUsers = async () => {
+    const fetchMemberUsers = useCallback(async () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get('/users');
@@ -89,7 +99,7 @@ const UserAccountManagement = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (activeTab === 'privileged') {
@@ -97,7 +107,7 @@ const UserAccountManagement = () => {
         } else {
             fetchMemberUsers();
         }
-    }, [activeTab]);
+    }, [activeTab, fetchPrivilegedUsers, fetchMemberUsers]);
 
     // Toggle user active status
     const toggleUserStatus = async (userId, currentStatus, isPrivileged) => {
@@ -143,18 +153,34 @@ const UserAccountManagement = () => {
         setShowMemberModal(true);
     };
 
-    // Filter users based on search
-    const filteredPrivilegedUsers = privilegedUsers.filter((user) =>
-        user.username?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const normalizedSearch = searchQuery.trim().toLowerCase();
+    const accessiblePrivilegedUsers = isAdmin
+        ? privilegedUsers
+        : privilegedUsers.filter(user => Number(user.role) <= 3);
+    const privilegedCompanyOptions = [...new Set(
+        accessiblePrivilegedUsers.map(user => user.company_name).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b));
+    const privilegedRoleOptions = [...new Set(
+        accessiblePrivilegedUsers.map(user => Number(user.role)).filter(Boolean)
+    )].sort((a, b) => b - a);
+    const universityOptions = [...new Set(
+        memberUsers.map(user => user.university).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b));
 
-    // Filter privileged users based on role
-    // Leads can only see Volunteers (role 3) and below
-    // Admins can see all
-    const visiblePrivilegedUsers = (isAdmin
-        ? filteredPrivilegedUsers
-        : filteredPrivilegedUsers.filter(user => user.role <= 3)
-    ).sort((a, b) => {
+    const visiblePrivilegedUsers = accessiblePrivilegedUsers.filter((user) => {
+        const searchableText = [
+            user.username,
+            user.full_name,
+            user.email,
+            user.company_name
+        ].filter(Boolean).join(' ').toLowerCase();
+        const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+        const matchesStatus = statusFilter === 'all'
+            || (statusFilter === 'active' ? user.is_active !== false : user.is_active === false);
+        const matchesRole = roleFilter === 'all' || Number(user.role) === Number(roleFilter);
+        const matchesCompany = companyFilter === 'all' || user.company_name === companyFilter;
+        return matchesSearch && matchesStatus && matchesRole && matchesCompany;
+    }).sort((a, b) => {
         let aValue, bValue;
         switch (privilegedSortField) {
             case 'username':
@@ -162,8 +188,8 @@ const UserAccountManagement = () => {
                 bValue = b.username || '';
                 break;
             case 'role':
-                aValue = a.role || 0;
-                bValue = b.role || 0;
+                aValue = Number(a.role) || 0;
+                bValue = Number(b.role) || 0;
                 break;
             case 'status':
                 aValue = a.is_active ? 1 : 0;
@@ -186,11 +212,23 @@ const UserAccountManagement = () => {
         }
     };
 
-    const filteredMemberUsers = memberUsers.filter(
-        (user) =>
-            user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    ).sort((a, b) => {
+    const filteredMemberUsers = memberUsers.filter((user) => {
+        const searchableText = [
+            user.full_name,
+            user.email,
+            user.university,
+            user.phone_number
+        ].filter(Boolean).join(' ').toLowerCase();
+        const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+        const matchesStatus = statusFilter === 'all'
+            || (statusFilter === 'active' ? user.is_active !== false : user.is_active === false);
+        const matchesUniversity = universityFilter === 'all' || user.university === universityFilter;
+        const matchesVerification = verificationFilter === 'all'
+            || (verificationFilter === 'verified' ? user.email_verified : !user.email_verified);
+        const matchesCommunity = communityFilter === 'all'
+            || (communityFilter === 'joined' ? user.slack_joined : !user.slack_joined);
+        return matchesSearch && matchesStatus && matchesUniversity && matchesVerification && matchesCommunity;
+    }).sort((a, b) => {
         let aValue, bValue;
         switch (memberSortField) {
             case 'full_name':
@@ -212,6 +250,24 @@ const UserAccountManagement = () => {
         if (aValue > bValue) return memberSortDirection === 'asc' ? 1 : -1;
         return 0;
     });
+
+    const clearAllFilters = () => {
+        setSearchQuery('');
+        setStatusFilter('all');
+        setRoleFilter('all');
+        setCompanyFilter('all');
+        setUniversityFilter('all');
+        setVerificationFilter('all');
+        setCommunityFilter('all');
+    };
+
+    const hasActiveFilters = searchQuery || statusFilter !== 'all'
+        || (activeTab === 'privileged' && (roleFilter !== 'all' || companyFilter !== 'all'))
+        || (activeTab === 'members' && (
+            universityFilter !== 'all'
+            || verificationFilter !== 'all'
+            || communityFilter !== 'all'
+        ));
 
     const handleMemberSort = (field) => {
         if (memberSortField === field) {
@@ -277,20 +333,88 @@ const UserAccountManagement = () => {
                         </button>
                     </div>
 
-                    {/* Search */}
-                    <div className="relative max-w-2xl">
-                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--te-text-dim)]" />
-                        <input
-                            type="text"
-                            placeholder={
-                                activeTab === 'privileged'
-                                    ? 'Search by username...'
-                                    : 'Search by name or email...'
-                            }
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="te-input pl-12"
-                        />
+                    <div className="te-card p-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                            <div className={`sm:col-span-2 ${activeTab === 'privileged' ? 'lg:col-span-4' : 'lg:col-span-3'}`}>
+                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Search</label>
+                                <div className="relative">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                                    <input
+                                        type="search"
+                                        placeholder={
+                                            activeTab === 'privileged'
+                                                ? 'Username, name, email, or company...'
+                                                : 'Name, email, university, or phone...'
+                                        }
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="te-input w-full pl-9"
+                                    />
+                                </div>
+                            </div>
+                            <div className="lg:col-span-2">
+                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Status</label>
+                                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="te-select w-full">
+                                    <option value="all">All statuses</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            {activeTab === 'privileged' ? (
+                                <>
+                                    <div className="lg:col-span-3">
+                                        <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Role</label>
+                                        <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="te-select w-full">
+                                            <option value="all">All roles</option>
+                                            {privilegedRoleOptions.map(role => <option key={role} value={role}>{getRoleName(role)}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="lg:col-span-3">
+                                        <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Company</label>
+                                        <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="te-select w-full">
+                                            <option value="all">All companies</option>
+                                            {privilegedCompanyOptions.map(company => <option key={company} value={company}>{company}</option>)}
+                                        </select>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="lg:col-span-3">
+                                        <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">University</label>
+                                        <select value={universityFilter} onChange={(e) => setUniversityFilter(e.target.value)} className="te-select w-full">
+                                            <option value="all">All universities</option>
+                                            {universityOptions.map(university => <option key={university} value={university}>{university}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="lg:col-span-2">
+                                        <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Email</label>
+                                        <select value={verificationFilter} onChange={(e) => setVerificationFilter(e.target.value)} className="te-select w-full">
+                                            <option value="all">Any verification</option>
+                                            <option value="verified">Verified</option>
+                                            <option value="unverified">Unverified</option>
+                                        </select>
+                                    </div>
+                                    <div className="lg:col-span-2">
+                                        <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Community</label>
+                                        <select value={communityFilter} onChange={(e) => setCommunityFilter(e.target.value)} className="te-select w-full">
+                                            <option value="all">Any membership</option>
+                                            <option value="joined">Joined</option>
+                                            <option value="not-joined">Not joined</option>
+                                        </select>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div className="mt-4 flex flex-col gap-2 border-t border-[var(--te-border)] pt-3 sm:flex-row sm:items-center sm:justify-between">
+                            <span className="font-mono text-xs text-[var(--te-text-dim)]">
+                                Showing {activeTab === 'privileged' ? visiblePrivilegedUsers.length : filteredMemberUsers.length} of {activeTab === 'privileged' ? accessiblePrivilegedUsers.length : memberUsers.length} accounts
+                            </span>
+                            {hasActiveFilters && <button onClick={clearAllFilters} className="te-btn-secondary te-btn-sm justify-center">
+                                    <XMarkIcon className="h-4 w-4" />
+                                    Clear filters
+                                </button>}
+                        </div>
                     </div>
                 </div>
 
@@ -357,6 +481,9 @@ const UserAccountManagement = () => {
                                                 </div>
                                             </th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">
+                                                Company
+                                            </th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">
                                                 Actions
                                             </th>
                                         </tr>
@@ -364,8 +491,8 @@ const UserAccountManagement = () => {
                                     <tbody className="divide-y divide-[var(--te-border)]">
                                         {visiblePrivilegedUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="4" className="px-3 sm:px-6 py-8 sm:py-12 text-center text-sm sm:text-base text-[var(--te-text-dim)]">
-                                                    No privileged accounts found
+                                                <td colSpan="5" className="px-3 sm:px-6 py-8 sm:py-12 text-center text-sm sm:text-base text-[var(--te-text-dim)]">
+                                                    No privileged accounts match the current filters
                                                 </td>
                                             </tr>
                                         ) : (
@@ -382,9 +509,10 @@ const UserAccountManagement = () => {
                                                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--te-surface-alt)] flex items-center justify-center flex-shrink-0">
                                                                     <ShieldCheckIcon className="h-4 w-4 sm:h-6 sm:w-6 text-te-green" />
                                                                 </div>
-                                                                <span className="font-medium text-[var(--te-text)] text-xs sm:text-sm">
-                                                                    {user.username}
-                                                                </span>
+                                                                <div>
+                                                                    <span className="font-medium text-[var(--te-text)] text-xs sm:text-sm">{user.username}</span>
+                                                                    {(user.full_name || user.email) && <p className="mt-0.5 text-xs text-[var(--te-text-dim)]">{user.full_name || user.email}</p>}
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td className="px-3 sm:px-6 py-3 sm:py-4">
@@ -410,6 +538,9 @@ const UserAccountManagement = () => {
                                                                     <span className="text-xs sm:text-sm font-medium">Inactive</span>
                                                                 </span>
                                                             )}
+                                                        </td>
+                                                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[var(--te-text-dim)]">
+                                                            {user.company_name || '-'}
                                                         </td>
                                                         <td className="px-3 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
                                                             <div className="flex items-center justify-start gap-1 sm:gap-2">
@@ -456,7 +587,7 @@ const UserAccountManagement = () => {
                             <div className="md:hidden space-y-2.5 p-3">
                                 {visiblePrivilegedUsers.length === 0 ? (
                                     <div className="p-8 text-center text-sm text-[var(--te-text-dim)]">
-                                        No privileged accounts found
+                                        No privileged accounts match the current filters
                                     </div>
                                 ) : (
                                     visiblePrivilegedUsers.map((user) => {
@@ -496,6 +627,7 @@ const UserAccountManagement = () => {
                                                                 <span className="text-xs font-medium">Inactive</span>
                                                             </span>
                                                         )}
+                                                        {user.company_name && <p className="mt-2 text-xs text-[var(--te-text-dim)]">{user.company_name}</p>}
                                                     </div>
 
                                                     {/* Action Buttons */}
@@ -572,6 +704,12 @@ const UserAccountManagement = () => {
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">
                                                 University
                                             </th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">
+                                                Email
+                                            </th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)]">
+                                                Community
+                                            </th>
                                             <th
                                                 onClick={() => handleMemberSort('status')}
                                                 className="px-3 sm:px-6 py-3 sm:py-4 text-left font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text)] cursor-pointer hover:bg-[var(--te-hover)] transition-colors"
@@ -595,8 +733,8 @@ const UserAccountManagement = () => {
                                     <tbody className="divide-y divide-[var(--te-border)]">
                                         {filteredMemberUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="5" className="px-3 sm:px-6 py-12 text-center text-[var(--te-text-dim)] text-xs sm:text-sm">
-                                                    No member accounts found
+                                                <td colSpan="7" className="px-3 sm:px-6 py-12 text-center text-[var(--te-text-dim)] text-xs sm:text-sm">
+                                                    No member accounts match the current filters
                                                 </td>
                                             </tr>
                                         ) : (
@@ -621,6 +759,15 @@ const UserAccountManagement = () => {
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[var(--te-text-dim)]">{user.email}</td>
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[var(--te-text-dim)]">
                                                         {user.university || 'N/A'}
+                                                    </td>
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                                        <span className={`inline-flex items-center gap-1 text-xs font-medium ${user.email_verified ? 'text-te-green' : 'text-[var(--te-text-dim)]'}`}>
+                                                            {user.email_verified ? <CheckCircleIcon className="h-4 w-4" /> : <XCircleIcon className="h-4 w-4" />}
+                                                            {user.email_verified ? 'Verified' : 'Unverified'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-[var(--te-text-dim)]">
+                                                        {user.slack_joined ? 'Joined' : 'Not joined'}
                                                     </td>
                                                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                         {user.is_active ? (
@@ -665,7 +812,7 @@ const UserAccountManagement = () => {
                             <div className="md:hidden space-y-2.5 p-3">
                                 {filteredMemberUsers.length === 0 ? (
                                     <div className="p-8 text-center text-xs text-[var(--te-text-dim)]">
-                                        No member accounts found
+                                        No member accounts match the current filters
                                     </div>
                                 ) : (
                                     filteredMemberUsers.map((user) => (
@@ -711,6 +858,16 @@ const UserAccountManagement = () => {
                                                                 <span className="text-xs font-medium">Inactive</span>
                                                             </span>
                                                         )}
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-[var(--te-text-dim)] uppercase">Email</span>
+                                                        <span className={`text-xs font-medium ${user.email_verified ? 'text-te-green' : 'text-[var(--te-text-dim)]'}`}>
+                                                            {user.email_verified ? 'Verified' : 'Unverified'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium text-[var(--te-text-dim)] uppercase">Community</span>
+                                                        <span className="text-xs font-medium text-[var(--te-text)]">{user.slack_joined ? 'Joined' : 'Not joined'}</span>
                                                     </div>
                                                 </div>
 
@@ -802,7 +959,7 @@ const UserAccountManagement = () => {
                                         </div>
                                         <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
                                             <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Phone</p>
-                                            <p className="text-sm font-medium text-[var(--te-text)]">{selectedMember.phone || 'Not provided'}</p>
+                                            <p className="text-sm font-medium text-[var(--te-text)]">{selectedMember.phone_number || 'Not provided'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -822,8 +979,8 @@ const UserAccountManagement = () => {
                                             <p className="text-sm font-medium text-[var(--te-text)]">{selectedMember.university || 'Not provided'}</p>
                                         </div>
                                         <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
-                                            <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Graduation Year</p>
-                                            <p className="text-sm font-medium text-[var(--te-text)]">{selectedMember.year || 'Not provided'}</p>
+                                            <p className="text-xs font-semibold text-[var(--te-text-dim)] mb-1">Program End Date</p>
+                                            <p className="text-sm font-medium text-[var(--te-text)]">{selectedMember.end_date || 'Not provided'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -836,8 +993,8 @@ const UserAccountManagement = () => {
                                         </svg>
                                         Account Status
                                     </h3>
-                                    <div className="bg-[var(--te-surface-alt)] rounded-lg p-4">
-                                        <div className="flex items-center justify-between">
+                                    <div className="divide-y divide-[var(--te-border)] bg-[var(--te-surface-alt)] rounded-lg px-4">
+                                        <div className="flex items-center justify-between py-4">
                                             <span className="text-sm font-medium text-[var(--te-text)]">Status</span>
                                             {selectedMember.is_active ? (
                                                 <span className="flex items-center gap-2 text-te-green font-semibold">
@@ -850,6 +1007,18 @@ const UserAccountManagement = () => {
                                                     Inactive
                                                 </span>
                                             )}
+                                        </div>
+                                        <div className="flex items-center justify-between py-4">
+                                            <span className="text-sm font-medium text-[var(--te-text)]">Email verification</span>
+                                            <span className={`text-sm font-semibold ${selectedMember.email_verified ? 'text-te-green' : 'text-[var(--te-text-dim)]'}`}>
+                                                {selectedMember.email_verified ? 'Verified' : 'Unverified'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between py-4">
+                                            <span className="text-sm font-medium text-[var(--te-text)]">Community</span>
+                                            <span className="text-sm font-semibold text-[var(--te-text)]">
+                                                {selectedMember.slack_joined ? 'Joined' : 'Not joined'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

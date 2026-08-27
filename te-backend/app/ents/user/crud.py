@@ -69,9 +69,12 @@ def read_all_member_users(db: Database) -> list[user_models.MemberUser]:
     return [user_models.MemberUser(**user) for user in users_data]
 
 
-def read_all_privileged_users(db: Database) -> list[dict]:
+def read_all_privileged_users(
+    db: Database, *, include_inactive: bool = False
+) -> list[dict]:
     """Read all privileged users from MongoDB (Admin only)"""
-    users_data = db.privileged_users.find({"is_active": True}).sort("full_name", 1)
+    query = {} if include_inactive else {"is_active": True}
+    users_data = db.privileged_users.find(query).sort("full_name", 1)
 
     result = []
     for user in users_data:
@@ -84,6 +87,8 @@ def read_all_privileged_users(db: Database) -> list[dict]:
                 "username": user.get("username"),
                 "role": user.get("role"),
                 "is_active": user.get("is_active", True),
+                "company_id": str(user["company_id"]) if user.get("company_id") else None,
+                "company_name": user.get("company_name", ""),
             }
         )
     return result

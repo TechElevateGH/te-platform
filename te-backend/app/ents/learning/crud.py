@@ -79,6 +79,24 @@ def update_streak(progress: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def get_effective_current_streak(
+    streak_data: Dict[str, Any], *, now: Optional[datetime] = None
+) -> int:
+    current_streak = streak_data.get("current_streak", 0)
+    last_activity_date = streak_data.get("last_activity_date")
+    if current_streak <= 0 or not last_activity_date:
+        return 0
+
+    try:
+        last_activity = datetime.strptime(last_activity_date, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return 0
+
+    current_date = (now or datetime.utcnow()).date()
+    days_since_activity = (current_date - last_activity).days
+    return current_streak if 0 <= days_since_activity <= 1 else 0
+
+
 def log_activity(
     db: Database,
     user_id: int,
@@ -266,7 +284,7 @@ def calculate_learning_stats(
         "session_count": session_count,
         "average_session_duration": avg_session,
         "streak": {
-            "current_streak": streak_data.get("current_streak", 0),
+            "current_streak": get_effective_current_streak(streak_data),
             "longest_streak": streak_data.get("longest_streak", 0),
             "last_activity_date": streak_data.get("last_activity_date"),
             "streak_dates": streak_data.get("streak_dates", [])[-7:],  # Last 7 days
@@ -1114,7 +1132,7 @@ def get_all_members_progress(db: Database) -> List[dict]:
                     "total_time_seconds": total_time,
                     "total_time_formatted": f"{total_time // 3600}h {(total_time % 3600) // 60}m",
                     "session_count": progress.get("session_count", 0),
-                    "current_streak": streak_data.get("current_streak", 0),
+                    "current_streak": get_effective_current_streak(streak_data),
                     "longest_streak": streak_data.get("longest_streak", 0),
                     "last_activity_date": streak_data.get("last_activity_date"),
                     "category_breakdown": category_breakdown,
@@ -1204,16 +1222,17 @@ def get_learning_statistics(db: Database) -> dict:
     )
 
     # Streak statistics
-    active_streaks = sum(
-        1 for p in all_progress if p.get("streak_data", {}).get("current_streak", 0) > 0
-    )
+    current_streaks = [
+        get_effective_current_streak(p.get("streak_data", {}))
+        for p in all_progress
+    ]
+    active_streaks = sum(1 for streak in current_streaks if streak > 0)
     max_streak = max(
         (p.get("streak_data", {}).get("longest_streak", 0) for p in all_progress),
         default=0,
     )
     avg_streak = (
-        sum(p.get("streak_data", {}).get("current_streak", 0) for p in all_progress)
-        / members_with_progress
+        sum(current_streaks) / members_with_progress
         if members_with_progress > 0
         else 0
     )

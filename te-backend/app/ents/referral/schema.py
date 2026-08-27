@@ -3,7 +3,7 @@ from enum import Enum
 
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class JobRoles(Enum):
@@ -140,3 +140,4 @@ class ReferralUpdateStatus(BaseModel):
 
 class CompanyReadForReferrals(CompanyReadBase):
     referral_materials: ReferralMaterials
+    metadata: dict = Field(default_factory=dict)

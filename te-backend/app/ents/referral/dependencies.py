@@ -31,6 +31,7 @@ def parse_company_for_referrals(user_id, company):
     return referral_schema.CompanyReadForReferrals(
         **company_base.dict(),
         referral_materials=referral_schema.ReferralMaterials(**materials),
+        metadata=getattr(company, "metadata", {}) or {},
     )
 
 

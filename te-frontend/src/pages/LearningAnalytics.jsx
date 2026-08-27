@@ -16,6 +16,13 @@ import {
 } from 'icons';
 import { CheckCircleIcon as CheckCircleSolidIcon, BookmarkIcon as BookmarkSolidIcon } from 'icons';
 
+const getMemberActivityTimestamp = member => {
+    return [member.last_activity_date, member.last_updated]
+        .map(activityDate => activityDate ? new Date(activityDate).getTime() : 0)
+        .filter(timestamp => !Number.isNaN(timestamp))
+        .reduce((latest, timestamp) => Math.max(latest, timestamp), 0);
+};
+
 export default function LearningAnalytics() {
     const { userRole: authUserRole } = useAuth();
     const userRole = authUserRole ? parseInt(authUserRole) : 0;
@@ -29,7 +36,9 @@ export default function LearningAnalytics() {
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedTopic, setSelectedTopic] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [memberActivityFilter, setMemberActivityFilter] = useState('all');
+    const [memberProgressFilter, setMemberProgressFilter] = useState('all');
+    const [memberSortBy, setMemberSortBy] = useState('recent-desc');
 
     // Topic view filters and sort
     const [categoryFilter, setCategoryFilter] = useState('all');
@@ -119,12 +128,55 @@ export default function LearningAnalytics() {
         return byCategory;
     }, [allMembersProgress]);
 
-    // Filter members based on search
-    const filteredMembers = allMembersProgress.filter(
-        (member) =>
-            member.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            member.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredMembers = useMemo(() => {
+        const normalizedSearch = searchQuery.trim().toLowerCase();
+        const now = Date.now();
+        const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+
+        return allMembersProgress
+            .filter(member => {
+                const searchableText = [member.full_name, member.email]
+                    .filter(Boolean)
+                    .join(' ')
+                    .toLowerCase();
+                const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+                const activityTimestamp = getMemberActivityTimestamp(member);
+
+                let matchesActivity = true;
+                if (memberActivityFilter === 'last-7') matchesActivity = activityTimestamp >= sevenDaysAgo;
+                if (memberActivityFilter === 'last-30') matchesActivity = activityTimestamp >= thirtyDaysAgo;
+                if (memberActivityFilter === 'inactive-30') {
+                    matchesActivity = activityTimestamp === 0 || activityTimestamp < thirtyDaysAgo;
+                }
+
+                let matchesProgress = true;
+                if (memberProgressFilter === 'completed') matchesProgress = (member.completed_count || 0) > 0;
+                if (memberProgressFilter === 'no-completions') matchesProgress = (member.completed_count || 0) === 0;
+                if (memberProgressFilter === 'active-streak') matchesProgress = (member.current_streak || 0) > 0;
+
+                return matchesSearch && matchesActivity && matchesProgress;
+            })
+            .sort((a, b) => {
+                switch (memberSortBy) {
+                    case 'name-asc':
+                        return (a.full_name || '').localeCompare(b.full_name || '');
+                    case 'name-desc':
+                        return (b.full_name || '').localeCompare(a.full_name || '');
+                    case 'completed-desc':
+                        return (b.completed_count || 0) - (a.completed_count || 0);
+                    case 'time-desc':
+                        return (b.total_time_seconds || 0) - (a.total_time_seconds || 0);
+                    case 'streak-desc':
+                        return (b.current_streak || 0) - (a.current_streak || 0);
+                    case 'sessions-desc':
+                        return (b.session_count || 0) - (a.session_count || 0);
+                    case 'recent-desc':
+                    default:
+                        return getMemberActivityTimestamp(b) - getMemberActivityTimestamp(a);
+                }
+            });
+    }, [allMembersProgress, searchQuery, memberActivityFilter, memberProgressFilter, memberSortBy]);
 
     // Filter and sort topics based on search, category filter, and sort options
     const filteredTopics = useMemo(() => {
@@ -175,6 +227,29 @@ export default function LearningAnalytics() {
     const categories = useMemo(() => {
         return ['all', ...new Set(Object.keys(topicsByCategory))];
     }, [topicsByCategory]);
+    const totalTopicCount = Object.values(topicsByCategory)
+        .reduce((total, topics) => total + topics.length, 0);
+    const hasActiveFilters = searchQuery
+        || (viewMode === 'member' && (
+            memberActivityFilter !== 'all'
+            || memberProgressFilter !== 'all'
+            || memberSortBy !== 'recent-desc'
+        ))
+        || (viewMode === 'topic' && (
+            categoryFilter !== 'all'
+            || sortBy !== 'name'
+            || sortOrder !== 'asc'
+        ));
+
+    const clearFilters = () => {
+        setSearchQuery('');
+        setMemberActivityFilter('all');
+        setMemberProgressFilter('all');
+        setMemberSortBy('recent-desc');
+        setCategoryFilter('all');
+        setSortBy('name');
+        setSortOrder('asc');
+    };
 
     // Calculate stats
     const stats = useMemo(() => {
@@ -295,10 +370,9 @@ export default function LearningAnalytics() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {/* Search, Sort, and View Switcher Bar */}
+                            {/* Search, filters, and view switcher */}
                             <div className="te-card p-4">
                                 <div className="flex flex-col sm:flex-row gap-3">
-                                    {/* Search */}
                                     <div className="flex-1">
                                         <div className="relative">
                                             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--te-text-dim)]" />
@@ -312,7 +386,6 @@ export default function LearningAnalytics() {
                                         </div>
                                     </div>
 
-                                    {/* View Switcher */}
                                     <div className="flex rounded-lg border border-[var(--te-border)] bg-[var(--te-surface-alt)] p-1">
                                         <button
                                             onClick={() => setViewMode('member')}
@@ -329,22 +402,65 @@ export default function LearningAnalytics() {
                                             Topics
                                         </button>
                                     </div>
+                                </div>
 
-                                    {/* Sort & Advanced Filters */}
-                                    <div className="flex gap-2">
-                                        {viewMode === 'topic' && (
-                                            <>
-                                                <select
-                                                    value={categoryFilter}
-                                                    onChange={(e) => setCategoryFilter(e.target.value)}
-                                                    className="te-select"
-                                                >
+                                <div className="mt-4 border-t border-[var(--te-border)] pt-4">
+                                    <div className="mb-3 flex items-center gap-2">
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
+                                        <span className="font-mono text-xs font-semibold uppercase tracking-wide text-[var(--te-text-dim)]">Filters and sorting</span>
+                                    </div>
+                                    {viewMode === 'member' ? (
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                                            <div className="lg:col-span-3">
+                                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Activity</label>
+                                                <select value={memberActivityFilter} onChange={(e) => setMemberActivityFilter(e.target.value)} className="te-select w-full">
+                                                    <option value="all">Any activity</option>
+                                                    <option value="last-7">Active in last 7 days</option>
+                                                    <option value="last-30">Active in last 30 days</option>
+                                                    <option value="inactive-30">Inactive for 30+ days</option>
+                                                </select>
+                                            </div>
+                                            <div className="lg:col-span-3">
+                                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Progress</label>
+                                                <select value={memberProgressFilter} onChange={(e) => setMemberProgressFilter(e.target.value)} className="te-select w-full">
+                                                    <option value="all">Any progress</option>
+                                                    <option value="completed">Has completions</option>
+                                                    <option value="no-completions">No completions</option>
+                                                    <option value="active-streak">Active streak</option>
+                                                </select>
+                                            </div>
+                                            <div className="lg:col-span-3">
+                                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Sort</label>
+                                                <select value={memberSortBy} onChange={(e) => setMemberSortBy(e.target.value)} className="te-select w-full">
+                                                    <option value="recent-desc">Most recently active</option>
+                                                    <option value="completed-desc">Most completions</option>
+                                                    <option value="time-desc">Most learning time</option>
+                                                    <option value="streak-desc">Longest current streak</option>
+                                                    <option value="sessions-desc">Most sessions</option>
+                                                    <option value="name-asc">Name A-Z</option>
+                                                    <option value="name-desc">Name Z-A</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-3">
+                                                <span className="font-mono text-xs text-[var(--te-text-dim)]">{filteredMembers.length} of {allMembersProgress.length} members</span>
+                                                {hasActiveFilters && <button onClick={clearFilters} className="te-btn-secondary te-btn-sm justify-center">
+                                                        <XMarkIcon className="h-4 w-4" />
+                                                        Clear filters
+                                                    </button>}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                                            <div className="lg:col-span-4">
+                                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Category</label>
+                                                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="te-select w-full">
                                                     {categories.map(cat => (
-                                                        <option key={cat} value={cat}>
-                                                            {cat === 'all' ? 'All Categories' : cat}
-                                                        </option>
+                                                        <option key={cat} value={cat}>{cat === 'all' ? 'All categories' : cat}</option>
                                                     ))}
                                                 </select>
+                                            </div>
+                                            <div className="lg:col-span-4">
+                                                <label className="mb-1 block text-xs font-semibold text-[var(--te-text-dim)]">Sort</label>
                                                 <select
                                                     value={`${sortBy}-${sortOrder}`}
                                                     onChange={(e) => {
@@ -352,27 +468,26 @@ export default function LearningAnalytics() {
                                                         setSortBy(by);
                                                         setSortOrder(order);
                                                     }}
-                                                    className="te-select"
+                                                    className="te-select w-full"
                                                 >
-                                                    <option value="name-asc">Name (A-Z)</option>
-                                                    <option value="name-desc">Name (Z-A)</option>
-                                                    <option value="completed-desc">Most Completed</option>
-                                                    <option value="completed-asc">Least Completed</option>
-                                                    <option value="bookmarked-desc">Most Bookmarked</option>
-                                                    <option value="bookmarked-asc">Least Bookmarked</option>
+                                                    <option value="name-asc">Name A-Z</option>
+                                                    <option value="name-desc">Name Z-A</option>
+                                                    <option value="completed-desc">Most completed</option>
+                                                    <option value="completed-asc">Least completed</option>
+                                                    <option value="bookmarked-desc">Most bookmarked</option>
+                                                    <option value="bookmarked-asc">Least bookmarked</option>
                                                 </select>
-                                            </>
-                                        )}
-                                        <button
-                                            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                            className={`te-btn-sm ${showAdvancedFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}
-                                        >
-                                            <AdjustmentsHorizontalIcon className="w-4 h-4 inline mr-1.5" />
-                                            Filters
-                                        </button>
-                                    </div>
+                                            </div>
+                                            <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-4">
+                                                <span className="font-mono text-xs text-[var(--te-text-dim)]">{filteredTopics.length} of {totalTopicCount} topics</span>
+                                                {hasActiveFilters && <button onClick={clearFilters} className="te-btn-secondary te-btn-sm justify-center">
+                                                        <XMarkIcon className="h-4 w-4" />
+                                                        Clear filters
+                                                    </button>}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-
                             </div>
 
                             {/* Analytics Cards - Category Breakdown & Weekly Activity */}
@@ -530,7 +645,7 @@ export default function LearningAnalytics() {
                                                 ) : (
                                                     <tr>
                                                         <td colSpan="6" className="px-4 py-6 text-sm text-[var(--te-text-dim)]">
-                                                            {searchQuery ? 'No members found matching your search' : 'No member progress data available'}
+                                                            {hasActiveFilters ? 'No members match the current filters' : 'No member progress data available'}
                                                         </td>
                                                     </tr>
                                                 )}
@@ -583,7 +698,7 @@ export default function LearningAnalytics() {
                                                 ) : (
                                                     <tr>
                                                         <td colSpan="4" className="px-4 py-6 text-sm text-[var(--te-text-dim)]">
-                                                            {searchQuery ? 'No topics found matching your search' : 'No topic data available'}
+                                                            {hasActiveFilters ? 'No topics match the current filters' : 'No topic data available'}
                                                         </td>
                                                     </tr>
                                                 )}

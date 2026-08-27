@@ -7,8 +7,39 @@ import { Loading } from '../components/_custom/Loading';
 import DeleteConfirmationModal from '../components/_custom/DeleteConfirmationModal';
 import ReferralManagement from '../components/referral/ReferralManagement';
 import { getCompanyLogoUrl, handleCompanyLogoError } from '../utils';
-import { PlusIcon, BuildingOfficeIcon, ClockIcon, CheckCircleIcon, PaperAirplaneIcon, XMarkIcon, AdjustmentsHorizontalIcon, ChartBarIcon, ArrowDownTrayIcon, PencilIcon, TrashIcon } from 'icons';
+import { PlusIcon, BuildingOfficeIcon, ClockIcon, CheckCircleIcon, PaperAirplaneIcon, XMarkIcon, AdjustmentsHorizontalIcon, ChartBarIcon, ArrowDownTrayIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from 'icons';
 import { ClipboardDocumentIcon } from 'icons';
+
+const parseReferralDate = value => {
+  if (!value) return null;
+
+  const normalizedValue = String(value).trim();
+  const dayFirstDate = normalizedValue.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (dayFirstDate) {
+    const [, day, month, year] = dayFirstDate;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const parsedDate = new Date(normalizedValue);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const formatReferralDate = value => {
+  const parsedDate = parseReferralDate(value);
+  return parsedDate
+    ? parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : 'Unknown';
+};
+
+const normalizeReferral = referral => ({
+  ...referral,
+  submitted_date: referral.submitted_date || referral.date || referral.referral_date || '',
+  has_resume: referral.has_resume !== undefined
+    ? referral.has_resume
+    : Boolean(referral.resume || referral.resume_file_id),
+  has_essay: referral.has_essay !== undefined ? referral.has_essay : Boolean(referral.essay)
+});
+
 const ReferralsManagement = () => {
   const {
     accessToken,
@@ -23,7 +54,7 @@ const ReferralsManagement = () => {
   const [showAddCompany, setShowAddCompany] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Pending'); // Default to Pending status
-  const [memberFilter, setMemberFilter] = useState('');
+  const [attachmentFilter, setAttachmentFilter] = useState('');
   const [selectedReferral, setSelectedReferral] = useState(null);
   const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
@@ -37,10 +68,10 @@ const ReferralsManagement = () => {
 
   // Check if user is a referrer (role = 2) - use sessionStorage as fallback for immediate availability
   const storedRole = sessionStorage.getItem('userRole');
-  const effectiveRole = userRole || parseInt(storedRole) || 0;
+  const effectiveRole = Number(userRole || storedRole || 0);
   const isReferrer = effectiveRole === 2;
   const isLead = effectiveRole >= 3; // Volunteers, Leads, Admins
-  const isAdmin = effectiveRole >= 4; // Leads and Admins
+  const isAdmin = effectiveRole === 5;
 
   // Company filter - only initialize for non-referrers
   const [companyFilter, setCompanyFilter] = useState('');
@@ -67,22 +98,21 @@ const ReferralsManagement = () => {
     }
   }, [isReferrer]);
 
-  // Advanced Features State - Sort controls hidden for referrers but sorting logic still active with defaults
-  const [sortField] = useState('date'); // Default sort by date for referrers
-  const [sortOrder] = useState('desc'); // Default descending order for referrers
+  // Advanced Features State
+  const [sortField, setSortField] = useState('date');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [dateRange, setDateRange] = useState({
     start: '',
     end: ''
   });
-  const [showDateFilter, setShowDateFilter] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     company: true,
     jobTitle: true,
+    submittedDate: true,
     member: true,
     phone_number: true,
     status: true,
-    actions: true,
     email: false,
     resume: false,
     essay: false
@@ -93,6 +123,9 @@ const ReferralsManagement = () => {
   const [companies, setCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [companySearchQuery, setCompanySearchQuery] = useState('');
+  const [companyMaterialFilter, setCompanyMaterialFilter] = useState('');
+  const [companySortOrder, setCompanySortOrder] = useState('asc');
 
   // Column Management
   const toggleColumn = column => {
@@ -105,10 +138,10 @@ const ReferralsManagement = () => {
     setVisibleColumns({
       company: true,
       jobTitle: true,
+      submittedDate: true,
       member: true,
       phone_number: true,
       status: true,
-      actions: true,
       email: false,
       resume: false,
       essay: false
@@ -118,13 +151,13 @@ const ReferralsManagement = () => {
     setVisibleColumns({
       company: true,
       jobTitle: true,
+      submittedDate: true,
       member: true,
       email: true,
       phone_number: true,
       status: true,
       resume: true,
-      essay: true,
-      actions: true
+      essay: true
     });
   };
 
@@ -178,12 +211,7 @@ const ReferralsManagement = () => {
         }
       });
       const rawReferrals = response.data?.referrals || [];
-      const enriched = rawReferrals.map(r => ({
-        ...r,
-        submitted_date: r.submitted_date || r.date || '',
-        has_resume: r.has_resume !== undefined ? r.has_resume : Boolean(r.resume),
-        has_essay: r.has_essay !== undefined ? r.has_essay : Boolean(r.essay)
-      }));
+      const enriched = rawReferrals.map(normalizeReferral);
       setReferrals(enriched);
     } catch (error) {
       console.error('Error fetching referrals:', error);
@@ -260,11 +288,18 @@ const ReferralsManagement = () => {
       });
       setCompanyForm({
         name: '',
+        image: '',
+        description: '',
+        website: '',
+        industry: '',
+        size: '',
+        headquarters: '',
         referral_link: '',
         requires_resume: true,
         requires_phone_number: true,
         requires_essay: true
       });
+      await fetchCompanies();
       setShowAddCompany(false);
       toast.success('Referral company added successfully!');
     } catch (error) {
@@ -303,6 +338,7 @@ const ReferralsManagement = () => {
           Authorization: `Bearer ${accessToken}`
         }
       });
+      await fetchCompanies();
       setShowEditCompany(false);
       setEditingCompany(null);
       toast.success('Company updated successfully!');
@@ -312,10 +348,10 @@ const ReferralsManagement = () => {
     }
   };
 
-  // Handle referral update from modal
-  // Handle referral update from modal
   const handleReferralUpdate = updatedReferral => {
-    setReferrals(prevReferrals => prevReferrals.map(ref => ref.id === updatedReferral.id ? updatedReferral : ref));
+    const normalizedReferral = normalizeReferral(updatedReferral);
+    setReferrals(prevReferrals => prevReferrals.map(ref => ref.id === normalizedReferral.id ? normalizedReferral : ref));
+    setSelectedReferral(currentReferral => currentReferral?.id === normalizedReferral.id ? normalizedReferral : currentReferral);
   };
 
   // Handle inline status update
@@ -406,25 +442,51 @@ const ReferralsManagement = () => {
     }
   };
 
-  // Filter referrals
-  const filteredReferrals = referrals.filter(ref => {
-    const matchesSearch = !searchQuery || ref.company?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || ref.user_name?.toLowerCase().includes(searchQuery.toLowerCase()) || ref.job_title?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = !statusFilter || ref.status === statusFilter;
-    const matchesMember = !memberFilter || ref.user_name?.toLowerCase().includes(memberFilter.toLowerCase()) || ref.user_email?.toLowerCase().includes(memberFilter.toLowerCase());
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const startDate = dateRange.start ? new Date(`${dateRange.start}T00:00:00`) : null;
+  const endDate = dateRange.end ? new Date(`${dateRange.end}T23:59:59.999`) : null;
+  const companyOptions = [...new Set(referrals.map(ref => ref.company?.name).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
 
-    // Only apply company filter for non-referrers
-    const matchesCompany = isReferrer || !companyFilter || ref.company?.name?.toLowerCase().includes(companyFilter.toLowerCase());
-    const matchesDateRange = (!dateRange.start || new Date(ref.submitted_date) >= new Date(dateRange.start)) && (!dateRange.end || new Date(ref.submitted_date) <= new Date(dateRange.end));
-    return matchesSearch && matchesStatus && matchesMember && matchesCompany && matchesDateRange;
+  const filteredReferrals = referrals.filter(ref => {
+    const searchableText = [
+      ref.company?.name,
+      ref.job_title,
+      ref.role,
+      ref.user_name,
+      ref.user_email,
+      ref.phone_number,
+      ref.status
+    ].filter(Boolean).join(' ').toLowerCase();
+    const matchesSearch = !normalizedSearch || searchableText.includes(normalizedSearch);
+    const matchesStatus = !statusFilter || ref.status === statusFilter;
+    const matchesCompany = isReferrer || !companyFilter || ref.company?.name === companyFilter;
+    const submittedDate = parseReferralDate(ref.submitted_date);
+    const matchesDateRange = (!startDate || (submittedDate && submittedDate >= startDate))
+      && (!endDate || (submittedDate && submittedDate <= endDate));
+
+    let matchesAttachment = true;
+    if (attachmentFilter === 'resume') matchesAttachment = ref.has_resume;
+    if (attachmentFilter === 'missing-resume') matchesAttachment = !ref.has_resume;
+    if (attachmentFilter === 'essay') matchesAttachment = ref.has_essay;
+    if (attachmentFilter === 'missing-essay') matchesAttachment = !ref.has_essay;
+
+    return matchesSearch && matchesStatus && matchesCompany && matchesDateRange && matchesAttachment;
   });
 
   // Sorting logic
   const sortedReferrals = [...filteredReferrals].sort((a, b) => {
+    if (sortField === 'date') {
+      const aDate = parseReferralDate(a.submitted_date);
+      const bDate = parseReferralDate(b.submitted_date);
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+    }
+
     let comparison = 0;
     switch (sortField) {
-      case 'date':
-        comparison = new Date(a.submitted_date || 0) - new Date(b.submitted_date || 0);
-        break;
       case 'company':
         comparison = (a.company?.name || '').localeCompare(b.company?.name || '');
         break;
@@ -444,21 +506,52 @@ const ReferralsManagement = () => {
   const clearAllFilters = () => {
     setSearchQuery('');
     setStatusFilter('');
-    setMemberFilter('');
-    if (!isReferrer) {
-      setCompanyFilter('');
-    }
+    setAttachmentFilter('');
+    setCompanyFilter('');
     setDateRange({
       start: '',
       end: ''
     });
+    setSortField('date');
+    setSortOrder('desc');
+  };
+
+  const filteredCompanies = companies
+    .filter(company => {
+      const metadata = company.metadata || {};
+      const searchableText = [
+        company.name,
+        company.domain,
+        company.referral_link,
+        metadata.description,
+        metadata.industry,
+        metadata.headquarters
+      ].filter(Boolean).join(' ').toLowerCase();
+      const matchesSearch = !companySearchQuery.trim()
+        || searchableText.includes(companySearchQuery.trim().toLowerCase());
+      const materials = company.referral_materials || {};
+      const matchesMaterial = !companyMaterialFilter
+        || (companyMaterialFilter === 'none'
+          ? !materials.resume && !materials.essay && !materials.phone_number
+          : Boolean(materials[companyMaterialFilter]));
+      return matchesSearch && matchesMaterial;
+    })
+    .sort((a, b) => {
+      const comparison = (a.name || '').localeCompare(b.name || '');
+      return companySortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  const clearCompanyFilters = () => {
+    setCompanySearchQuery('');
+    setCompanyMaterialFilter('');
+    setCompanySortOrder('asc');
   };
 
   // CSV Export
   const exportToCSV = () => {
-    const headers = ['Company', 'Job Title', 'Member', 'Email', 'Phone Number', 'Status', 'Resume', 'Essay'];
-    const rows = sortedReferrals.map(ref => [ref.company?.name || '', ref.job_title || '', ref.user_name || '', ref.user_email || '', ref.phone_number || '', ref.status || '', ref.has_resume ? 'Yes' : 'No', ref.has_essay ? 'Yes' : 'No']);
-    const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+    const headers = ['Company', 'Job Title', 'Submitted', 'Member', 'Email', 'Phone Number', 'Status', 'Resume', 'Essay'];
+    const rows = sortedReferrals.map(ref => [ref.company?.name || '', ref.job_title || '', formatReferralDate(ref.submitted_date), ref.user_name || '', ref.user_email || '', ref.phone_number || '', ref.status || '', ref.has_resume ? 'Yes' : 'No', ref.has_essay ? 'Yes' : 'No']);
+    const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\n');
     const blob = new Blob([csvContent], {
       type: 'text/csv'
     });
@@ -474,8 +567,6 @@ const ReferralsManagement = () => {
   const stats = {
     total: referrals.length,
     pending: referrals.filter(r => r?.status === 'Pending').length,
-    approved: referrals.filter(r => r?.status === 'Approved').length,
-    declined: referrals.filter(r => r?.status === 'Declined').length,
     completed: referrals.filter(r => r?.status === 'Completed').length
   };
   if (loading) {
@@ -611,147 +702,112 @@ const ReferralsManagement = () => {
 
                 {/* Stats + Filters for Member Referrals Tab */}
                 {activeTab === 'referrals' && <div className="mb-6 te-card overflow-hidden">
-                        {/* Stats Section - Mobile: Full Width, Desktop: Side by Side */}
-                        <div className="flex flex-col gap-4 p-4 md:flex-row md:items-end">
-                            {/* Stats - Horizontal scroll on mobile */}
-                            <div className="grid grid-cols-3 overflow-hidden border border-[var(--te-border)] font-mono text-xs md:min-w-80">
-                                {!isReferrer && <>
-                                        <div className="border-r border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                            <ChartBarIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-[var(--te-text-dim)]" />
-                                            <span className="text-[var(--te-text-dim)]">Total:</span>
-                                            <span className="font-bold text-[var(--te-text)]">{stats.total}</span>
-                                        </div>
-                                        <div className="hidden"></div>
-                                    </>}
-
-                                <div className="border-r border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                    <ClockIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-te-gold" />
-                                    <span className="text-[var(--te-text-dim)]">Pending:</span>
-                                    <span className="font-bold text-te-gold">{stats.pending}</span>
+                        <div className="grid grid-cols-3 divide-x divide-[var(--te-border)] border-b border-[var(--te-border)] bg-[var(--te-surface-alt)]">
+                            <div className="p-4">
+                                <div className="flex items-center gap-2 text-[var(--te-text-dim)]">
+                                    <ChartBarIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Total</span>
                                 </div>
-                                <div className="hidden"></div>
-                                <div className="border-r border-[var(--te-border)] bg-[var(--te-surface)] p-3">
-                                    <CheckCircleIcon className="h-3 w-3 md:h-3.5 md:w-3.5 text-te-green" />
-                                    <span className="text-[var(--te-text-dim)]">Completed:</span>
-                                    <span className="font-bold text-te-green">{stats.completed}</span>
+                                <p className="mt-1 font-mono text-xl font-bold text-[var(--te-text)]">{stats.total}</p>
+                            </div>
+                            <div className="p-4">
+                                <div className="flex items-center gap-2 text-te-gold">
+                                    <ClockIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Pending</span>
+                                </div>
+                                <p className="mt-1 font-mono text-xl font-bold text-te-gold">{stats.pending}</p>
+                            </div>
+                            <div className="p-4">
+                                <div className="flex items-center gap-2 text-te-green">
+                                    <CheckCircleIcon className="h-4 w-4" />
+                                    <span className="font-mono text-[10px] uppercase tracking-wide">Completed</span>
+                                </div>
+                                <p className="mt-1 font-mono text-xl font-bold text-te-green">{stats.completed}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 p-4">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12">
+                                <div className="sm:col-span-2 lg:col-span-4">
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Search</label>
+                                    <div className="relative">
+                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                                        <input
+                                            type="search"
+                                            placeholder="Member, email, company, or position..."
+                                            value={searchQuery}
+                                            onChange={e => setSearchQuery(e.target.value)}
+                                            className="te-input w-full pl-9"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="lg:col-span-2">
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Status</label>
+                                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="te-select w-full">
+                                        <option value="">All statuses</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Completed">Completed</option>
+                                        {!isReferrer && <option value="Declined">Declined</option>}
+                                        {!isReferrer && <option value="Cancelled">Cancelled</option>}
+                                    </select>
+                                </div>
+                                {!isReferrer && <div className="lg:col-span-2">
+                                        <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Company</label>
+                                        <select value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="te-select w-full">
+                                            <option value="">All companies</option>
+                                            {companyOptions.map(company => <option key={company} value={company}>{company}</option>)}
+                                        </select>
+                                    </div>}
+                                <div className={isReferrer ? 'lg:col-span-3' : 'lg:col-span-2'}>
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Attachment</label>
+                                    <select value={attachmentFilter} onChange={e => setAttachmentFilter(e.target.value)} className="te-select w-full">
+                                        <option value="">All attachments</option>
+                                        <option value="resume">Has resume</option>
+                                        <option value="missing-resume">Missing resume</option>
+                                        <option value="essay">Has essay</option>
+                                        <option value="missing-essay">Missing essay</option>
+                                    </select>
+                                </div>
+                                <div className={isReferrer ? 'lg:col-span-3' : 'lg:col-span-2'}>
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Sort</label>
+                                    <select
+                                        value={`${sortField}:${sortOrder}`}
+                                        onChange={e => {
+                                          const [field, order] = e.target.value.split(':');
+                                          setSortField(field);
+                                          setSortOrder(order);
+                                        }}
+                                        className="te-select w-full"
+                                    >
+                                        <option value="date:desc">Newest first</option>
+                                        <option value="date:asc">Oldest first</option>
+                                        <option value="member:asc">Member A-Z</option>
+                                        <option value="member:desc">Member Z-A</option>
+                                        <option value="company:asc">Company A-Z</option>
+                                        <option value="company:desc">Company Z-A</option>
+                                        <option value="status:asc">Status A-Z</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            {/* Vertical Divider - Hidden on mobile and for referrers */}
-                            {!isReferrer && <div className="hidden"></div>}
-
-                            {/* Filters Section - Only for non-referrers */}
-                            {!isReferrer && <div className="flex-1 grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end">
-                                    {/* Status Filter */}
-                                    <div className="col-span-1 md:col-span-2">
-                                        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="te-select w-full">
-
-                                            <option value="">All Status</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Approved">Approved</option>
-                                            <option value="Declined">Declined</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Company Filter */}
-                                    <div className="col-span-1 md:col-span-3">
-                                        <input type="text" placeholder="Company..." value={companyFilter} onChange={e => setCompanyFilter(e.target.value)} className="te-input w-full" />
-
-                                    </div>
-
-                                    {/* Member Filter */}
-                                    <div className="col-span-1 md:col-span-3">
-                                        <input type="text" placeholder="Member..." value={memberFilter} onChange={e => setMemberFilter(e.target.value)} className="te-input w-full" />
-
-                                    </div>
-
-                                    {/* Date Range Toggle */}
-                                    <div className="col-span-2 md:col-span-1">
-                                        <button onClick={() => setShowDateFilter(!showDateFilter)} className={`te-btn-secondary w-full justify-center ${showDateFilter || dateRange.start || dateRange.end ? "bg-[var(--te-surface)]" : ""}`} title="Date Range Filter">
-
-                                            <span>📅</span>
-                                            <span className="hidden sm:inline text-xs">Date</span>
-                                            {(dateRange.start || dateRange.end) && <span className="text-xs">●</span>}
-                                        </button>
-                                    </div>
-                                </div>}
-
-
-                            {/* Simple Filters for Referrers - Just Status and Member */}
-                            {isReferrer && <div className="flex-1 flex flex-col sm:flex-row gap-2">
-                                    {/* Status Filter */}
-                                    <div className="flex-1">
-                                        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="te-select w-full">
-
-                                            <option value="">All Status</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="Approved">Approved</option>
-                                            <option value="Completed">Completed</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Member Filter */}
-                                    <div className="flex-1">
-                                        <input type="text" placeholder="Search by member name..." value={memberFilter} onChange={e => setMemberFilter(e.target.value)} className="te-input w-full" />
-
-                                    </div>
-                                </div>}
-
+                            <div className="grid grid-cols-1 gap-3 border-t border-[var(--te-border)] pt-4 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                                <div className="lg:col-span-3">
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Submitted from</label>
+                                    <input type="date" value={dateRange.start} onChange={e => setDateRange({ ...dateRange, start: e.target.value })} className="te-input w-full" />
+                                </div>
+                                <div className="lg:col-span-3">
+                                    <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Submitted to</label>
+                                    <input type="date" value={dateRange.end} onChange={e => setDateRange({ ...dateRange, end: e.target.value })} className="te-input w-full" />
+                                </div>
+                                <div className="flex items-center text-left font-mono text-xs text-[var(--te-text-dim)] sm:col-span-2 lg:col-span-4">
+                                    Showing {sortedReferrals.length} of {referrals.length} requests
+                                </div>
+                                {(searchQuery || statusFilter || companyFilter || attachmentFilter || dateRange.start || dateRange.end) && <button onClick={clearAllFilters} className="te-btn-secondary te-btn-sm justify-center sm:col-span-2 lg:col-span-2">
+                                        <XMarkIcon className="h-4 w-4" />
+                                        Clear filters
+                                    </button>}
+                            </div>
                         </div>
-
-                        {/* Date Range - Collapsible Section - Only for non-referrers */}
-                        {!isReferrer && showDateFilter && <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mt-2 pt-2 border-t border-[var(--te-border)]">
-                                <div className="md:col-span-6">
-                                    <label className="block text-left text-xs font-medium text-[var(--te-text-dim)] mb-1">
-                                        Date Range
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <input type="date" value={dateRange.start} onChange={e => setDateRange({
-                ...dateRange,
-                start: e.target.value
-              })} placeholder="Start date" className="te-input flex-1 text-xs py-1.5" />
-
-                                        <input type="date" value={dateRange.end} onChange={e => setDateRange({
-                ...dateRange,
-                end: e.target.value
-              })} placeholder="End date" className="te-input flex-1 text-xs py-1.5" />
-
-                                    </div>
-                                </div>
-                            </div>}
-
-
-                        {/* Active Filters & Clear - Simplified for referrers */}
-                        {(searchQuery || statusFilter || memberFilter || (!isReferrer && (companyFilter || dateRange.start || dateRange.end))) && <div className="mt-2 pt-2 border-t border-[var(--te-border)] flex items-center justify-between flex-wrap gap-2">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span className="text-left text-xs text-[var(--te-text-dim)]">Active:</span>
-                                    {statusFilter && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
-                                            Status: {statusFilter}
-                                        </span>}
-
-                                    {!isReferrer && companyFilter && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
-                                            Company: {companyFilter}
-                                        </span>}
-
-                                    {memberFilter && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
-                                            Member: {memberFilter}
-                                        </span>}
-
-
-                                    {!isReferrer && (dateRange.start || dateRange.end) && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
-                                            Date: {dateRange.start || '...'} to {dateRange.end || '...'}
-                                        </span>}
-
-                                </div>
-                                <button onClick={clearAllFilters} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-te-red hover:bg-[var(--te-hover)] rounded transition-colors">
-
-                                    <XMarkIcon className="h-3 w-3" />
-                                    Clear All
-                                </button>
-                            </div>}
-
                     </div>}
 
 
@@ -784,6 +840,10 @@ const ReferralsManagement = () => {
                                                         Position
                                                     </th>}
 
+                                                {visibleColumns.submittedDate && <th className="px-4 py-3 text-left text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">
+                                                        Submitted
+                                                    </th>}
+
                                                 {visibleColumns.member && <th className="px-4 py-3 text-left text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">
                                                         Member
                                                     </th>}
@@ -806,10 +866,6 @@ const ReferralsManagement = () => {
 
                                                 {visibleColumns.essay && <th className="px-4 py-3 text-left text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">
                                                         Essay
-                                                    </th>}
-
-                                                {visibleColumns.actions && <th className="px-4 py-3 text-left text-xs font-mono font-semibold text-[var(--te-text-dim)] uppercase tracking-[0.16em]">
-                                                        Actions
                                                     </th>}
 
                                             </tr>
@@ -846,6 +902,10 @@ const ReferralsManagement = () => {
                                                                     <div className="text-left font-semibold text-[var(--te-text)] text-sm">{ref.job_title}</div>
                                                                     <div className="text-left text-xs text-[var(--te-text-dim)]">{ref.role}</div>
                                                                 </div>
+                                                            </td>}
+
+                                                        {visibleColumns.submittedDate && <td className="px-4 py-3 whitespace-nowrap">
+                                                                <span className="text-left text-xs text-[var(--te-text-dim)]">{formatReferralDate(ref.submitted_date)}</span>
                                                             </td>}
 
                                                         {visibleColumns.member && <td className="px-4 py-3">
@@ -906,7 +966,7 @@ const ReferralsManagement = () => {
 
                                                         {visibleColumns.status && <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                                                                 <div className="flex justify-start">
-                                                                    <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} className={`te-select text-xs font-bold py-1.5 ${(ref.status === 'Approved' || ref.status === 'Completed') ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)] focus:ring-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)] focus:ring-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
+                                                                    <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} className={`te-select text-xs font-bold py-1.5 ${ref.status === 'Completed' ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)] focus:ring-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)] focus:ring-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)] focus:ring-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)] focus:ring-[var(--te-ring)]"}`}>
 
 
                                                                         <option value="Pending">Pending</option>
@@ -936,12 +996,6 @@ const ReferralsManagement = () => {
                                                                             No
                                                                         </span>}
 
-                                                                </div>
-                                                            </td>}
-
-                                                        {visibleColumns.actions && <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                                                                <div className="flex items-center justify-start gap-2">
-                                                                    {/* Actions column available for future use */}
                                                                 </div>
                                                             </td>}
 
@@ -987,7 +1041,7 @@ const ReferralsManagement = () => {
 
                                                 </div>
                                                 {/* Compact Status Badge */}
-                                                {visibleColumns.status && <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} onClick={e => e.stopPropagation()} className={`te-select text-[9px] font-bold py-1 ${(ref.status === 'Approved' || ref.status === 'Completed') ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]"}`}>
+                                                {visibleColumns.status && <select value={ref.status} onChange={e => handleInlineStatusUpdate(ref.id, e.target.value)} onClick={e => e.stopPropagation()} className={`te-select text-[9px] font-bold py-1 ${ref.status === 'Completed' ? "bg-[var(--te-green-soft)] text-te-green border-[var(--te-green)]" : ref.status === 'Pending' ? 'bg-[var(--te-gold-soft)] text-te-gold border-[var(--te-gold)]' : ref.status === 'Declined' ? 'bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]' : ref.status === 'Cancelled' ? "bg-[var(--te-red-soft)] text-te-red border-[var(--te-red)]" : "bg-[var(--te-surface-alt)] text-[var(--te-text)] border-[var(--te-border)]"}`}>
 
 
                                                         <option value="Pending">Pending</option>
@@ -1000,6 +1054,11 @@ const ReferralsManagement = () => {
 
                                             {/* Compact Body */}
                                             <div className="px-3 py-2.5">
+                                                {visibleColumns.submittedDate && <div className="mb-2.5 flex items-center justify-between">
+                                                        <span className="text-[10px] font-medium uppercase text-[var(--te-text-dim)]">Submitted</span>
+                                                        <span className="text-xs font-medium text-[var(--te-text)]">{formatReferralDate(ref.submitted_date)}</span>
+                                                    </div>}
+
                                                 {/* Member Info - Condensed */}
                                                 {visibleColumns.member && <div className="space-y-1 mb-2.5">
                                                         <div className="flex items-center justify-between">
@@ -1055,7 +1114,49 @@ const ReferralsManagement = () => {
                         </div>
                     </>}
                         {/* Companies Table - Only for Lead+ */}
-                {activeTab === 'companies' && (isLead || isAdmin) && <div className="te-card overflow-hidden transition-colors">
+                {activeTab === 'companies' && (isLead || isAdmin) && <>
+                    <div className="mb-4 te-card p-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
+                            <div className="sm:col-span-2 lg:col-span-5">
+                                <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Search companies</label>
+                                <div className="relative">
+                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
+                                    <input
+                                        type="search"
+                                        placeholder="Name, industry, location, or link..."
+                                        value={companySearchQuery}
+                                        onChange={e => setCompanySearchQuery(e.target.value)}
+                                        className="te-input w-full pl-9"
+                                    />
+                                </div>
+                            </div>
+                            <div className="lg:col-span-3">
+                                <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Requirement</label>
+                                <select value={companyMaterialFilter} onChange={e => setCompanyMaterialFilter(e.target.value)} className="te-select w-full">
+                                    <option value="">All requirements</option>
+                                    <option value="resume">Resume required</option>
+                                    <option value="essay">Essay required</option>
+                                    <option value="phone_number">Phone required</option>
+                                    <option value="none">No special requirements</option>
+                                </select>
+                            </div>
+                            <div className="lg:col-span-2">
+                                <label className="mb-1 block text-left text-xs font-semibold text-[var(--te-text-dim)]">Sort</label>
+                                <select value={companySortOrder} onChange={e => setCompanySortOrder(e.target.value)} className="te-select w-full">
+                                    <option value="asc">Name A-Z</option>
+                                    <option value="desc">Name Z-A</option>
+                                </select>
+                            </div>
+                            <div className="flex flex-col gap-2 lg:col-span-2">
+                                <span className="font-mono text-xs text-[var(--te-text-dim)]">{filteredCompanies.length} of {companies.length}</span>
+                                {(companySearchQuery || companyMaterialFilter) && <button onClick={clearCompanyFilters} className="te-btn-secondary te-btn-sm justify-center">
+                                        <XMarkIcon className="h-4 w-4" />
+                                        Clear
+                                    </button>}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="te-card overflow-hidden transition-colors">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
@@ -1075,11 +1176,11 @@ const ReferralsManagement = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[var(--te-border)]">
-                                    {companies.length === 0 ? <tr>
+                                    {filteredCompanies.length === 0 ? <tr>
                                             <td colSpan="4" className="px-4 py-8 text-center text-sm text-[var(--te-text-dim)]">
-                                                No companies found
+                                                No companies match the current filters
                                             </td>
-                                        </tr> : companies.map(company => <tr key={company.id} className="hover:bg-[var(--te-hover)] cursor-pointer transition-colors" onClick={() => {
+                                        </tr> : filteredCompanies.map(company => <tr key={company.id} className="hover:bg-[var(--te-hover)] cursor-pointer transition-colors" onClick={() => {
                 setSelectedCompany(company);
                 setShowCompanyModal(true);
               }}>
@@ -1107,19 +1208,19 @@ const ReferralsManagement = () => {
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <div className="flex justify-start gap-1 flex-wrap">
-                                                        {company.referral_materials?.requires_resume && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                                        {company.referral_materials?.resume && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                                                 Resume
                                                             </span>}
 
-                                                        {company.referral_materials?.requires_essay && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                                        {company.referral_materials?.essay && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                                                 Essay
                                                             </span>}
 
-                                                        {company.referral_materials?.requires_phone_number && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                                        {company.referral_materials?.phone_number && <span className="px-2 py-0.5 text-xs font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                                                 Phone
                                                             </span>}
 
-                                                        {!company.referral_materials?.requires_resume && !company.referral_materials?.requires_essay && !company.referral_materials?.requires_phone_number && <span className="text-sm text-[var(--te-text-dim)]">None</span>}
+                                                        {!company.referral_materials?.resume && !company.referral_materials?.essay && !company.referral_materials?.phone_number && <span className="text-sm text-[var(--te-text-dim)]">None</span>}
 
                                                     </div>
                                                 </td>
@@ -1139,13 +1240,9 @@ const ReferralsManagement = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>}
+                    </div>
+                </>}
 
-
-                {/* Results Count */}
-                {sortedReferrals.length > 0 && <div className="mt-4 font-mono text-xs text-[var(--te-text-dim)]">
-                        Showing {sortedReferrals.length} of {referrals.length} referral requests
-                    </div>}
 
             </div>
 
@@ -1294,27 +1391,27 @@ const ReferralsManagement = () => {
                             <div>
                                 <h3 className="text-left text-sm font-semibold text-[var(--te-text-dim)] mb-2">Required Materials</h3>
                                 <div className="flex gap-2 flex-wrap">
-                                    {selectedCompany.referral_materials?.requires_resume && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                    {selectedCompany.referral_materials?.resume && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                             Resume
                                         </span>}
 
-                                    {selectedCompany.referral_materials?.requires_essay && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                    {selectedCompany.referral_materials?.essay && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                             Essay
                                         </span>}
 
-                                    {selectedCompany.referral_materials?.requires_phone_number && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
+                                    {selectedCompany.referral_materials?.phone_number && <span className="px-3 py-1 text-sm font-medium bg-[var(--te-surface-alt)] text-[var(--te-text)] rounded">
                                             Phone Number
                                         </span>}
 
-                                    {!selectedCompany.referral_materials?.requires_resume && !selectedCompany.referral_materials?.requires_essay && !selectedCompany.referral_materials?.requires_phone_number && <span className="text-left text-sm text-[var(--te-text-dim)]">No special requirements</span>}
+                                    {!selectedCompany.referral_materials?.resume && !selectedCompany.referral_materials?.essay && !selectedCompany.referral_materials?.phone_number && <span className="text-left text-sm text-[var(--te-text-dim)]">No special requirements</span>}
 
                                 </div>
                             </div>
 
                             {/* Description */}
-                            {selectedCompany.description && <div>
+                            {selectedCompany.metadata?.description && <div>
                                     <h3 className="text-left text-sm font-semibold text-[var(--te-text-dim)] mb-2">Description</h3>
-                                    <p className="text-left text-sm text-[var(--te-text-dim)]">{selectedCompany.description}</p>
+                                    <p className="text-left text-sm text-[var(--te-text-dim)]">{selectedCompany.metadata.description}</p>
                                 </div>}
 
 

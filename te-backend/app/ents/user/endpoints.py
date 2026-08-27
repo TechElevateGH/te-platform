@@ -10,6 +10,7 @@ import app.ents.user.crud as user_crud
 import app.ents.user.dependencies as user_dependencies
 import app.ents.user.models as user_models
 import app.ents.user.schema as user_schema
+from app.core.permissions import get_user_role
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pymongo.database import Database
 
@@ -38,18 +39,28 @@ def _serialize_mongo_document(value: Any) -> Any:
 @router.get("/privileged", response_model=list[Dict[str, Any]])
 def list_privileged_users(
     db: Database = Depends(session.get_db),
-    _: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
+    include_inactive: bool = False,
+    current_user: user_models.MemberUser = Depends(user_dependencies.get_current_lead),
 ) -> Any:
     """
     List all privileged users (Volunteers and Leads) for assignment purposes.
 
-    Returns all active users with role 3 (Volunteer) or role 4 (Lead).
+    Returns active privileged users by default. Account management can include
+    inactive users so administrators can reactivate them.
     These users can be assigned resume review requests.
     Includes full_name and email for display purposes.
 
     **Requires**: Lead (role=4) or Admin (role=5) access
     """
-    users = user_crud.read_all_privileged_users(db)
+    if include_inactive and get_user_role(current_user) != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can view inactive privileged accounts",
+        )
+
+    users = user_crud.read_all_privileged_users(
+        db, include_inactive=include_inactive
+    )
     return users
 
 
