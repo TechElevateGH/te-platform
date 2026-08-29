@@ -223,6 +223,31 @@ def list_all_applications(
         raise HTTPException(status_code=500, detail="Failed to retrieve applications")
 
 
+@applications_router.patch("/{application_id}/status", response_model=Dict[str, str])
+def update_application_status(
+    db: Database = Depends(session.get_db),
+    *,
+    application_id: str,
+    data: application_schema.ApplicationStatusUpdate,
+    current_user=Depends(user_dependencies.get_current_user),
+):
+    """Update an application's status from the admin management table."""
+    from app.core.permissions import get_user_role
+
+    if get_user_role(current_user) != 5:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can update application statuses",
+        )
+
+    if not application_crud.update_application_status(
+        db, application_id=application_id, status=data.status
+    ):
+        raise HTTPException(status_code=404, detail="Application not found or no changes made")
+
+    return {"message": "Application status updated successfully"}
+
+
 @applications_router.patch("/archive", status_code=status.HTTP_200_OK)
 def archive_applications(
     db: Database = Depends(session.get_db),

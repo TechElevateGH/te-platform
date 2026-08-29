@@ -40,6 +40,7 @@ const ApplicationManagement = () => {
     const [sortDirection, setSortDirection] = useState('desc');
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+    const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
     // Selection and bulk delete state
     const [selectedItems, setSelectedItems] = useState([]);
@@ -142,6 +143,24 @@ const ApplicationManagement = () => {
             toast.error('Failed to delete applications. Please try again.');
         }
     }, [accessToken, fetchAllApplications, toast]);
+
+    const handleInlineStatusUpdate = async (application, status) => {
+        if (status === application.status) return;
+
+        setUpdatingStatusId(application.id);
+        try {
+            await axiosInstance.patch(`/applications/${application.id}/status`, { status }, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            toast.success('Application status updated');
+            await fetchAllApplications();
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            toast.error(error.response?.data?.detail || 'Failed to update application status');
+        } finally {
+            setUpdatingStatusId(null);
+        }
+    };
 
     useEffect(() => {
         if (accessToken) {
@@ -638,7 +657,31 @@ const ApplicationManagement = () => {
                                                     ) : <span className="text-xs text-[var(--te-text-dim)]">—</span>}
                                                 </td>
                                             )}
-                                            {visibleColumns.status && <td className="px-4 py-4"><span className={`te-chip border ${getStatusColor(app.status)}`}>{app.status}</span></td>}
+                                            {visibleColumns.status && (
+                                                <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                                                    {isAdmin ? (
+                                                        <select
+                                                            value={app.status}
+                                                            onChange={(e) => handleInlineStatusUpdate(app, e.target.value)}
+                                                            disabled={updatingStatusId === app.id}
+                                                            className={`te-select py-1 text-xs font-semibold ${getStatusColor(app.status)}`}
+                                                            aria-label={`Update application status for ${app.company}`}
+                                                        >
+                                                            <option value="Submitted">Submitted</option>
+                                                            <option value="OA">OA</option>
+                                                            <option value="Phone interview">Phone interview</option>
+                                                            <option value="Final interview">Final interview</option>
+                                                            <option value="HR">HR</option>
+                                                            <option value="Recruiter call">Recruiter call</option>
+                                                            <option value="Offer">Offer</option>
+                                                            <option value="Not now">Not now</option>
+                                                            <option value="Rejected">Rejected</option>
+                                                        </select>
+                                                    ) : (
+                                                        <span className={`te-chip border ${getStatusColor(app.status)}`}>{app.status}</span>
+                                                    )}
+                                                </td>
+                                            )}
                                             {visibleColumns.applied && <td className="px-4 py-4 font-mono text-xs text-[var(--te-text-dim)]">{app.date}</td>}
                                         </tr>
                                     ))

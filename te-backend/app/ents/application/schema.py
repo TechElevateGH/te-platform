@@ -67,3 +67,9 @@ class ApplicationUpdateBase(BaseModel):
 
 class ApplicationUpdate(ApplicationUpdateBase):
     location: referral_schema.LocationBase
+
+
+class ApplicationStatusUpdate(BaseModel):
+    """Payload for an admin updating an application's status."""
+
+    status: str

@@ -151,6 +151,17 @@ def update_application(
     return result.modified_count > 0
 
 
+def update_application_status(
+    db: Database, *, application_id: str, status: str
+) -> bool:
+    """Update an application's status across all member accounts."""
+    result = db.member_users.update_one(
+        {"applications.id": application_id},
+        {"$set": {"applications.$.status": status}},
+    )
+    return result.modified_count > 0
+
+
 def archive_application(db: Database, *, user_id: str, application_id: str) -> bool:
     """Archive an application using array filter with UUID"""
     from bson import ObjectId

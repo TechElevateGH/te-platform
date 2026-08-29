@@ -54,6 +54,10 @@ const ResumesAndEssaysManagement = () => {
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
     const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('Pending'); // Default to Pending status
+    const [resumeReviewReviewerFilter, setResumeReviewReviewerFilter] = useState('');
+    const [resumeReviewDateRange, setResumeReviewDateRange] = useState({ start: '', end: '' });
+    const [resumeReviewSortBy, setResumeReviewSortBy] = useState('submitted_desc');
+    const [updatingReviewStatusId, setUpdatingReviewStatusId] = useState(null);
     const [toast, setToast] = useState(null);
     const [myAssignedReviews, setMyAssignedReviews] = useState([]);
     const [allAssignments, setAllAssignments] = useState([]);
@@ -335,6 +339,31 @@ const ResumesAndEssaysManagement = () => {
         }
     };
 
+    const handleInlineReviewStatusUpdate = async (review, status) => {
+        const reviewId = review.id || review._id;
+        if (!reviewId || status === review.status) return;
+
+        setUpdatingReviewStatusId(reviewId);
+        try {
+            await axiosInstance.patch(`/resumes/reviews?review_id=${reviewId}`, { status }, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            setToast({ message: 'Review status updated successfully', type: 'success' });
+            await fetchResumeReviews();
+            if (isVolunteerOrAbove) {
+                await fetchMyAssignedReviews();
+            }
+            if (isAdmin) {
+                await fetchAllAssignments();
+            }
+        } catch (error) {
+            console.error('Error updating review status:', error);
+            setToast({ message: error.response?.data?.detail || 'Failed to update review status', type: 'error' });
+        } finally {
+            setUpdatingReviewStatusId(null);
+        }
+    };
+
     // Open cancel modal
     const openCancelModal = (review) => {
         setCancelModal({ open: true, review, reason: '' });
@@ -456,8 +485,8 @@ const ResumesAndEssaysManagement = () => {
         return colors[status] || 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border border-[var(--te-border)]';
     };
 
-    // Filter resume reviews - default to Pending and In Review only
-    const filteredResumeReviews = resumeReviews.filter(review => {
+    // Filter and sort resume reviews.
+    const filteredResumeReviews = useMemo(() => resumeReviews.filter(review => {
         // Status filter
         let statusMatch = true;
         if (resumeReviewStatusFilter === 'active') {
@@ -475,8 +504,78 @@ const ResumesAndEssaysManagement = () => {
         // Level filter
         const levelMatch = !levelFilter || review.level === levelFilter;
 
-        return statusMatch && searchMatch && levelMatch;
-    });
+        const reviewerMatch = !resumeReviewReviewerFilter ||
+            (resumeReviewReviewerFilter === 'Unassigned'
+                ? !review.reviewer_name
+                : (review.reviewer_name || '').toLowerCase() === resumeReviewReviewerFilter.toLowerCase());
+
+        const submittedDate = review.submitted_date ? new Date(review.submitted_date) : null;
+        const startDate = resumeReviewDateRange.start ? new Date(`${resumeReviewDateRange.start}T00:00:00`) : null;
+        const endDate = resumeReviewDateRange.end ? new Date(`${resumeReviewDateRange.end}T23:59:59.999`) : null;
+        const dateMatch = (!startDate || (submittedDate && submittedDate >= startDate)) &&
+            (!endDate || (submittedDate && submittedDate <= endDate));
+
+        return statusMatch && searchMatch && levelMatch && reviewerMatch && dateMatch;
+    }).sort((a, b) => {
+        const compareText = (first, second) => (first || '').localeCompare(second || '');
+        const compareDate = (first, second) => {
+            const firstDate = first ? new Date(first).getTime() : 0;
+            const secondDate = second ? new Date(second).getTime() : 0;
+            return firstDate - secondDate;
+        };
+
+        switch (resumeReviewSortBy) {
+            case 'submitted_asc':
+                return compareDate(a.submitted_date, b.submitted_date);
+            case 'member_asc':
+                return compareText(a.user_name, b.user_name);
+            case 'member_desc':
+                return compareText(b.user_name, a.user_name);
+            case 'job_asc':
+                return compareText(a.job_title, b.job_title);
+            case 'job_desc':
+                return compareText(b.job_title, a.job_title);
+            case 'level_asc':
+                return compareText(a.level, b.level);
+            case 'level_desc':
+                return compareText(b.level, a.level);
+            case 'status_asc':
+                return compareText(a.status, b.status);
+            case 'status_desc':
+                return compareText(b.status, a.status);
+            case 'reviewer_asc':
+                return compareText(a.reviewer_name, b.reviewer_name);
+            case 'reviewer_desc':
+                return compareText(b.reviewer_name, a.reviewer_name);
+            case 'submitted_desc':
+            default:
+                return compareDate(b.submitted_date, a.submitted_date);
+        }
+    }), [
+        resumeReviews,
+        resumeReviewStatusFilter,
+        searchQuery,
+        levelFilter,
+        resumeReviewReviewerFilter,
+        resumeReviewDateRange,
+        resumeReviewSortBy
+    ]);
+
+    const reviewReviewerOptions = useMemo(() => [...new Set(
+        resumeReviews.map(review => review.reviewer_name).filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b)), [resumeReviews]);
+
+    const hasActiveResumeReviewFilters = searchQuery || levelFilter ||
+        resumeReviewStatusFilter !== 'Pending' || resumeReviewReviewerFilter ||
+        resumeReviewDateRange.start || resumeReviewDateRange.end;
+
+    const clearResumeReviewFilters = () => {
+        setSearchQuery('');
+        setLevelFilter('');
+        setResumeReviewStatusFilter('Pending');
+        setResumeReviewReviewerFilter('');
+        setResumeReviewDateRange({ start: '', end: '' });
+    };
 
     // Get unique reviewers from all assignments
     const uniqueReviewers = useMemo(() => {
@@ -1203,6 +1302,7 @@ const ResumesAndEssaysManagement = () => {
                                     <option value="In Review">In Review</option>
                                     <option value="Completed">Completed</option>
                                     <option value="Declined">Declined</option>
+                                    <option value="Cancelled">Cancelled</option>
                                 </select>
 
                                 {/* Level Filter Dropdown */}
@@ -1218,15 +1318,60 @@ const ResumesAndEssaysManagement = () => {
                                     <option value="Senior">Senior</option>
                                 </select>
 
+                                <select
+                                    value={resumeReviewReviewerFilter}
+                                    onChange={(e) => setResumeReviewReviewerFilter(e.target.value)}
+                                    className="te-select py-1.5 min-w-[140px]"
+                                    aria-label="Filter by reviewer"
+                                >
+                                    <option value="">All reviewers</option>
+                                    <option value="Unassigned">Unassigned</option>
+                                    {reviewReviewerOptions.map((reviewer) => (
+                                        <option key={reviewer} value={reviewer}>{reviewer}</option>
+                                    ))}
+                                </select>
+
+                                <input
+                                    type="date"
+                                    value={resumeReviewDateRange.start}
+                                    onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, start: e.target.value }))}
+                                    className="te-input py-1.5"
+                                    aria-label="Submitted on or after"
+                                />
+                                <input
+                                    type="date"
+                                    value={resumeReviewDateRange.end}
+                                    onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, end: e.target.value }))}
+                                    className="te-input py-1.5"
+                                    aria-label="Submitted on or before"
+                                />
+
+                                <select
+                                    value={resumeReviewSortBy}
+                                    onChange={(e) => setResumeReviewSortBy(e.target.value)}
+                                    className="te-select py-1.5 min-w-[150px]"
+                                    aria-label="Sort review requests"
+                                >
+                                    <option value="submitted_desc">Newest first</option>
+                                    <option value="submitted_asc">Oldest first</option>
+                                    <option value="member_asc">Member (A-Z)</option>
+                                    <option value="member_desc">Member (Z-A)</option>
+                                    <option value="job_asc">Job title (A-Z)</option>
+                                    <option value="job_desc">Job title (Z-A)</option>
+                                    <option value="level_asc">Level (A-Z)</option>
+                                    <option value="level_desc">Level (Z-A)</option>
+                                    <option value="status_asc">Status (A-Z)</option>
+                                    <option value="status_desc">Status (Z-A)</option>
+                                    <option value="reviewer_asc">Reviewer (A-Z)</option>
+                                    <option value="reviewer_desc">Reviewer (Z-A)</option>
+                                </select>
+
                                 {/* Clear Filters Button */}
-                                {(searchQuery || levelFilter || resumeReviewStatusFilter !== 'active') && (
+                                {hasActiveResumeReviewFilters && (
                                     <button
-                                        onClick={() => {
-                                            setSearchQuery('');
-                                            setLevelFilter('');
-                                            setResumeReviewStatusFilter('active');
-                                        }}
+                                        onClick={clearResumeReviewFilters}
                                         className="te-btn-danger te-btn-sm gap-1"
+                                        title="Clear filters"
                                     >
                                         <XMarkIcon className="h-4 w-4" />
                                     </button>
@@ -1242,7 +1387,7 @@ const ResumesAndEssaysManagement = () => {
                         {/* Hint Text */}
                         <div className="mb-2 px-1">
                             <p className="text-xs text-[var(--te-text-dim)]">
-                                💡 <strong>Click any row</strong> to view details {isLeadOrAbove && '• Use Assign button to assign reviewers'}
+                                💡 <strong>Click any row</strong> to view details {isLeadOrAbove && '• Update status directly in the table • Use Assign button to assign reviewers'}
                             </p>
                         </div>
 
@@ -1293,12 +1438,27 @@ const ResumesAndEssaysManagement = () => {
                                                             {review.level}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-3 text-left">
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
-                                                            {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
-                                                            {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
-                                                            {review.status}
-                                                        </span>
+                                                    <td className="px-4 py-3 text-left" onClick={(e) => e.stopPropagation()}>
+                                                        {isLeadOrAbove ? (
+                                                            <select
+                                                                value={review.status}
+                                                                onChange={(e) => handleInlineReviewStatusUpdate(review, e.target.value)}
+                                                                disabled={updatingReviewStatusId === (review.id || review._id)}
+                                                                className={`te-select py-1 text-xs font-bold ${getReviewStatusClass(review.status)}`}
+                                                                aria-label={`Update status for ${review.user_name}`}
+                                                            >
+                                                                <option value="Pending">Pending</option>
+                                                                <option value="In Review">In Review</option>
+                                                                <option value="Completed">Completed</option>
+                                                                <option value="Declined">Declined</option>
+                                                            </select>
+                                                        ) : (
+                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
+                                                                {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
+                                                                {review.status === 'Completed' && <CheckCircleIcon className="h-3.5 w-3.5" />}
+                                                                {review.status}
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="px-4 py-3 text-left">
                                                         <span className="text-sm text-[var(--te-text-dim)]">{review.submitted_date}</span>
