@@ -26,6 +26,7 @@ import {
 
 import axiosInstance from '../axiosConfig'
 import ApplicationCreate from '../components/application/ApplicationCreate'
+import ApplicationBulkCreate from '../components/application/ApplicationBulkCreate'
 import ApplicationInfo from '../components/application/ApplicationInfo'
 
 // Start with empty list; will populate from backend
@@ -53,6 +54,7 @@ const Applications = () => {
     const [applicationId, setApplicationId] = useState(null);
 
     const [addApplication, setAddApplication] = useState(false);
+    const [addApplications, setAddApplications] = useState(false);
     const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
     // Confirmation modal state
@@ -275,13 +277,10 @@ const Applications = () => {
                             </p>
                         </div>
                         {!fetchApplications && isMember && (
-                            <button
-                                onClick={() => setAddApplication(true)}
-                                className="te-btn-primary te-btn-lg w-full sm:w-auto"
-                            >
-                                <PlusIcon className="h-4 w-4" />
-                                New application
-                            </button>
+                            <div className="flex w-full gap-2 sm:w-auto">
+                                <button onClick={() => setAddApplication(true)} className="te-btn-primary te-btn-lg flex-1 sm:flex-none"><PlusIcon className="h-4 w-4" /> New application</button>
+                                <button onClick={() => setAddApplications(true)} className="te-btn-secondary te-btn-lg flex-1 sm:flex-none"><PlusIcon className="h-4 w-4" /> Bulk add</button>
+                            </div>
                         )}
                     </div>
 
@@ -556,6 +555,7 @@ const Applications = () => {
             {addApplication && (
                 <ApplicationCreate setAddApplication={setAddApplication} />
             )}
+            {addApplications && <ApplicationBulkCreate setAddApplications={setAddApplications} />}
 
             {applicationId && (
                 <ApplicationInfo

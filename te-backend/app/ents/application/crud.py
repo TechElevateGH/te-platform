@@ -17,8 +17,21 @@ def create_application(
     """Create an Application for user (embedded in member_users document)"""
     from bson import ObjectId
 
-    # Create application data (embedded document with UUID)
-    application_data = {
+    application_data = _application_data(data)
+
+    result = db.member_users.update_one(
+        {"_id": ObjectId(user_id)}, {"$push": {"applications": application_data}}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return application_models.Application(**application_data)
+
+
+def _application_data(data: application_schema.ApplicationCreate) -> dict:
+    """Create the embedded representation shared by single and bulk creation."""
+    return {
         "id": str(uuid4()),  # Generate unique ID
         "company": data.company,
         "location": {
@@ -37,14 +50,22 @@ def create_application(
         "archived": False,
     }
 
+
+def create_applications(
+    db: Database, *, user_id: str, applications: list[application_schema.ApplicationCreate]
+) -> list[application_models.Application]:
+    """Create multiple applications for a user in one database update."""
+    from bson import ObjectId
+
+    application_data = [_application_data(application) for application in applications]
     result = db.member_users.update_one(
-        {"_id": ObjectId(user_id)}, {"$push": {"applications": application_data}}
+        {"_id": ObjectId(user_id)}, {"$push": {"applications": {"$each": application_data}}}
     )
 
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return application_models.Application(**application_data)
+    return [application_models.Application(**application) for application in application_data]
 
 
 def read_user_applications(

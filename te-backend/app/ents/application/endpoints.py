@@ -51,6 +51,35 @@ def create_user_application(
     return {"application": application_dependencies.parse_application(application)}
 
 
+@user_applications_router.post(
+    "/bulk",
+    response_model=Dict[str, list[application_schema.ApplicationRead]],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_user_applications_bulk(
+    *,
+    db: Database = Depends(session.get_db),
+    user_id: str,
+    data: application_schema.ApplicationBulkCreate,
+    current_user=Depends(user_dependencies.get_current_member_only),
+) -> Any:
+    """Create multiple application tracking records for the authenticated member."""
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Can only create applications for yourself")
+    if not data.applications:
+        raise HTTPException(status_code=400, detail="Add at least one application")
+
+    applications = application_crud.create_applications(
+        db, user_id=user_id, applications=data.applications
+    )
+    return {
+        "applications": [
+            application_dependencies.parse_application(application)
+            for application in applications
+        ]
+    }
+
+
 @user_applications_router.get(
     "", response_model=Dict[str, list[application_schema.ApplicationRead]]
 )

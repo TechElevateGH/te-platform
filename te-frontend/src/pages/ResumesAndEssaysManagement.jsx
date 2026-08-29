@@ -19,6 +19,8 @@ import {
     AdjustmentsHorizontalIcon,
     MagnifyingGlassIcon,
     ChevronUpIcon,
+    ChevronDownIcon,
+    ChevronUpDownIcon,
     ChevronRightIcon,
     XCircleIcon
 } from 'icons';
@@ -57,6 +59,7 @@ const ResumesAndEssaysManagement = () => {
     const [resumeReviewReviewerFilter, setResumeReviewReviewerFilter] = useState('');
     const [resumeReviewDateRange, setResumeReviewDateRange] = useState({ start: '', end: '' });
     const [resumeReviewSortBy, setResumeReviewSortBy] = useState('submitted_desc');
+    const [showResumeReviewFilters, setShowResumeReviewFilters] = useState(false);
     const [updatingReviewStatusId, setUpdatingReviewStatusId] = useState(null);
     const [toast, setToast] = useState(null);
     const [myAssignedReviews, setMyAssignedReviews] = useState([]);
@@ -575,6 +578,23 @@ const ResumesAndEssaysManagement = () => {
         setResumeReviewStatusFilter('Pending');
         setResumeReviewReviewerFilter('');
         setResumeReviewDateRange({ start: '', end: '' });
+    };
+
+    const handleResumeReviewSort = (field) => {
+        const [currentField, currentDirection] = resumeReviewSortBy.split('_');
+        setResumeReviewSortBy(
+            currentField === field
+                ? `${field}_${currentDirection === 'asc' ? 'desc' : 'asc'}`
+                : `${field}_asc`
+        );
+    };
+
+    const reviewSortIcon = (field) => {
+        const [currentField, currentDirection] = resumeReviewSortBy.split('_');
+        if (currentField !== field) return <ChevronUpDownIcon className="h-3.5 w-3.5 opacity-40" />;
+        return currentDirection === 'asc'
+            ? <ChevronUpIcon className="h-3.5 w-3.5" />
+            : <ChevronDownIcon className="h-3.5 w-3.5" />;
     };
 
     // Get unique reviewers from all assignments
@@ -1251,11 +1271,9 @@ const ResumesAndEssaysManagement = () => {
                 {/* Resume Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <>
-                        {/* Unified Stats, Search & Filters Bar */}
-                        <div className="te-card rounded-lg p-2 mb-3 transition-colors">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                {/* Expanded Stats */}
-                                <div className="flex items-center gap-4 text-sm">
+                        <div className="te-card rounded-lg p-3 mb-3 transition-colors">
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                                     <div className="flex items-center gap-1.5">
                                         <ChartBarIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
                                         <span className="text-[var(--te-text-dim)] hidden sm:inline">Total:</span>
@@ -1278,8 +1296,7 @@ const ResumesAndEssaysManagement = () => {
                                     </div>
                                 </div>
 
-                                {/* Search */}
-                                <div className="relative w-56 sm:w-80">
+                                <div className="relative flex-1 lg:min-w-[18rem]">
                                     <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--te-text-dim)]" />
                                     <input
                                         type="text"
@@ -1289,62 +1306,6 @@ const ResumesAndEssaysManagement = () => {
                                         className="te-input pl-9 py-1.5"
                                     />
                                 </div>
-
-                                {/* Status Filter Dropdown */}
-                                <select
-                                    value={resumeReviewStatusFilter}
-                                    onChange={(e) => setResumeReviewStatusFilter(e.target.value)}
-                                    className="te-select py-1.5 min-w-[120px]"
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="">All</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Review">In Review</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Declined">Declined</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-
-                                {/* Level Filter Dropdown */}
-                                <select
-                                    value={levelFilter}
-                                    onChange={(e) => setLevelFilter(e.target.value)}
-                                    className="te-select py-1.5 min-w-[120px]"
-                                >
-                                    <option value="">All Levels</option>
-                                    <option value="Intern">Intern</option>
-                                    <option value="Entry">Entry</option>
-                                    <option value="Mid">Mid</option>
-                                    <option value="Senior">Senior</option>
-                                </select>
-
-                                <select
-                                    value={resumeReviewReviewerFilter}
-                                    onChange={(e) => setResumeReviewReviewerFilter(e.target.value)}
-                                    className="te-select py-1.5 min-w-[140px]"
-                                    aria-label="Filter by reviewer"
-                                >
-                                    <option value="">All reviewers</option>
-                                    <option value="Unassigned">Unassigned</option>
-                                    {reviewReviewerOptions.map((reviewer) => (
-                                        <option key={reviewer} value={reviewer}>{reviewer}</option>
-                                    ))}
-                                </select>
-
-                                <input
-                                    type="date"
-                                    value={resumeReviewDateRange.start}
-                                    onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, start: e.target.value }))}
-                                    className="te-input py-1.5"
-                                    aria-label="Submitted on or after"
-                                />
-                                <input
-                                    type="date"
-                                    value={resumeReviewDateRange.end}
-                                    onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, end: e.target.value }))}
-                                    className="te-input py-1.5"
-                                    aria-label="Submitted on or before"
-                                />
 
                                 <select
                                     value={resumeReviewSortBy}
@@ -1365,23 +1326,25 @@ const ResumesAndEssaysManagement = () => {
                                     <option value="reviewer_asc">Reviewer (A-Z)</option>
                                     <option value="reviewer_desc">Reviewer (Z-A)</option>
                                 </select>
-
-                                {/* Clear Filters Button */}
+                                <button onClick={() => setShowResumeReviewFilters(current => !current)} className={`te-btn-sm gap-1.5 ${showResumeReviewFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}>
+                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                    Filters
+                                </button>
                                 {hasActiveResumeReviewFilters && (
-                                    <button
-                                        onClick={clearResumeReviewFilters}
-                                        className="te-btn-danger te-btn-sm gap-1"
-                                        title="Clear filters"
-                                    >
-                                        <XMarkIcon className="h-4 w-4" />
-                                    </button>
+                                    <button onClick={clearResumeReviewFilters} className="te-btn-danger te-btn-sm gap-1" title="Clear filters"><XMarkIcon className="h-4 w-4" /> Clear</button>
                                 )}
-
-                                {/* Results Count */}
-                                <div className="hidden sm:block text-xs font-medium text-[var(--te-text-dim)] whitespace-nowrap">
+                                <div className="text-xs font-medium text-[var(--te-text-dim)] whitespace-nowrap">
                                     {filteredResumeReviews.length} of {resumeReviews.length}
                                 </div>
                             </div>
+                            {showResumeReviewFilters && (
+                                <div className="mt-3 grid grid-cols-1 gap-3 border-t border-[var(--te-border)] pt-3 sm:grid-cols-2 lg:grid-cols-4">
+                                    <select value={resumeReviewStatusFilter} onChange={(e) => setResumeReviewStatusFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by status"><option value="active">Active</option><option value="">All statuses</option><option value="Pending">Pending</option><option value="In Review">In Review</option><option value="Completed">Completed</option><option value="Declined">Declined</option><option value="Cancelled">Cancelled</option></select>
+                                    <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by level"><option value="">All levels</option><option value="Intern">Intern</option><option value="Entry">Entry</option><option value="Mid">Mid</option><option value="Senior">Senior</option></select>
+                                    <select value={resumeReviewReviewerFilter} onChange={(e) => setResumeReviewReviewerFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by reviewer"><option value="">All reviewers</option><option value="Unassigned">Unassigned</option>{reviewReviewerOptions.map((reviewer) => <option key={reviewer} value={reviewer}>{reviewer}</option>)}</select>
+                                    <div className="grid grid-cols-2 gap-2"><input type="date" value={resumeReviewDateRange.start} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, start: e.target.value }))} className="te-input py-1.5" aria-label="Submitted on or after" /><input type="date" value={resumeReviewDateRange.end} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, end: e.target.value }))} className="te-input py-1.5" aria-label="Submitted on or before" /></div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Hint Text */}
@@ -1396,12 +1359,12 @@ const ResumesAndEssaysManagement = () => {
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-[var(--te-surface-alt)] border-b border-[var(--te-border)]">
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Member</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Job Title</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Level</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Status</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Submitted</th>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase">Reviewer</th>
+                                            <th onClick={() => handleResumeReviewSort('member')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Member {reviewSortIcon('member')}</div></th>
+                                            <th onClick={() => handleResumeReviewSort('job')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Job Title {reviewSortIcon('job')}</div></th>
+                                            <th onClick={() => handleResumeReviewSort('level')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Level {reviewSortIcon('level')}</div></th>
+                                            <th onClick={() => handleResumeReviewSort('status')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Status {reviewSortIcon('status')}</div></th>
+                                            <th onClick={() => handleResumeReviewSort('submitted')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Submitted {reviewSortIcon('submitted')}</div></th>
+                                            <th onClick={() => handleResumeReviewSort('reviewer')} className="cursor-pointer px-4 py-3 text-left text-xs font-bold text-[var(--te-text-dim)] uppercase hover:bg-[var(--te-hover)]"><div className="flex items-center gap-1">Reviewer {reviewSortIcon('reviewer')}</div></th>
                                             {isLeadOrAbove && (
                                                 <th className="px-4 py-3 text-right text-xs font-bold text-[var(--te-text-dim)] uppercase">Actions</th>
                                             )}

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 import app.ents.referral.schema as referral_schema
 from pydantic import BaseModel
@@ -38,6 +39,12 @@ class ApplicationBase(BaseModel):
 class ApplicationCreate(ApplicationBase):
     company: str
     location: referral_schema.LocationBase
+
+
+class ApplicationBulkCreate(BaseModel):
+    """Payload for creating multiple application records at once."""
+
+    applications: List[ApplicationCreate]
 
 
 class ApplicationReadBase(ApplicationBase):
