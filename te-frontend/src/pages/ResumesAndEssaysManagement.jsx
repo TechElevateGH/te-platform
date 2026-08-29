@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../axiosConfig';
 import { Loading } from '../components/_custom/Loading';
@@ -24,6 +24,54 @@ import {
     ChevronRightIcon,
     XCircleIcon
 } from 'icons';
+
+const REVIEW_STATUS_STYLES = {
+    'Pending': 'border-[var(--te-gold)] bg-[var(--te-gold-soft)] text-[var(--te-gold)]',
+    'In Review': 'border-blue-300 bg-blue-50 text-blue-700',
+    'Requested': 'border-violet-300 bg-violet-50 text-violet-700',
+    'Completed': 'border-[var(--te-green)] bg-[var(--te-green-soft)] text-[var(--te-green)]',
+    'Approved': 'border-emerald-300 bg-emerald-50 text-emerald-700',
+    'Reviewed': 'border-teal-300 bg-teal-50 text-teal-700',
+    'Declined': 'border-[var(--te-red)] bg-[var(--te-red-soft)] text-[var(--te-red)]',
+    'Cancelled': 'border-slate-300 bg-slate-100 text-slate-600',
+    'Rejected': 'border-rose-300 bg-rose-50 text-rose-700',
+    'Needs Changes': 'border-orange-300 bg-orange-50 text-orange-700'
+};
+
+const REVIEW_STATUSES = ['Pending', 'In Review', 'Completed', 'Declined'];
+
+const ReviewStatusSelect = ({ review, disabled, onChange }) => (
+    <Listbox value={review.status} onChange={onChange} disabled={disabled}>
+        <div className="relative w-32">
+            <Listbox.Button
+                className={`flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-xs font-bold transition-opacity disabled:cursor-wait disabled:opacity-60 ${REVIEW_STATUS_STYLES[review.status] || 'border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'}`}
+                aria-label={`Update status for ${review.user_name}`}
+            >
+                <span className="truncate">{review.status}</span>
+                <ChevronDownIcon className="h-3.5 w-3.5 shrink-0" />
+            </Listbox.Button>
+            <Transition
+                as={Fragment}
+                leave="transition ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+            >
+                <Listbox.Options className="absolute left-0 z-30 mt-1 w-40 space-y-1 rounded-lg border border-[var(--te-border)] bg-[var(--te-surface)] p-1.5 shadow-lg focus:outline-none">
+                    {REVIEW_STATUSES.map((status) => (
+                        <Listbox.Option key={status} value={status}>
+                            {({ active, selected }) => (
+                                <div className={`flex cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-xs font-bold ${REVIEW_STATUS_STYLES[status]} ${active ? 'ring-2 ring-[var(--te-ring)] ring-offset-1' : ''}`}>
+                                    {status}
+                                    {selected && <CheckCircleIcon className="h-4 w-4" />}
+                                </div>
+                            )}
+                        </Listbox.Option>
+                    ))}
+                </Listbox.Options>
+            </Transition>
+        </div>
+    </Listbox>
+);
 
 const ResumesAndEssaysManagement = () => {
     const { accessToken, userRole, userId } = useAuth();
@@ -55,7 +103,7 @@ const ResumesAndEssaysManagement = () => {
     const [reviewFeedback, setReviewFeedback] = useState('');
     const [reviewStatus, setReviewStatus] = useState('');
     const [submittingReview, setSubmittingReview] = useState(false);
-    const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('Pending'); // Default to Pending status
+    const [resumeReviewStatusFilter, setResumeReviewStatusFilter] = useState('');
     const [resumeReviewReviewerFilter, setResumeReviewReviewerFilter] = useState('');
     const [resumeReviewDateRange, setResumeReviewDateRange] = useState({ start: '', end: '' });
     const [resumeReviewSortBy, setResumeReviewSortBy] = useState('submitted_desc');
@@ -473,19 +521,7 @@ const ResumesAndEssaysManagement = () => {
     const hasActiveFilters = searchQuery || memberFilter || fileTypeFilter;
 
     const getReviewStatusClass = (status) => {
-        const colors = {
-            'Pending': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
-            'In Review': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
-            'Requested': 'bg-[var(--te-gold-soft)] text-[var(--te-gold)] border border-[var(--te-gold)]',
-            'Completed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
-            'Approved': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
-            'Reviewed': 'bg-[var(--te-green-soft)] text-[var(--te-green)] border border-[var(--te-green)]',
-            'Declined': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
-            'Cancelled': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
-            'Rejected': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]',
-            'Needs Changes': 'bg-[var(--te-red-soft)] text-[var(--te-red)] border border-[var(--te-red)]'
-        };
-        return colors[status] || 'bg-[var(--te-surface-alt)] text-[var(--te-text-dim)] border border-[var(--te-border)]';
+        return `border ${REVIEW_STATUS_STYLES[status] || 'border-[var(--te-border)] bg-[var(--te-surface-alt)] text-[var(--te-text-dim)]'}`;
     };
 
     // Filter and sort resume reviews.
@@ -568,14 +604,19 @@ const ResumesAndEssaysManagement = () => {
         resumeReviews.map(review => review.reviewer_name).filter(Boolean)
     )].sort((a, b) => a.localeCompare(b)), [resumeReviews]);
 
-    const hasActiveResumeReviewFilters = searchQuery || levelFilter ||
-        resumeReviewStatusFilter !== 'Pending' || resumeReviewReviewerFilter ||
-        resumeReviewDateRange.start || resumeReviewDateRange.end;
+    const resumeReviewAdvancedFilterCount = [
+        levelFilter,
+        resumeReviewReviewerFilter,
+        resumeReviewDateRange.start,
+        resumeReviewDateRange.end
+    ].filter(Boolean).length;
+    const hasActiveResumeReviewFilters = searchQuery || resumeReviewStatusFilter ||
+        resumeReviewAdvancedFilterCount > 0;
 
     const clearResumeReviewFilters = () => {
         setSearchQuery('');
         setLevelFilter('');
-        setResumeReviewStatusFilter('Pending');
+        setResumeReviewStatusFilter('');
         setResumeReviewReviewerFilter('');
         setResumeReviewDateRange({ start: '', end: '' });
     };
@@ -1271,78 +1312,97 @@ const ResumesAndEssaysManagement = () => {
                 {/* Resume Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <>
-                        <div className="te-card rounded-lg p-3 mb-3 transition-colors">
-                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                                    <div className="flex items-center gap-1.5">
-                                        <ChartBarIcon className="h-4 w-4 text-[var(--te-text-dim)]" />
-                                        <span className="text-[var(--te-text-dim)] hidden sm:inline">Total:</span>
-                                        <span className="font-bold text-[var(--te-text)]">{resumeReviews.length}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <ClockIcon className="h-4 w-4 text-[var(--te-gold)]" />
-                                        <span className="text-[var(--te-text-dim)] hidden sm:inline">Pending:</span>
-                                        <span className="font-bold text-[var(--te-text)]">{resumeReviews.filter(r => r.status === 'Pending').length}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <DocumentTextIcon className="h-4 w-4 text-[var(--te-gold)]" />
-                                        <span className="text-[var(--te-text)] hidden sm:inline">In Review:</span>
-                                        <span className="font-bold text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'In Review').length}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <CheckCircleIcon className="h-4 w-4 text-[var(--te-green)]" />
-                                        <span className="text-[var(--te-text)] hidden sm:inline">Completed:</span>
-                                        <span className="font-bold text-[var(--te-text-dim)]">{resumeReviews.filter(r => r.status === 'Completed').length}</span>
-                                    </div>
-                                </div>
-
-                                <div className="relative flex-1 lg:min-w-[18rem]">
-                                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--te-text-dim)]" />
+                        <div className="te-card mb-4 overflow-hidden rounded-lg">
+                            <div className="flex flex-col gap-3 border-b border-[var(--te-border)] p-4 lg:flex-row lg:items-center">
+                                <div className="relative min-w-0 flex-1">
+                                    <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--te-text-dim)]" />
                                     <input
-                                        type="text"
-                                        placeholder="Search..."
+                                        type="search"
+                                        placeholder="Search member, email, or job title"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="te-input pl-9 py-1.5"
+                                        className="te-input w-full pl-9"
                                     />
                                 </div>
-
-                                <select
-                                    value={resumeReviewSortBy}
-                                    onChange={(e) => setResumeReviewSortBy(e.target.value)}
-                                    className="te-select py-1.5 min-w-[150px]"
-                                    aria-label="Sort review requests"
-                                >
-                                    <option value="submitted_desc">Newest first</option>
-                                    <option value="submitted_asc">Oldest first</option>
-                                    <option value="member_asc">Member (A-Z)</option>
-                                    <option value="member_desc">Member (Z-A)</option>
-                                    <option value="job_asc">Job title (A-Z)</option>
-                                    <option value="job_desc">Job title (Z-A)</option>
-                                    <option value="level_asc">Level (A-Z)</option>
-                                    <option value="level_desc">Level (Z-A)</option>
-                                    <option value="status_asc">Status (A-Z)</option>
-                                    <option value="status_desc">Status (Z-A)</option>
-                                    <option value="reviewer_asc">Reviewer (A-Z)</option>
-                                    <option value="reviewer_desc">Reviewer (Z-A)</option>
-                                </select>
-                                <button onClick={() => setShowResumeReviewFilters(current => !current)} className={`te-btn-sm gap-1.5 ${showResumeReviewFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}>
-                                    <AdjustmentsHorizontalIcon className="h-4 w-4" />
-                                    Filters
-                                </button>
-                                {hasActiveResumeReviewFilters && (
-                                    <button onClick={clearResumeReviewFilters} className="te-btn-danger te-btn-sm gap-1" title="Clear filters"><XMarkIcon className="h-4 w-4" /> Clear</button>
-                                )}
-                                <div className="text-xs font-medium text-[var(--te-text-dim)] whitespace-nowrap">
-                                    {filteredResumeReviews.length} of {resumeReviews.length}
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setShowResumeReviewFilters(current => !current)}
+                                        className={`te-btn-sm gap-2 ${showResumeReviewFilters ? 'te-btn-primary' : 'te-btn-secondary'}`}
+                                        aria-expanded={showResumeReviewFilters}
+                                    >
+                                        <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                                        Filters
+                                        {resumeReviewAdvancedFilterCount > 0 && (
+                                            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--te-text)] px-1.5 text-[10px] font-bold text-[var(--te-surface)]">
+                                                {resumeReviewAdvancedFilterCount}
+                                            </span>
+                                        )}
+                                    </button>
+                                    {hasActiveResumeReviewFilters && (
+                                        <button onClick={clearResumeReviewFilters} className="te-btn-ghost te-btn-sm text-[var(--te-red)]">
+                                            Clear
+                                        </button>
+                                    )}
+                                    <span className="whitespace-nowrap font-mono text-xs text-[var(--te-text-dim)]">
+                                        {filteredResumeReviews.length} results
+                                    </span>
                                 </div>
                             </div>
+
+                            <div className="flex gap-2 overflow-x-auto px-4 py-3 te-scroll">
+                                {[
+                                    { value: '', label: 'All', count: resumeReviews.length, icon: ChartBarIcon, tone: 'border-slate-300 bg-slate-50 text-slate-700' },
+                                    { value: 'active', label: 'Active', count: resumeReviews.filter(r => r.status === 'Pending' || r.status === 'In Review').length, icon: ClockIcon, tone: 'border-violet-300 bg-violet-50 text-violet-700' },
+                                    { value: 'Pending', label: 'Pending', count: resumeReviews.filter(r => r.status === 'Pending').length, icon: ClockIcon, tone: REVIEW_STATUS_STYLES.Pending },
+                                    { value: 'In Review', label: 'In review', count: resumeReviews.filter(r => r.status === 'In Review').length, icon: DocumentTextIcon, tone: REVIEW_STATUS_STYLES['In Review'] },
+                                    { value: 'Completed', label: 'Completed', count: resumeReviews.filter(r => r.status === 'Completed').length, icon: CheckCircleIcon, tone: REVIEW_STATUS_STYLES.Completed },
+                                    { value: 'Declined', label: 'Declined', count: resumeReviews.filter(r => r.status === 'Declined').length, icon: XCircleIcon, tone: REVIEW_STATUS_STYLES.Declined },
+                                    { value: 'Cancelled', label: 'Cancelled', count: resumeReviews.filter(r => r.status === 'Cancelled').length, icon: XCircleIcon, tone: REVIEW_STATUS_STYLES.Cancelled }
+                                ].map((status) => (
+                                    <button
+                                        key={status.label}
+                                        onClick={() => setResumeReviewStatusFilter(status.value)}
+                                        className={`inline-flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold transition-all ${status.tone} ${
+                                            resumeReviewStatusFilter === status.value
+                                                ? 'ring-2 ring-current ring-offset-2'
+                                                : 'opacity-70 hover:opacity-100'
+                                        }`}
+                                    >
+                                        <status.icon className="h-3.5 w-3.5" />
+                                        {status.label}
+                                        <span className="font-mono text-[10px] opacity-75">{status.count}</span>
+                                    </button>
+                                ))}
+                            </div>
+
                             {showResumeReviewFilters && (
-                                <div className="mt-3 grid grid-cols-1 gap-3 border-t border-[var(--te-border)] pt-3 sm:grid-cols-2 lg:grid-cols-4">
-                                    <select value={resumeReviewStatusFilter} onChange={(e) => setResumeReviewStatusFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by status"><option value="active">Active</option><option value="">All statuses</option><option value="Pending">Pending</option><option value="In Review">In Review</option><option value="Completed">Completed</option><option value="Declined">Declined</option><option value="Cancelled">Cancelled</option></select>
-                                    <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by level"><option value="">All levels</option><option value="Intern">Intern</option><option value="Entry">Entry</option><option value="Mid">Mid</option><option value="Senior">Senior</option></select>
-                                    <select value={resumeReviewReviewerFilter} onChange={(e) => setResumeReviewReviewerFilter(e.target.value)} className="te-select py-1.5" aria-label="Filter by reviewer"><option value="">All reviewers</option><option value="Unassigned">Unassigned</option>{reviewReviewerOptions.map((reviewer) => <option key={reviewer} value={reviewer}>{reviewer}</option>)}</select>
-                                    <div className="grid grid-cols-2 gap-2"><input type="date" value={resumeReviewDateRange.start} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, start: e.target.value }))} className="te-input py-1.5" aria-label="Submitted on or after" /><input type="date" value={resumeReviewDateRange.end} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, end: e.target.value }))} className="te-input py-1.5" aria-label="Submitted on or before" /></div>
+                                <div className="grid grid-cols-1 gap-4 border-t border-[var(--te-border)] bg-[var(--te-surface-alt)] p-4 sm:grid-cols-2 lg:grid-cols-4">
+                                    <label className="block">
+                                        <span className="te-eyebrow text-[10px]">Career level</span>
+                                        <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)} className="te-select mt-2 w-full">
+                                            <option value="">All levels</option>
+                                            <option value="Intern">Intern</option>
+                                            <option value="Entry">Entry</option>
+                                            <option value="Mid">Mid</option>
+                                            <option value="Senior">Senior</option>
+                                        </select>
+                                    </label>
+                                    <label className="block">
+                                        <span className="te-eyebrow text-[10px]">Reviewer</span>
+                                        <select value={resumeReviewReviewerFilter} onChange={(e) => setResumeReviewReviewerFilter(e.target.value)} className="te-select mt-2 w-full">
+                                            <option value="">All reviewers</option>
+                                            <option value="Unassigned">Unassigned</option>
+                                            {reviewReviewerOptions.map((reviewer) => <option key={reviewer} value={reviewer}>{reviewer}</option>)}
+                                        </select>
+                                    </label>
+                                    <label className="block">
+                                        <span className="te-eyebrow text-[10px]">Submitted after</span>
+                                        <input type="date" value={resumeReviewDateRange.start} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, start: e.target.value }))} className="te-input mt-2 w-full" />
+                                    </label>
+                                    <label className="block">
+                                        <span className="te-eyebrow text-[10px]">Submitted before</span>
+                                        <input type="date" value={resumeReviewDateRange.end} onChange={(e) => setResumeReviewDateRange(prev => ({ ...prev, end: e.target.value }))} className="te-input mt-2 w-full" />
+                                    </label>
                                 </div>
                             )}
                         </div>
@@ -1403,18 +1463,11 @@ const ResumesAndEssaysManagement = () => {
                                                     </td>
                                                     <td className="px-4 py-3 text-left" onClick={(e) => e.stopPropagation()}>
                                                         {isLeadOrAbove ? (
-                                                            <select
-                                                                value={review.status}
-                                                                onChange={(e) => handleInlineReviewStatusUpdate(review, e.target.value)}
+                                                            <ReviewStatusSelect
+                                                                review={review}
+                                                                onChange={(status) => handleInlineReviewStatusUpdate(review, status)}
                                                                 disabled={updatingReviewStatusId === (review.id || review._id)}
-                                                                className={`te-select py-1 text-xs font-bold ${getReviewStatusClass(review.status)}`}
-                                                                aria-label={`Update status for ${review.user_name}`}
-                                                            >
-                                                                <option value="Pending">Pending</option>
-                                                                <option value="In Review">In Review</option>
-                                                                <option value="Completed">Completed</option>
-                                                                <option value="Declined">Declined</option>
-                                                            </select>
+                                                            />
                                                         ) : (
                                                             <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-md ${getReviewStatusClass(review.status)}`}>
                                                                 {review.status === 'Pending' && <ClockIcon className="h-3.5 w-3.5" />}
